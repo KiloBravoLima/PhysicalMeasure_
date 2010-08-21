@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TestLists xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestList name="PhysicalQuantity tests" id="14d0c211-ace5-4b59-ad6b-08c3e6a059a6" parentListId="8c43106b-9dc1-4907-a29f-aa66a61bf5b6" />
+  <TestList name="ScaledUnitFromSymbol tests" id="2e5e6747-77ea-406c-bb62-3a86d43ff939" parentListId="c3432667-bc68-42e0-bd71-7be9439f3ad4">
+    <TestLinks>
+      <TestLink id="d94173c9-0795-7512-d3a1-311f76fd3ad8" name="ScaledUnitFromSymbolTestGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="73cb1f63-7b2a-ffc1-386f-e813a243fbc8" name="ScaledUnitFromSymbolTestMilliKelvin" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="4f5bef52-ae3a-1ce1-dad9-24070c1aec8f" name="ScaledUnitFromSymbolTestKiloGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    </TestLinks>
+  </TestList>
+  <TestList name="PhysicalUnit unique tests" id="5ca548b7-054f-4689-87b6-d5ef0f367f74" parentListId="c3432667-bc68-42e0-bd71-7be9439f3ad4">
+    <TestLinks>
+      <TestLink id="e71d3cb5-02a1-7224-d66f-775a80c0c8dd" name="UnitsMustDifferTestLengthMass" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="1e67b752-c2e4-376c-c901-323b63d285a5" name="UnitsMustDifferTestLengthElectricCharge" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="08a7edb4-87a9-66ff-729d-6a60bce0bc8a" name="UnitsMustDifferTestMassCelcius" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="acb55b20-5749-8649-8363-14fd112a44c6" name="UnitsMustDifferTestCoulombCelcius" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    </TestLinks>
+  </TestList>
+  <TestList name="PhysicalQuantity parsing tests" id="5d200656-c8a9-4f21-90d5-30fa0b5f68cc" parentListId="14d0c211-ace5-4b59-ad6b-08c3e6a059a6">
+    <TestLinks>
+      <TestLink id="0442b5d1-6667-5e98-99dd-7fedff14ac20" name="ParseTestMilliGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    </TestLinks>
+  </TestList>
+  <TestList name="Lists of Tests" id="8c43106b-9dc1-4907-a29f-aa66a61bf5b6">
+    <RunConfiguration id="688117b2-65bf-41b0-8dae-c485f0197f2a" name="Local" storage="local.testsettings" type="Microsoft.VisualStudio.TestTools.Common.TestRunConfiguration, Microsoft.VisualStudio.QualityTools.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  </TestList>
+  <TestList name="UnitFromSymbol  parsing tests" id="9c95e0d6-5cf2-4937-9297-a1f35ce14964" parentListId="c3432667-bc68-42e0-bd71-7be9439f3ad4">
+    <TestLinks>
+      <TestLink id="fe7c56aa-2636-5b7d-2024-2ed0c59c6c3e" name="UnitFromSymbolTestCoulomb" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="cf6d451c-3336-c9ef-9ba2-e45a97b021d0" name="UnitFromSymbolTestCelcius" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    </TestLinks>
+  </TestList>
+  <TestList name="PhysicalUnit tests" id="c3432667-bc68-42e0-bd71-7be9439f3ad4" parentListId="8c43106b-9dc1-4907-a29f-aa66a61bf5b6" />
+  <TestList name="PhysicalUnitSystem tests" id="e391cdc7-56e6-4216-bf18-2cd51da680b9" parentListId="c3432667-bc68-42e0-bd71-7be9439f3ad4">
+    <TestLinks>
+      <TestLink id="ceabd600-b28a-c9b5-3cf9-2bf229d4afc2" name="GetUnitSystemConversionTest" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    </TestLinks>
+  </TestList>
+</TestLists>
