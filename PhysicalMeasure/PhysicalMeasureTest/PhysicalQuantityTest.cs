@@ -64,6 +64,7 @@ namespace PhysicalMeasureTest
         //
         #endregion
 
+        #region PhysicalQuantity.Parse test
 
         /// <summary>
         ///A test for Parse
@@ -79,5 +80,96 @@ namespace PhysicalMeasureTest
             actual = PhysicalQuantity.Parse(s, styles, provider);
             Assert.AreEqual(expected, actual);
         }
+
+        #endregion PhysicalQuantity.Parse test
+
+
+        #region PhysicalQuantity math test
+
+        /// <summary>
+        ///A test for add operator
+        ///</summary>
+        [TestMethod()]
+        public void AddKiloGramToMilliGram()
+        {
+            PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+            PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+
+            PhysicalQuantity expected = new PhysicalQuantity(456.000123, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+
+            IPhysicalQuantity actual = pg1 + pg2;
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for sub operator
+        ///</summary>
+        [TestMethod()]
+        public void SubKiloGramFromMilliGram()
+        {
+            PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+            PhysicalQuantity pg2 = new PhysicalQuantity(789, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+
+            PhysicalQuantity expected = new PhysicalQuantity(0.000123- 789, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+
+            IPhysicalQuantity actual = pg1 - pg2;
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for mult operator
+        ///</summary>
+        [TestMethod()]
+        public void MultKiloGramToMilliGram()
+        {
+            PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+            PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+
+            IPhysicalUnit MassSquared = new DerivedUnit(PhysicalMeasure.Physic.SI_Units, new sbyte[] { 0, 2, 0, 0, 0, 0, 0 });
+
+            PhysicalQuantity expected = new PhysicalQuantity(0.000123 * 456 , (IPhysicalUnit)MassSquared);
+
+            IPhysicalQuantity actual = pg1 * pg2;
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for div operator
+        ///</summary>
+        [TestMethod()]
+        public void DivKiloGramFromMilliGram()
+        {
+            PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+            PhysicalQuantity pg2 = new PhysicalQuantity(789, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+
+            PhysicalQuantity expected = new PhysicalQuantity(0.000123 / 789, PhysicalMeasure.Physic.dimensionless);
+
+            IPhysicalQuantity actual = pg1 / pg2;
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for power operator
+        ///</summary>
+        [TestMethod()]
+        public void CalcEnergyIn1Gram()
+        {
+            PhysicalQuantity M = new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+
+            IPhysicalUnit MeterPrSecond = new DerivedUnit(PhysicalMeasure.Physic.SI_Units, new sbyte[] { 1, 0, -1, 0, 0, 0, 0 });
+            PhysicalQuantity c = new PhysicalQuantity(299792458, MeterPrSecond);
+
+            PhysicalQuantity expected = new PhysicalQuantity(0.001 * 299792458 * 299792458, PhysicalMeasure.Physic.SI_Units.UnitFromSymbol("J"));
+
+            IPhysicalQuantity E = M * c.Pow(2);
+            Assert.AreEqual(expected, E);
+        }
+
+//        IUnit LengthUnit = (IUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.length)]);
+//        IUnit MassUnit = (IUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]);
+        
+        #endregion PhysicalQuantity math test
     }
 }

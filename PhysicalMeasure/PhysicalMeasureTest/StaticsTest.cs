@@ -60,6 +60,20 @@ namespace PhysicalMeasureTest
         //
         #endregion
 
+        /// <summary>
+        ///A test for UnitFromSymbol
+        ///</summary>
+        [TestMethod()]
+        public void MeasureKindValues()
+        {
+            Assert.AreEqual((int)MeasureKind.length, 0);
+            Assert.AreEqual((int)MeasureKind.mass, 1);
+            Assert.AreEqual((int)MeasureKind.time, 2);
+            Assert.AreEqual((int)MeasureKind.electric_current, 3);
+            Assert.AreEqual((int)MeasureKind.thermodynamic_temperature, 4);
+            Assert.AreEqual((int)MeasureKind.amount_of_substance, 5);
+            Assert.AreEqual((int)MeasureKind.luminous_intensity, 6);
+        }
 
         #region Units must differ test
 
@@ -202,7 +216,6 @@ namespace PhysicalMeasureTest
         }
 
         #endregion ScaledUnitFromSymbol test
-
 
     }
 }
