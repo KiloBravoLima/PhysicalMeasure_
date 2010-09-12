@@ -112,7 +112,7 @@ namespace PhysicalMeasureTest
 
             PhysicalQuantity expected = new PhysicalQuantity(0.000123- 789, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
 
-            IPhysicalQuantity actual = pg1 - pg2;
+            PhysicalQuantity actual = pg1 - pg2;
             Assert.AreEqual(expected, actual);
         }
 
@@ -126,11 +126,11 @@ namespace PhysicalMeasureTest
             PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
             PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
 
-            IPhysicalUnit MassSquared = new DerivedUnit(PhysicalMeasure.Physic.SI_Units, new sbyte[] { 0, 2, 0, 0, 0, 0, 0 });
+            PhysicalUnit MassSquared = new DerivedUnit(PhysicalMeasure.Physic.SI_Units, new sbyte[] { 0, 2, 0, 0, 0, 0, 0 });
 
             PhysicalQuantity expected = new PhysicalQuantity(0.000123 * 456 , (IPhysicalUnit)MassSquared);
 
-            IPhysicalQuantity actual = pg1 * pg2;
+            PhysicalQuantity actual = pg1 * pg2;
             Assert.AreEqual(expected, actual);
         }
 
@@ -145,10 +145,9 @@ namespace PhysicalMeasureTest
 
             PhysicalQuantity expected = new PhysicalQuantity(0.000123 / 789, PhysicalMeasure.Physic.dimensionless);
 
-            IPhysicalQuantity actual = pg1 / pg2;
+            PhysicalQuantity actual = pg1 / pg2;
             Assert.AreEqual(expected, actual);
         }
-
 
         /// <summary>
         ///A test for power operator
@@ -156,20 +155,38 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void CalcEnergyIn1Gram()
         {
-            PhysicalQuantity M = new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+            PhysicalQuantity m = new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
 
-            IPhysicalUnit MeterPrSecond = new DerivedUnit(PhysicalMeasure.Physic.SI_Units, new sbyte[] { 1, 0, -1, 0, 0, 0, 0 });
+            PhysicalUnit MeterPrSecond = new DerivedUnit(PhysicalMeasure.Physic.SI_Units, new sbyte[] { 1, 0, -1, 0, 0, 0, 0 });
             PhysicalQuantity c = new PhysicalQuantity(299792458, MeterPrSecond);
 
             PhysicalQuantity expected = new PhysicalQuantity(0.001 * 299792458 * 299792458, PhysicalMeasure.Physic.SI_Units.UnitFromSymbol("J"));
 
-            IPhysicalQuantity E = M * c.Pow(2);
+            PhysicalQuantity E = m * c.Pow(2);
             Assert.AreEqual(expected, E);
         }
 
-//        IUnit LengthUnit = (IUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.length)]);
-//        IUnit MassUnit = (IUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]);
-        
+        /// <summary>
+        ///A test for power operator
+        ///</summary>
+        [TestMethod()]
+        public void CalcEnergyIn1GramFalling10MeterAtEarthSurface()
+        {
+            PhysicalQuantity m = PhysicalQuantity.Parse("1 g") as PhysicalQuantity;
+            PhysicalQuantity h = PhysicalQuantity.Parse("10 m") as PhysicalQuantity;
+
+            //!!! To do: make this work: PhysicalQuantity g = PhysicalQuantity.Parse("9.81 m/s^2");
+            PhysicalUnit MeterPrSecond2 = new DerivedUnit(PhysicalMeasure.Physic.SI_Units, new sbyte[] { 1, 0, -2, 0, 0, 0, 0 });
+            PhysicalQuantity g = new PhysicalQuantity(9.81, MeterPrSecond2);
+
+            PhysicalQuantity expected = new PhysicalQuantity(0.001 * 9.81 * 10, PhysicalMeasure.Physic.SI_Units.UnitFromSymbol("J"));
+
+            PhysicalQuantity E = m * g * h;
+
+            Assert.AreEqual(expected, E);
+        }
+       
+
         #endregion PhysicalQuantity math test
     }
 }
