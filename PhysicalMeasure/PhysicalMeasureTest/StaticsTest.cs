@@ -166,7 +166,7 @@ namespace PhysicalMeasureTest
         public void UnitFromSymbolTestCelcius()
         {
             string SymbolStr = "°C";
-            IUnit expected = (IUnit)(Physic.SI_Units.ConvertabelUnits[0]);
+            IUnit expected = (IUnit)(Physic.SI_Units.ConvertabelUnits[1]);
             IUnit actual;
             actual = Physic.UnitFromSymbol(SymbolStr);
             Assert.AreEqual(expected, actual);
@@ -216,6 +216,46 @@ namespace PhysicalMeasureTest
         }
 
         #endregion ScaledUnitFromSymbol test
+
+
+        #region Convertabel unit test
+
+        /// <summary>
+        ///A test for convertible unit Celsius
+        ///</summary>
+        [TestMethod()]
+        public void convertibleUnitTestCelsius()
+        {
+            //string BaseUnitQuantityStr = "100 K";
+            // !!! To do : make this work : string ConverterbelUnitQuantityStr = "-173.15 C";
+            string ConverterbelUnitQuantityStr = "-173 °C";
+
+            // IPhysicalQuantity expected = PhysicalQuantity.Parse(BaseUnitQuantityStr);
+            IPhysicalQuantity expected = new PhysicalQuantity(100+0.15, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.thermodynamic_temperature)]));
+
+            IPhysicalQuantity actual   = PhysicalQuantity.Parse(ConverterbelUnitQuantityStr);
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for convertible unit gram
+        ///</summary>
+        [TestMethod()]
+        public void convertibleUnitTestGram()
+        {
+            //string BaseUnitQuantityStr = "0.123 Kg";
+            string ConverterbelUnitQuantityStr = "123 g";
+
+            // IPhysicalQuantity expected = PhysicalQuantity.Parse(BaseUnitQuantityStr);
+            IPhysicalQuantity expected = new PhysicalQuantity(0.123, (IPhysicalUnit)(PhysicalMeasure.Physic.SI_Units.BaseUnits[(int)(MeasureKind.mass)]));
+
+            IPhysicalQuantity actual = PhysicalQuantity.Parse(ConverterbelUnitQuantityStr);
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        #endregion Convertabel unit test
 
     }
 }

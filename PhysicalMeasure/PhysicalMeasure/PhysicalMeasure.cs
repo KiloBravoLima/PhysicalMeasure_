@@ -405,7 +405,7 @@ namespace PhysicalMeasure
 
         public delegate sbyte CombineExponentsFunc(sbyte e1, sbyte e2);
 
-        public static IPhysicalQuantity combineUnits(IPhysicalUnit u1, IPhysicalUnit u2, CombineExponentsFunc cef)
+        public static PhysicalQuantity combineUnits(IPhysicalUnit u1, IPhysicalUnit u2, CombineExponentsFunc cef)
         {
             IPhysicalQuantity pq2 = new PhysicalQuantity(1, u2);
             if (u2.System != u1.System)
@@ -422,25 +422,26 @@ namespace PhysicalMeasure
             return new PhysicalQuantity(pq2.Value, pu);
         }
 
+        public static PhysicalQuantity operator *(PhysicalUnit u1, IPhysicalUnit u2)
+        {
+            return combineUnits(u1, u2, (sbyte e1, sbyte e2) => (sbyte)(e1 + e2));
+        }
+
+        public static PhysicalQuantity operator /(PhysicalUnit u1, IPhysicalUnit u2)
+        {
+            return combineUnits(u1, u2, (sbyte e1, sbyte e2) => (sbyte)(e1 - e2));
+        }
+
         public IPhysicalQuantity mult(IPhysicalUnit u2)
         {
-            return combineUnits(this, u2, (sbyte e1, sbyte e2) => (sbyte)(e1 + e2));
+            return this * u2;
         }
 
         public IPhysicalQuantity div(IPhysicalUnit u2)
         {
-            return combineUnits(this, u2, (sbyte e1, sbyte e2) => (sbyte)(e1 - e2));
+            return this / u2;
         }
 
-        public static IPhysicalQuantity operator *(PhysicalUnit u1, IPhysicalUnit u2)
-        {
-            return u1.mult(u2);
-        }
-
-        public static IPhysicalQuantity operator /(PhysicalUnit u1, IPhysicalUnit u2)
-        {
-            return u1.div(u2);
-        }
     }
 
     public class BaseUnit : PhysicalUnit, INamedSymbol, IBaseUnit
@@ -542,7 +543,7 @@ namespace PhysicalMeasure
 
         public override unitkind Kind { get { return unitkind.ukConvertabelUnit; } }
 
-        public override sbyte[] Exponents { get { return null; } }
+        public override sbyte[] Exponents { get { /* return null; */  return BaseUnit.Exponents; } }
 
         /** public UnitSystem system { get { return baseunit.system; } / * set { systemunit.system = value; } * / } **/
 
@@ -735,7 +736,7 @@ namespace PhysicalMeasure
                         }
                     }
 
-                    if (DimensionExponets.Equals( converttounit.Exponents, physicalquantity.Unit.Exponents))
+                    if (DimensionExponets.Equals(converttounit.Exponents, physicalquantity.Unit.Exponents))
                     {
                         return new PhysicalQuantity(physicalquantity.Value, converttounit);
                     }
@@ -1113,14 +1114,32 @@ namespace PhysicalMeasure
             }
         }
 
+        public int ValueCompare(double OtherValue)
+        {   /* Handle limited precision */
+            double RelativeDiff = (this.Value - OtherValue)/ this.Value;
+            if (RelativeDiff < -1e-15)
+            {
+                return -1;
+            } 
+            else if (RelativeDiff > 1e-15)
+            {
+                return 1;
+            } 
+            else {
+                return 0;
+            }
+        }
+
         public bool Equals(IPhysicalQuantity other)
         {
-            if (this.Unit == other.Unit)
+            if (this.Unit != other.Unit)
             {
-                return (this.Value == other.Value);
+                other = other.ConvertTo(this.Unit);
+                if (other == null)
+                    return false;
             }
-            IPhysicalQuantity pq = other.ConvertTo(this.Unit);
-            return (pq != null) && (pq.Value == this.Value);
+            //return (this.Value == other.Value);
+            return this.ValueCompare(other.Value) == 0;
         }
 
         public override bool Equals(Object obj)
@@ -1166,14 +1185,21 @@ namespace PhysicalMeasure
             return pq;
         }
 
-        public static IPhysicalQuantity CombineUnitAndValues(IPhysicalQuantity pq1, IPhysicalQuantity pq2, CombineValuesFunc cvf, PhysicalUnit.CombineExponentsFunc cef)
+        public static PhysicalQuantity CombineUnitsAndValues(IPhysicalQuantity pq1, IPhysicalQuantity pq2, CombineValuesFunc cvf, PhysicalUnit.CombineExponentsFunc cef)
         {
-            // IPhysicalQuantity pq = new PhysicalQuantity(cvf(pq1.Value, pq2.Value), cuf(pq1.Unit, pq2.Unit));
-            // return pq;
-
             if (pq2.Unit.System != pq1.Unit.System)
             {   // Must be same unit system
                 pq2 = pq2.ConvertTo(pq1.Unit.System);
+            }
+            if (pq1.Unit.Kind == unitkind.ukConvertabelUnit)
+            {
+                IConvertabelUnit pg1_unit = pq1.Unit as IConvertabelUnit;
+                pq1 = pq1.ConvertTo(pg1_unit.BaseUnit);
+            }
+            if (pq2.Unit.Kind == unitkind.ukConvertabelUnit)
+            {
+                IConvertabelUnit pg2_unit = pq2.Unit as IConvertabelUnit;
+                pq2 = pq1.ConvertTo(pg2_unit.BaseUnit);
             }
             sbyte[] someexponents = new sbyte[Physic.NoOfMeasures];
 
@@ -1185,34 +1211,27 @@ namespace PhysicalMeasure
             return new PhysicalQuantity(cvf(pq1.Value, pq2.Value), pu);
         }
 
-        public IPhysicalQuantity add(IPhysicalQuantity pq2)
+        public static PhysicalQuantity operator +(PhysicalQuantity pq1, IPhysicalQuantity pq2)
         {
-            return CombineValues(this, pq2, (double v1, double v2) => v1 + v2);
+            return CombineValues(pq1, pq2, (double v1, double v2) => v1 + v2);
         }
 
-        public IPhysicalQuantity sub(IPhysicalQuantity pq2)
+        public static PhysicalQuantity operator -(PhysicalQuantity pq1, IPhysicalQuantity pq2)
         {
-            return CombineValues(this, pq2, (double v1, double v2) => v1 - v2);
+            return CombineValues(pq1, pq2, (double v1, double v2) => v1 - v2);
         }
 
-        public IPhysicalQuantity mult(IPhysicalQuantity pq2)
+        public static PhysicalQuantity operator *(PhysicalQuantity pq1, IPhysicalQuantity pq2)
         {
-            //return CombineUnitAndValues(pq1, pq2, (double v1, double v2) => v1 * v2, (IPhysicalUnit u1, IPhysicalUnit u2) => u1 * u2);
-            IPhysicalQuantity pq1 = this;
-            pq1 = CombineUnitAndValues(pq1, pq2, (double v1, double v2) => v1 * v2, (sbyte e1, sbyte e2) => (sbyte)(e1 + e2));
-
-            return pq1;
+            return CombineUnitsAndValues(pq1, pq2, (double v1, double v2) => v1 * v2, (sbyte e1, sbyte e2) => (sbyte)(e1 + e2));
         }
 
-        public IPhysicalQuantity div(IPhysicalQuantity pq2)
+        public static PhysicalQuantity operator /(PhysicalQuantity pq1, IPhysicalQuantity pq2)
         {
-            //return CombineUnitAndValues(pq1, pq2, (double v1, double v2) => v1 / v2, (IPhysicalUnit u1, IPhysicalUnit u2) => u1 / u2);
-            IPhysicalQuantity pq1 = this;
-            pq1 = CombineUnitAndValues(pq1, pq2, (double v1, double v2) => v1 / v2, (sbyte e1, sbyte e2) => (sbyte)(e1 - e2));
-            return pq1;
+            return CombineUnitsAndValues(pq1, pq2, (double v1, double v2) => v1 / v2, (sbyte e1, sbyte e2) => (sbyte)(e1 - e2));
         }
 
-        public IPhysicalQuantity Pow(sbyte exponent)
+        public PhysicalQuantity Power(sbyte exponent)
         {
             IPhysicalQuantity pq = this;
             sbyte[] someexponents = new sbyte[Physic.NoOfMeasures];
@@ -1225,29 +1244,34 @@ namespace PhysicalMeasure
             return new PhysicalQuantity(System.Math.Pow(pq.Value, exponent), pu);
         }
 
-        public static IPhysicalQuantity operator +(PhysicalQuantity pq1, IPhysicalQuantity pq2)
+        public static PhysicalQuantity operator ^(PhysicalQuantity pq, sbyte exponent)
         {
-            return pq1.add(pq2);
+            return pq.Power(exponent);
         }
 
-        public static IPhysicalQuantity operator -(PhysicalQuantity pq1, IPhysicalQuantity pq2)
+        public IPhysicalQuantity add(IPhysicalQuantity pq2)
         {
-            return pq1.sub(pq2);
+            return this + pq2;
         }
 
-        public static IPhysicalQuantity operator *(PhysicalQuantity pq1, IPhysicalQuantity pq2)
+        public IPhysicalQuantity sub(IPhysicalQuantity pq2)
         {
-            return pq1.mult(pq2);
+            return this - pq2;
         }
 
-        public static IPhysicalQuantity operator /(PhysicalQuantity pq1, IPhysicalQuantity pq2)
+        public IPhysicalQuantity mult(IPhysicalQuantity pq2)
         {
-            return pq1.div(pq2);
+            return this * pq2;
         }
 
-        public static IPhysicalQuantity operator ^(PhysicalQuantity pq, sbyte exponent)
+        public IPhysicalQuantity div(IPhysicalQuantity pq2)
         {
-            return pq.Pow(exponent);
+            return this / pq2;
+        }
+
+        public IPhysicalQuantity Pow(sbyte exponent)
+        {
+            return this.Power(exponent);
         }
         
     }
@@ -1385,8 +1409,8 @@ namespace PhysicalMeasure
                                                                                             new NamedDerivedUnit(SI_Units, "becquerel", "Bq",   new sbyte[] { 0, 0, -1, 0, 0, 0, 0 }),
                                                                                             new NamedDerivedUnit(SI_Units, "gray",      "Gy",   new sbyte[] { 2, 0, -2, 0, 0, 0, 0 }),
                                                                                             new NamedDerivedUnit(SI_Units, "katal",     "kat",  new sbyte[] { 0, 0, -1, 0, 0, 1, 0 }) },
-                                                                 new ConvertabelUnit[] { new ConvertabelUnit("gram", "g", SI_BaseUnits[(int)(MeasureKind.mass)], new ScaledValueConvertion(1000)),
-                                                                                         new ConvertabelUnit("Celsius", "°C", SI_BaseUnits[(int)(MeasureKind.thermodynamic_temperature)], new LinearyValueConvertion(273.15, 1)) });
+                                                                 new ConvertabelUnit[] { new ConvertabelUnit("gram", "g", SI_BaseUnits[(int)(MeasureKind.mass)], new ScaledValueConvertion(1000)),  /* [g] = 1000 * [Kg] */
+                                                                                         new ConvertabelUnit("Celsius", "°C", SI_BaseUnits[(int)(MeasureKind.thermodynamic_temperature)], new LinearyValueConvertion(-273.15, 1)) }); /* [°C] = 1 * [K] - 273.15 */
         public static PhysicalUnit dimensionless = new DerivedUnit(SI_Units, new sbyte[] { 0, 0, 0, 0, 0, 0, 0 });
 
         public static UnitSystem CGS_Units = new UnitSystem("CGS", UnitPrefixes,
