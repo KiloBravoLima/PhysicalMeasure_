@@ -257,5 +257,51 @@ namespace PhysicalMeasureTest
 
         #endregion Convertabel unit test
 
+        #region SI unit symbol test
+
+
+        /// <summary>
+        ///A test for power operator
+        ///</summary>
+        public void CalcEnergyIn1Gram_using_symbolnames()
+        {
+            PhysicalQuantity m = new PhysicalQuantity(0.001, Physic.SI.kg);
+
+            PhysicalUnit MeterPrSecond = (PhysicalUnit)(Physic.SI.m / Physic.SI.s).Unit;
+            PhysicalQuantity c = new PhysicalQuantity(299792458, MeterPrSecond);
+
+            PhysicalQuantity expected = new PhysicalQuantity(0.001 * 299792458 * 299792458, Physic.SI.J);
+
+            PhysicalQuantity E = m * c.Pow(2);
+            Assert.AreEqual(expected, E);
+        }
+
+        /// <summary>
+        ///A test for root operator
+        ///</summary>
+        [TestMethod()]
+        public void CalcSpeedOf1GramFalling10MeterAtEarthSurface()
+        {
+            PhysicalQuantity m =  new PhysicalQuantity(1 , Physic.SI.g);
+            PhysicalQuantity h = new PhysicalQuantity(10, Physic.SI.m);
+
+            //!!! To do: make this work: PhysicalQuantity g = PhysicalQuantity.Parse("9.81 m/s^2");
+            // PhysicalUnit MeterPrSecond2 = new DerivedUnit(Physic.SI_Units, new sbyte[] { 1, 0, -2, 0, 0, 0, 0 });
+            PhysicalUnit MeterPrSecond2 = (PhysicalUnit)(Physic.SI.m / (Physic.SI.s ^ 2)).Unit ;
+            PhysicalQuantity g = new PhysicalQuantity(9.81, MeterPrSecond2);
+
+            PhysicalQuantity E = m * g * h;
+
+            PhysicalQuantity v = (2 * E / m) % 2; /* OBS! The '%' operator is used for root. "% 2" is square root, */
+
+            PhysicalUnit MeterPrSecond = (PhysicalUnit)(Physic.SI.m / Physic.SI.s).Unit;
+
+            double speed = Math.Pow(2 * (0.001 * 9.81 * 10) / 0.001, 0.5);
+            PhysicalQuantity expected = new PhysicalQuantity(speed, MeterPrSecond);
+
+            Assert.AreEqual(expected, v);
+        }
+       
+        #endregion SI unit symbol test
     }
 }
