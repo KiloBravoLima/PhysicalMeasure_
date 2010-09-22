@@ -21,6 +21,12 @@
       <TestLink id="0442b5d1-6667-5e98-99dd-7fedff14ac20" name="ParseTestMilliGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     </TestLinks>
   </TestList>
+  <TestList name="ConvertabelUnit tests" id="5d241160-ce5e-484d-9363-f2193cb3e03d" parentListId="14d0c211-ace5-4b59-ad6b-08c3e6a059a6">
+    <TestLinks>
+      <TestLink id="4c34c8ab-8bc3-4f98-78f0-8ccc43beb4b5" name="convertibleUnitTestGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="9362cc4b-1041-2485-5c66-ea9ad23e79df" name="convertibleUnitTestCelsius" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    </TestLinks>
+  </TestList>
   <TestList name="Lists of Tests" id="8c43106b-9dc1-4907-a29f-aa66a61bf5b6">
     <RunConfiguration id="688117b2-65bf-41b0-8dae-c485f0197f2a" name="Local" storage="local.testsettings" type="Microsoft.VisualStudio.TestTools.Common.TestRunConfiguration, Microsoft.VisualStudio.QualityTools.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   </TestList>
@@ -38,11 +44,12 @@
   </TestList>
   <TestList name="PhysicalQuantity math tests" id="e76458c3-c8a3-445a-93c9-d9e3d492fdd1" parentListId="14d0c211-ace5-4b59-ad6b-08c3e6a059a6">
     <TestLinks>
-      <TestLink id="d1e7c845-55df-3aa1-5b87-814a6940b1a0" name="AddKiloGramToMilliGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-      <TestLink id="795f76df-3fd6-82c7-1017-45ff142c1f3d" name="MultKiloGramToMilliGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-      <TestLink id="7162eb2c-d49a-a115-6eed-72fe40a3bb76" name="CalcEnergyIn1Gram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-      <TestLink id="587c2195-b2fa-c794-8ce1-d8ff9387bcbf" name="DivKiloGramFromMilliGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
       <TestLink id="63ecc6b1-ab82-de6f-7f63-d3a5915901d3" name="SubKiloGramFromMilliGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="7162eb2c-d49a-a115-6eed-72fe40a3bb76" name="CalcEnergyIn1Gram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="795f76df-3fd6-82c7-1017-45ff142c1f3d" name="MultKiloGramToMilliGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="d1e7c845-55df-3aa1-5b87-814a6940b1a0" name="AddKiloGramToMilliGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="587c2195-b2fa-c794-8ce1-d8ff9387bcbf" name="DivKiloGramFromMilliGram" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="f6420cca-0110-2d18-8480-c31a960e0fae" name="CalcEnergyIn1GramFalling10MeterAtEarthSurface" storage="physicalmeasuretest\bin\debug\physicalmeasuretest.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     </TestLinks>
   </TestList>
 </TestLists>
