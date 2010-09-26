@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<VSPerformanceSession Version="1.00">
+  <Options>
+    <Solution>D:\Alle brugere\Klaus\Programmering\Visual Studio\C#\PhysicalMeasure\PhysicalMeasure.sln</Solution>
+    <CollectionMethod>Instrumentation</CollectionMethod>
+    <AllocationMethod>None</AllocationMethod>
+    <LaunchRuntimeControl>true</LaunchRuntimeControl>
+    <AddReport>true</AddReport>
+    <ResourceBasedAnalysisSelected>true</ResourceBasedAnalysisSelected>
+    <ThreadBasedAnalysisSelected>true</ThreadBasedAnalysisSelected>
+    <UniqueReport>Timestamp</UniqueReport>
+    <SamplingMethod>Cycles</SamplingMethod>
+    <CycleCount>10000000</CycleCount>
+    <PageFaultCount>10</PageFaultCount>
+    <SysCallCount>10</SysCallCount>
+    <SamplingCounter Name="" ReloadValue="00000000000f4240" DisplayName="" />
+    <RelocateBinaries>false</RelocateBinaries>
+    <AdditionalArgruments />
+    <TargetCLRVersion>Automatic</TargetCLRVersion>
+    <CollectOnHpcCluster>false</CollectOnHpcCluster>
+    <HPCSettings>
+      <NumberOfProcesses>0</NumberOfProcesses>
+      <TargetSelection>UnknownDisabled</TargetSelection>
+      <ProfileOnRank>0</ProfileOnRank>
+      <AdvancedProperties>
+        <Project>Profiler Project</Project>
+        <CleanUp>true</CleanUp>
+        <MpiexecCommand>mpiexec.exe</MpiexecCommand>
+        <DeployCRT>true</DeployCRT>
+      </AdvancedProperties>
+    </HPCSettings>
+    <HardwareCounters EnableHWCounters="false" />
+    <EtwSettings>
+      <Provider ControlGuid="06b94d9a-b15e-456e-a4ef-37c984a2cb4b" Enabled="false" Flags="000000fe" Level="5" />
+      <Provider ControlGuid="1fbecc45-c060-4e7c-8a0e-0dbd6116181b" Enabled="false" Flags="000000fe" Level="5" />
+      <Provider ControlGuid="3a2a4e84-4c21-4981-ae10-3fda0d9b0f83" Enabled="false" Flags="000000fe" Level="5" />
+      <Provider ControlGuid="9e814aad-3204-11d2-9a82-006008a86939" Enabled="false" Flags="00000000" Level="0" />
+      <Provider ControlGuid="a1c2040e-8840-4c31-ba11-9871031a19ea" Enabled="false" Flags="000000fe" Level="5" />
+      <Provider ControlGuid="aff081fe-0247-4275-9c4e-021f3dc1da35" Enabled="false" Flags="ffffffff" Level="5" />
+      <Provider ControlGuid="e13c0d23-ccbc-4e12-931b-d9cc2eee27e4" Enabled="true" Flags="7fffffff" Level="5" />
+    </EtwSettings>
+    <PdhSettings>
+      <PdhCountersEnabled>false</PdhCountersEnabled>
+      <PdhCountersRate>500</PdhCountersRate>
+      <PdhCounters>
+        <PdhCounter>\Fysisk disk(_Total)\Gennemsnitslængde af diskkø</PdhCounter>
+        <PdhCounter>\Hukommelse\Sider/sekund</PdhCounter>
+        <PdhCounter>\Processor(_Total)\% Processortid</PdhCounter>
+      </PdhCounters>
+    </PdhSettings>
+  </Options>
+  <ExcludeSmallFuncs>true</ExcludeSmallFuncs>
+  <JScriptProfilingEnabled>false</JScriptProfilingEnabled>
+  <PreinstrumentEvent>
+    <InstrEventExclude>false</InstrEventExclude>
+  </PreinstrumentEvent>
+  <PostinstrumentEvent>
+    <InstrEventExclude>false</InstrEventExclude>
+  </PostinstrumentEvent>
+  <RuntimeMarks>
+    <MarkName>Mark One</MarkName>
+    <MarkName>Mark Two</MarkName>
+    <MarkName>Mark Three</MarkName>
+    <MarkName>Mark Four</MarkName>
+    <MarkName>Mark Five</MarkName>
+    <MarkName>Mark Six</MarkName>
+    <MarkName>Mark Seven</MarkName>
+    <MarkName>Mark Eight</MarkName>
+    <MarkName>Mark Nine</MarkName>
+    <MarkName>Mark Ten</MarkName>
+  </RuntimeMarks>
+</VSPerformanceSession>

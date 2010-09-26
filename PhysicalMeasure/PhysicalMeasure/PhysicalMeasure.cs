@@ -8,7 +8,7 @@ namespace PhysicalMeasure
 {
     #region Physical Measure Constants
 
-    public static partial class Physic
+    public static partial class Physics
     {
         public const int NoOfMeasures = 7;
     }
@@ -55,7 +55,8 @@ namespace PhysicalMeasure
         sbyte[] Exponents { get; }
     }
 
-    public interface IBaseUnit : IUnit, INamed
+    //public interface IBaseUnit : IUnit, INamed
+    public interface IBaseUnit : IUnit, INamedSymbolSystemItem
     {
         sbyte BaseUnitNumber { get; }
     }
@@ -71,7 +72,7 @@ namespace PhysicalMeasure
     public interface IConvertibleUnit : IUnit, INamed
     {
         IPhysicalUnit BaseUnit { get; }
-        IValueConvertion Convertion { get; }
+        IValueConversion Conversion { get; }
     }
 
     public interface ISystemUnit : ISystemItem, IUnit
@@ -90,7 +91,7 @@ namespace PhysicalMeasure
         IPhysicalQuantity ConvertTo(IUnitSystem converttounitsystem);
     }
 
-    public interface IValueConvertion
+    public interface IValueConversion
     {
         double Convert(double value, bool backwards = false);
         double ConvertFromBaseunit(double value);
@@ -107,7 +108,6 @@ namespace PhysicalMeasure
         IPhysicalQuantity Pow(sbyte exponent);
         IPhysicalQuantity Rot(sbyte exponent);
     }
-
 
     public interface IPhysicalQuantity : IFormattable, IPhysicalQuantityMath
     {
@@ -161,7 +161,7 @@ namespace PhysicalMeasure
             {
                 equal = exponents1[i] == exponents2[i];
                 i++;
-            } while (i < Physic.NoOfMeasures && equal);
+            } while (i < Physics.NoOfMeasures && equal);
 
             return equal;
         }
@@ -217,14 +217,14 @@ namespace PhysicalMeasure
 
     #region Value Conversion Classes
 
-    public abstract class ValueConvertion : IValueConvertion
+    public abstract class ValueConversion : IValueConversion
     {
         public abstract double Convert(double value, bool backwards = false);
         public abstract double ConvertFromBaseunit(double value);
         public abstract double ConvertToBaseunit(double value);
     }
 
-    public class LinearyValueConvertion : ValueConvertion
+    public class LinearyValueConversion : ValueConversion
     {
         private double _offset;
         private double _scale;
@@ -241,7 +241,7 @@ namespace PhysicalMeasure
             set { _scale = value; }
         }
 
-        public LinearyValueConvertion(double someoffset, double somescale)
+        public LinearyValueConversion(double someoffset, double somescale)
         {
             this.Offset = someoffset;
             this.Scale = somescale;
@@ -270,17 +270,17 @@ namespace PhysicalMeasure
         }
     }
 
-    public class ScaledValueConvertion : LinearyValueConvertion
+    public class ScaledValueConversion : LinearyValueConversion
     {
-        public ScaledValueConvertion(double somescale)
+        public ScaledValueConversion(double somescale)
             : base(0, somescale)
         {
         }
     }
 
-    public class IdentityValueConvertion : ScaledValueConvertion
+    public class IdentityValueConversion : ScaledValueConversion
     {
-        public IdentityValueConvertion()
+        public IdentityValueConversion()
             : base(1)
         {
         }
@@ -368,6 +368,39 @@ namespace PhysicalMeasure
         public abstract UnitKind Kind { get; }
         public abstract sbyte[] Exponents { get; }
 
+        /// <summary>
+        /// IFormattable.ToString implementation.
+        /// </summary>
+        ///public override string ToString(string format, IFormatProvider formatProvider)
+        ///{
+        ///    return this.Value.ToString(format, formatProvider) + " " + this.Unit.ToString();
+        ///}
+
+        /// <summary>
+        /// IFormattable.ToString implementation.
+        /// </summary>
+        public override string ToString()
+        {
+            // return this.System.Name + "." + this.Symbol;
+
+            string ExponentsStr = "";
+            int index = 0;
+            foreach (sbyte exponent in Exponents)
+            {
+                if (exponent != 0)
+                {
+                    ExponentsStr += this.System.BaseUnits[index].Symbol;
+                    if (exponent != 1)
+                    {
+                        ExponentsStr += exponent.ToString();
+                    }
+                }
+
+                index++;
+            }
+            return this.System.Name + "." + ExponentsStr;
+        }
+
         public virtual IPhysicalQuantity ConvertTo(IPhysicalUnit converttounit)
         {
             IPhysicalQuantity pq = new PhysicalQuantity(1, this);
@@ -427,9 +460,9 @@ namespace PhysicalMeasure
             {
                 pq2 = u1.System.ConvertTo(pq2, u1);
             }
-            sbyte[] someexponents = new sbyte[Physic.NoOfMeasures];
+            sbyte[] someexponents = new sbyte[Physics.NoOfMeasures];
 
-            for (int i = 0; i < Physic.NoOfMeasures; i++)
+            for (int i = 0; i < Physics.NoOfMeasures; i++)
             {
                 someexponents[i] = cef(u1.Exponents[i], pq2.Unit.Exponents[i]);
             }
@@ -439,9 +472,9 @@ namespace PhysicalMeasure
 
         public PhysicalUnit Power(sbyte exponent)
         {
-            sbyte[] someexponents = new sbyte[Physic.NoOfMeasures];
+            sbyte[] someexponents = new sbyte[Physics.NoOfMeasures];
 
-            for (int i = 0; i < Physic.NoOfMeasures; i++)
+            for (int i = 0; i < Physics.NoOfMeasures; i++)
             {
                 someexponents[i] = (sbyte)(this.Exponents[i] * exponent);
             }
@@ -506,6 +539,24 @@ namespace PhysicalMeasure
             : this(null, somebaseunitnumber, somename, somesymbol)
         {
         }
+
+        /// <summary>
+        /// IFormattable.ToString implementation.
+        /// </summary>
+        ///public override string ToString(string format, IFormatProvider formatProvider)
+        ///{
+        ///    return this.Value.ToString(format, formatProvider) + " " + this.Unit.ToString();
+        ///}
+
+        /// <summary>
+        /// IFormattable.ToString implementation.
+        /// </summary>
+        public override string ToString()
+        {
+            // return this.System.Name + "." + this.Name;
+            return this.System.Name + "." + this.Symbol;
+        }
+
     }
 
     public class DerivedUnit : PhysicalUnit, IDerivedUnit
@@ -545,6 +596,24 @@ namespace PhysicalMeasure
             : this(somesystem, new NamedSymbol(somename, somesymbol), someexponents)
         {
         }
+
+        /// <summary>
+        /// IFormattable.ToString implementation.
+        /// </summary>
+        ///public override string ToString(string format, IFormatProvider formatProvider)
+        ///{
+        ///    return this.Value.ToString(format, formatProvider) + " " + this.Unit.ToString();
+        ///}
+
+        /// <summary>
+        /// IFormattable.ToString implementation.
+        /// </summary>
+        public override string ToString()
+        {
+            // return this.System.Name + "." + this.Name;
+            return this.System.Name + "." + this.Symbol;
+        }
+
     }
 
     public class ConvertibleUnit : PhysicalUnit, INamedSymbol, IConvertibleUnit
@@ -555,21 +624,21 @@ namespace PhysicalMeasure
         public string Symbol { get { return this._NamedSymbol.Symbol; } set { this._NamedSymbol.Symbol = value; } }
 
         private IPhysicalUnit _baseunit;
-        private IValueConvertion _convertion;
+        private IValueConversion _conversion;
 
         public IPhysicalUnit BaseUnit { get { return _baseunit; } }
-        public IValueConvertion Convertion { get { return _convertion; } }
+        public IValueConversion Conversion { get { return _conversion; } }
 
-        public ConvertibleUnit(NamedSymbol somenamedsymbol, IPhysicalUnit somebaseunit = null, ValueConvertion someconvertion = null)
+        public ConvertibleUnit(NamedSymbol somenamedsymbol, IPhysicalUnit somebaseunit = null, ValueConversion someconversion = null)
             : base(somebaseunit != null ? somebaseunit.System : null)
         {
             this._NamedSymbol = somenamedsymbol;
             _baseunit = somebaseunit;
-            _convertion = someconvertion;
+            _conversion = someconversion;
         }
 
-        public ConvertibleUnit(string somename, string somesymbol, IPhysicalUnit somesystemunit = null, ValueConvertion someconvertion = null)
-            : this(new NamedSymbol(somename, somesymbol), somesystemunit, someconvertion)
+        public ConvertibleUnit(string somename, string somesymbol, IPhysicalUnit somesystemunit = null, ValueConversion someconversion = null)
+            : this(new NamedSymbol(somename, somesymbol), somesystemunit, someconversion)
         {
         }
 
@@ -587,7 +656,7 @@ namespace PhysicalMeasure
             }
             else 
             {
-                PhysicalQuantity pq = new PhysicalQuantity(Convertion.ConvertFromBaseunit(1), BaseUnit);
+                PhysicalQuantity pq = new PhysicalQuantity(Conversion.ConvertFromBaseunit(1), BaseUnit);
                 if (converttounit == BaseUnit)
                 {
                     return pq;
@@ -752,7 +821,7 @@ namespace PhysicalMeasure
                             IConvertibleUnit icu = (IConvertibleUnit)physicalquantity.Unit;
                             if (icu.BaseUnit == converttounit)
                             {
-                                return new PhysicalQuantity(icu.Convertion.ConvertToBaseunit(physicalquantity.Value), converttounit);
+                                return new PhysicalQuantity(icu.Conversion.ConvertToBaseunit(physicalquantity.Value), converttounit);
                             }
                         }
                     }
@@ -763,7 +832,7 @@ namespace PhysicalMeasure
                             IConvertibleUnit icu = (IConvertibleUnit)converttounit;
                             if (icu.BaseUnit == physicalquantity.Unit)
                             {
-                                return new PhysicalQuantity(icu.Convertion.ConvertFromBaseunit(physicalquantity.Value), converttounit);
+                                return new PhysicalQuantity(icu.Conversion.ConvertFromBaseunit(physicalquantity.Value), converttounit);
                             }
                         }
                     }
@@ -775,7 +844,7 @@ namespace PhysicalMeasure
                 }
                 else
                 {   /* Inter unit system conversion */
-                    UnitSystemConversion usc = Physic.GetUnitSystemConversion(physicalquantity.Unit.System, converttounit.System);
+                    UnitSystemConversion usc = Physics.GetUnitSystemConversion(physicalquantity.Unit.System, converttounit.System);
                     if (usc != null)
                     {
                         return usc.ConvertTo(physicalquantity, converttounit);
@@ -794,7 +863,7 @@ namespace PhysicalMeasure
             }
 
             {   /* Inter unit system conversion */
-                UnitSystemConversion usc = Physic.GetUnitSystemConversion(physicalquantity.Unit.System, converttounitsystem);
+                UnitSystemConversion usc = Physics.GetUnitSystemConversion(physicalquantity.Unit.System, converttounitsystem);
                 if (usc != null)
                 {
                     return usc.ConvertTo(physicalquantity, converttounitsystem);
@@ -827,9 +896,9 @@ namespace PhysicalMeasure
             set { _ConvertedUnitSystem = value; }
         }
 
-        public ValueConvertion[] BaseUnitConversions;
+        public ValueConversion[] BaseUnitConversions;
 
-        public UnitSystemConversion(IUnitSystem somebaseunitsystem, IUnitSystem someconvertedunitsystem, ValueConvertion[] somebaseunitconversions)
+        public UnitSystemConversion(IUnitSystem somebaseunitsystem, IUnitSystem someconvertedunitsystem, ValueConversion[] somebaseunitconversions)
         {
             this.BaseUnitSystem = somebaseunitsystem;
             this.ConvertedUnitSystem = someconvertedunitsystem;
@@ -922,7 +991,7 @@ namespace PhysicalMeasure
                     {
                         NoOfNonOneExponents++;
                     }
-                    ValueConvertion vc = BaseUnitConversions[i];
+                    ValueConversion vc = BaseUnitConversions[i];
                     if (vc != null)
                     {
                         double baseunitconvertedvalue = vc.Convert(1, backwards);
@@ -931,7 +1000,7 @@ namespace PhysicalMeasure
                     }
                     else
                     {
-                        /* throw new ArgumentException("object's physical unit is not convertibel to a " + ConvertedUnitSystem.name + " unit. " + ConvertedUnitSystem.name+ " does not "); */
+                        /* throw new ArgumentException("object's physical unit is not convertibel to a " + ConvertedUnitSystem.name + " unit. " + ConvertedUnitSystem.name + " does not "); */
                         return null;
                     }
                 }
@@ -1050,6 +1119,11 @@ namespace PhysicalMeasure
         {
         }
 
+        public PhysicalQuantity(double somevalue, IPhysicalQuantity somephysicalquantity)
+            : this(somevalue * somephysicalquantity.Value, somephysicalquantity.Unit)
+        {
+        }
+
         /// <summary>
         /// IComparable.CompareTo implementation.
         /// </summary>
@@ -1090,7 +1164,7 @@ namespace PhysicalMeasure
             string ValueStr = Strings[0];
             string UnitStr  = Strings[1];
 
-            temp = Physic.ScaledUnitFromSymbol(UnitStr);
+            temp = Physics.ScaledUnitFromSymbol(UnitStr);
             temp.Value *= Double.Parse(ValueStr, styles, provider);
 
             return temp;
@@ -1107,7 +1181,7 @@ namespace PhysicalMeasure
             string ValueStr = Strings[0];
             string UnitStr = Strings[1];
 
-            temp = Physic.ScaledUnitFromSymbol(UnitStr);
+            temp = Physics.ScaledUnitFromSymbol(UnitStr);
             temp.Value *= Double.Parse(ValueStr);
 
             return temp;
@@ -1234,11 +1308,13 @@ namespace PhysicalMeasure
         {
             if (pq1.Unit != pq2.Unit)
             {
-                pq2 = pq2.ConvertTo(pq1.Unit);
-                if (pq2 == null)
+                IPhysicalQuantity temp_pq2 = pq2.ConvertTo(pq1.Unit);
+                if (temp_pq2 == null)
                 {
-                    throw new ArgumentException("object's physical unit " + pq2.Unit.ToString()+ "is not convertible to a " + pq1.Unit.ToString());
+                    throw new ArgumentException("object's physical unit " + pq2.Unit.ToString()+ " is not convertible to a " + pq1.Unit.ToString());
                 }
+
+                pq2 = temp_pq2;
             }
             return new PhysicalQuantity(cvf(pq1.Value, pq2.Value), pq1.Unit);
         }
@@ -1259,9 +1335,9 @@ namespace PhysicalMeasure
                 IConvertibleUnit pg2_unit = pq2.Unit as IConvertibleUnit;
                 pq2 = pq2.ConvertTo(pg2_unit.BaseUnit);
             }
-            sbyte[] someexponents = new sbyte[Physic.NoOfMeasures];
+            sbyte[] someexponents = new sbyte[Physics.NoOfMeasures];
 
-            for (int i = 0; i < Physic.NoOfMeasures; i++)
+            for (int i = 0; i < Physics.NoOfMeasures; i++)
             {
                 someexponents[i] = cef(pq1.Unit.Exponents[i], pq2.Unit.Exponents[i]);
             }
@@ -1312,9 +1388,9 @@ namespace PhysicalMeasure
         public PhysicalQuantity Power(sbyte exponent)
         {
             IPhysicalQuantity pq = this;
-            sbyte[] someexponents = new sbyte[Physic.NoOfMeasures];
+            sbyte[] someexponents = new sbyte[Physics.NoOfMeasures];
 
-            for (int i = 0; i < Physic.NoOfMeasures; i++)
+            for (int i = 0; i < Physics.NoOfMeasures; i++)
             {
                 someexponents[i] = (sbyte)(pq.Unit.Exponents[i] * exponent);
             }
@@ -1326,9 +1402,9 @@ namespace PhysicalMeasure
         public PhysicalQuantity Root(sbyte exponent)
         {
             IPhysicalQuantity pq = this;
-            sbyte[] someexponents = new sbyte[Physic.NoOfMeasures];
+            sbyte[] someexponents = new sbyte[Physics.NoOfMeasures];
 
-            for (int i = 0; i < Physic.NoOfMeasures; i++)
+            for (int i = 0; i < Physics.NoOfMeasures; i++)
             {
                 someexponents[i] = (sbyte)(pq.Unit.Exponents[i] / exponent);
             }
@@ -1382,7 +1458,7 @@ namespace PhysicalMeasure
 
     #region Physical Measure Statics Class
 
-    public static partial class Physic
+    public static partial class Physics
     {
         /*  http://en.wikipedia.org/wiki/SI_prefix 
             The International System of Units specifies twenty SI prefixes:
@@ -1510,47 +1586,10 @@ namespace PhysicalMeasure
                                                                                             new NamedDerivedUnit(SI_Units, "becquerel", "Bq",   new sbyte[] { 0, 0, -1, 0, 0, 0, 0 }),
                                                                                             new NamedDerivedUnit(SI_Units, "gray",      "Gy",   new sbyte[] { 2, 0, -2, 0, 0, 0, 0 }),
                                                                                             new NamedDerivedUnit(SI_Units, "katal",     "kat",  new sbyte[] { 0, 0, -1, 0, 0, 1, 0 }) },
-                                                                 new ConvertibleUnit[] { new ConvertibleUnit("gram", "g", SI_BaseUnits[(int)(MeasureKind.Mass)], new ScaledValueConvertion(1000)),  /* [g] = 1000 * [Kg] */
-                                                                                         new ConvertibleUnit("Celsius", "°C", SI_BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)], new LinearyValueConvertion(-273.15, 1)) }); /* [°C] = 1 * [K] - 273.15 */
+                                                                 new ConvertibleUnit[] { new ConvertibleUnit("gram", "g", SI_BaseUnits[(int)(MeasureKind.Mass)], new ScaledValueConversion(1000)),  /* [g] = 1000 * [Kg] */
+                                                                                         new ConvertibleUnit("Celsius", "°C", SI_BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)], new LinearyValueConversion(-273.15, 1)) }); /* [°C] = 1 * [K] - 273.15 */
         public static readonly PhysicalUnit dimensionless = new DerivedUnit(SI_Units, new sbyte[] { 0, 0, 0, 0, 0, 0, 0 });
 
-        public static partial class SI 
-        {
-            /* SI base units */
-            public static readonly PhysicalUnit m = (PhysicalUnit)SI_Units.BaseUnits[0];
-            public static readonly PhysicalUnit kg = (PhysicalUnit)SI_Units.BaseUnits[1];
-            public static readonly PhysicalUnit s = (PhysicalUnit)SI_Units.BaseUnits[2];
-            public static readonly PhysicalUnit A = (PhysicalUnit)SI_Units.BaseUnits[3];
-            public static readonly PhysicalUnit K = (PhysicalUnit)SI_Units.BaseUnits[4];
-            public static readonly PhysicalUnit mol = (PhysicalUnit)SI_Units.BaseUnits[5];
-            public static readonly PhysicalUnit cd = (PhysicalUnit)SI_Units.BaseUnits[6];
-
-            /* Named units derived from SI base units */
-            public static readonly PhysicalUnit Hz = (PhysicalUnit)SI_Units.NamedDerivedUnits[0];
-            public static readonly PhysicalUnit rad = (PhysicalUnit)SI_Units.NamedDerivedUnits[1];
-            public static readonly PhysicalUnit sr = (PhysicalUnit)SI_Units.NamedDerivedUnits[2];
-            public static readonly PhysicalUnit N = (PhysicalUnit)SI_Units.NamedDerivedUnits[3];
-            public static readonly PhysicalUnit Pa = (PhysicalUnit)SI_Units.NamedDerivedUnits[4];
-            public static readonly PhysicalUnit J = (PhysicalUnit)SI_Units.NamedDerivedUnits[5];
-            public static readonly PhysicalUnit W = (PhysicalUnit)SI_Units.NamedDerivedUnits[6];
-            public static readonly PhysicalUnit C = (PhysicalUnit)SI_Units.NamedDerivedUnits[7];
-            public static readonly PhysicalUnit V = (PhysicalUnit)SI_Units.NamedDerivedUnits[8];
-            public static readonly PhysicalUnit F = (PhysicalUnit)SI_Units.NamedDerivedUnits[9];
-            public static readonly PhysicalUnit ohm = (PhysicalUnit)SI_Units.NamedDerivedUnits[10];
-            public static readonly PhysicalUnit S = (PhysicalUnit)SI_Units.NamedDerivedUnits[11];
-            public static readonly PhysicalUnit Wb = (PhysicalUnit)SI_Units.NamedDerivedUnits[12];
-            public static readonly PhysicalUnit T = (PhysicalUnit)SI_Units.NamedDerivedUnits[13];
-            public static readonly PhysicalUnit H = (PhysicalUnit)SI_Units.NamedDerivedUnits[14];
-            public static readonly PhysicalUnit lm = (PhysicalUnit)SI_Units.NamedDerivedUnits[15];
-            public static readonly PhysicalUnit lx = (PhysicalUnit)SI_Units.NamedDerivedUnits[16];
-            public static readonly PhysicalUnit Bq = (PhysicalUnit)SI_Units.NamedDerivedUnits[17];
-            public static readonly PhysicalUnit Gy = (PhysicalUnit)SI_Units.NamedDerivedUnits[18];
-            public static readonly PhysicalUnit kat = (PhysicalUnit)SI_Units.NamedDerivedUnits[19];
-
-            /* Convertible units */
-            public static readonly PhysicalUnit g = (PhysicalUnit)SI_Units.ConvertibleUnits[0];
-            public static readonly PhysicalUnit Ce = (PhysicalUnit)SI_Units.ConvertibleUnits[1];
-        }
 
         public static readonly UnitSystem CGS_Units = new UnitSystem("CGS", UnitPrefixes,
                                                                   new BaseUnit[] {  new BaseUnit(CGS_Units, (sbyte)MeasureKind.Length, "centimeter", "cm"), 
@@ -1591,32 +1630,32 @@ namespace PhysicalMeasure
         public static UnitSystem[] UnitSystems = new UnitSystem[] { SI_Units, CGS_Units, MGD_Units, MGM_Units };
 
 
-        public static readonly UnitSystemConversion SItoCGSConversion = new UnitSystemConversion(SI_Units, CGS_Units, new ValueConvertion[] { new ScaledValueConvertion(100),                /* 1 m      <SI> = 100 cm        <CGS>  */
-                                                                                                                                     new ScaledValueConvertion(1000),               /* 1 Kg     <SI> = 1000 g        <CGS>  */
-                                                                                                                                     new IdentityValueConvertion(),                 /* 1 s      <SI> = 1 s           <CGS>  */
-                                                                                                                                     new IdentityValueConvertion(),                 /* 1 A      <SI> = 1 A           <CGS>  */
-                                                                                                                                     new IdentityValueConvertion(),                 /* 1 K      <SI> = 1 K           <CGS>  */
-                                                                                                                                     new IdentityValueConvertion(),                 /* 1 mol    <SI> = 1 mol         <CGS>  */
-                                                                                                                                     new IdentityValueConvertion(),                 /* 1 cadela <SI> = 1 cadela      <CGS>  */
+        public static readonly UnitSystemConversion SItoCGSConversion = new UnitSystemConversion(SI_Units, CGS_Units, new ValueConversion[] { new ScaledValueConversion(100),                /* 1 m      <SI> = 100 cm        <CGS>  */
+                                                                                                                                     new ScaledValueConversion(1000),               /* 1 Kg     <SI> = 1000 g        <CGS>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 s      <SI> = 1 s           <CGS>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 A      <SI> = 1 A           <CGS>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 K      <SI> = 1 K           <CGS>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 mol    <SI> = 1 mol         <CGS>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 cadela <SI> = 1 cadela      <CGS>  */
                                                                                                                                     });
 
-        public static readonly UnitSystemConversion SItoMGDConversion = new UnitSystemConversion(SI_Units, MGD_Units, new ValueConvertion[] { new IdentityValueConvertion(),                 /* 1 m      <SI> = 1 m           <MGD>  */
-                                                                                                                                     new IdentityValueConvertion(),                 /* 1 Kg     <SI> = 1 Kg          <MGD>  */
-                                                                                                                                     new ScaledValueConvertion(1/(24*60*60)),       /* 1 s      <SI> = 1/86400 d     <MGD>  */
-                                                                                                                                  /* new ScaledValueConvertion(10000/(24*60*60)),   /* 1 s      <SI> = 10000/86400 ø <MGD>  */
-                                                                                                                                     new IdentityValueConvertion(),                 /* 1 A      <SI> = 1 A           <MGD>  */
-                                                                                                                                     new IdentityValueConvertion(),                 /* 1 K      <SI> = 1 K           <MGD>  */
-                                                                                                                                     new IdentityValueConvertion(),                 /* 1 mol    <SI> = 1 mol         <MGD>  */
-                                                                                                                                     new IdentityValueConvertion(),                 /* 1 cadela <SI> = 1 cadela      <MGD>  */
+        public static readonly UnitSystemConversion SItoMGDConversion = new UnitSystemConversion(SI_Units, MGD_Units, new ValueConversion[] { new IdentityValueConversion(),                 /* 1 m      <SI> = 1 m           <MGD>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 Kg     <SI> = 1 Kg          <MGD>  */
+                                                                                                                                     new ScaledValueConversion(1/(24*60*60)),       /* 1 s      <SI> = 1/86400 d     <MGD>  */
+                                                                                                                                  /* new ScaledValueConversion(10000/(24*60*60)),   /* 1 s      <SI> = 10000/86400 ø <MGD>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 A      <SI> = 1 A           <MGD>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 K      <SI> = 1 K           <MGD>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 mol    <SI> = 1 mol         <MGD>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 cadela <SI> = 1 cadela      <MGD>  */
                                                                                                                                    });
 
-        public static readonly UnitSystemConversion MGDtoMGMConversion = new UnitSystemConversion(MGD_Units, MGM_Units, new ValueConvertion[] { new IdentityValueConvertion(),               /* 1 m      <MGD> = 1 m           <MGM>  */
-                                                                                                                                       new IdentityValueConvertion(),               /* 1 Kg     <MGD> = 1 Kg          <MGM>  */
-                                                                                                                                       new ScaledValueConvertion(10000),            /* 1 d      <MGD> = 10000 ø       <MGM>  */
-                                                                                                                                       new IdentityValueConvertion(),               /* 1 A      <MGD> = 1 A           <MGM>  */
-                                                                                                                                       new IdentityValueConvertion(),               /* 1 K      <MGD> = 1 K           <MGM>  */
-                                                                                                                                       new IdentityValueConvertion(),               /* 1 mol    <MGD> = 1 mol         <MGM>  */
-                                                                                                                                       new IdentityValueConvertion(),               /* 1 cadela <MGD> = 1 cadela      <MGM>  */
+        public static readonly UnitSystemConversion MGDtoMGMConversion = new UnitSystemConversion(MGD_Units, MGM_Units, new ValueConversion[] { new IdentityValueConversion(),               /* 1 m      <MGD> = 1 m           <MGM>  */
+                                                                                                                                       new IdentityValueConversion(),               /* 1 Kg     <MGD> = 1 Kg          <MGM>  */
+                                                                                                                                       new ScaledValueConversion(10000),            /* 1 d      <MGD> = 10000 ø       <MGM>  */
+                                                                                                                                       new IdentityValueConversion(),               /* 1 A      <MGD> = 1 A           <MGM>  */
+                                                                                                                                       new IdentityValueConversion(),               /* 1 K      <MGD> = 1 K           <MGM>  */
+                                                                                                                                       new IdentityValueConversion(),               /* 1 mol    <MGD> = 1 mol         <MGM>  */
+                                                                                                                                       new IdentityValueConversion(),               /* 1 cadela <MGD> = 1 cadela      <MGM>  */
                                                                                                                                      });
 
 
@@ -1662,6 +1701,44 @@ namespace PhysicalMeasure
             }
             return null;
         }
+    }
+
+    public static partial class SI
+    {
+        /* SI base units */
+        public static readonly PhysicalUnit m = (PhysicalUnit)Physics.SI_Units.BaseUnits[0];
+        public static readonly PhysicalUnit kg = (PhysicalUnit)Physics.SI_Units.BaseUnits[1];
+        public static readonly PhysicalUnit s = (PhysicalUnit)Physics.SI_Units.BaseUnits[2];
+        public static readonly PhysicalUnit A = (PhysicalUnit)Physics.SI_Units.BaseUnits[3];
+        public static readonly PhysicalUnit K = (PhysicalUnit)Physics.SI_Units.BaseUnits[4];
+        public static readonly PhysicalUnit mol = (PhysicalUnit)Physics.SI_Units.BaseUnits[5];
+        public static readonly PhysicalUnit cd = (PhysicalUnit)Physics.SI_Units.BaseUnits[6];
+
+        /* Named units derived from SI base units */
+        public static readonly PhysicalUnit Hz = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[0];
+        public static readonly PhysicalUnit rad = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[1];
+        public static readonly PhysicalUnit sr = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[2];
+        public static readonly PhysicalUnit N = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[3];
+        public static readonly PhysicalUnit Pa = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[4];
+        public static readonly PhysicalUnit J = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[5];
+        public static readonly PhysicalUnit W = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[6];
+        public static readonly PhysicalUnit C = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[7];
+        public static readonly PhysicalUnit V = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[8];
+        public static readonly PhysicalUnit F = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[9];
+        public static readonly PhysicalUnit ohm = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[10];
+        public static readonly PhysicalUnit S = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[11];
+        public static readonly PhysicalUnit Wb = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[12];
+        public static readonly PhysicalUnit T = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[13];
+        public static readonly PhysicalUnit H = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[14];
+        public static readonly PhysicalUnit lm = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[15];
+        public static readonly PhysicalUnit lx = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[16];
+        public static readonly PhysicalUnit Bq = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[17];
+        public static readonly PhysicalUnit Gy = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[18];
+        public static readonly PhysicalUnit kat = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[19];
+
+        /* Convertible units */
+        public static readonly PhysicalUnit g = (PhysicalUnit)Physics.SI_Units.ConvertibleUnits[0];
+        public static readonly PhysicalUnit Ce = (PhysicalUnit)Physics.SI_Units.ConvertibleUnits[1];
     }
 
     #endregion Physical Unit System Statics
