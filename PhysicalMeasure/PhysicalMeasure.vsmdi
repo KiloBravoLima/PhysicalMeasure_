@@ -32,7 +32,7 @@
     </TestLinks>
   </TestList>
   <TestList name="Lists of Tests" id="8c43106b-9dc1-4907-a29f-aa66a61bf5b6">
-    <RunConfiguration id="688117b2-65bf-41b0-8dae-c485f0197f2a" name="Local" storage="local.testsettings" type="Microsoft.VisualStudio.TestTools.Common.TestRunConfiguration, Microsoft.VisualStudio.QualityTools.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <RunConfiguration id="fdf38468-2f4f-4bc0-a3d8-14776d5e3144" name="Trace and Test Impact" storage="traceandtestimpact.testsettings" type="Microsoft.VisualStudio.TestTools.Common.TestRunConfiguration, Microsoft.VisualStudio.QualityTools.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   </TestList>
   <TestList name="UnitFromSymbol  parsing tests" id="9c95e0d6-5cf2-4937-9297-a1f35ce14964" parentListId="c3432667-bc68-42e0-bd71-7be9439f3ad4">
     <TestLinks>

@@ -62,7 +62,7 @@ namespace PhysicalMeasureTest
         //
         #endregion
 
-        #region PhysicalQuantity ToString test
+        #region PhysicalUnit StringTo tests
 
         /// <summary>
         ///A test for base unit ToString
@@ -100,7 +100,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void DerivedUnitToStringTest()
         {
-            PhysicalUnit MeterPrSecond2 = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new sbyte[] { 1, 0, -2, 0, 0, 0, 0 });
+            PhysicalUnit MeterPrSecond2 = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
 
             String expected = "SI.ms-2";
 
@@ -109,7 +109,151 @@ namespace PhysicalMeasureTest
             Assert.AreEqual(expected, actual);
         }
 
-        #endregion PhysicalUnit ToString test
+        #endregion PhysicalUnit StringTo tests
+
+        #region PhysicalUnit math tests
+
+        /// <summary>
+        ///A test for mult operator
+        ///</summary>
+        [TestMethod()]
+        public void MultBaseunitAndDerivedUnitTest()
+        {
+            PhysicalUnit pu1 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)];
+            PhysicalUnit pu2 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"); // m2∙kg∙s−2
+
+            PhysicalUnit expected = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 2, 2, -2, 0, 0, 0, 0 });
+
+            PhysicalUnit actual = pu1 * pu2;
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for div operator
+        ///</summary>
+        [TestMethod()]
+        public void DivBaseunitAndDerivedUnitTest()
+        {
+            PhysicalUnit pu1 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)];
+            PhysicalUnit pu2 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"); // m2∙kg∙s−2
+
+            PhysicalUnit expected = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { -2, 0, 2, 0, 0, 0, 0 });
+
+            PhysicalUnit actual = pu1 / pu2;
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for div operator
+        ///</summary>
+        [TestMethod()]
+        public void DivDerivedunitAndBaseUnitTest()
+        {
+            PhysicalUnit pu1 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"); // m2∙kg∙s−2
+            PhysicalUnit pu2 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)];
+
+            PhysicalUnit expected = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 2, 0, -2, 0, 0, 0, 0 });
+
+            PhysicalUnit actual = pu1 / pu2;
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for power operator
+        ///</summary>
+        [TestMethod()]
+        public void PowerOfBaseUnit()
+        {
+            PhysicalUnit pu = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Length)];
+
+            PhysicalUnit expected = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 3, 0, 0, 0, 0, 0, 0 });
+
+            PhysicalUnit actual = pu ^ 3;
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for power operator
+        ///</summary>
+        [TestMethod()]
+        public void PowerOfDerivedUnit()
+        {
+            PhysicalUnit pu = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
+
+            PhysicalUnit expected = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 3, 0, -3, 0, 0, 0, 0 });
+
+            PhysicalUnit actual = pu ^ 3;
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for root operator
+        ///</summary>
+        [TestMethod()]
+        public void RootOfDerivedUnit()
+        {
+            PhysicalUnit pu = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+
+            PhysicalUnit expected = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+
+            PhysicalUnit actual = pu % 2;
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        #endregion PhysicalUnit math tests
+
+        #region BaseUnit tests
+
+        /// <summary>
+        ///A test for BaseUnit BaseUnitNumber access
+        ///</summary>
+        [TestMethod()]
+        public void BaseUnitTestBaseUnitNumberAccessMass()
+        {
+            BaseUnit u = (BaseUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]);
+
+            SByte expected = 1;
+
+            SByte actual = u.BaseUnitNumber;
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for BaseUnit BaseUnitNumber access
+        ///</summary>
+        [TestMethod()]
+        public void BaseUnitTestBaseUnitNumberAccessLuminousIntensity()
+        {
+            BaseUnit u = (BaseUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Luminous_intensity)]);
+
+            SByte expected = 6;
+
+            SByte actual = u.BaseUnitNumber;
+
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for BaseUnit Name access
+        ///</summary>
+        [TestMethod()]
+        public void BaseUnitTestNameAccessMass()
+        {
+            BaseUnit u = (BaseUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]);
+
+            String expected = "kilogram";
+
+            String actual = u.Name;
+
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        #endregion BaseUnit tests
+
     }
 
     /// <summary>
@@ -176,7 +320,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void ParseTestMilliGram()
         {
-            string s = "123.000 mg"; 
+            String s = "123.000 mg"; 
             NumberStyles styles = NumberStyles.Float;
             IFormatProvider provider = NumberFormatInfo.InvariantInfo;
             IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)])));
@@ -230,7 +374,7 @@ namespace PhysicalMeasureTest
             PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
             PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
 
-            PhysicalUnit MassSquared = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new sbyte[] { 0, 2, 0, 0, 0, 0, 0 });
+            PhysicalUnit MassSquared = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 0, 2, 0, 0, 0, 0, 0 });
 
             PhysicalQuantity expected = new PhysicalQuantity(0.000123 * 456 , (IPhysicalUnit)MassSquared);
 
@@ -261,7 +405,7 @@ namespace PhysicalMeasureTest
         {
             PhysicalQuantity m = new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
 
-            PhysicalUnit MeterPrSecond = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new sbyte[] { 1, 0, -1, 0, 0, 0, 0 });
+            PhysicalUnit MeterPrSecond = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
             PhysicalQuantity c = new PhysicalQuantity(299792458, MeterPrSecond);
 
             PhysicalQuantity expected = new PhysicalQuantity(0.001 * 299792458 * 299792458, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"));
@@ -280,7 +424,7 @@ namespace PhysicalMeasureTest
             PhysicalQuantity h = PhysicalQuantity.Parse("10 m") as PhysicalQuantity;
 
             //!!! To do: make this work: PhysicalQuantity g = PhysicalQuantity.Parse("9.81 m/s^2");
-            PhysicalUnit MeterPrSecond2 = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new sbyte[] { 1, 0, -2, 0, 0, 0, 0 });
+            PhysicalUnit MeterPrSecond2 = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
             PhysicalQuantity g = new PhysicalQuantity(9.81, MeterPrSecond2);
 
             PhysicalQuantity expected = new PhysicalQuantity(0.001 * 9.81 * 10, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"));
@@ -355,6 +499,51 @@ namespace PhysicalMeasureTest
         #endregion PhysicalQuantity math test
 
         #region PhysicalQuantity ToString test
+
+        /// <summary>
+        ///A test for base unit PhysicalQuantity ToString
+        ///</summary>
+        [TestMethod()]
+        public void BaseUnitPhysicalQuantityToStringTest()
+        {
+            PhysicalQuantity pq = new PhysicalQuantity(123.4, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("Kg"));
+
+            String expected = (123.4).ToString()+" SI.Kg";
+
+            String actual = pq.ToString();
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for named derived unit PhysicalQuantity ToString
+        ///</summary>
+        [TestMethod()]
+        public void NamedDerivedUnitPhysicalQuantityToStringTest()
+        {
+            PhysicalQuantity pq = new PhysicalQuantity(0.001 * 9.81 * 10, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"));
+
+            String expected = (0.0981).ToString()+" SI.J";
+
+            String actual = pq.ToString();
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for (unnamed) derived unit PhysicalQuantity ToString
+        ///</summary>
+        [TestMethod()]
+        public void DerivedUnitPhysicalQuantityToStringTest()
+        {
+            PhysicalQuantity pq = new PhysicalQuantity(0.00987654321, new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 }));
+
+            String expected = (0.00987654321).ToString() + " SI.ms-2";
+
+            String actual = pq.ToString();
+
+            Assert.AreEqual(expected, actual);
+        }
 
 
         #endregion PhysicalQuantity ToString test
