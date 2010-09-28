@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <TestSettings name="Local" id="688117b2-65bf-41b0-8dae-c485f0197f2a" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
   <Description>These are default test settings for a local test run.</Description>
-  <Deployment enabled="false" />
   <Execution>
     <Timeouts runTimeout="1800000" testTimeout="10000" />
     <TestTypeSpecific>
@@ -26,6 +25,15 @@
         <DataCollector uri="datacollector://Microsoft/TestImpact/1.0" assemblyQualifiedName="Microsoft.VisualStudio.TraceCollector.TestImpactDataCollector, Microsoft.VisualStudio.TraceCollector, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
         </DataCollector>
         <DataCollector uri="datacollector://microsoft/CodeCoverage/1.0" assemblyQualifiedName="Microsoft.VisualStudio.TestTools.CodeCoverage.CoveragePlugIn, Microsoft.VisualStudio.QualityTools.Plugins.CodeCoverage, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" friendlyName="Code Coverage">
+          <Configuration>
+            <CodeCoverage xmlns="">
+              <Regular>
+                <CodeCoverageItem binaryFile="PhysicalMeasure\bin\Debug\PhysicalMeasure.dll" pdbFile="PhysicalMeasure\bin\Debug\PhysicalMeasure.pdb" instrumentInPlace="true" />
+              </Regular>
+            </CodeCoverage>
+          </Configuration>
+        </DataCollector>
+        <DataCollector uri="datacollector://microsoft/TraceDebugger/1.0" assemblyQualifiedName="Microsoft.VisualStudio.TraceCollector.TraceDebuggerDataCollector, Microsoft.VisualStudio.TraceCollector, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" friendlyName="IntelliTrace">
         </DataCollector>
       </DataCollectors>
     </AgentRule>

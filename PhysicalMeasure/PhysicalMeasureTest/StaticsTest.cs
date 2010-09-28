@@ -105,10 +105,10 @@ namespace PhysicalMeasureTest
         ///A test for UnitFromSymbol
         ///</summary>
         [TestMethod()]
-        public void UnitsMustDifferTestMassCelcius()
+        public void UnitsMustDifferTestKilogramGram()
         {
             IUnit MassUnit = (IUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]);
-            IUnit CelciusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[0]);
+            IUnit CelciusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
 
             Assert.AreNotEqual(MassUnit, CelciusTemperatureUnit);
         }
@@ -117,12 +117,36 @@ namespace PhysicalMeasureTest
         ///A test for UnitFromSymbol
         ///</summary>
         [TestMethod()]
+        public void UnitsMustDifferTestMassCelcius()
+        {
+            IUnit MassUnit = (IUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]);
+            IUnit CelciusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
+
+            Assert.AreNotEqual(MassUnit, CelciusTemperatureUnit);
+        }
+
+        /// <summary>
+        ///A test for Equal
+        ///</summary>
+        [TestMethod()]
         public void UnitsMustDifferTestCoulombCelcius()
         {
             IUnit Coulomb = (IUnit)(Physics.SI_Units.NamedDerivedUnits[7]);
             IUnit CelciusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[0]);
 
             Assert.AreNotEqual(Coulomb, CelciusTemperatureUnit);
+        }
+
+        /// <summary>
+        ///A test for Equal
+        ///</summary>
+        [TestMethod()]
+        public void UnitsMustDifferTestKelvinCelcius()
+        {
+            IUnit KelvinUnit = (IUnit)(Physics.SI_Units.NamedDerivedUnits[5]);
+            IUnit CelciusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
+
+            Assert.AreNotEqual(KelvinUnit, CelciusTemperatureUnit);
         }
 
         #endregion Units must differ test
@@ -137,8 +161,7 @@ namespace PhysicalMeasureTest
             IUnitSystem SomeUnitSystem = Physics.SI_Units;
             IUnitSystem SomeOtherUnitSystem = Physics.MGD_Units;
             UnitSystemConversion expected = Physics.SItoMGDConversion; 
-            UnitSystemConversion actual;
-            actual = Physics.GetUnitSystemConversion(SomeUnitSystem, SomeOtherUnitSystem);
+            UnitSystemConversion actual = Physics.GetUnitSystemConversion(SomeUnitSystem, SomeOtherUnitSystem);
             Assert.AreEqual(expected, actual);
         }
 
@@ -150,9 +173,22 @@ namespace PhysicalMeasureTest
         ///A test for UnitFromSymbol
         ///</summary>
         [TestMethod()]
+        public void UnitFromSymbolTestAmpere()
+        {
+            String SymbolStr = "A";
+            IUnit expected = (IUnit)(Physics.SI_Units.BaseUnits[3]);
+            IUnit actual;
+            actual = Physics.UnitFromSymbol(SymbolStr);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for UnitFromSymbol
+        ///</summary>
+        [TestMethod()]
         public void UnitFromSymbolTestCoulomb()
         {
-            string SymbolStr = "C";
+            String SymbolStr = "C";
             IUnit expected = (IUnit)(Physics.SI_Units.NamedDerivedUnits[7]);
             IUnit actual;
             actual = Physics.UnitFromSymbol(SymbolStr);
@@ -165,7 +201,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitFromSymbolTestCelcius()
         {
-            string SymbolStr = "°C";
+            String SymbolStr = "°C";
             IUnit expected = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
             IUnit actual;
             actual = Physics.UnitFromSymbol(SymbolStr);
@@ -174,6 +210,114 @@ namespace PhysicalMeasureTest
 
         #endregion UnitFromSymbol test
 
+        #region UnitFromName test
+
+        /// <summary>
+        ///A test for UnitFromName on BaseUnit
+        ///</summary>
+        [TestMethod()]
+        public void UnitFromNameTestMeter()
+        {
+            String NameStr = "meter";
+            IUnit expected = (IUnit)(Physics.SI_Units.BaseUnits[0]);
+            IUnit actual;
+            actual = Physics.UnitFromName(NameStr);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for UnitFromName on BaseUnit
+        ///</summary>
+        [TestMethod()]
+        public void UnitFromNameTestAmpere()
+        {
+            String NameStr = "ampere";
+            IUnit expected = (IUnit)(Physics.SI_Units.BaseUnits[3]);
+            IUnit actual;
+            actual = Physics.UnitFromName(NameStr);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for UnitFromName on BaseUnit
+        ///</summary>
+        [TestMethod()]
+        public void UnitFromNameTestCadela()
+        {
+            String NameStr = "cadela";
+            IUnit expected = (IUnit)(Physics.SI_Units.BaseUnits[6]);
+            IUnit actual;
+            actual = Physics.UnitFromName(NameStr);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for UnitFromName on NamedDerivedUnit
+        ///</summary>
+        [TestMethod()]
+        public void UnitFromNameTestHertz()
+        {
+            String NameStr = "hertz";
+            IUnit expected = (IUnit)(Physics.SI_Units.NamedDerivedUnits[0]);
+            IUnit actual;
+            actual = Physics.UnitFromName(NameStr);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for UnitFromName on NamedDerivedUnit
+        ///</summary>
+        [TestMethod()]
+        public void UnitFromNameTestJoule()
+        {
+            String NameStr = "joule";
+            IUnit expected = (IUnit)(Physics.SI_Units.NamedDerivedUnits[5]);
+            IUnit actual;
+            actual = Physics.UnitFromName(NameStr);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for UnitFromName on NamedDerivedUnit
+        ///</summary>
+        [TestMethod()]
+        public void UnitFromNameTestKatal()
+        {
+            String NameStr = "katal";
+            IUnit expected = (IUnit)(Physics.SI_Units.NamedDerivedUnits[19]);
+            IUnit actual;
+            actual = Physics.UnitFromName(NameStr);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for UnitFromName on ConvertibleUnit
+        ///</summary>
+        [TestMethod()]
+        public void UnitFromNameTestGram()
+        {
+            String NameStr = "gram";
+            IUnit expected = (IUnit)(Physics.SI_Units.ConvertibleUnits[0]);
+            IUnit actual;
+            actual = Physics.UnitFromName(NameStr);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for UnitFromName on ConvertibleUnit
+        ///</summary>
+        [TestMethod()]
+        public void UnitFromNameTestCelcius()
+        {
+            String NameStr = "Celsius";
+            IUnit expected = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
+            IUnit actual;
+            actual = Physics.UnitFromName(NameStr);
+            Assert.AreEqual(expected, actual);
+        }
+
+        #endregion UnitFromName test
+
         #region ScaledUnitFromSymbol test
         /// <summary>
         ///A test for ScaledUnitFromSymbol
@@ -181,7 +325,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void ScaledUnitFromSymbolTestMilliKelvin()
         {
-            string ScaledSymbolStr = "mK";
+            String ScaledSymbolStr = "mK";
             IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)])));
             IPhysicalQuantity actual;
             actual = Physics.ScaledUnitFromSymbol(ScaledSymbolStr);
@@ -194,7 +338,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void ScaledUnitFromSymbolTestGram()
         {
-            string ScaledSymbolStr = "g";
+            String ScaledSymbolStr = "g";
             IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)])));
             IPhysicalQuantity actual;
             actual = Physics.SI_Units.ScaledUnitFromSymbol(ScaledSymbolStr);
@@ -207,7 +351,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void ScaledUnitFromSymbolTestKiloGram()
         {
-            string ScaledSymbolStr = "Kg";
+            String ScaledSymbolStr = "Kg";
             IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(1, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)])));
             IPhysicalQuantity actual;
             actual = Physics.ScaledUnitFromSymbol(ScaledSymbolStr);
@@ -225,7 +369,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void ConvertibleUnitTestCelsius()
         {
-            string ConvertibleUnitQuantityStr = "-173 °C";
+            String ConvertibleUnitQuantityStr = "-173 °C";
 
             IPhysicalQuantity expected = new PhysicalQuantity(100+0.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)]));
 
@@ -240,7 +384,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void ConvertibleUnitTestGram()
         {
-            string ConvertibleUnitQuantityStr = "123 g";
+            String ConvertibleUnitQuantityStr = "123 g";
 
             IPhysicalQuantity expected = new PhysicalQuantity(0.123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
 
@@ -263,7 +407,7 @@ namespace PhysicalMeasureTest
             PhysicalQuantity h = new PhysicalQuantity(10, SI.m);
 
             //!!! To do: make this work: PhysicalQuantity g = PhysicalQuantity.Parse("9.81 m/s^2");
-            // PhysicalUnit MeterPerSecond2 = new DerivedUnit(Physic.SI_Units, new sbyte[] { 1, 0, -2, 0, 0, 0, 0 });
+            // PhysicalUnit MeterPerSecond2 = new DerivedUnit(Physic.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
             PhysicalUnit MeterPerSecond2 = (PhysicalUnit)(SI.m / (SI.s ^ 2)).Unit;
             PhysicalQuantity g = new PhysicalQuantity(9.81, MeterPerSecond2);
 
