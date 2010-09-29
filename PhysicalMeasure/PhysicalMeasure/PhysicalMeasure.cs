@@ -326,6 +326,7 @@ namespace PhysicalMeasure
         public ScaledValueConversion(double somescale)
             : base(0, somescale)
         {
+            Debug.Assert(somescale != 0);
         }
     }
 
@@ -1099,27 +1100,36 @@ namespace PhysicalMeasure
             }
             double value = physicalquantity.Value * convertproduct;
             IPhysicalUnit unit;
+            IUnitSystem unitsystem = (backwards ? BaseUnitSystem: ConvertedUnitSystem);
             if ((NoOfNonZeroExponents == 1) && (NoOfNonOneExponents == 0))
             {
                 /* BaseUnit */
-                unit = (IPhysicalUnit)ConvertedUnitSystem.BaseUnits[FirstNonZeroExponent];
+                unit = (IPhysicalUnit)unitsystem.BaseUnits[FirstNonZeroExponent];
             }
             else
-            {
-                int namedderivedunitsindex = 0;
-                // while (!IsSameMeasureKind(ConvertedUnitSystem.NamedDerivedUnits[namedderivedunitsindex].Exponents, FromUnitExponents))
-                while (!DimensionExponets.Equals(ConvertedUnitSystem.NamedDerivedUnits[namedderivedunitsindex].Exponents, FromUnitExponents))
+            {   
+                /* Check if it is a NamedDerivedUnit */
+                unit = null;
+                if (unitsystem.NamedDerivedUnits != null)
                 {
-                    namedderivedunitsindex++;
-                }
+                    int namedderivedunitsindex = 0;
 
-                if (namedderivedunitsindex < ConvertedUnitSystem.NamedDerivedUnits.Length)
-                {   /* NamedDerivedUnit */
-                    unit = (IPhysicalUnit)ConvertedUnitSystem.NamedDerivedUnits[namedderivedunitsindex];
+                    while (   (namedderivedunitsindex < unitsystem.NamedDerivedUnits.Length) 
+                           && !DimensionExponets.Equals(unitsystem.NamedDerivedUnits[namedderivedunitsindex].Exponents, FromUnitExponents))
+                    {
+                        namedderivedunitsindex++;
+                    }
+
+                    if (namedderivedunitsindex < unitsystem.NamedDerivedUnits.Length)
+                    {
+                        /* NamedDerivedUnit */
+                        unit = (IPhysicalUnit)unitsystem.NamedDerivedUnits[namedderivedunitsindex];
+                    }
                 }
-                else
-                {   /* DerivedUnit */
-                    unit = new DerivedUnit(ConvertedUnitSystem, FromUnitExponents);
+                if (unit == null)
+                {  
+                    /* DerivedUnit */
+                    unit = new DerivedUnit(unitsystem, FromUnitExponents);
                 }
             }
             return new PhysicalQuantity(value, unit);
@@ -1758,7 +1768,7 @@ namespace PhysicalMeasure
 
         public static readonly UnitSystemConversion SItoMGDConversion = new UnitSystemConversion(SI_Units, MGD_Units, new ValueConversion[] { new IdentityValueConversion(),                 /* 1 m      <SI> = 1 m           <MGD>  */
                                                                                                                                      new IdentityValueConversion(),                 /* 1 Kg     <SI> = 1 Kg          <MGD>  */
-                                                                                                                                     new ScaledValueConversion(1/(24*60*60)),       /* 1 s      <SI> = 1/86400 d     <MGD>  */
+                                                                                                                                     new ScaledValueConversion(1.0/(24*60*60)),       /* 1 s      <SI> = 1/86400 d     <MGD>  */
                                                                                                                                   /* new ScaledValueConversion(10000/(24*60*60)),   /* 1 s      <SI> = 10000/86400 ø <MGD>  */
                                                                                                                                      new IdentityValueConversion(),                 /* 1 A      <SI> = 1 A           <MGD>  */
                                                                                                                                      new IdentityValueConversion(),                 /* 1 K      <SI> = 1 K           <MGD>  */
