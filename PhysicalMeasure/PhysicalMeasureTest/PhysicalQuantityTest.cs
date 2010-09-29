@@ -203,6 +203,74 @@ namespace PhysicalMeasureTest
 
         #endregion PhysicalUnit math tests
 
+        #region PhysicalUnit Convert tests
+
+
+        /// <summary>
+        ///A test for ConvertTo()
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalUnitConvertToUnitSystemMGD()
+        {
+            PhysicalUnit pu = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+
+            PhysicalUnit expectedunit = new DerivedUnit(PhysicalMeasure.Physics.MGD_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            PhysicalQuantity expected = new PhysicalQuantity(1/Math.Pow(24*60*60, -4), expectedunit);
+
+            IPhysicalQuantity actual = pu.ConvertTo(PhysicalMeasure.Physics.MGD_Units);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for ConvertTo()
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalUnitConvertToUnitSystemSI()
+        {
+            PhysicalUnit pu = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+
+            PhysicalUnit expectedunit = new DerivedUnit(PhysicalMeasure.Physics.MGD_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            PhysicalQuantity expected = new PhysicalQuantity(1 / Math.Pow(24 * 60 * 60, -4), expectedunit);
+
+            IPhysicalQuantity actual = pu.ConvertTo(PhysicalMeasure.Physics.MGD_Units);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for ConvertTo()
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalUnitConvertToMGDUnit()
+        {
+            PhysicalUnit pu = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+
+            PhysicalUnit expectedunit = new DerivedUnit(PhysicalMeasure.Physics.MGD_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            PhysicalQuantity expected = new PhysicalQuantity(1/Math.Pow(24 * 60 * 60, -4), expectedunit);
+
+            IPhysicalQuantity actual = pu.ConvertTo(expectedunit);
+            Assert.AreEqual(expected, actual);
+        }
+
+
+
+        /// <summary>
+        ///A test for ConvertTo()
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalUnitConvertToSIUnit()
+        {
+            PhysicalUnit pu = new DerivedUnit(PhysicalMeasure.Physics.MGD_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+
+            PhysicalUnit expectedunit = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, pu.Exponents);
+            PhysicalQuantity expected = new PhysicalQuantity( Math.Pow(24 * 60 * 60, -4), expectedunit);
+
+            IPhysicalQuantity actual = pu.ConvertTo(expectedunit);
+            Assert.AreEqual(expected, actual);
+        }
+
+        #endregion PhysicalUnit Convert tests
+
+
         #region BaseUnit tests
 
         /// <summary>
