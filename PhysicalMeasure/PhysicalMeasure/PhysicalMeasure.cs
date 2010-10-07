@@ -602,6 +602,39 @@ namespace PhysicalMeasure
             return this / u2;
         }
 
+
+        public static PhysicalQuantity operator *(PhysicalUnit u, IPhysicalQuantity pq)
+        {
+            IPhysicalQuantity pq2 = u * pq.Unit;
+            return new PhysicalQuantity(pq.Value * pq2.Value, (PhysicalUnit)pq.Unit * pq2.Unit);
+        }
+
+        public static PhysicalQuantity operator /(PhysicalUnit u, IPhysicalQuantity pq)
+        {
+            IPhysicalQuantity pq2 = u / pq.Unit;
+            return new PhysicalQuantity(pq.Value / pq2.Value, (PhysicalUnit)pq.Unit / pq2.Unit);
+        }
+
+        public IPhysicalQuantity Multiply(IPhysicalQuantity pq)
+        {
+            return this * pq;
+        }
+
+        public IPhysicalQuantity Divide(IPhysicalQuantity pq)
+        {
+            return this / pq;
+        }
+
+
+        public static PhysicalQuantity operator *(PhysicalUnit u, IUnitPrefix up)
+        {
+            return new PhysicalQuantity(Math.Pow(10, up.PrefixExponent), u);
+        }
+
+        public static PhysicalQuantity operator *(IUnitPrefix up, PhysicalUnit u)
+        {
+            return new PhysicalQuantity(Math.Pow(10, up.PrefixExponent), u);
+        }
     }
 
     public class BaseUnit : PhysicalUnit, INamedSymbol, IBaseUnit
@@ -1512,6 +1545,17 @@ namespace PhysicalMeasure
             return (pq ^ -1) * d;
         }
 
+        public static PhysicalQuantity operator *(IPhysicalQuantity pq, IUnitPrefix up)
+        {
+            return new PhysicalQuantity(pq.Value * Math.Pow(10, up.PrefixExponent), pq.Unit);
+        }
+
+        public static PhysicalQuantity operator *(IUnitPrefix up, IPhysicalQuantity pq)
+        {
+            return new PhysicalQuantity(pq.Value * Math.Pow(10, up.PrefixExponent), pq.Unit);
+        }
+
+
         public PhysicalQuantity Power(SByte exponent)
         {
             IPhysicalQuantity pq = this;
@@ -1689,7 +1733,7 @@ namespace PhysicalMeasure
                                                                     new BaseUnit(null, (SByte)MeasureKind.Electric_current, "ampere", "A"), 
                                                                     new BaseUnit(null, (SByte)MeasureKind.Thermodynamic_temperature, "kelvin", "K"), 
                                                                     new BaseUnit(null, (SByte)MeasureKind.Amount_of_substance, "mol", "mol"), 
-                                                                    new BaseUnit(null, (SByte)MeasureKind.Luminous_intensity, "cadela", "cd") };
+                                                                    new BaseUnit(null, (SByte)MeasureKind.Luminous_intensity, "candela", "cd") };
 
         public static readonly UnitSystem SI_Units = new UnitSystem("SI", UnitPrefixes,
                                                                  SI_BaseUnits,
@@ -1725,7 +1769,7 @@ namespace PhysicalMeasure
                                                                                     new BaseUnit(CGS_Units, (SByte)MeasureKind.Electric_current, "ampere", "A"), 
                                                                                     new BaseUnit(CGS_Units, (SByte)MeasureKind.Thermodynamic_temperature, "kelvin", "K"), 
                                                                                     new BaseUnit(CGS_Units, (SByte)MeasureKind.Amount_of_substance, "mol", "mol"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)MeasureKind.Luminous_intensity, "cadela", "cd")});
+                                                                                    new BaseUnit(CGS_Units, (SByte)MeasureKind.Luminous_intensity, "candela", "cd")});
 
         public static readonly UnitSystem MGD_Units = new UnitSystem("MGD", UnitPrefixes,
                                                                   new BaseUnit[] {  new BaseUnit(MGD_Units, (SByte)MeasureKind.Length, "meter", "m"), 
@@ -1738,7 +1782,7 @@ namespace PhysicalMeasure
                                                                                     new BaseUnit(MGD_Units, (SByte)MeasureKind.Electric_current, "ampere", "A"), 
                                                                                     new BaseUnit(MGD_Units, (SByte)MeasureKind.Thermodynamic_temperature, "kelvin", "K"), 
                                                                                     new BaseUnit(MGD_Units, (SByte)MeasureKind.Amount_of_substance, "mol", "mol"), 
-                                                                                    new BaseUnit(MGD_Units, (SByte)MeasureKind.Luminous_intensity, "cadela", "cd") } );
+                                                                                    new BaseUnit(MGD_Units, (SByte)MeasureKind.Luminous_intensity, "candela", "cd") } );
 
         public static readonly UnitSystem MGM_Units = new UnitSystem("MGM", UnitPrefixes,
                                                                   new BaseUnit[] {  new BaseUnit(MGD_Units, (SByte)MeasureKind.Length, "meter", "m"), 
@@ -1751,38 +1795,38 @@ namespace PhysicalMeasure
                                                                                     new BaseUnit(MGD_Units, (SByte)MeasureKind.Electric_current, "ampere", "A"), 
                                                                                     new BaseUnit(MGD_Units, (SByte)MeasureKind.Thermodynamic_temperature, "kelvin", "K"), 
                                                                                     new BaseUnit(MGD_Units, (SByte)MeasureKind.Amount_of_substance, "mol", "mol"), 
-                                                                                    new BaseUnit(MGD_Units, (SByte)MeasureKind.Luminous_intensity, "cadela", "cd") } );
+                                                                                    new BaseUnit(MGD_Units, (SByte)MeasureKind.Luminous_intensity, "candela", "cd") } );
 
 
         public static UnitSystem[] UnitSystems = new UnitSystem[] { SI_Units, CGS_Units, MGD_Units, MGM_Units };
 
 
-        public static readonly UnitSystemConversion SItoCGSConversion = new UnitSystemConversion(SI_Units, CGS_Units, new ValueConversion[] { new ScaledValueConversion(100),                /* 1 m      <SI> = 100 cm        <CGS>  */
-                                                                                                                                     new ScaledValueConversion(1000),               /* 1 Kg     <SI> = 1000 g        <CGS>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 s      <SI> = 1 s           <CGS>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 A      <SI> = 1 A           <CGS>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 K      <SI> = 1 K           <CGS>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 mol    <SI> = 1 mol         <CGS>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 cadela <SI> = 1 cadela      <CGS>  */
+        public static readonly UnitSystemConversion SItoCGSConversion = new UnitSystemConversion(SI_Units, CGS_Units, new ValueConversion[] { new ScaledValueConversion(100),       /* 1 m       <SI> = 100 cm        <CGS>  */
+                                                                                                                                     new ScaledValueConversion(1000),               /* 1 Kg      <SI> = 1000 g        <CGS>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 s       <SI> = 1 s           <CGS>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 A       <SI> = 1 A           <CGS>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 K       <SI> = 1 K           <CGS>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 mol     <SI> = 1 mol         <CGS>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 candela <SI> = 1 cadela      <CGS>  */
                                                                                                                                     });
 
-        public static readonly UnitSystemConversion SItoMGDConversion = new UnitSystemConversion(SI_Units, MGD_Units, new ValueConversion[] { new IdentityValueConversion(),                 /* 1 m      <SI> = 1 m           <MGD>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 Kg     <SI> = 1 Kg          <MGD>  */
-                                                                                                                                     new ScaledValueConversion(1.0/(24*60*60)),       /* 1 s      <SI> = 1/86400 d     <MGD>  */
-                                                                                                                                  /* new ScaledValueConversion(10000/(24*60*60)),   /* 1 s      <SI> = 10000/86400 ø <MGD>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 A      <SI> = 1 A           <MGD>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 K      <SI> = 1 K           <MGD>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 mol    <SI> = 1 mol         <MGD>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 cadela <SI> = 1 cadela      <MGD>  */
+        public static readonly UnitSystemConversion SItoMGDConversion = new UnitSystemConversion(SI_Units, MGD_Units, new ValueConversion[] { new IdentityValueConversion(),        /* 1 m       <SI> = 1 m           <MGD>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 Kg      <SI> = 1 Kg          <MGD>  */
+                                                                                                                                     new ScaledValueConversion(1.0/(24*60*60)),     /* 1 s       <SI> = 1/86400 d     <MGD>  */
+                                                                                                                                  /* new ScaledValueConversion(10000/(24*60*60)),   /* 1 s       <SI> = 10000/86400 ø <MGD>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 A       <SI> = 1 A           <MGD>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 K       <SI> = 1 K           <MGD>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 mol     <SI> = 1 mol         <MGD>  */
+                                                                                                                                     new IdentityValueConversion(),                 /* 1 candela <SI> = 1 cadela      <MGD>  */
                                                                                                                                    });
 
-        public static readonly UnitSystemConversion MGDtoMGMConversion = new UnitSystemConversion(MGD_Units, MGM_Units, new ValueConversion[] { new IdentityValueConversion(),               /* 1 m      <MGD> = 1 m           <MGM>  */
-                                                                                                                                       new IdentityValueConversion(),               /* 1 Kg     <MGD> = 1 Kg          <MGM>  */
-                                                                                                                                       new ScaledValueConversion(10000),            /* 1 d      <MGD> = 10000 ø       <MGM>  */
-                                                                                                                                       new IdentityValueConversion(),               /* 1 A      <MGD> = 1 A           <MGM>  */
-                                                                                                                                       new IdentityValueConversion(),               /* 1 K      <MGD> = 1 K           <MGM>  */
-                                                                                                                                       new IdentityValueConversion(),               /* 1 mol    <MGD> = 1 mol         <MGM>  */
-                                                                                                                                       new IdentityValueConversion(),               /* 1 cadela <MGD> = 1 cadela      <MGM>  */
+        public static readonly UnitSystemConversion MGDtoMGMConversion = new UnitSystemConversion(MGD_Units, MGM_Units, new ValueConversion[] { new IdentityValueConversion(),      /* 1 m       <MGD> = 1 m           <MGM>  */
+                                                                                                                                       new IdentityValueConversion(),               /* 1 Kg      <MGD> = 1 Kg          <MGM>  */
+                                                                                                                                       new ScaledValueConversion(10000),            /* 1 d       <MGD> = 10000 ø       <MGM>  */
+                                                                                                                                       new IdentityValueConversion(),               /* 1 A       <MGD> = 1 A           <MGM>  */
+                                                                                                                                       new IdentityValueConversion(),               /* 1 K       <MGD> = 1 K           <MGM>  */
+                                                                                                                                       new IdentityValueConversion(),               /* 1 mol     <MGD> = 1 mol         <MGM>  */
+                                                                                                                                       new IdentityValueConversion(),               /* 1 candela <MGD> = 1 cadela      <MGM>  */
                                                                                                                                      });
 
 
@@ -1843,6 +1887,31 @@ namespace PhysicalMeasure
         }
     }
 
+
+    public static partial class Prefix
+    {
+        /* SI unit prefixes */
+        public static readonly UnitPrefix Y = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[0];
+        public static readonly UnitPrefix Z = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[1];
+        public static readonly UnitPrefix E = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[2];
+        public static readonly UnitPrefix P = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[3];
+        public static readonly UnitPrefix T = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[4];
+        public static readonly UnitPrefix G = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[5];
+        public static readonly UnitPrefix K = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[6];
+        public static readonly UnitPrefix H = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[7];
+        public static readonly UnitPrefix D = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[8];
+        public static readonly UnitPrefix d = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[9];
+        public static readonly UnitPrefix c = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[10];
+        public static readonly UnitPrefix m = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[11];
+        public static readonly UnitPrefix my = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[12];
+        public static readonly UnitPrefix n = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[13];
+        public static readonly UnitPrefix p = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[14];
+        public static readonly UnitPrefix f = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[15];
+        public static readonly UnitPrefix a = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[16];
+        public static readonly UnitPrefix z = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[17];
+        public static readonly UnitPrefix y = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[18];
+    }
+
     public static partial class SI
     {
         /* SI base units */
@@ -1865,7 +1934,7 @@ namespace PhysicalMeasure
         public static readonly PhysicalUnit C = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[7];
         public static readonly PhysicalUnit V = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[8];
         public static readonly PhysicalUnit F = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[9];
-        public static readonly PhysicalUnit ohm = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[10];
+        public static readonly PhysicalUnit Ohm = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[10];
         public static readonly PhysicalUnit S = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[11];
         public static readonly PhysicalUnit Wb = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[12];
         public static readonly PhysicalUnit T = (PhysicalUnit)Physics.SI_Units.NamedDerivedUnits[13];
@@ -1882,5 +1951,89 @@ namespace PhysicalMeasure
     }
 
     #endregion Physical Unit System Statics
+}
+
+namespace PhysicalMeasure.Constants
+{
+
+    #region Physical Constants Statics
+
+    public static partial class Constants
+    {
+        /* http://en.wikipedia.org/wiki/Physical_constant 
+         
+            Table of universal constants
+                Quantity                            Symbol      Value                               Relative Standard Uncertainty 
+                speed of light in vacuum            c           299792458 m·s−1                     defined 
+                Newtonian constant of gravitation   G           6.67428(67)×10−11 m3·kg−1·s−2       1.0 × 10−4 
+                Planck constant                     h           6.62606896(33) × 10−34 J·s          5.0 × 10−8 
+                reduced Planck constant             h/2 pi      1.054571628(53) × 10−34 J·s         5.0 × 10−8 
+         */
+        public static readonly PhysicalQuantity c = new PhysicalQuantity(299792458, SI.m / SI.s);
+        public static readonly PhysicalQuantity G = new PhysicalQuantity(6.67428E-11, (SI.m^3) / (SI.kg * (SI.s ^ 2)));
+        public static readonly PhysicalQuantity h = new PhysicalQuantity(6.62E-34, SI.J * SI.s);
+        public static readonly PhysicalQuantity h_bar = new PhysicalQuantity(1.054571628 - 34, SI.J * SI.s);
+
+        /*
+            Table of electromagnetic constants
+                Quantity                            Symbol      Value                           (SI units)              Relative Standard Uncertainty 
+                magnetic constant 
+                     (vacuum permeability)          my0         4π × 10−7                       N·A−2 
+                                                                   = 1.256637061× 10−6          N·A−2                   defined 
+                electric constant 
+                     (vacuum permittivity)          epsilon0    8.854187817×10−12               F·m−1                   defined 
+                characteristic impedance of vacuum  Z0          376.730313461                   Ω                       defined 
+                Coulomb's constant                  ke          8.987551787×109                 N·m²·C−2                defined 
+                elementary charge                   e           1.602176487×10−19               C                       2.5 × 10−8 
+                Bohr magneton                       myB         9.27400915(23)×10−24            J·T−1                   2.5 × 10−8 
+                conductance quantum                 G0          7.7480917004(53)×10−5           S                       6.8 × 10−10 
+                inverse conductance quantum         1/G0        12906.4037787(88)               Ω                       6.8 × 10−10 
+                Josephson constant                  KJ          4.83597891(12)×1014             Hz·V−1                  2.5 × 10−8 
+                magnetic flux quantum               phi0        2.067833667(52)×10−15           Wb                      2.5 × 10−8 
+                nuclear magneton                    myN         5.05078343(43)×10−27            J·T−1                   8.6 × 10−8 
+                von Klitzing constant               RK          25812.807557(18)                Ω                       6.8 × 10−10 
+        */
+        public static readonly PhysicalQuantity my0 = new PhysicalQuantity(1.256637061E-6, SI.N / (SI.A^2));
+        public static readonly PhysicalQuantity epsilon0 = new PhysicalQuantity(8.854187817E-12, SI.F / SI.m);
+        public static readonly PhysicalQuantity Z0 = new PhysicalQuantity(376.730313461, SI.Ohm);
+        public static readonly PhysicalQuantity ke = new PhysicalQuantity(8.987551787E9, SI.N * (SI.m^2) /(SI.C^2));
+        public static readonly PhysicalQuantity e = new PhysicalQuantity(1.602176487E-19, SI.C);
+        public static readonly PhysicalQuantity myB = new PhysicalQuantity(9.27400915E-24, SI.J / SI.T);
+        public static readonly PhysicalQuantity G0 = new PhysicalQuantity(7.7480917004E-5, SI.S);
+        public static readonly PhysicalQuantity KJ = new PhysicalQuantity(4.83597891E14, SI.Hz / SI.V);
+        public static readonly PhysicalQuantity phi0 = new PhysicalQuantity(2.067833667E-15, SI.Wb);
+        public static readonly PhysicalQuantity myN = new PhysicalQuantity(5.05078343E-27, SI.J / SI.T);
+        public static readonly PhysicalQuantity RK = new PhysicalQuantity(25812.807557, SI.Ohm);
+
+        /*
+            Table of atomic and nuclear constants
+                Quantity                            Symbol      Value                           (SI units)              Relative Standard Uncertainty 
+                Bohr radius                         a0          5.291772108(18)×10−11           m                       3.3 × 10−9 
+                classical electron radius           re          2.8179402894(58)×10−15          m                       2.1 × 10−9 
+                electron mass                       me          9.10938215(45)×10−31            kg                      5.0 × 10−8 
+                Fermi coupling constant             GF          1.16639(1)×10−5                 GeV−2                   8.6 × 10−6 
+                fine-structure constant             alpha       7.2973525376(50)×10−3                                   6.8 × 10−10 
+                Hartree energy                      Eh          4.35974417(75)×10−18            J                       1.7 × 10−7 
+                proton mass                         mp          1.672621637(83)×10−27           kg                      5.0 × 10−8 
+                quantum of circulation              h2me        3.636947550(24)×10−4            m² s−1                  6.7 × 10−9 
+                Rydberg constant                    Rinf        10973731.568525(73)             m−1                     6.6 × 10−12 
+                Thomson cross section               tcs         6.65245873(13)×10−29            m²                      2.0 × 10−8 
+                weak mixing angle                   ThetaW      0.22215(76)                                             3.4 × 10−3 
+        */
+
+        public static readonly PhysicalQuantity a0 = new PhysicalQuantity(5.291772108E-11, SI.m);
+        public static readonly PhysicalQuantity re = new PhysicalQuantity(2.8179402894E-15, SI.m);
+        public static readonly PhysicalQuantity me = new PhysicalQuantity(9.10938215E-31, SI.kg);
+        public static readonly PhysicalQuantity GF = new PhysicalQuantity(1.16639E-5, (Prefix.G * Constants.e * SI.V) ^ -2);
+        public static readonly PhysicalQuantity alpha = new PhysicalQuantity(7.2973525376E-3, Physics.dimensionless);
+        public static readonly PhysicalQuantity Eh = new PhysicalQuantity(4.35974417E-18, SI.J);
+        public static readonly PhysicalQuantity mp = new PhysicalQuantity(1.672621637E-27, SI.kg);
+        public static readonly PhysicalQuantity h2me = new PhysicalQuantity(3.636947550E-4, (SI.m ^ 2) / SI.s);
+        public static readonly PhysicalQuantity Rinf = new PhysicalQuantity(10973731.568525, SI.m ^ -1);
+        public static readonly PhysicalQuantity tcs = new PhysicalQuantity(6.65245873E-29, SI.m ^ 2);
+        public static readonly PhysicalQuantity ThetaW = new PhysicalQuantity(0.22215, Physics.dimensionless);
+    
+    }
+    #endregion Physical Constants Statics
 
 }
