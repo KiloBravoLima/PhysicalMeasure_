@@ -615,5 +615,37 @@ namespace PhysicalMeasureTest
 
 
         #endregion PhysicalQuantity ToString test
+
+        #region PhysicalQuantity functions test
+
+
+
+        PhysicalQuantity EnergyEquivalentOfMass(PhysicalQuantity mass)
+        {
+            /* Assert. ...(mass.Unit). ... == MeasureKind.Mass); */
+            PhysicalQuantity E = mass * Constants.c.Pow(2);
+            return E;
+        }
+
+        /// <summary>
+        ///A test for PhysicalQuantity 
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalQuantityFunctionTest()
+        {
+            PhysicalQuantity m = new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+
+            PhysicalUnit MeterPrSecond = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
+            PhysicalQuantity c = new PhysicalQuantity(299792458, MeterPrSecond);
+
+            PhysicalQuantity expected = new PhysicalQuantity(0.001 * 299792458 * 299792458, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"));
+
+            PhysicalQuantity E = EnergyEquivalentOfMass(m);
+            Assert.AreEqual(expected, E);
+        }
+
+
+        #endregion PhysicalQuantity functions test
+
     }
 }
