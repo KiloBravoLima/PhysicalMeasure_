@@ -1,7 +1,8 @@
-﻿using PhysicalMeasure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Globalization;
+using PhysicalMeasure;
+using PhysicalMeasure.Constants;
 
 namespace PhysicalMeasureTest
 {
@@ -618,6 +619,23 @@ namespace PhysicalMeasureTest
 
         #region PhysicalQuantity functions test
 
+        ///// <summary>
+        /////A test for PhysicalQuantity 
+        /////</summary>
+        //[TestMethod()]
+        //public void PhysicalQuantityGeVTest()
+        //{
+
+        //    PhysicalQuantity eV = Constants.e * SI.V;
+        //    PhysicalQuantity GeV_ = Prefix.G * (Constants.e * SI.V);
+        //    PhysicalQuantity GeV__ = (Prefix.G * Constants.e) * SI.V;
+        //    PhysicalQuantity GeV = (SI.V * Prefix.G) * Constants.e;
+
+        //    PhysicalQuantity GeVPowMinus2 = GeV ^ -2;
+        //    PhysicalQuantity GF = new PhysicalQuantity(1.16639E-5 * GeVPowMinus2.Value, GeVPowMinus2.Unit);
+
+        //    Assert.IsNotNull(GF);
+        //}
 
 
         PhysicalQuantity EnergyEquivalentOfMass(PhysicalQuantity mass)
