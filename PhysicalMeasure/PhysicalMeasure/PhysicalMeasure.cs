@@ -1545,12 +1545,12 @@ namespace PhysicalMeasure
             return (pq ^ -1) * d;
         }
 
-        public static PhysicalQuantity operator *(IPhysicalQuantity pq, IUnitPrefix up)
+        public static PhysicalQuantity operator *(PhysicalQuantity pq, IUnitPrefix up)
         {
             return new PhysicalQuantity(pq.Value * Math.Pow(10, up.PrefixExponent), pq.Unit);
         }
 
-        public static PhysicalQuantity operator *(IUnitPrefix up, IPhysicalQuantity pq)
+        public static PhysicalQuantity operator *(IUnitPrefix up, PhysicalQuantity pq)
         {
             return new PhysicalQuantity(pq.Value * Math.Pow(10, up.PrefixExponent), pq.Unit);
         }
@@ -2020,11 +2020,12 @@ namespace PhysicalMeasure.Constants
                 Thomson cross section               tcs         6.65245873(13)×10−29            m²                      2.0 × 10−8 
                 weak mixing angle                   ThetaW      0.22215(76)                                             3.4 × 10−3 
         */
-
         public static readonly PhysicalQuantity a0 = new PhysicalQuantity(5.291772108E-11, SI.m);
         public static readonly PhysicalQuantity re = new PhysicalQuantity(2.8179402894E-15, SI.m);
         public static readonly PhysicalQuantity me = new PhysicalQuantity(9.10938215E-31, SI.kg);
+        /**
         public static readonly PhysicalQuantity GF = new PhysicalQuantity(1.16639E-5, (Prefix.G * Constants.e * SI.V) ^ -2);
+        **/
         public static readonly PhysicalQuantity alpha = new PhysicalQuantity(7.2973525376E-3, Physics.dimensionless);
         public static readonly PhysicalQuantity Eh = new PhysicalQuantity(4.35974417E-18, SI.J);
         public static readonly PhysicalQuantity mp = new PhysicalQuantity(1.672621637E-27, SI.kg);
@@ -2032,7 +2033,6 @@ namespace PhysicalMeasure.Constants
         public static readonly PhysicalQuantity Rinf = new PhysicalQuantity(10973731.568525, SI.m ^ -1);
         public static readonly PhysicalQuantity tcs = new PhysicalQuantity(6.65245873E-29, SI.m ^ 2);
         public static readonly PhysicalQuantity ThetaW = new PhysicalQuantity(0.22215, Physics.dimensionless);
-    
     }
     #endregion Physical Constants Statics
 

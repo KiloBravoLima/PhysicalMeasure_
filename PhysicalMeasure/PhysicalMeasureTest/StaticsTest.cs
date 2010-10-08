@@ -244,7 +244,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitFromNameTestCadela()
         {
-            String NameStr = "cadela";
+            String NameStr = "candela";
             IUnit expected = (IUnit)(Physics.SI_Units.BaseUnits[6]);
             IUnit actual;
             actual = Physics.UnitFromName(NameStr);
