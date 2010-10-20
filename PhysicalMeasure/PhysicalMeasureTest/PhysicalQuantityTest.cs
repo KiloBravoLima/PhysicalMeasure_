@@ -619,23 +619,20 @@ namespace PhysicalMeasureTest
 
         #region PhysicalQuantity functions test
 
-        ///// <summary>
-        /////A test for PhysicalQuantity 
-        /////</summary>
-        //[TestMethod()]
-        //public void PhysicalQuantityGeVTest()
-        //{
+        /// <summary>
+        ///A test for PhysicalQuantity 
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalQuantityGeVTest()
+        {
 
-        //    PhysicalQuantity eV = Constants.e * SI.V;
-        //    PhysicalQuantity GeV_ = Prefix.G * (Constants.e * SI.V);
-        //    PhysicalQuantity GeV__ = (Prefix.G * Constants.e) * SI.V;
-        //    PhysicalQuantity GeV = (SI.V * Prefix.G) * Constants.e;
+            PhysicalQuantity GeV = Prefix.G * Constants.e * SI.V;
 
-        //    PhysicalQuantity GeVPowMinus2 = GeV ^ -2;
-        //    PhysicalQuantity GF = new PhysicalQuantity(1.16639E-5 * GeVPowMinus2.Value, GeVPowMinus2.Unit);
+            PhysicalQuantity GeVPowMinus2 = GeV ^ -2;
+            PhysicalQuantity GF = new PhysicalQuantity(1.16639E-5 * GeVPowMinus2.Value, GeVPowMinus2.Unit);
 
-        //    Assert.IsNotNull(GF);
-        //}
+            Assert.IsNotNull(GF);
+        }
 
 
         PhysicalQuantity EnergyEquivalentOfMass(PhysicalQuantity mass)
