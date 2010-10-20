@@ -400,6 +400,89 @@ namespace PhysicalMeasureTest
 
         #endregion PhysicalQuantity.Parse test
 
+        #region PhysicalQuantity compare operation test
+
+        /// <summary>
+        ///A test for == operator
+        ///</summary>
+        [TestMethod()]
+        public void CompareOperatorEqualsTest()
+        {
+            PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+            PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+
+            PhysicalQuantity expected = new PhysicalQuantity(456.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+
+            IPhysicalQuantity actual = pg1 + pg2;
+
+            Assert.IsTrue(expected == actual);
+        }
+
+        /// <summary>
+        ///A test for != operator
+        ///</summary>
+        [TestMethod()]
+        public void CompareOperatorNotEqualsTest()
+        {
+            PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+            PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+
+            PhysicalQuantity expected = new PhysicalQuantity(456.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+
+            IPhysicalQuantity actual = pg1 + pg2;
+
+            Assert.IsFalse(expected != actual);
+        }
+
+        /// <summary>
+        ///A test for < operator
+        ///</summary>
+        [TestMethod()]
+        public void CompareOperatorLessTest()
+        {
+            PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+            PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+
+            Assert.IsTrue(pg1 < pg2);
+        }
+
+        /// <summary>
+        ///A test for <= operator
+        ///</summary>
+        [TestMethod()]
+        public void CompareOperatorLessOrEqualsTest()
+        {
+            PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+            PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+
+            Assert.IsTrue(pg1 <= pg2);
+        }
+
+        /// <summary>
+        ///A test for > operator
+        ///</summary>
+        [TestMethod()]
+        public void CompareOperatorLargerTest()
+        {
+            PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+            PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+
+            Assert.IsFalse(pg1 > pg2);
+        }
+
+        /// <summary>
+        ///A test for > operator
+        ///</summary>
+        [TestMethod()]
+        public void CompareOperatorLargerOrEqualTest()
+        {
+            PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+            PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+
+            Assert.IsFalse(pg1 > pg2);
+        }
+
+        #endregion PhysicalQuantity compare operation test
 
         #region PhysicalQuantity math test
 
