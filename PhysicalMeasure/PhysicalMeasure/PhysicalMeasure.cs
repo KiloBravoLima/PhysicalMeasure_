@@ -602,27 +602,30 @@ namespace PhysicalMeasure
             return this / u2;
         }
 
+        //public static PhysicalQuantity operator *(PhysicalUnit u, IPhysicalQuantity pq)
+        //{
+        //    IPhysicalQuantity pq2 = u * pq.Unit;
+        //    return new PhysicalQuantity(pq.Value * pq2.Value, (PhysicalUnit)pq.Unit * pq2.Unit);
+        //}
 
-        public static PhysicalQuantity operator *(PhysicalUnit u, IPhysicalQuantity pq)
-        {
-            IPhysicalQuantity pq2 = u * pq.Unit;
-            return new PhysicalQuantity(pq.Value * pq2.Value, (PhysicalUnit)pq.Unit * pq2.Unit);
-        }
-
-        public static PhysicalQuantity operator /(PhysicalUnit u, IPhysicalQuantity pq)
-        {
-            IPhysicalQuantity pq2 = u / pq.Unit;
-            return new PhysicalQuantity(pq.Value / pq2.Value, (PhysicalUnit)pq.Unit / pq2.Unit);
-        }
+        //public static PhysicalQuantity operator /(PhysicalUnit u, IPhysicalQuantity pq)
+        //{
+        //    IPhysicalQuantity pq2 = u / pq.Unit;
+        //    return new PhysicalQuantity(pq.Value / pq2.Value, (PhysicalUnit)pq.Unit / pq2.Unit);
+        //}
 
         public IPhysicalQuantity Multiply(IPhysicalQuantity pq)
         {
-            return this * pq;
+            // return this * pq;
+            IPhysicalQuantity pq2 = this * pq.Unit;
+            return new PhysicalQuantity(pq.Value * pq2.Value, (PhysicalUnit)pq.Unit * pq2.Unit);
         }
 
         public IPhysicalQuantity Divide(IPhysicalQuantity pq)
         {
-            return this / pq;
+            // return this / pq;
+            IPhysicalQuantity pq2 = this / pq.Unit;
+            return new PhysicalQuantity(pq.Value / pq2.Value, (PhysicalUnit)pq.Unit / pq2.Unit);
         }
 
 
@@ -1545,6 +1548,26 @@ namespace PhysicalMeasure
             return (pq ^ -1) * d;
         }
 
+        public static PhysicalQuantity operator *(PhysicalQuantity pq, IPhysicalUnit pu)
+        {
+            return pq * new PhysicalQuantity(1, pu);
+        }
+
+        public static PhysicalQuantity operator /(PhysicalQuantity pq, IPhysicalUnit pu)
+        {
+            return pq / new PhysicalQuantity(1, pu);
+        }
+
+        public static PhysicalQuantity operator *(IPhysicalUnit pu, PhysicalQuantity pq)
+        {
+            return pq * new PhysicalQuantity(1, pu);
+        }
+
+        public static PhysicalQuantity operator /(IPhysicalUnit pu, PhysicalQuantity pq)
+        {
+            return pq / new PhysicalQuantity(1, pu);
+        }
+
         public static PhysicalQuantity operator *(PhysicalQuantity pq, IUnitPrefix up)
         {
             return new PhysicalQuantity(pq.Value * Math.Pow(10, up.PrefixExponent), pq.Unit);
@@ -1622,7 +1645,6 @@ namespace PhysicalMeasure
         {
             return this.Root(exponent);
         }
-      
     }
 
     #endregion Physical Quantity Classes
