@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhysicalMeasure;
+using PhysicalMeasure.Constants;
 
 namespace PhysicalMeasureTest
 {
@@ -439,5 +440,23 @@ namespace PhysicalMeasureTest
         }
       
         #endregion SI unit symbol test
+
+        #region Physical Constants Statics test
+
+        /// <summary>
+        ///A test for the Physical Constants Statics class
+        ///</summary>
+        [TestMethod()]
+        public void CalculateSunlightsTimeToEarth()
+        {
+            PhysicalQuantity distanceSunEarth = new PhysicalQuantity(150E12, SI.m);
+            PhysicalQuantity lightspeed = Constants.c;
+            PhysicalQuantity time = distanceSunEarth / lightspeed;
+
+            PhysicalQuantity expected = new PhysicalQuantity(150E12 / 299792458, SI.s);
+            Assert.AreEqual(expected, time);
+        }
+
+        #endregion Physical Constants Statics test
     }
 }
