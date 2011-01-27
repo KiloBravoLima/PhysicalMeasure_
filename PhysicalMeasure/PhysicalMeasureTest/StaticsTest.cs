@@ -76,6 +76,39 @@ namespace PhysicalMeasureTest
             Assert.AreEqual((int)MeasureKind.Luminous_intensity, 6);
         }
 
+
+        #region SI Unit Prefix symbols test
+
+        /// <summary>
+        ///A test for SI Unit Prefix symbols values
+        ///</summary>
+        [TestMethod()]
+        public void PrefixSymbolValues()
+        {
+            Assert.AreEqual(PhysicalMeasure.Prefix.Y.PrefixValue, 1E24);
+            Assert.AreEqual(PhysicalMeasure.Prefix.Z.PrefixValue, 1E21);
+            Assert.AreEqual(PhysicalMeasure.Prefix.E.PrefixValue, 1E18);
+            Assert.AreEqual(PhysicalMeasure.Prefix.P.PrefixValue, 1E15);
+            Assert.AreEqual(PhysicalMeasure.Prefix.T.PrefixValue, 1E12);
+            Assert.AreEqual(PhysicalMeasure.Prefix.G.PrefixValue, 1E9);
+            Assert.AreEqual(PhysicalMeasure.Prefix.M.PrefixValue, 1E6);
+            Assert.AreEqual(PhysicalMeasure.Prefix.K.PrefixValue, 1E3);
+            Assert.AreEqual(PhysicalMeasure.Prefix.H.PrefixValue, 1E2);
+            Assert.AreEqual(PhysicalMeasure.Prefix.D.PrefixValue, 1E1);
+            Assert.AreEqual(PhysicalMeasure.Prefix.d.PrefixValue, 1E-1);
+            Assert.AreEqual(PhysicalMeasure.Prefix.c.PrefixValue, 1E-2);
+            Assert.AreEqual(PhysicalMeasure.Prefix.m.PrefixValue, 1E-3);
+            Assert.AreEqual(PhysicalMeasure.Prefix.my.PrefixValue, 1E-6);
+            Assert.AreEqual(PhysicalMeasure.Prefix.n.PrefixValue, 1E-9);
+            Assert.AreEqual(PhysicalMeasure.Prefix.p.PrefixValue, 1E-12);
+            Assert.AreEqual(PhysicalMeasure.Prefix.f.PrefixValue, 1E-15);
+            Assert.AreEqual(PhysicalMeasure.Prefix.a.PrefixValue, 1E-18);
+            Assert.AreEqual(PhysicalMeasure.Prefix.z.PrefixValue, 1E-21);
+            Assert.AreEqual(PhysicalMeasure.Prefix.y.PrefixValue, 1E-24);
+        }
+
+        #endregion SI Unit Prefix symbols test
+
         #region Units must differ test
 
         /// <summary>
