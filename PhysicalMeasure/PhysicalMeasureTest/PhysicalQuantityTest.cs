@@ -400,6 +400,69 @@ namespace PhysicalMeasureTest
 
         #endregion PhysicalQuantity.Parse test
 
+
+        #region PhysicalQuantity ConvertTo test
+
+        /// <summary>
+        ///A test for ConvertTo()
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalQuantityOfConvertibleUnitBasedOnDerivedUnitConvertToDerivedUnit_kWh()
+        {
+            PhysicalUnit kWh = (PhysicalUnit)new ConvertibleUnit("kiloWattHour", "kWh", SI.J, new ScaledValueConversion(1.0/3600000)); /* [kWh] = 1/3600000 * [J] */
+            PhysicalQuantity conso = new PhysicalQuantity(1, kWh);
+            IPhysicalQuantity actual = conso.ConvertTo(SI.J);
+
+            PhysicalQuantity expected = new PhysicalQuantity(3600000, SI.J);
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for ConvertTo()
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalQuantityOfConvertibleUnitBasedOnDerivedUnitConvertToDerivedUnit_Wh()
+        {
+            PhysicalUnit Wh = (PhysicalUnit)new ConvertibleUnit("WattHour", "Wh", SI.J, new ScaledValueConversion(1.0/3600)); /* [Wh] = 1/3600 * [J] */
+            PhysicalQuantity E_1 = new PhysicalQuantity(1, Prefix.K * Wh);
+            PhysicalQuantity E_2 = new PhysicalQuantity(0.001, Prefix.M * Wh);
+            IPhysicalQuantity actual_1 = E_1.ConvertTo(SI.J);
+            IPhysicalQuantity actual_2 = E_2.ConvertTo(SI.J);
+
+            PhysicalQuantity expected = new PhysicalQuantity(3600000, SI.J);
+
+            Assert.AreEqual(expected, actual_1);
+            Assert.AreEqual(expected, actual_2);
+        }
+
+
+        /// <summary>
+        ///A test for ConvertTo()
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalQuantityOfConvertibleUnitBasedOnConvertibleUnitConvertToDerivedUnit()
+        {
+            /* It is NOT encuraged to do like this. Just for test */
+            PhysicalUnit Wh = (PhysicalUnit)new ConvertibleUnit("WattHour", "Wh", SI.J, new ScaledValueConversion(1.0 / 3600)); /* [Wh] = 1/3600 * [J] */
+            PhysicalUnit kWh = (PhysicalUnit)new ConvertibleUnit("kiloWattHour", "kWh", Wh, new ScaledValueConversion(1.0 / 1000)); /* [kWh] = 1/1000 * [Wh] */
+            PhysicalUnit MWh = (PhysicalUnit)new ConvertibleUnit("MegaWattHour", "MWh", kWh, new ScaledValueConversion(1.0 / 1000)); /* [MWh] = 1/1000 * [kWh] */
+            PhysicalQuantity E_1 = new PhysicalQuantity(1000, Wh);
+            PhysicalQuantity E_2 = new PhysicalQuantity(1, kWh);
+            PhysicalQuantity E_3 = new PhysicalQuantity(0.001, MWh);
+            IPhysicalQuantity actual_1 = E_1.ConvertTo(SI.J);
+            IPhysicalQuantity actual_2 = E_2.ConvertTo(SI.J);
+            IPhysicalQuantity actual_3 = E_3.ConvertTo(SI.J);
+
+            PhysicalQuantity expected = new PhysicalQuantity(3600000, SI.J);
+
+            Assert.AreEqual(expected, actual_1);
+            Assert.AreEqual(expected, actual_2);
+            Assert.AreEqual(expected, actual_3);
+        }
+
+        #endregion PhysicalQuantity ConvertTo test
+
         #region PhysicalQuantity compare operation test
 
         /// <summary>
