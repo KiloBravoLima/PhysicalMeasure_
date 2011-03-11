@@ -1808,17 +1808,17 @@ namespace PhysicalMeasure
                                                                                     new BaseUnit(MGD_Units, (SByte)MeasureKind.Luminous_intensity, "candela", "cd") } );
 
         public static readonly UnitSystem MGM_Units = new UnitSystem("MGM", UnitPrefixes,
-                                                                  new BaseUnit[] {  new BaseUnit(MGD_Units, (SByte)MeasureKind.Length, "meter", "m"), 
-                                                                                    new BaseUnit(MGD_Units, (SByte)MeasureKind.Mass, "kilogram", "Kg"), 
+                                                                  new BaseUnit[] {  new BaseUnit(MGM_Units, (SByte)MeasureKind.Length, "meter", "m"), 
+                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.Mass, "kilogram", "Kg"), 
 
-                                                                                /*  new BaseUnit(MGD_Units, (SByte)MeasureKind.Time, "second", "s"), */
-                                                                                /*  new BaseUnit(MGD_Units, (SByte)MeasureKind.Time, "day", "d"), */
-                                                                                    new BaseUnit(MGD_Units, (SByte)MeasureKind.Time, "moment", "ø"), 
+                                                                                /*  new BaseUnit(MGM_Units, (SByte)MeasureKind.Time, "second", "s"), */
+                                                                                /*  new BaseUnit(MGM_Units, (SByte)MeasureKind.Time, "day", "d"), */
+                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.Time, "moment", "ø"), 
 
-                                                                                    new BaseUnit(MGD_Units, (SByte)MeasureKind.Electric_current, "ampere", "A"), 
-                                                                                    new BaseUnit(MGD_Units, (SByte)MeasureKind.Thermodynamic_temperature, "kelvin", "K"), 
-                                                                                    new BaseUnit(MGD_Units, (SByte)MeasureKind.Amount_of_substance, "mol", "mol"), 
-                                                                                    new BaseUnit(MGD_Units, (SByte)MeasureKind.Luminous_intensity, "candela", "cd") } );
+                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.Electric_current, "ampere", "A"), 
+                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.Thermodynamic_temperature, "kelvin", "K"), 
+                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.Amount_of_substance, "mol", "mol"), 
+                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.Luminous_intensity, "candela", "cd") });
 
 
         public static UnitSystem[] UnitSystems = new UnitSystem[] { SI_Units, CGS_Units, MGD_Units, MGM_Units };
