@@ -73,7 +73,8 @@ namespace PhysicalMeasureTest
         {
             PhysicalUnit u = (PhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]);
 
-            String expected = "SI.Kg";
+            //String expected = "SI.Kg";
+            String expected = "Kg";
 
             String actual = u.ToString();
 
@@ -88,7 +89,8 @@ namespace PhysicalMeasureTest
         {
             PhysicalUnit u = (PhysicalUnit)(PhysicalMeasure.Physics.SI_Units.NamedDerivedUnits[5]);
 
-            String expected = "SI.J";
+            //String expected = "SI.J";
+            String expected = "J";
 
             String actual = u.ToString();
 
@@ -103,7 +105,8 @@ namespace PhysicalMeasureTest
         {
             PhysicalUnit MeterPrSecond2 = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
 
-            String expected = "SI.ms-2";
+            //String expected = "SI.m·s-2";
+            String expected = "m·s-2";
 
             String actual = MeterPrSecond2.ToString();
 
@@ -387,16 +390,46 @@ namespace PhysicalMeasureTest
         ///A test for Parse
         ///</summary>
         [TestMethod()]
-        public void ParseTestMilliGram()
+        public void TestMilliGramParseString()
         {
             String s = "123.000 mg"; 
             NumberStyles styles = NumberStyles.Float;
             IFormatProvider provider = NumberFormatInfo.InvariantInfo;
-            IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)])));
+            //IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)])));
+            //IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(123, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(-3, PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)], 1)))));
+            IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(123, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(-3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("g"), 1)))));
             IPhysicalQuantity actual;
             actual = PhysicalQuantity.Parse(s, styles, provider);
             Assert.AreEqual(expected, actual);
         }
+
+        /// <summary>
+        ///A test for Parse
+        ///</summary>
+        [TestMethod()]
+        public void TestMilligramEqualKilogram()
+        {
+            //String s = "123.000 mg";
+            IPhysicalQuantity InKiloGram = (IPhysicalQuantity)(new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]))); // In kilogram
+            IPhysicalQuantity InMilliGram = (IPhysicalQuantity)(new PhysicalQuantity(123, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(-3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("g"), 1))))); // In milli gram
+
+            Assert.AreEqual(InKiloGram, InMilliGram);
+        }
+
+        /// <summary>
+        ///A test for equal
+        ///</summary>
+        [TestMethod()]
+        public void TestMilliKelvinEqualKiloCelcius()
+        {
+            //String s = "594.15 mK";
+            //String s = "3.21 K°C";
+            IPhysicalQuantity InMilliKelvin = (IPhysicalQuantity)(new PhysicalQuantity(321273.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)]))); // In Kelvin
+            IPhysicalQuantity InKiloCelcius = (IPhysicalQuantity)(new PhysicalQuantity(321, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("°C"), 1))))); // In Kilo Celsius
+
+            Assert.AreEqual(InMilliKelvin, InKiloCelcius);
+        }
+
 
         #endregion PhysicalQuantity.Parse test
 
@@ -723,7 +756,8 @@ namespace PhysicalMeasureTest
         {
             PhysicalQuantity pq = new PhysicalQuantity(123.4, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("Kg"));
 
-            String expected = (123.4).ToString()+" SI.Kg";
+            //String expected = (123.4).ToString()+" SI.Kg";
+            String expected = (123.4).ToString(CultureInfo.InvariantCulture) + " Kg";
 
             String actual = pq.ToString();
 
@@ -738,7 +772,8 @@ namespace PhysicalMeasureTest
         {
             PhysicalQuantity pq = new PhysicalQuantity(0.001 * 9.81 * 10, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"));
 
-            String expected = (0.0981).ToString()+" SI.J";
+            //String expected = (0.0981).ToString()+" SI.J";
+            String expected = (0.0981).ToString(CultureInfo.InvariantCulture) + " J";
 
             String actual = pq.ToString();
 
@@ -753,7 +788,8 @@ namespace PhysicalMeasureTest
         {
             PhysicalQuantity pq = new PhysicalQuantity(0.00987654321, new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 }));
 
-            String expected = (0.00987654321).ToString() + " SI.ms-2";
+            //String expected = (0.00987654321).ToString() + " SI.ms-2";
+            String expected = (0.00987654321).ToString(CultureInfo.InvariantCulture) + " m·s-2";
 
             String actual = pq.ToString();
 

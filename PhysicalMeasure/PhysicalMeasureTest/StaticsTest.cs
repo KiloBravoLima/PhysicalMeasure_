@@ -360,8 +360,10 @@ namespace PhysicalMeasureTest
         public void ScaledUnitFromSymbolTestMilliKelvin()
         {
             String ScaledSymbolStr = "mK";
-            IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)])));
-            IPhysicalQuantity actual;
+            //IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)])));
+            //IPhysicalQuantity actual;
+            IPhysicalUnit expected = (IPhysicalUnit)(new CombinedUnit(new PrefixedUnitExponent(-3, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)]), 1)));
+            IPhysicalUnit actual;
             actual = Physics.ScaledUnitFromSymbol(ScaledSymbolStr);
             Assert.AreEqual(expected, actual);
         }
@@ -373,8 +375,11 @@ namespace PhysicalMeasureTest
         public void ScaledUnitFromSymbolTestGram()
         {
             String ScaledSymbolStr = "g";
-            IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)])));
-            IPhysicalQuantity actual;
+            //IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)])));
+            //IPhysicalQuantity actual;
+            //IPhysicalUnit expected = (IPhysicalUnit)(new CombinedUnit(new PrefixedUnitExponent(-3, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]), 1)));
+            IPhysicalUnit expected = (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[0]);
+            IPhysicalUnit actual;
             actual = Physics.SI_Units.ScaledUnitFromSymbol(ScaledSymbolStr);
             Assert.AreEqual(expected, actual);
         }
@@ -386,8 +391,10 @@ namespace PhysicalMeasureTest
         public void ScaledUnitFromSymbolTestKiloGram()
         {
             String ScaledSymbolStr = "Kg";
-            IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(1, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)])));
-            IPhysicalQuantity actual;
+            //IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(1, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)])));
+            //IPhysicalQuantity actual;
+            IPhysicalUnit expected = (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]);
+            IPhysicalUnit actual;
             actual = Physics.ScaledUnitFromSymbol(ScaledSymbolStr);
             Assert.AreEqual(expected, actual);
         }
@@ -401,11 +408,11 @@ namespace PhysicalMeasureTest
         ///A test for convertible unit Celsius
         ///</summary>
         [TestMethod()]
-        public void ConvertibleUnitTestCelsius()
+        public void ConvertibleUnitTestCelsiusParseString()
         {
             String ConvertibleUnitQuantityStr = "-173 °C";
 
-            IPhysicalQuantity expected = new PhysicalQuantity(100+0.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)]));
+            IPhysicalQuantity expected = new PhysicalQuantity(-173, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[1])); // °C
 
             IPhysicalQuantity actual   = PhysicalQuantity.Parse(ConvertibleUnitQuantityStr);
 
@@ -413,19 +420,45 @@ namespace PhysicalMeasureTest
         }
 
         /// <summary>
+        ///A test for convertible unit Celsius
+        ///</summary>
+        [TestMethod()]
+        public void ConvertibleUnitTestCelsiusEqualsKelvin()
+        {
+            IPhysicalQuantity InCelcius = new PhysicalQuantity(-173, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[1])); // °C
+            IPhysicalQuantity InKelvin = new PhysicalQuantity(100.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)])); // K
+
+            Assert.AreEqual(InCelcius, InKelvin);
+        }
+
+        /// <summary>
         ///A test for convertible unit gram
         ///</summary>
         [TestMethod()]
-        public void ConvertibleUnitTestGram()
+        public void ConvertibleUnitTestGramParseString()
         {
             String ConvertibleUnitQuantityStr = "123 g";
 
-            IPhysicalQuantity expected = new PhysicalQuantity(0.123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+            IPhysicalQuantity expected = new PhysicalQuantity(123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[0]));
 
             IPhysicalQuantity actual = PhysicalQuantity.Parse(ConvertibleUnitQuantityStr);
 
             Assert.AreEqual(expected, actual);
         }
+
+
+        /// <summary>
+        ///A test for convertible unit gram
+        ///</summary>
+        [TestMethod()]
+        public void ConvertibleUnitTestGramEqualsKilogram()
+        {
+            IPhysicalQuantity InGram = new PhysicalQuantity(123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[0]));
+            IPhysicalQuantity InKilogram = new PhysicalQuantity(0.123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
+
+            Assert.AreEqual(InGram, InKilogram);
+        }
+
 
         #endregion Convertible unit test
 
@@ -447,6 +480,12 @@ namespace PhysicalMeasureTest
 
             PhysicalQuantity E = m * g * h;
 
+            double ENumProd = (0.001 * 9.81 * 10);
+            PhysicalUnit EUnitProd = (PhysicalUnit)(SI.g * MeterPerSecond2 * SI.m).Unit;
+
+            PhysicalQuantity Eexpected = new PhysicalQuantity(ENumProd, EUnitProd);
+            Assert.AreEqual(Eexpected, E);
+
             PhysicalQuantity v = (2 * E / m) % 2; /* OBS! The '%' operator is used for root. "% 2" is square root, */
 
             PhysicalUnit MeterPerSecond = (PhysicalUnit)(SI.m / SI.s).Unit;
@@ -463,7 +502,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void CalculateEnergyIn1Gram()
         {
-            PhysicalQuantity m = new PhysicalQuantity(0.001, SI.kg);
+            PhysicalQuantity m = new PhysicalQuantity(0.001, SI.Kg);
             PhysicalQuantity c = new PhysicalQuantity(299792458, SI.m / SI.s);
 
             PhysicalQuantity E = m * c.Pow(2);
