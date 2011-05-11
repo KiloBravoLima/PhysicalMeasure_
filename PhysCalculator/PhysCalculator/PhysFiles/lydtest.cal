@@ -1,0 +1,4 @@
+// Test at konvert 
+set lydhast = 340 ms-1
+set lydhastKmt = lydhast [ Km/t ]
+
