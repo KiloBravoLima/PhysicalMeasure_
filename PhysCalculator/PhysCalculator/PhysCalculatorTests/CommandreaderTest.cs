@@ -1,6 +1,7 @@
-﻿using PhysCalc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using CommandParser;
+using PhysicalCalculator;
 
 namespace PhysCalculatorTests
 {
@@ -124,12 +125,12 @@ namespace PhysCalculatorTests
         ///A test for GetFile
         ///</summary>
         [TestMethod()]
-        public void GetFileTest_FileNotFound()
+        public void GetAccessorTest_AccessorNotFound()
         {
             string[] args = { };
             Commandreader target = new Commandreader(args);
             string actual;
-            actual = target.GetFile();
+            actual = target.Accessor();
             Assert.IsNull(actual);
         }
 
@@ -137,13 +138,13 @@ namespace PhysCalculatorTests
         ///A test for GetFile
         ///</summary>
         [TestMethod()]
-        public void GetFileTest_FileFound()
+        public void GetAccessorTest_AccessorFound()
         {
             string[] args = { "read test" };
             Commandreader target = new Commandreader(args);
-            string expected = null;
+            string expected = "Command list";
             string actual;
-            actual = target.GetFile();
+            actual = target.Accessor();
             Assert.AreEqual(expected, actual);
         }
 
@@ -156,7 +157,7 @@ namespace PhysCalculatorTests
             Commandreader target = new Commandreader();
             bool expected = false; 
             bool actual;
-            actual = target.HasFile();
+            actual = target.HasAccessor();
             Assert.AreEqual(expected, actual);
         }
 
@@ -168,9 +169,9 @@ namespace PhysCalculatorTests
         {
             string[] args = { "read test" };
             Commandreader target = new Commandreader(args);
-            bool expected = false; 
+            bool expected = true; 
             bool actual;
-            actual = target.HasFile();
+            actual = target.HasAccessor();
             Assert.AreEqual(expected, actual);
         }
 
@@ -206,8 +207,8 @@ namespace PhysCalculatorTests
             string ResultLine = string.Empty; 
             string ResultLineExpected = ""; 
             string expected = null;
-            string actual;
-            actual = target.ReadFromFile(ref ResultLine);
+            string actual = null;
+            //actual = target.ReadFromFile(ref ResultLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
         }
@@ -220,9 +221,9 @@ namespace PhysCalculatorTests
         {
             Commandreader target = new Commandreader(); 
             string filename = "testfilename";
-            target.SetFile(filename);
+            target.AddFile(filename);
             string expected = "testfilename";
-            string actual = target.GetFile();
+            string actual = target.Accessor();
             Assert.AreEqual(expected, actual);
         }
 

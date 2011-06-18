@@ -1,8 +1,10 @@
-﻿using PhysCalc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using PhysicalMeasure;
 using System.Collections.Generic;
+using PhysicalMeasure;
+using CommandParser;
+using PhysicalCalculator;
+
 
 namespace PhysCalculatorTests
 {
@@ -118,8 +120,9 @@ namespace PhysCalculatorTests
         {
             PhysCalculator target = new PhysCalculator();
             string CommandLine = "Print 13 g + 99.987 Kg - 10 mg";
-            string ResultLine = string.Empty; 
-            string ResultLineExpected = "99.99999 Kg"; 
+            string ResultLine = string.Empty;
+            //string ResultLineExpected = "99.99999 Kg"; 
+            string ResultLineExpected = "99999.99 g"; 
             bool expected = true; 
             bool actual;
             actual = target.Command(CommandLine, out ResultLine);
@@ -156,7 +159,8 @@ namespace PhysCalculatorTests
             string CommandLine = "// test of comment"; 
             string CommandLineExpected = string.Empty; 
             string ResultLine = string.Empty;
-            string ResultLineExpected = "// test of comment"; 
+            //string ResultLineExpected = "// test of comment"; 
+            string ResultLineExpected = string.Empty;
             bool expected = true; 
             bool actual;
             actual = target.CommandComment(ref CommandLine, ref ResultLine);
@@ -189,10 +193,10 @@ namespace PhysCalculatorTests
                     +"    Read <filename>"; 
             ***/
             List<String> ResultLineExpected = new List<String>();
-            ResultLineExpected.Add("Read <filename>");
+            ResultLineExpected.Add("Include <filename>");
             ResultLineExpected.Add("Save <filename>");
-            ResultLineExpected.Add("Set <varname> = <expression>");
-            ResultLineExpected.Add("Print <expression> [, <expression> ]*");
+            ResultLineExpected.Add("Set <varname> [ '=' ] <expression> [',' <varname> [ '=' ] <expression> ]*");
+            ResultLineExpected.Add("[ Print ] <expression> [',' <expression> ]*");
             ResultLineExpected.Add("List");
             ResultLineExpected.Add("Store <varname>");
             ResultLineExpected.Add("Remove <varname>");
@@ -232,7 +236,7 @@ namespace PhysCalculatorTests
             CommandLine = string.Empty; 
             CommandLineExpected = string.Empty; 
             ResultLine = string.Empty;
-            ResultLineExpected = "varname : 12 m2·Kg·s-2\r\n";
+            ResultLineExpected = " Global namespace\r\nvar varname = 12 m2·Kg·s-2";
             expected = true;
             actual = target.CommandList(ref CommandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
@@ -247,10 +251,10 @@ namespace PhysCalculatorTests
         public void CommandPrintTest()
         {
             PhysCalculator target = new PhysCalculator();
-            string CommandLine = "123.456 J·S·Ω/m"; 
+            string CommandLine = "123 J·S·Ω/m + 0.456 m·Kg·s-2"; 
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = "123.456 m·Kg·s-2"; 
+            string ResultLineExpected = "123.456 J·S·Ω/m"; 
             bool expected = true; 
             bool actual;
             actual = target.CommandPrint(ref CommandLine, ref ResultLine);
@@ -288,7 +292,7 @@ namespace PhysCalculatorTests
             string CommandLine = "varname"; 
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = "Variable 'varname' not know";
+            string ResultLineExpected = "'varname' not known";
             bool expected = false; 
             bool actual;
             actual = target.CommandRemove(ref CommandLine, ref ResultLine);
@@ -354,7 +358,7 @@ namespace PhysCalculatorTests
             string CommandLine = "varname = 3 N * 4 m";
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = "12 m2·Kg·s-2";
+            string ResultLineExpected = "varname = 12 m2·Kg·s-2";
             bool expected = true; 
             bool actual;
             actual = target.CommandSet(ref CommandLine, ref ResultLine);
@@ -507,12 +511,13 @@ namespace PhysCalculatorTests
 
             IPhysicalQuantity VarValue;
             IPhysicalQuantity VarValueExpected = new PhysicalQuantity(340, SI.m/SI.s);
-            bool GetVarRes = target.VariableGet("SoundSpeed", out VarValue);
+            String ResultLine = null;
+            bool GetVarRes = target.VariableGet(target.CurrentContext, "SoundSpeed", out VarValue, ref ResultLine);
             Assert.IsTrue(GetVarRes);
             Assert.AreEqual<IPhysicalQuantity>( VarValueExpected, VarValue);
       
             VarValueExpected = new PhysicalQuantity(1224, new CombinedUnit() *  new PrefixedUnitExponent(Prefix.K.PrefixExponent, SI.m, 1) /SI.h);
-            GetVarRes = target.VariableGet("SoundSpeedInKmPrHour", out VarValue);
+            GetVarRes = target.VariableGet(target.CurrentContext, "SoundSpeedInKmPrHour", out VarValue, ref ResultLine);
             Assert.IsTrue(GetVarRes);
             Assert.AreEqual<IPhysicalQuantity>( VarValueExpected, VarValue);
         }
@@ -637,8 +642,9 @@ namespace PhysCalculatorTests
             actual = target.VariableSet(VariableName, VariableValue);
             Assert.AreEqual(expected, actual);
 
-            IPhysicalQuantity VariableValueExpected = VariableValue; 
-            actual = target.VariableGet(VariableName, out VariableValue);
+            IPhysicalQuantity VariableValueExpected = VariableValue;
+            String ResultLine = null;
+            actual = target.VariableGet(target.CurrentContext, VariableName, out VariableValue, ref ResultLine);
             Assert.AreEqual(VariableValueExpected, VariableValue);
             Assert.AreEqual(expected, actual);
         }
@@ -657,7 +663,7 @@ namespace PhysCalculatorTests
             actual = target.VariableSet(VariableName, VariableValue);
             Assert.AreEqual(expected, actual);
 
-            actual = target.VariableRemove(VariableName);
+            //actual = target..VariableRemove(VariableName);
             Assert.AreEqual(expected, actual);
         }
 
@@ -685,7 +691,9 @@ namespace PhysCalculatorTests
             PhysCalculator target = new PhysCalculator(); 
             bool expected = true; 
             bool actual;
-            actual = target.VariablesClear();
+            // 
+            actual = target.IdentifiersClear();
+            //actual = target.IdentifiersClear();
             Assert.AreEqual(expected, actual);
         }
     }

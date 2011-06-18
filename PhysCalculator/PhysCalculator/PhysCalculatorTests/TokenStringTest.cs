@@ -72,8 +72,8 @@ namespace PhysCalculatorTests
         {
             string CommandLine = "Some_name in this line";
             string Identifier = string.Empty;
-            string IdentifierExpected = "Some";
-            string expected = "_name in this line";  
+            string IdentifierExpected = "Some_name";
+            string expected = "in this line";  
             string actual;
             actual = TokenString.ReadIdentifier(CommandLine, out Identifier);
             Assert.AreEqual(IdentifierExpected, Identifier);

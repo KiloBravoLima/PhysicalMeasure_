@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Klaus Bo Larsen")]
 [assembly: AssemblyProduct("PhysicalMeasure")]
-[assembly: AssemblyCopyright("Copyright © Klaus Bo Larsen 2010")]
+[assembly: AssemblyCopyright("Copyright © Klaus Bo Larsen 2010-2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
