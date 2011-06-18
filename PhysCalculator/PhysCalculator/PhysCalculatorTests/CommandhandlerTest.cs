@@ -1,6 +1,7 @@
-﻿using PhysCalc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using CommandParser;
+using PhysicalCalculator;
 
 namespace PhysCalculatorTests
 {

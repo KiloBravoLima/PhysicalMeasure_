@@ -1,11 +1,10 @@
-﻿using PhysCalc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using CommandParser;
+using PhysicalCalculator;
 
 namespace PhysCalculatorTests
 {
-    
-    
     /// <summary>
     ///This is a test class for Commandreader_FileAccesserTest and is intended
     ///to contain all Commandreader_FileAccesserTest Unit Tests
@@ -65,28 +64,30 @@ namespace PhysCalculatorTests
 
 
         /// <summary>
-        ///A test for FileAccesser Constructor
+        ///A test for CommandFileAccessor Constructor
         ///</summary>
         [TestMethod()]
         [DeploymentItem("PhysCalc.exe")]
-        public void Commandreader_FileAccesserConstructorTest()
+        public void Commandreader_CommandFileAccessorConstructorTest()
         {
             string FileNameStr = "Filename.ext";
-            FileAccesser target = new FileAccesser(FileNameStr);
+            CommandFileAccessor target = new CommandFileAccessor(FileNameStr);
             Assert.IsNotNull(target);
             Assert.AreEqual(target.FileNameStr, FileNameStr);
         }
 
         /// <summary>
-        ///A test for FileAccesser Constructor
+        ///A test for CommandFileAccessor Constructor
         ///</summary>
         [TestMethod()]
         [DeploymentItem("PhysCalc.exe")]
-        public void Commandreader_FileAccesserConstructorTest1()
+        public void Commandreader_CommandFileAccessorConstructorTest1()
         {
-            FileAccesser target = new FileAccesser();
+            CommandFileAccessor target = new CommandFileAccessor();
             Assert.IsNotNull(target);
-            Assert.IsNull(target.FileNameStr);
+            //Assert.IsNull(target.FileNameStr);
+            string expected = string.Empty;
+            Assert.AreEqual(expected, target.FileNameStr);
         }
 
         /// <summary>
@@ -97,13 +98,13 @@ namespace PhysCalculatorTests
         public void ReadFromFileTest_FileNotExists()
         {
             string FileNameStr = "Filename.ext";
-            FileAccesser target = new FileAccesser(FileNameStr);
+            CommandFileAccessor target = new CommandFileAccessor(FileNameStr);
             string ResultLine = string.Empty; 
             string ResultLineStartExpected = "File '";
             string ResultLineEndExpected = "Filename.ext' not found";
             string expected = string.Empty;
             string actual;
-            actual = target.ReadFromFile(ref ResultLine);
+            actual = target.GetCommandLine(ref ResultLine);
             //Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.IsTrue(ResultLine.StartsWith(ResultLineStartExpected));
             Assert.IsTrue(ResultLine.EndsWith(ResultLineEndExpected));

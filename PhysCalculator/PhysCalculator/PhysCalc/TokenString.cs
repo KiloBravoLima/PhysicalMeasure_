@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Linq;
 
 namespace TokenParser
@@ -61,6 +61,11 @@ namespace TokenParser
 
         #region Class extension parse methodes
 
+        public static Boolean IsKeyword(this String CommandLine, String Keyword)
+        {
+            return CommandLine.Equals(Keyword, StringComparison.OrdinalIgnoreCase);
+        }
+
         public static Boolean StartsWithKeyword(this String CommandLine, String Keyword)
         {
             return CommandLine.StartsWith(Keyword, StringComparison.OrdinalIgnoreCase);
@@ -73,21 +78,32 @@ namespace TokenParser
 
         public static String ReadToken(this String CommandLine, out String Token)
         {
+            int i = PeekToken(CommandLine, out Token);
+            //return CommandLine.Substring(i+1).TrimStart();
+            return CommandLine.Substring(i).TrimStart();
+        }
+
+        public static int PeekToken(this String CommandLine, out String Token)
+        {
             int i = CommandLine.IndexOf(" ");
             if (i < 0)
             {
                 i = CommandLine.Length;
             }
             Token = CommandLine.Substring(0, i);
-            return CommandLine.Substring(i+1).TrimStart();
+            return i;
+        }
+
+        public static Boolean IsIdentifier(this String CommandLine)
+        {
+            return (!String.IsNullOrEmpty(CommandLine)) && (Char.IsLetter(CommandLine[0]) || Char.Equals(CommandLine[0], '_'));
         }
 
         public static String ReadIdentifier(this String CommandLine, out String Identifier)
         {
-            //int i = CommandLine.IndexOfAny([' ', '*', '+'] ");
-            if ((!String.IsNullOrEmpty(CommandLine)) && Char.IsLetter(CommandLine[0]))
+            if (IsIdentifier(CommandLine))
             {
-                int i = CommandLine.TakeWhile(c => Char.IsLetterOrDigit(c)).Count();
+                int i = CommandLine.TakeWhile(c => Char.IsLetterOrDigit(c) || Char.Equals(c, '_')).Count();
                 Identifier = CommandLine.Substring(0, i);
 
                 return CommandLine.Substring(i).TrimStart();
@@ -102,30 +118,4 @@ namespace TokenParser
         #endregion Class extension parse methodes
 
     }
-
-    static class ExtensionList
-    {
-        /*
-        public static T LastOne<T>(this List<T> Me)
-        {
-            return Me.Count > 0 ? Me[Me.Count - 1] : null; 
-        }
-
-        public static void Push<T>(this List<T> Me, T element)
-        {
-            Me.Add(element);
-        }
-
-        public static T Pop<T>(this List<T> Me)
-        {
-            T element = Me.LastOne();
-            if (element != null)
-            {
-                Me.RemoveAt(Me.Count - 1);
-            }
-            return element;
-        }
-        */
-    }
-
 }

@@ -6,11 +6,12 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("PhysCalc")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Physical quantity calculator")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Tieto")]
+
+[assembly: AssemblyCompany("Klaus Bo Larsen")]
 [assembly: AssemblyProduct("PhysCalc")]
-[assembly: AssemblyCopyright("Copyright © Tieto 2011")]
+[assembly: AssemblyCopyright("Copyright © Klaus Bo Larsen 2010-2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,7 +33,9 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+//[assembly: AssemblyVersion("1.0.0.0")]
+//[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyFileVersion("1.0.*")]
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PhysCalculatorTests")]

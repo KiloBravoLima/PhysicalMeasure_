@@ -1,24 +1,27 @@
-﻿using System;
+﻿﻿using System;
 using System.Linq;
 
-namespace PhysCalc
+using CommandParser;
+
+namespace PhysicalCalculator
 {
     class Program
     {
         static void Main(string[] args)
         {
             ResultWriter ConsoleLineWriter = new ResultWriter();
-            Commandreader PhysCommands = new Commandreader(args, ConsoleLineWriter);
-            if (PhysCommands == null)
+            Commandreader CommandLineReader = new Commandreader(args, ConsoleLineWriter);
+            CommandLineReader.ReadFromConsoleWhenEmpty = true;
+            if (CommandLineReader == null)
             {
                 ConsoleLineWriter.WriteLine(String.Format("PhysCalculator Commandreader failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
             }
             else
             {
-                PhysCalculator Calculator = new PhysCalculator(PhysCommands, ConsoleLineWriter);
+                PhysCalculator Calculator = new PhysCalculator(CommandLineReader, ConsoleLineWriter);
                 if (Calculator == null)
                 {
-                    Console.WriteLine(String.Format("PhysCalculator failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
+                    ConsoleLineWriter.WriteLine(String.Format("PhysCalculator failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
                 }
                 else
                 {

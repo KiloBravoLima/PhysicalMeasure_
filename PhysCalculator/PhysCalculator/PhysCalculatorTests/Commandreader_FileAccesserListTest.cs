@@ -1,6 +1,7 @@
-﻿using PhysCalc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using CommandParser;
+using PhysicalCalculator;
 
 namespace PhysCalculatorTests
 {
@@ -65,29 +66,29 @@ namespace PhysCalculatorTests
 
 
         /// <summary>
-        ///A test for FileAccesserList Constructor
+        ///A test for CommandAccessorStack Constructor
         ///</summary>
         [TestMethod()]
         [DeploymentItem("PhysCalc.exe")]
-        public void Commandreader_FileAccesserListConstructorTest()
+        public void Commandreader_CommandAccessorStackConstructorTest()
         {
-            FileAccesserList target = new FileAccesserList();
+            CommandAccessorStack target = new CommandAccessorStack();
             Assert.IsNotNull(target);
         }
 
         /// <summary>
-        ///A test for ReadFromFile
+        ///A test for GetCommandLine
         ///</summary>
         [TestMethod()]
         [DeploymentItem("PhysCalc.exe")]
-        public void ReadFromFileTest()
+        public void GetCommandLineTest()
         {
-            FileAccesserList target = new FileAccesserList(); 
+            CommandAccessorStack target = new CommandAccessorStack(); 
             string ResultLine = "test"; 
             string ResultLineExpected = "test";
             string expected = null;
             string actual;
-            actual = target.ReadFromFile(ref ResultLine);
+            actual = target.GetCommandLine(ref ResultLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
         }
