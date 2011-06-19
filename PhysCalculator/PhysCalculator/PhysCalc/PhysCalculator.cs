@@ -897,6 +897,7 @@ namespace PhysicalCalculator
                         }
                         else
                         {
+                            PrimaryContext = CurrentContext;
                             identifierkind = IdentifierKind.unknown;
                         }
                     }

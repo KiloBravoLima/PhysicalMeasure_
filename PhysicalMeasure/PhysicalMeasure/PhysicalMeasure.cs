@@ -2300,6 +2300,14 @@ namespace PhysicalMeasure
 
                 if (converttounitsystem != null && convertfromunitsystem != converttounitsystem)
                 {   /* Inter unit system conversion */
+
+                    if (physicalquantity.Unit.Kind == UnitKind.ukConvertibleUnit)
+                    {
+                        IConvertibleUnit icu = (IConvertibleUnit)physicalquantity.Unit;
+                        double d = physicalquantity.Value;
+                        physicalquantity = icu.ConvertToSystemUnit(ref d);
+                    }
+
                     IPhysicalQuantity pq = this.ConvertTo(physicalquantity, converttounitsystem);
                     if (pq != null)
                     {
@@ -2448,6 +2456,9 @@ namespace PhysicalMeasure
 
         public IPhysicalQuantity Convert(IPhysicalUnit convertunit, bool backwards = false)
         {
+
+            Debug.Assert(convertunit.Kind == UnitKind.ukBaseUnit || convertunit.Kind == UnitKind.ukDerivedUnit);
+            
             SByte[] FromUnitExponents = convertunit.Exponents; 
 
             double convertproduct = 1;

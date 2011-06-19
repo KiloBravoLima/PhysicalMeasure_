@@ -632,19 +632,21 @@ namespace PhysicalCalculator.Expression
 
             String CommandLineRest = CommandLine.ReadIdentifier(out IdentifierName);
 
-            // Check for custom defined unit
-            Debug.Assert(IdentifierName != null);
-            Boolean UnitIdentifierFound = IdentifierContextLookup(IdentifierName, out Context, out identifierkind, ref ResultLine);
-            if (UnitIdentifierFound && identifierkind == IdentifierKind.unit)
+            if (IdentifierName != null)
             {
-                CommandLine = CommandLineRest; 
-                Boolean OK = Context.UnitGet(IdentifierName, out pu, ref ResultLine);
+                // Check for custom defined unit
+                Debug.Assert(IdentifierName != null);
+                Boolean UnitIdentifierFound = IdentifierContextLookup(IdentifierName, out Context, out identifierkind, ref ResultLine);
+                if (UnitIdentifierFound && identifierkind == IdentifierKind.unit)
+                {
+                    CommandLine = CommandLineRest;
+                    Boolean OK = Context.UnitGet(IdentifierName, out pu, ref ResultLine);
+                }
+                else
+                {   // Standard units
+                    pu = PhysicalUnit.ParseUnit(ref CommandLine);
+                }
             }
-            else
-            {   // Standard units
-                pu = PhysicalUnit.ParseUnit(ref CommandLine);
-            }
-
             return pu;
         }
 
