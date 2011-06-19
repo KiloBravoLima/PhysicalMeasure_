@@ -7,11 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasure", "..\..\Ph
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{023D025A-0D6F-464C-AFC2-A61EE955F6C8}"
 	ProjectSection(SolutionItems) = preProject
-		PhysFiles\Initialise.cal = PhysFiles\Initialise.cal
 		Local.testsettings = Local.testsettings
 		PhysCalculator.vsmdi = PhysCalculator.vsmdi
-		PhysFiles\Test.cal = PhysFiles\Test.cal
-		Test2.cal = Test2.cal
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject

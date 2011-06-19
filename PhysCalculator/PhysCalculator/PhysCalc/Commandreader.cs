@@ -449,9 +449,21 @@ namespace PhysicalCalculator
             } 
         }
 
-        public void WriteLine(string Line)
+        public void Write(string Line)
         {   // Echo Line to output
             if (ResultLineWriter != null) 
+            {   // Echo Line to file output
+                ResultLineWriter.Write(Line);
+            }
+            else
+            {   // Echo Line to console output
+                Console.Write(Line);
+            }
+        }
+
+        public void WriteLine(string Line)
+        {   // Echo Line to output
+            if (ResultLineWriter != null)
             {   // Echo Line to file output
                 ResultLineWriter.WriteLine(Line);
             }
@@ -526,17 +538,17 @@ namespace PhysicalCalculator
                 {   // Echo Command to output
                     if (!String.IsNullOrWhiteSpace(ResultLine))
                     {
-                        ResultLineWriter.WriteLine(ResultLine);
+                        WriteLine(ResultLine);
                         ResultLine = "";
                     }
-                    WriteLine("| ");
+                    Write("| ");
                     WriteLine(CommandLine);
                 }
             }
             else if (ReadFromConsoleWhenEmpty)
             {
                 // Show that we are ready to next command from user
-                ResultLineWriter.Write("|>");
+                Write("|>");
 
                 CommandLine = Console.ReadLine();
             }

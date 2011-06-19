@@ -1,0 +1,16 @@
+// Saved 2011-06-16 09:00:00 to Valuta.cal
+// 
+unit DKR 
+unit SKR = 0.82 DKR
+unit NKR = 0.96 DKR
+unit EUR = 7.59 DKR
+unit BPD = 8.64 DKR
+unit USD = 5.37 DKR
+unit JPY = 8 DKR
+unit THB = 0.24 DKR
+
+set Price1 = 123 DKR
+set Price2 = 321 USD
+
+set Price2InDKR = Price2 [DKR]
+set Price2InEUR = Price2 [EUR]

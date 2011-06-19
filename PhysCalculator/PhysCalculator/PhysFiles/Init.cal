@@ -1,4 +1,0 @@
-set lydhastighed = 340 m/s
-set time = 60 * 60 s
-set lyddistprtime = lydhastighed * time
-list
