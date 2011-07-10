@@ -241,8 +241,11 @@ namespace PhysicalCalculator
                 }
                 try
                 {
-                    FileReader = File.OpenText(FileNameStr);
-
+                    //FileReader = File.OpenText(FileNameStr);
+                    //Encoding FileEncoding = Encoding.UTF8;
+                    //Encoding FileEncoding = Encoding.ASCII;
+                    //Encoding FileEncoding = Encoding.UTF7;
+                    FileReader = new StreamReader(FileNameStr, Encoding.UTF7);
                     if (OutputTracelevel.HasFlag(Tracelevel.fileenterleave))
                     {
                         ResultLine = "Reading from file " + FileNameStr;

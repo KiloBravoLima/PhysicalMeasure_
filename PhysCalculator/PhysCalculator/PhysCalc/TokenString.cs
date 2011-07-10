@@ -79,7 +79,6 @@ namespace TokenParser
         public static String ReadToken(this String CommandLine, out String Token)
         {
             int i = PeekToken(CommandLine, out Token);
-            //return CommandLine.Substring(i+1).TrimStart();
             return CommandLine.Substring(i).TrimStart();
         }
 

@@ -125,7 +125,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = "99999.99 g"; 
             bool expected = true; 
             bool actual;
-            actual = target.Command(CommandLine, out ResultLine);
+            actual = target.Command(ref CommandLine, out ResultLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
         }
@@ -195,8 +195,8 @@ namespace PhysCalculatorTests
             List<String> ResultLineExpected = new List<String>();
             ResultLineExpected.Add("Include <filename>");
             ResultLineExpected.Add("Save <filename>");
-            ResultLineExpected.Add("Set <varname> [ '=' ] <expression> [',' <varname> [ '=' ] <expression> ]*");
-            ResultLineExpected.Add("[ Print ] <expression> [',' <expression> ]*");
+            ResultLineExpected.Add("Set <varname> [ = ] <expression> [, <varname> [ = ] <expression> ]*");
+            ResultLineExpected.Add("[ Print ] <expression> [, <expression> ]*");
             ResultLineExpected.Add("List");
             ResultLineExpected.Add("Store <varname>");
             ResultLineExpected.Add("Remove <varname>");
@@ -226,7 +226,8 @@ namespace PhysCalculatorTests
             string CommandLine = "varname = 3 N * 4 m";
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = "12 m2·Kg·s-2";
+            //string ResultLineExpected = "12 m2·Kg·s-2";
+
             bool expected = true;
             bool actual;
 
@@ -236,12 +237,22 @@ namespace PhysCalculatorTests
             CommandLine = string.Empty; 
             CommandLineExpected = string.Empty; 
             ResultLine = string.Empty;
-            ResultLineExpected = " Global namespace\r\nvar varname = 12 m2·Kg·s-2";
+            //ResultLineExpected = " Global:\r\nvar varname = 12 m2·Kg·s-2";
+            List<String> ResultLinesExpected = new List<String>();
+            ResultLinesExpected.Add("Global:");
+            ResultLinesExpected.Add("var varname = 12 m2·Kg·s-2");
+
             expected = true;
             actual = target.CommandList(ref CommandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
-            Assert.AreEqual(ResultLineExpected, ResultLine);
+            //Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
+
+            for (int i = 0; i < ResultLinesExpected.Count; i++)
+            {
+                Assert.IsTrue(ResultLine.Contains(ResultLinesExpected[i]), "ResultLine expected to contain " + ResultLinesExpected[i]);
+            }
+
         }
 
         /// <summary>

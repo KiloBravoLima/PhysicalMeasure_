@@ -18,8 +18,20 @@ namespace PhysicalCalculator.Expression
 
     public interface IEnviroment
     {
-        Boolean UnitGet(String UnitName, out IPhysicalUnit UnitValue, ref String ResultLine);
+        Tracelevel OutputTracelevel { get; set; } 
+
+        Boolean SetLocalIdentifier(String IdentifierName, INametableItem Item);
+        Boolean RemoveLocalIdentifier(String IdentifierName);
+
+        Boolean FindIdentifier(String IdentifierName, out IEnviroment FoundInContext, out INametableItem Item);
+
+        Boolean SystemSet(String SystemName, out INametableItem SystemItem);
+
+        Boolean UnitSet(IUnitSystem UnitSystem, String UnitName, IPhysicalQuantity UnitValue, out INametableItem UnitItem);
+
         Boolean VariableGet(String VariableName, out IPhysicalQuantity VariableValue, ref String ResultLine);
+        Boolean VariableSet(String VariableName, IPhysicalQuantity VariableValue);
+
         Boolean FunctionFind(String FunctionName, out IFunctionEvaluator functionevaluator);
     }
 
@@ -64,6 +76,7 @@ namespace PhysicalCalculator.Expression
 
         // Delegert types
         // VariableLookup callback
+        public delegate Boolean IdentifierItemLookupFunc(String IdentifierName, out IEnviroment FoundInContext, out INametableItem Item);
         public delegate Boolean IdentifierContextLookupFunc(String IdentifierName, out IEnviroment FoundInContext, out IdentifierKind identifierkind);
         public delegate Boolean QualifiedIdentifierContextLookupFunc(IEnviroment LookInContext, String IdentifierName, out IEnviroment FoundInContext, out IdentifierKind identifierkind);
 
@@ -74,6 +87,7 @@ namespace PhysicalCalculator.Expression
 
 
         // Delegert static globals
+        public static IdentifierItemLookupFunc IdentifierItemLookupCallback;
         public static IdentifierContextLookupFunc IdentifierContextLookupCallback;
         public static QualifiedIdentifierContextLookupFunc QualifiedIdentifierContextLookupCallback;
 
@@ -83,6 +97,18 @@ namespace PhysicalCalculator.Expression
         public static FunctionEvaluateFileReadFunc FunctionEvaluateFileReadCallback;
 
         // static access functions
+
+        public static Boolean IdentifierItemLookup(String IdentifierName, out IEnviroment FoundInContext, out INametableItem Item, ref String ResultLine)
+        {
+            Item = null;
+            FoundInContext = null;
+            if (IdentifierItemLookupCallback != null)
+            {
+                return IdentifierItemLookupCallback(IdentifierName, out FoundInContext, out Item);
+            }
+            return false;
+        }
+
         public static Boolean IdentifierContextLookup(String VariableName, out IEnviroment FoundInContext, out IdentifierKind identifierkind, ref String ResultLine)
         {
             identifierkind = IdentifierKind.unknown;
@@ -355,25 +381,51 @@ namespace PhysicalCalculator.Expression
             if (!String.IsNullOrEmpty(CommandLine))
             {
                 CommandLine = CommandLine.TrimStart();
+                int Operation = 0;
 
-                if (TokenString.TryParseChar('^', ref CommandLine)) 
+                if (TokenString.TryParseChar('^', ref CommandLine))
+                {
+                    Operation = 1;
+                }
+                else
+                if (TokenString.TryParseChar('%', ref CommandLine))
+                {
+                    Operation = -1;
+                }
+
+                if (Operation != 0)
                 {
                     CommandLine = CommandLine.TrimStart();
 
                     Double RealExponent;
-                    Boolean OK = ParseDouble(ref CommandLine, ref ResultLine, out RealExponent);
+                    //Boolean OK = ParseDouble(ref CommandLine, ref ResultLine, out RealExponent);
+                    //Boolean OK = ParseIntExpression(ref CommandLine, ref ResultLine, out IntExponent);
+
+                    IPhysicalQuantity RealExponentPQ = ParseExpression(ref CommandLine, ref ResultLine);
+                    Boolean OK = RealExponentPQ != null && RealExponentPQ.IsDimensionless;
+
                     if (OK)
                     {
                         sbyte IntExponent;
 
-                        if (RealExponent >= 1.0)
+                        RealExponent = RealExponentPQ.Value;
+                        if (Math.Abs(RealExponent) >= 1)
                         {
                             IntExponent = (SByte)Math.Round(RealExponent);
+                        }
+                        else
+                        {
+                            IntExponent = (SByte)Math.Round(1.0 / RealExponent);
+                            Operation = -Operation;
+                        }
+
+                        if (Operation == 1)
+                        {
                             pqRes = pq.Pow(IntExponent);
                         }
                         else
                         {
-                            IntExponent = (SByte)Math.Round(1.0/RealExponent);
+                            Debug.Assert(Operation == -1);
                             pqRes = pq.Rot(IntExponent);
                         }
                     }
@@ -416,14 +468,13 @@ namespace PhysicalCalculator.Expression
                 Boolean IdentifierFound = ParseQualifiedIdentifier(ref CommandLine, ref ResultLine, out IdentifierName, out pq);
                 if (!IdentifierFound)
                 {
-                    Boolean IsFileFunction = false;
                     if (!String.IsNullOrEmpty(IdentifierName) && !String.IsNullOrEmpty(CommandLine) && CommandLine[0] == '(')
                     {
                         string line2 = CommandLine.Substring(1).TrimStart();
                         if (!String.IsNullOrEmpty(line2) && line2[0] == ')')
                         {   // Undefined function without parameters? Maybe it is a .cal file name? 
-                            IsFileFunction = File.Exists(IdentifierName + ".cal");
-                            if (IsFileFunction)
+                            IdentifierFound = File.Exists(IdentifierName + ".cal");
+                            if (IdentifierFound)
                             {
                                 TokenString.ParseChar('(', ref CommandLine, ref ResultLine);
                                 CommandLine = CommandLine.TrimStart();
@@ -433,10 +484,14 @@ namespace PhysicalCalculator.Expression
                             }
                         }
                     }
-
-                    if (!IsFileFunction)
+                    if (!IdentifierFound)
                     {
-                        ResultLine = "Unknown identifier: '" + IdentifierName + "'";
+                        if (!String.IsNullOrEmpty(ResultLine))
+                        {
+                            ResultLine += ". ";
+                        }
+
+                        ResultLine += "Unknown identifier: '" + IdentifierName + "'";
                     }
                 }
             }
@@ -580,9 +635,11 @@ namespace PhysicalCalculator.Expression
                 {
                     numlen++;
                 }
-                if ((numlen < maxlen)
-                    && ((CommandLine[numlen] == '.')
-                        || (CommandLine[numlen] == ',')))
+                if (   (numlen < maxlen)
+                    && (   (CommandLine[numlen] == '.')
+                /*      || (CommandLine[numlen] == ',') */ )
+                    && (numlen + 1 < maxlen) 
+                    && Char.IsDigit(CommandLine[numlen + 1]))
                 {
                     numlen++;
                 }
@@ -626,25 +683,37 @@ namespace PhysicalCalculator.Expression
         public static IPhysicalUnit ParsePhysicalUnit(ref String CommandLine, ref String ResultLine)
         {
             IPhysicalUnit pu = null;
+            Boolean UnitIdentifierFound = false;
             String IdentifierName;
             IEnviroment Context;
-            IdentifierKind identifierkind;
 
             String CommandLineRest = CommandLine.ReadIdentifier(out IdentifierName);
 
             if (IdentifierName != null)
             {
                 // Check for custom defined unit
-                Debug.Assert(IdentifierName != null);
-                Boolean UnitIdentifierFound = IdentifierContextLookup(IdentifierName, out Context, out identifierkind, ref ResultLine);
-                if (UnitIdentifierFound && identifierkind == IdentifierKind.unit)
+                INametableItem Item;
+                UnitIdentifierFound = IdentifierItemLookup(IdentifierName, out Context, out Item, ref ResultLine);
+                if (UnitIdentifierFound)
                 {
-                    CommandLine = CommandLineRest;
-                    Boolean OK = Context.UnitGet(IdentifierName, out pu, ref ResultLine);
+                    if (Item.identifierkind == IdentifierKind.unit)
+                    {
+                        CommandLine = CommandLineRest;
+                        pu = ((NamedUnit)Item).pu;
+                    }
+                    else
+                    {
+                        ResultLine = IdentifierName + " is a " + Item.identifierkind.ToString() + ". Expected an unit";
+                    }
                 }
-                else
-                {   // Standard units
-                    pu = PhysicalUnit.ParseUnit(ref CommandLine);
+            }
+            //if (!UnitIdentifierFound)
+            if (pu == null)
+            {   // Standard units
+                pu = PhysicalUnit.ParseUnit(ref CommandLine);
+                if (pu != null && UnitIdentifierFound)
+                {   
+                    ResultLine = "";
                 }
             }
             return pu;
