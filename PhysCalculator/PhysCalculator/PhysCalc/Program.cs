@@ -9,25 +9,26 @@ namespace PhysicalCalculator
     {
         static void Main(string[] args)
         {
-            ResultWriter ConsoleLineWriter = new ResultWriter();
-            Commandreader CommandLineReader = new Commandreader(args, ConsoleLineWriter);
+
+            ResultWriter ResultLineWriter = new ResultWriter();
+            Commandreader CommandLineReader = new Commandreader(args, ResultLineWriter);
             CommandLineReader.ReadFromConsoleWhenEmpty = true;
             if (CommandLineReader == null)
             {
-                ConsoleLineWriter.WriteLine(String.Format("PhysCalculator Commandreader failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
+                ResultLineWriter.WriteLine(String.Format("PhysCalculator Commandreader failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
             }
             else
             {
-                PhysCalculator Calculator = new PhysCalculator(CommandLineReader, ConsoleLineWriter);
+                PhysCalculator Calculator = new PhysCalculator(CommandLineReader, ResultLineWriter);
                 if (Calculator == null)
                 {
-                    ConsoleLineWriter.WriteLine(String.Format("PhysCalculator failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
+                    ResultLineWriter.WriteLine(String.Format("PhysCalculator failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
                 }
                 else
                 {
-                    ConsoleLineWriter.WriteLine("PhysCalculator ready");
+                    ResultLineWriter.WriteLine("PhysCalculator ready");
                     Calculator.Run();
-                    ConsoleLineWriter.WriteLine("PhysCalculator finished");
+                    ResultLineWriter.WriteLine("PhysCalculator finished");
                 }
             }
         }

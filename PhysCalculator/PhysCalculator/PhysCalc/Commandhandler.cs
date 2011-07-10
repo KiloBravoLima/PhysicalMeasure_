@@ -15,7 +15,7 @@ namespace CommandParser
         {
         }
 
-        public virtual Boolean Command(String CommandLine, out String ResultLine)
+        public virtual Boolean Command(ref String CommandLine, out String ResultLine)
         {
             Boolean CommandHandled = false;
 
@@ -26,7 +26,7 @@ namespace CommandParser
 
         public delegate Boolean CommandDelegate(ref string CommandLine, ref string ResultLine);
 
-        public Boolean CheckForCommand(String CommandKeyword, CommandDelegate CmdHandler, String CommandLine, ref String ResultLine, ref Boolean CommandHandled)
+        public Boolean CheckForCommand(String CommandKeyword, CommandDelegate CmdHandler, ref String CommandLine, ref String ResultLine, ref Boolean CommandHandled)
         {
             Boolean IsThisCommand = TryParseToken(CommandKeyword, ref CommandLine);
 

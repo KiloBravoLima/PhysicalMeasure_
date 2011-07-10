@@ -180,7 +180,7 @@ namespace PhysicalMeasureTest
         ///A test for power operator
         ///</summary>
         [TestMethod()]
-        public void PowerOfDerivedUnit()
+        public void PowerOfDerivedUnitTest()
         {
             PhysicalUnit pu = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
 
@@ -194,7 +194,7 @@ namespace PhysicalMeasureTest
         ///A test for root operator
         ///</summary>
         [TestMethod()]
-        public void RootOfDerivedUnit()
+        public void RootOfDerivedUnitTest()
         {
             PhysicalUnit pu = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
@@ -202,6 +202,56 @@ namespace PhysicalMeasureTest
 
             PhysicalUnit actual = pu % 2;
             Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for mult and div operator
+        ///</summary>
+        [TestMethod()]
+        public void KmPrHourUnitTest()
+        {
+            PhysicalQuantity KmPrHour_example1 = PhysicalMeasure.Prefix.K * SI.m / SI.h;
+
+            PhysicalQuantity Speed1 = 123 * KmPrHour_example1;
+
+            //IPhysicalUnit KmPrHour_example2 = PhysicalMeasure.Prefix.K * SI.m / SI.h;
+
+            IPhysicalUnit Km = PhysicalMeasure.PhysicalUnit.Parse("Km");
+            IPhysicalUnit h = PhysicalMeasure.PhysicalUnit.Parse("h");
+            IPhysicalQuantity KmPrHour_example2 = Km.Divide(h);
+            PhysicalQuantity Speed2 = new PhysicalQuantity(123, KmPrHour_example2);
+
+            string KmPrHour_Str = "Km/h";
+            string Tempstr = KmPrHour_Str;
+            IPhysicalUnit KmPrHour_example3 = PhysicalMeasure.PhysicalUnit.ParseUnit(ref Tempstr);
+            PhysicalQuantity Speed3 = new PhysicalQuantity(123, KmPrHour_example3);
+
+            PhysicalQuantity expected = new PhysicalQuantity(123 * 1000.0/(60 * 60) , SI.m / SI.s);
+
+            Assert.AreEqual(expected, Speed1);
+            Assert.AreEqual(expected, Speed2);
+            Assert.AreEqual(expected, Speed3);
+        }
+
+        /// <summary>
+        ///A test for mult and div operator
+        ///</summary>
+        [TestMethod()]
+        public void WattHourUnitTest()
+        {
+            IPhysicalQuantity WattHour_example1 = SI.W * SI.h;
+
+            PhysicalUnit WattHour_example2 = (PhysicalUnit)new ConvertibleUnit("WattHour", "Wh", SI.J, new ScaledValueConversion(1.0 / 3600)); /* [Wh] = 1/3600 * [J] */
+
+            PhysicalQuantity E_1 = new PhysicalQuantity(1, WattHour_example1 ); // 1 Wh
+            PhysicalQuantity E_2 = new PhysicalQuantity(0.001, Prefix.K * WattHour_example2); // 0.001 KWh
+            //IPhysicalQuantity actual_1 = E_1.ConvertTo(SI.J);
+            //IPhysicalQuantity actual_2 = E_2.ConvertTo(SI.J);
+
+            PhysicalQuantity expected = new PhysicalQuantity(3600, SI.J);
+
+            Assert.AreEqual(expected, E_1);
+            Assert.AreEqual(expected, E_2);
         }
 
 
