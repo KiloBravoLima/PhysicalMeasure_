@@ -1,4 +1,5 @@
-// Test functions
+﻿// Test functions
+// UTF8
 
 Func Square ( x ) 
 {
