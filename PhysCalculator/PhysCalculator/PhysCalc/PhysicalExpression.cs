@@ -56,8 +56,15 @@ namespace PhysicalCalculator.Expression
             Eopt = [ SYS ] | e .
             E = T Eopt .
             Eopt = "+" T Eopt | "-" T Eopt | e .
-            T = F Topt .
-            Topt = "*" F Topt | "/" F Topt | e .
+          
+     *      T = F Topt .
+     *      Topt = "*" F Topt | "/" F Topt | e .
+
+     **     T1 = T2 T1opt .
+     **     T1opt = "*" T2 T1opt | e .
+     **     T2 = F T2opt .
+     **     T2opt = "/" F T2opt | e .
+         
             F = PE Fopt .
             PE = PQ | UE | VAR | FUNC "(" EXPLIST ")" | "(" E ")" .
             Fopt = ^ SN | e .
@@ -258,6 +265,19 @@ namespace PhysicalCalculator.Expression
                         UnitString = CommandLine.Substring(0, UnitStrLen);
                     }
 
+                    /*** 
+                    int SpacePos = CommandLine.IndexOf(' ');
+                    if (SpacePos == 1)
+                    {
+                        Char NumberBaseChar = Char.ToLower(CommandLine[0]);
+                        if ((NumberBaseChar == 'h')
+                            || (NumberBaseChar == 'x'))
+                        {
+                            UnitString = UnitString.Substring(2);
+                        }
+                    }
+                    ***/
+
                     UnitString = UnitString.TrimEnd();
                     String UnitStringAll = UnitString;
                     UnitStrLen = UnitString.Length;
@@ -278,258 +298,646 @@ namespace PhysicalCalculator.Expression
             return pu;
         }
 
-        public static IPhysicalQuantity ParseExpression(ref String CommandLine, ref String ResultLine)
+        // Token kinds
+        public enum TokenKind
         {
-            IPhysicalQuantity pq;
-
-            pq = ParseTerm(ref CommandLine, ref ResultLine);
-            if (pq != null)
-            {
-                pq = ParseOptionalExpression(pq, ref CommandLine, ref ResultLine);
-            }
-
-            return pq;
+            None = 0,
+            Operand = 1,
+            Operator = 2 /*,
+            UnaryOperator = 3 */
         }
 
-        public static IPhysicalQuantity ParseOptionalExpression(IPhysicalQuantity pq, ref String CommandLine, ref String ResultLine)
+        /*****
+        // Operator kinds
+        // Precedence for a group of operators is same as first (lowest) enum in the group
+        public enum OperatorKind
         {
-            IPhysicalQuantity pqRes = pq;
-            if (!String.IsNullOrEmpty(CommandLine))
-            {
-                if (TokenString.TryParseToken("+", ref CommandLine))
-                {
-                    IPhysicalQuantity pq2 = ParseExpression(ref CommandLine, ref ResultLine);
-                    pqRes = pq.Add(pq2);
-                }
-                else if (TokenString.TryParseToken("-", ref CommandLine))
-                {
-                    CommandLine = CommandLine.TrimStart();
-                    IPhysicalQuantity pq2 = ParseExpression(ref CommandLine, ref ResultLine);
-                    pqRes = pq.Subtract(pq2);
-                }
-            }
+            // Precediens == 0
+            none = 0,
 
-            return pqRes;
+            // Precediens == 1
+            parenbegin = 1,
+            parenend = 2,
+
+            // Precediens == 3
+            add = 3,
+            sub = 4,
+
+            // Precediens == 5
+            mult = 5,
+            div = 6,
+
+            // Precediens == 7
+            pow = 7,
+            root = 8,
+
+            // Precediens == 9
+            unaryplus = 9,
+            unaryminus = 10
         }
 
-        public static IPhysicalQuantity ParseTerm(ref String CommandLine, ref String ResultLine)
+        public static OperatorKind OperatorPrecedence(OperatorKind operatoren)
         {
-            IPhysicalQuantity pq;
-
-            pq = ParseFactor(ref CommandLine, ref ResultLine);
-            if (pq != null)
+            switch (operatoren)
             {
-                pq = ParseOptionalTerm(pq, ref CommandLine, ref ResultLine);
+                case OperatorKind.parenbegin: // "("
+                case OperatorKind.parenend: // ")":
+                    return OperatorKind.parenbegin; // 1;
+                case OperatorKind.add: // "+"
+                case OperatorKind.sub: // "-":
+                     return OperatorKind.add; // 3;
+                case OperatorKind.mult: // "*":
+                case OperatorKind.div: // "/":
+                     return OperatorKind.mult; // 5;
+                case OperatorKind.pow: // "^":
+                case OperatorKind.root: // "!":
+                     return OperatorKind.pow; // 7;
+                case OperatorKind.unaryplus: // unaryplus:
+                case OperatorKind.unaryminus: // UnaryMinus:
+                     return OperatorKind.unaryplus; // 9;
             }
-            return pq;
+
+            return OperatorKind.none;
         }
 
-        public static IPhysicalQuantity ParseOptionalTerm(IPhysicalQuantity pq, ref String CommandLine, ref String ResultLine)
+        public static OperatorKind OperatorKindFromChar(Char c)
         {
-            IPhysicalQuantity pqRes = pq;
-            if (!String.IsNullOrEmpty(CommandLine))
+            switch (c)
             {
-                CommandLine = CommandLine.TrimStart();
+                case '(': 
+                    return OperatorKind.parenbegin; // 1;
+                case ')': 
+                    return OperatorKind.parenend; // 2;
+                case '+':
+                     return OperatorKind.add; // 3;
+                case '-': 
+                     return OperatorKind.sub; // 4;
+                case '*': 
+                case '·':  // centre dot  '\0x0B7' (char)183 U+00B7
+                     return OperatorKind.mult; // 5;
+                case '/':
+                     return OperatorKind.div; // 6;
+                case '^': 
+                     return OperatorKind.pow; // 7;
+                // case '!':
+                //      return OperatorKind.root; // 8;
+                / *
+                case '+': // unaryplus:
+                     return OperatorKind.unaryplus; // 9;
+                case '-': // UnaryMinus:
+                     return OperatorKind.unaryminus; // 10;
+                 * /
+            }
 
-                if (   TokenString.TryParseChar('*', ref CommandLine) 
-                    || TokenString.TryParseChar('·', ref CommandLine))
+            return OperatorKind.none;
+        }
+        
+        public static OperatorKind Precedence(this OperatorKind operatoren)
+        {
+            return OperatorPrecedence(operatoren);
+        }
+ 
+        *****/
+
+        class token
+        {
+            public readonly TokenKind TokenKind;
+
+            public readonly IPhysicalQuantity Operand;
+            public readonly OperatorKind Operator;
+
+            public token(IPhysicalQuantity Operand)
+            {
+                this.TokenKind = TokenKind.Operand;
+                this.Operand = Operand;
+            }
+
+            public token(OperatorKind Operator)
+            {
+                this.TokenKind = TokenKind.Operator;
+                this.Operator = Operator;
+            }
+        }
+
+        class expressiontokenizer
+        {
+            public String InputString;
+            public String ResultString;
+            public int Pos = 0;
+            public Boolean InputRecognaized = true;
+            public IPhysicalUnit dimensionless = Physics.dimensionless;
+            public Boolean ThrowExceptionOnInvalidInput = false;
+
+            private Stack<OperatorKind> Operators = new Stack<OperatorKind>();
+            private List<token> Tokens = new List<token>();
+
+            TokenKind LastReadToken = TokenKind.None;
+            int ParenCount = 0;
+
+            public expressiontokenizer(String InputString)
+            {
+                this.InputString = InputString;
+            }
+
+            public expressiontokenizer(IPhysicalUnit dimensionless, String InputString)
+            {
+                this.dimensionless = dimensionless;
+                this.InputString = InputString;
+            }
+
+            public string GetRemainingInput()
+            {
+                return InputString.Substring(Pos);
+            }
+
+            private Boolean PushNewOperator(OperatorKind newOperator)
+            {
+                Boolean NewOperatorValid = (LastReadToken != TokenKind.Operator);
+
+                if (!NewOperatorValid)
                 {
-                    CommandLine = CommandLine.TrimStart();
-                    IPhysicalQuantity pq2 = ParseExpression(ref CommandLine, ref ResultLine);
-                    if (pq2 != null)
+                    if (newOperator == OperatorKind.add)
                     {
-                        pqRes = pq.Multiply(pq2);
+                        newOperator = OperatorKind.unaryplus;
+                        NewOperatorValid = true;
                     }
                     else
-                    {
-                        pqRes = null;
-                    }
-                }
-                else if (TokenString.TryParseToken("/", ref CommandLine))
-                {
-                    CommandLine = CommandLine.TrimStart();
-                    IPhysicalQuantity pq2 = ParseExpression(ref CommandLine, ref ResultLine);
-                    if (pq2 != null)
-                    {
-                        pqRes = pq.Divide(pq2);
-                    }
-                    else
-                    {
-                        pqRes = null;
-                    }
-                }
-            }
-
-            return pqRes;
-        }
-
-        public static IPhysicalQuantity ParseFactor(ref String CommandLine, ref String ResultLine)
-        {
-            IPhysicalQuantity pq;
-
-            pq = ParsePrimaryExpression(ref CommandLine, ref ResultLine);
-            if (pq != null)
-            {
-                pq = ParseOptionalPostUnaryOperator(pq, ref CommandLine, ref ResultLine);
-            }
-            return pq;
-        }
-
-        public static IPhysicalQuantity ParseOptionalPostUnaryOperator(IPhysicalQuantity pq, ref String CommandLine, ref String ResultLine)
-        {
-            IPhysicalQuantity pqRes = pq;
-            if (!String.IsNullOrEmpty(CommandLine))
-            {
-                CommandLine = CommandLine.TrimStart();
-                int Operation = 0;
-
-                if (TokenString.TryParseChar('^', ref CommandLine))
-                {
-                    Operation = 1;
-                }
-                else
-                if (TokenString.TryParseChar('%', ref CommandLine))
-                {
-                    Operation = -1;
-                }
-
-                if (Operation != 0)
-                {
-                    CommandLine = CommandLine.TrimStart();
-
-                    Double RealExponent;
-                    //Boolean OK = ParseDouble(ref CommandLine, ref ResultLine, out RealExponent);
-                    //Boolean OK = ParseIntExpression(ref CommandLine, ref ResultLine, out IntExponent);
-
-                    IPhysicalQuantity RealExponentPQ = ParseExpression(ref CommandLine, ref ResultLine);
-                    Boolean OK = RealExponentPQ != null && RealExponentPQ.IsDimensionless;
-
-                    if (OK)
-                    {
-                        sbyte IntExponent;
-
-                        RealExponent = RealExponentPQ.Value;
-                        if (Math.Abs(RealExponent) >= 1)
+                        if (newOperator == OperatorKind.sub)
                         {
-                            IntExponent = (SByte)Math.Round(RealExponent);
+                            newOperator = OperatorKind.unaryminus;
+                            NewOperatorValid = true;
                         }
-                        else
-                        {
-                            IntExponent = (SByte)Math.Round(1.0 / RealExponent);
-                            Operation = -Operation;
-                        }
-
-                        if (Operation == 1)
-                        {
-                            pqRes = pq.Pow(IntExponent);
-                        }
-                        else
-                        {
-                            Debug.Assert(Operation == -1);
-                            pqRes = pq.Rot(IntExponent);
-                        }
-                    }
-                    else
-                    {
-                        ResultLine = "Signed number for exponent expected";
-                    }
                 }
-            }
 
-            return pqRes;
-        }
-
-        public static IPhysicalQuantity ParsePrimaryExpression(ref String CommandLine, ref String ResultLine)
-        {
-            IPhysicalQuantity pq = null;
-            CommandLine = CommandLine.TrimStart();
-
-            if (String.IsNullOrEmpty(CommandLine))
-            {
-                // ResultLine = "Factor not found";
-            }
-            else if ( (CommandLine[0] == '+') || (CommandLine[0] == '-'))
-            {
-                Boolean Negate = CommandLine[0] == '-';
-
-                CommandLine = CommandLine.Substring(1);
-                CommandLine = CommandLine.TrimStart();
-
-                pq = ParseFactor(ref CommandLine, ref ResultLine);
-                if (Negate)
+                if (NewOperatorValid)
                 {
-                    pq.Value = -pq.Value;
-                }
-            }
-            else if (Char.IsLetter(CommandLine[0]) || Char.Equals(CommandLine[0], '_'))
-            {
-                String IdentifierName;
-
-                Boolean IdentifierFound = ParseQualifiedIdentifier(ref CommandLine, ref ResultLine, out IdentifierName, out pq);
-                if (!IdentifierFound)
-                {
-                    if (!String.IsNullOrEmpty(IdentifierName) && !String.IsNullOrEmpty(CommandLine) && CommandLine[0] == '(')
+                    if (Operators.Count > 0)
                     {
-                        string line2 = CommandLine.Substring(1).TrimStart();
-                        if (!String.IsNullOrEmpty(line2) && line2[0] == ')')
-                        {   // Undefined function without parameters? Maybe it is a .cal file name? 
-                            IdentifierFound = File.Exists(IdentifierName + ".cal");
-                            if (IdentifierFound)
+                        // Pop operators with precedence higher than new operator
+                        OperatorKind NewOperatorPrecedence = newOperator.Precedence();
+                        Boolean KeepPoping = true;
+                        while ((Operators.Count > 0) && KeepPoping)
+                        {
+                            OperatorKind  NextOperatorsPrecedence = Operators.Peek().Precedence();
+                            KeepPoping = (   (NextOperatorsPrecedence > NewOperatorPrecedence)
+                                          || (   (NextOperatorsPrecedence == NewOperatorPrecedence)
+                                              && (NewOperatorPrecedence != OperatorKind.unaryplus)));
+                            if (KeepPoping) 
                             {
-                                TokenString.ParseChar('(', ref CommandLine, ref ResultLine);
-                                CommandLine = CommandLine.TrimStart();
-                                TokenString.ParseChar(')', ref CommandLine, ref ResultLine);
-
-                                FileFunctionGet(IdentifierName, out pq, ref ResultLine);
+                                Tokens.Add(new token(Operators.Pop()));
                             }
                         }
                     }
-                    if (!IdentifierFound)
-                    {
-                        if (!String.IsNullOrEmpty(ResultLine))
-                        {
-                            ResultLine += ". ";
-                        }
+                    Operators.Push(newOperator);
+                    LastReadToken = TokenKind.Operator;
 
-                        ResultLine += "Unknown identifier: '" + IdentifierName + "'";
-                    }
+                    return true;
                 }
-            }
-            else if (CommandLine[0] == '(')
-            {   // paranteses
-                CommandLine = CommandLine.Substring(1).TrimStart(); // Skip start parantes '('
-
-                pq = ParseExpression(ref CommandLine, ref ResultLine);
-
-                CommandLine = CommandLine.TrimStart();
-                TokenString.ParseChar(')', ref CommandLine, ref ResultLine);
-                CommandLine = CommandLine.TrimStart();
-            }
-            else
-            {
-                Double D;
-                Boolean OK = ParseDouble(ref CommandLine, ref ResultLine, out D);
-                if (OK)
+                else
                 {
-                    if (!String.IsNullOrWhiteSpace(CommandLine))
-                    {   // Parse optional unit
-                        CommandLine = CommandLine.TrimStart();
+                    ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operand at pos " + Pos.ToString();
+                    if (ThrowExceptionOnInvalidInput)
+                    {
+                        throw new PhysicalUnitFormatException(ResultString);
+                    }
 
-                        IPhysicalUnit pu = ParsePhysicalUnit(ref CommandLine, ref ResultLine);
-                        if (pu != null)
+                    return false;
+                }
+            }
+
+            private Boolean PushNewParenbegin()
+            {
+                if (LastReadToken == TokenKind.Operand)
+                {
+                    // Cannot follow operand
+                    ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operator at pos " + Pos.ToString();
+                    if (ThrowExceptionOnInvalidInput)
+                    {
+                        throw new PhysicalUnitFormatException(ResultString);
+                    }
+
+                    return false;
+                } 
+                else 
+                {
+                    // Push opening parenthesis onto stack
+                    Operators.Push(OperatorKind.parenbegin);
+                    //LastReadToken = tokenkind.Operator;
+                    // Track number of parentheses
+                    ParenCount++;
+
+                    return true;
+                }
+            }
+
+            private Boolean PopUntilParenbegin()
+            {
+                if (LastReadToken != TokenKind.Operand)
+                {
+                    // Must follow operand
+                    ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operand at pos " + Pos.ToString();
+                    if (ThrowExceptionOnInvalidInput)
+                    {
+                        throw new PhysicalUnitFormatException(ResultString);
+                    }
+
+                    return false;
+                }
+                else if (ParenCount == 0)
+                {
+                    // Must have matching opening parenthesis
+                    ResultString = "The string argument is not in a valid physical expression format. Unmatched closing parenthesis at pos " + Pos.ToString();
+                    if (ThrowExceptionOnInvalidInput)
+                    {
+                        throw new PhysicalUnitFormatException(ResultString);
+                    }
+
+                    return false;
+                }
+                else
+                {
+                    // Pop all operators until matching opening parenthesis found
+                    OperatorKind temp = Operators.Pop();
+                    while (temp != OperatorKind.parenbegin)
+                    {
+                        Tokens.Add(new token(temp));
+                        temp = Operators.Pop();
+                    }
+
+                    // Track number of opening parenthesis
+                    ParenCount--;
+
+                    return true;
+                }
+            }
+
+
+            private token RemoveFirstToken()
+            {   // return first operator from post fix operators
+                token Token = Tokens[0];
+                Tokens.RemoveAt(0);
+
+                return Token;
+            }
+
+            public token GetToken()
+            {
+                Debug.Assert(InputString != null);
+
+                if (Tokens.Count > 0)
+                {   // return first operator from post fix operators
+                    return RemoveFirstToken();
+                }
+
+                while (InputString.Length > Pos && InputRecognaized)
+                {
+                    Char c = InputString[Pos];
+
+                    if (Char.IsWhiteSpace(c))
+                    {
+                        // Ignore spaces, tabs, etc.
+                        Pos++; // Shift to next char
+                    }
+                    else if (c == '(') 
+                    {
+                        // Push opening parenthesis onto operator stack
+                        if (PushNewParenbegin())
                         {
-                            pq = new PhysicalQuantity(D, pu);
+                            Pos++; // Shift to next char
+                        }
+                        else
+                        {
+                            //return null;
+                            // End of recognatized input; Stop reading and return operator tokens from stack.
+                            InputRecognaized = false;
+                        }
+                    }
+                    else if (c == ')')
+                    {
+                        // Pop all operators until matching opening parenthesis found
+                        if (PopUntilParenbegin())
+                        {
+                            Pos++; // Shift to next char
+                        }
+                        else
+                        {
+                            //return null;
+                            // End of recognatized input; Stop reading and return operator tokens from stack.
+                            InputRecognaized = false;
+                        }
+                    }
+                    else
+                    {
+                        OperatorKind NewOperator = OperatorKindExtensions.OperatorKindFromChar(c);
+
+                        if (NewOperator != OperatorKind.none)
+                        {
+                            if (PushNewOperator(NewOperator))
+                            {
+                                Pos++; // Shift to next char
+                            }
+                            else
+                            {
+                                //return null;
+                                // End of recognatized input; Stop reading and return operator tokens from stack.
+                                InputRecognaized = false;
+                            }
+                        }
+                        else if (Char.IsDigit(c))
+                        {
+                            if (LastReadToken == TokenKind.Operand)
+                            {
+                                if (ThrowExceptionOnInvalidInput)
+                                {
+                                    throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. An operator must follow a operand. Invalid operand at '" + c + "' at pos " + Pos.ToString());
+                                }
+                                else
+                                {
+                                    //return null;
+                                    // End of recognatized input; Stop reading and return operator tokens from stack.
+                                    InputRecognaized = false;
+                                }
+                            }
+                            else
+                            {
+                                Double D;
+
+                                String CommandLine = GetRemainingInput();
+                                int OldLen = CommandLine.Length;
+                                String ResultLine = "";
+                                Boolean OK = ParseDouble(ref CommandLine, ref ResultLine, out D);
+                                Pos += OldLen - CommandLine.Length;
+                                if (OK)
+                                {
+                                    IPhysicalQuantity pq =  new PhysicalQuantity(D, dimensionless);
+                                    if (!String.IsNullOrWhiteSpace(CommandLine))
+                                    {   // Parse optional unit
+                                        OldLen = CommandLine.Length;
+                                        CommandLine = CommandLine.TrimStart();
+                                        if (!String.IsNullOrEmpty(CommandLine) && (Char.IsLetter(CommandLine[0])))
+                                        {
+                                            ResultLine = "";
+                                            IPhysicalUnit pu = ParsePhysicalUnit(ref CommandLine, ref ResultLine);
+                                            Pos += OldLen - CommandLine.Length;
+                                            if (pu != null)
+                                            {
+                                                pq.Unit = pu;
+                                            }
+                                        }
+                                    }
+
+                                    LastReadToken = TokenKind.Operand;
+                                    return new token(pq);
+                                }
+
+                                if (ThrowExceptionOnInvalidInput)
+                                {
+                                    throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid or missing operand after '" + c + "' at pos " + Pos.ToString());
+                                }
+                                else
+                                {
+                                    //return null;
+                                    // End of recognatized input; Stop reading and return operator tokens from stack.
+                                    InputRecognaized = false;
+                                }
+                            }
+                        }
+                        else if (Char.IsLetter(c) || Char.Equals(c, '_'))
+                        {
+                            String IdentifierName;
+
+                            String CommandLine = GetRemainingInput();
+                            int OldLen = CommandLine.Length;
+                            String ResultLine = "";
+
+                            IPhysicalQuantity pq;
+
+                            Boolean IdentifierFound = ParseQualifiedIdentifier(ref CommandLine, ref ResultLine, out IdentifierName, out pq);
+                            Pos += OldLen - CommandLine.Length;
+                            if (!IdentifierFound)
+                            {
+                                if (!String.IsNullOrEmpty(IdentifierName) && !String.IsNullOrEmpty(CommandLine) && CommandLine[0] == '(')
+                                {
+                                    OldLen = CommandLine.Length;
+                                            
+                                    string line2 = CommandLine.Substring(1).TrimStart();
+                                    if (!String.IsNullOrEmpty(line2) && line2[0] == ')')
+                                    {   // Undefined function without parameters? Maybe it is a .cal file name? 
+                                        IdentifierFound = File.Exists(IdentifierName + ".cal");
+                                        if (IdentifierFound)
+                                        {
+                                            TokenString.ParseChar('(', ref CommandLine, ref ResultLine);
+                                            CommandLine = CommandLine.TrimStart();
+                                            TokenString.ParseChar(')', ref CommandLine, ref ResultLine);
+
+                                            FileFunctionGet(IdentifierName, out pq, ref ResultLine);
+                                            Pos += OldLen - CommandLine.Length;
+                                        }
+                                    }
+                                }
+                                /**
+                                if (!IdentifierFound)
+                                {
+                                    ResultLine = "Unknown identifier: '" + IdentifierName + "'";
+                                }
+                                **/
+
+                            }
+
+                            if (pq != null)
+                            {
+                                LastReadToken = TokenKind.Operand;
+                                return new token(pq);
+                            }
+
+                            if (ThrowExceptionOnInvalidInput)
+                            {
+                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid or missing operand at '" + c + "' at pos " + Pos.ToString());
+                            }
+                            else
+                            {
+                                //return null;
+                                // End of recognatized input; Stop reading and return operator tokens from stack.
+                                InputRecognaized = false;
+                            }
+
+                        }
+                        else
+                        {
+                            if (ThrowExceptionOnInvalidInput)
+                            {
+                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid input '" + InputString.Substring(Pos) + "' at pos " + Pos.ToString());
+                            }
+                            else
+                            {
+                                //return null;
+                                // End of recognatized input; Stop reading and return operator tokens from stack.
+                                InputRecognaized = false;
+                            }
                         }
                     }
 
-                    if (pq == null)
+                    if (Tokens.Count > 0)
+                    {   // return first operator from post fix operators
+                        return RemoveFirstToken();
+                    }
+
+                };
+
+                // Expression cannot end with operator
+                if (LastReadToken == TokenKind.Operator)
+                {
+                    if (ThrowExceptionOnInvalidInput)
                     {
-                        pq = new PhysicalQuantity(D, Physics.dimensionless);
+                        throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Operand expected '" + InputString.Substring(Pos) + "' at pos " + Pos.ToString());
+                    }
+                    else
+                    {
+                        //return null;
+                        // End of recognatized input; Stop reading and return operator tokens from stack.
+                        InputRecognaized = false;                    
                     }
                 }
+                // Check for balanced parentheses
+                if (ParenCount > 0)
+                {
+                    if (ThrowExceptionOnInvalidInput)
+                    {
+                        throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Closing parenthesis expected '" + InputString.Substring(Pos) + "' at pos " + Pos.ToString());
+                    } 
+                    else
+                    {
+                        //return null;
+                        // End of recognatized input; Stop reading and return operator tokens from stack.
+                        InputRecognaized = false;
+                    }
+                }
+                // Retrieve remaining operators from stack
+                while (Operators.Count > 0) 
+                {
+                    Tokens.Add(new token(Operators.Pop()));
+                }
+
+                if (Tokens.Count > 0)
+                {   // return first operator from post fix operators
+                    return RemoveFirstToken();
+                }
+
+                return null;
             }
-            return pq;
         }
+
+        public static IPhysicalQuantity ParseExpression(ref String CommandLine, ref String ResultLine)
+        {
+            //public static readonly 
+            PhysicalUnit dimensionless = new CombinedUnit();
+
+            expressiontokenizer Tokenizer = new expressiontokenizer(dimensionless, CommandLine);
+
+            Tokenizer.ThrowExceptionOnInvalidInput = false;
+            Stack<IPhysicalQuantity> Operands = new Stack<IPhysicalQuantity>();
+
+            token Token = Tokenizer.GetToken();
+            while (Token != null)
+            {
+                if (Token.TokenKind == TokenKind.Operand)
+                {
+                    // Stack PhysicalQuantity operand
+                    Operands.Push(Token.Operand);
+                }
+                else if (Token.TokenKind == TokenKind.Operator)
+                {
+
+                    if (Token.Operator == OperatorKind.unaryplus)
+                    {
+                        // Notthing to do
+                    }
+                    else if (Token.Operator == OperatorKind.unaryminus)
+                    {
+                        Debug.Assert(Operands.Count >= 1);
+
+                        IPhysicalQuantity pqTop = Operands.Pop();
+                        // Invert sign of pq
+                        Operands.Push(pqTop.Multiply(-1));
+                    }
+                    else
+                    {
+                        Debug.Assert(Operands.Count >= 2);
+
+                        IPhysicalQuantity pqSecond = Operands.Pop();
+                        IPhysicalQuantity pqFirst = Operands.Pop();
+
+                        if (Token.Operator == OperatorKind.add)
+                        {
+                            // Combine pq1 and pq2 to the new PhysicalQuantity pq1*pq2   
+                            Operands.Push(pqFirst.Add(pqSecond));
+                        }
+                        else if (Token.Operator == OperatorKind.sub)
+                        {
+                            // Combine pq1 and pq2 to the new PhysicalQuantity pq1/pq2
+                            Operands.Push(pqFirst.Subtract(pqSecond));
+                        }
+                        else if (Token.Operator == OperatorKind.mult)
+                        {
+                            // Combine pq1 and pq2 to the new PhysicalQuantity pq1*pq2   
+                            Operands.Push(pqFirst.Multiply(pqSecond));
+                        }
+                        else if (Token.Operator == OperatorKind.div)
+                        {
+                            // Combine pq1 and pq2 to the new PhysicalQuantity pq1/pq2
+                            Operands.Push(pqFirst.Divide(pqSecond));
+                        }
+                        else if (   (Token.Operator == OperatorKind.pow) 
+                                 || (Token.Operator == OperatorKind.root))
+                        {
+                            SByte Exponent;
+                            if (pqSecond.Value >= 1)
+                            {   // Use operator and Exponent
+                                Exponent = (SByte)pqSecond.Value;
+                            }
+                            else
+                            {   // Invert operator and Exponent
+                                Exponent = (SByte)(1/pqSecond.Value);
+
+                                if (Token.Operator == OperatorKind.pow)
+                                {
+                                    Token = new token(OperatorKind.root);
+                                }
+                                else
+                                {
+                                    Token = new token(OperatorKind.pow);
+                                }
+                            }
+
+                            if (Token.Operator == OperatorKind.pow)
+                            {
+                                // Combine pq and exponent to the new PhysicalQuantity pq^expo
+                                Operands.Push(pqFirst.Pow(Exponent));
+                            }
+                            else
+                            {
+                                // Combine pq and exponent to the new PhysicalQuantity pq^(1/expo)
+                                Operands.Push(pqFirst.Rot(Exponent));
+                            }
+                        }
+                        else
+                        {
+                            Debug.Assert(false);
+                        }
+                    }
+                }
+
+                Token = Tokenizer.GetToken();
+            }
+
+            CommandLine = Tokenizer.GetRemainingInput(); // Remaining of input string
+            ResultLine = Tokenizer.ResultString;
+
+            Debug.Assert(Operands.Count <= 1);  // 0 or 1
+
+            return (Operands.Count > 0) ? Operands.Pop() : null;
+        }
+
 
         public static Boolean ParseQualifiedIdentifier(ref String CommandLine, ref String ResultLine, out String IdentifierName, out IPhysicalQuantity pq)
         {
@@ -621,52 +1029,204 @@ namespace PhysicalCalculator.Expression
             {
                 //NumberStyles styles = NumberStyles.Float;
                 //IFormatProvider provider = NumberFormatInfo.InvariantInfo;
+                // 0x010203.040506 + 0x102030.405060
 
                 // Scan number
                 int numlen = 0;
+                int maxlen = CommandLine.Length; // Max length of sign and digits to look for
+                int numberBase = 10; // Decimal number expected
+                int exponentNumberBase = 10; // Decimal exponentnumber expected
+
+                int numberSignPos = -1; // No number sign found
+                int hexNumberPos = -1; // No hex number prefix found
+                int DecimalCharPos = -1; // No decimal char found
+                int exponentCharPos = -1;  // No exponent char found
+                int exponentNumberSignPos = -1; // No exponent number sign found
+                int exponentHexNumberPos = -1; // No exponent hex number prefix found
 
                 if ((CommandLine[0] == '-') || (CommandLine[0] == '+'))
                 {
+                    numberSignPos = numlen;
                     numlen = 1;
                 }
 
-                int maxlen = CommandLine.Length; // Max length of sign and digits to look for
                 while (numlen < maxlen && Char.IsDigit(CommandLine[numlen]))
                 {
                     numlen++;
                 }
+
                 if (   (numlen < maxlen)
-                    && (   (CommandLine[numlen] == '.')
-                /*      || (CommandLine[numlen] == ',') */ )
-                    && (numlen + 1 < maxlen) 
-                    && Char.IsDigit(CommandLine[numlen + 1]))
+                    && (CommandLine[numlen] == 'x')
+                    && (numlen > 0)
+                    && (CommandLine[numlen-1] == '0')
+                    && (   (numlen < 2)
+                        || (!Char.IsDigit(CommandLine[numlen-2]))))
+                {
+                    numlen++;
+                    hexNumberPos = numlen;
+                    numberBase = 0x10; // Hexadecimal number expected
+                }
+
+                while ((numlen < maxlen)
+                       && (Char.IsDigit(CommandLine[numlen])
+                           || ((numberBase == 0x10)
+                               && Char.IsLetter(CommandLine[numlen])
+                    //&& Char.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
+                               && TokenString.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
                 {
                     numlen++;
                 }
-                while (numlen < maxlen && Char.IsDigit(CommandLine[numlen]))
+
+                if ((numlen < maxlen)
+                    && ((CommandLine[numlen] == '.')
+                        || (CommandLine[numlen] == ',')))
+                {
+                    DecimalCharPos = numlen;
+                    numlen++;
+                }
+                while (   (numlen < maxlen)
+                       && (   Char.IsDigit(CommandLine[numlen]) 
+                           || (   (numberBase == 0x10) 
+                               && Char.IsLetter(CommandLine[numlen])
+                               //&& Char.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
+                               && TokenString.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
                 {
                     numlen++;
                 }
+
                 if ((numlen < maxlen)
                     && ((CommandLine[numlen] == 'E')
-                        || (CommandLine[numlen] == 'e')))
+                        || (CommandLine[numlen] == 'e')
+                        || (CommandLine[numlen] == 'H')
+                        || (CommandLine[numlen] == 'h')))
                 {
+                    exponentCharPos = numlen;
+
                     numlen++;
                     if ((numlen < maxlen)
                         && ((CommandLine[numlen] == '-')
                             || (CommandLine[numlen] == '+')))
                     {
+                        exponentNumberSignPos = numlen;
                         numlen++;
                     }
+
                     while (numlen < maxlen && Char.IsDigit(CommandLine[numlen]))
                     {
                         numlen++;
                     }
+
+                    if ((numlen < maxlen)
+                        && (CommandLine[numlen] == 'x')
+                        && (numlen > 0)
+                        && (CommandLine[numlen - 1] == '0')
+                        && ((numlen < 2)
+                            || (!Char.IsDigit(CommandLine[numlen - 2]))))
+                    {
+                        numlen++;
+                        exponentHexNumberPos = numlen;
+                        exponentNumberBase = 0x10; // Hexadecimal number expected
+                    }
+
+                    while ((numlen < maxlen)
+                           && (Char.IsDigit(CommandLine[numlen])
+                               || ((exponentNumberBase == 0x10)
+                                   && Char.IsLetter(CommandLine[numlen])
+                        //&& Char.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
+                                   && TokenString.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
+                    {
+                        numlen++;
+                    }
+
                 }
 
                 if (numlen > 0)
                 {
-                    OK = Double.TryParse(CommandLine.Substring(0, numlen), System.Globalization.NumberStyles.Float, NumberFormatInfo.InvariantInfo, out D); // styles, provider
+                    //System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
+                     
+                    if (numberBase == 0x10 || exponentNumberBase == 0x10)
+                    {   // Hex number
+                        //Double baseNumberD = 0;
+                        int baseNumberLen = numlen;
+                        if (exponentCharPos > 0)
+                        {
+                            baseNumberLen = exponentCharPos -1;
+                        }
+                        //OK = Double.TryParse(CommandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); 
+
+                        if (numberBase == 10)
+                        {
+                            System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
+                            OK = Double.TryParse(CommandLine.Substring(0, baseNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out D);
+                        }
+                        else
+                        {
+                            long baseNumberL = 0;
+                            int baseIntegralNumberLen = baseNumberLen - hexNumberPos;
+                            if (DecimalCharPos > 0)
+                            {
+                                baseIntegralNumberLen = DecimalCharPos - hexNumberPos;
+                            }
+                            
+                            System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.AllowHexSpecifier; // HexNumber
+                            OK = long.TryParse(CommandLine.Substring(hexNumberPos, baseIntegralNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out baseNumberL);
+                            D = baseNumberL;
+
+                            if (DecimalCharPos > 0)
+                            {
+                                int NoOfChars = baseNumberLen - (DecimalCharPos + 1);
+                                OK = long.TryParse(CommandLine.Substring(DecimalCharPos + 1, NoOfChars), numberstyle, NumberFormatInfo.InvariantInfo, out baseNumberL);
+                                D = D + (baseNumberL / Math.Pow(16, NoOfChars)) ;
+                                
+                            }
+                            
+                            if (numberSignPos > 0 && CommandLine[numberSignPos] == '-')
+                            {
+                                D = -D;
+                            }
+                        }
+                        if (OK && exponentCharPos > 0)
+                        {
+                            Double exponentNumberD = 0;
+                            if (numberBase == 10)
+                            {
+                                System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
+                                OK = Double.TryParse(CommandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumberD);
+                            }
+                            else
+                            {
+                                long exponentNumber = 0;
+                                System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.AllowHexSpecifier; // HexNumber
+                                OK = long.TryParse(CommandLine.Substring(exponentHexNumberPos, numlen - (exponentHexNumberPos-1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumber);
+                                exponentNumberD = exponentNumber;
+
+                                if (exponentNumberSignPos > 0 && CommandLine[exponentNumberSignPos] == '-')
+                                {
+                                    exponentNumberD = -exponentNumberD;
+                                }
+                            }
+
+                            if (OK)
+                            {
+                                Double Exponent;
+                                if ((CommandLine[exponentCharPos] == 'H') || (CommandLine[exponentCharPos] == 'h'))
+                                {
+                                    Exponent = 0x10;
+                                }
+                                else
+                                {
+                                    Exponent = 10;
+                                }
+
+                                D = D * Math.Pow(Exponent, exponentNumberD);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
+                        OK = Double.TryParse(CommandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); // styles, provider
+                    }
                     if (OK)
                     {
                         CommandLine = CommandLine.Substring(numlen);
@@ -720,5 +1280,99 @@ namespace PhysicalCalculator.Expression
         }
 
         #endregion Physical Expression parser methods
+    }
+
+
+       // Operator kinds
+        // Precedence for a group of operators is same as first (lowest) enum in the group
+        public enum OperatorKind
+        {
+            // Precediens == 0
+            none = 0,
+
+            // Precediens == 1
+            parenbegin = 1,
+            parenend = 2,
+
+            // Precediens == 3
+            add = 3,
+            sub = 4,
+
+            // Precediens == 5
+            mult = 5,
+            div = 6,
+
+            // Precediens == 7
+            pow = 7,
+            root = 8,
+
+            // Precediens == 9
+            unaryplus = 9,
+            unaryminus = 10
+        }
+
+    public static class OperatorKindExtensions
+    {
+
+        public static OperatorKind OperatorPrecedence(OperatorKind operatoren)
+        {
+            switch (operatoren)
+            {
+                case OperatorKind.parenbegin: // "("
+                case OperatorKind.parenend: // ")":
+                    return OperatorKind.parenbegin; // 1;
+                case OperatorKind.add: // "+"
+                case OperatorKind.sub: // "-":
+                     return OperatorKind.add; // 3;
+                case OperatorKind.mult: // "*":
+                case OperatorKind.div: // "/":
+                     return OperatorKind.mult; // 5;
+                case OperatorKind.pow: // "^":
+                case OperatorKind.root: // "!":
+                     return OperatorKind.pow; // 7;
+                case OperatorKind.unaryplus: // unaryplus:
+                case OperatorKind.unaryminus: // UnaryMinus:
+                     return OperatorKind.unaryplus; // 9;
+            }
+
+            return OperatorKind.none;
+        }
+
+        public static OperatorKind OperatorKindFromChar(Char c)
+        {
+            switch (c)
+            {
+                case '(':
+                    return OperatorKind.parenbegin; // 1;
+                case ')':
+                    return OperatorKind.parenend; // 2;
+                case '+':
+                    return OperatorKind.add; // 3;
+                case '-':
+                    return OperatorKind.sub; // 4;
+                case '*':
+                case '·':  // centre dot  '\0x0B7' (char)183 U+00B7
+                    return OperatorKind.mult; // 5;
+                case '/':
+                    return OperatorKind.div; // 6;
+                case '^':
+                    return OperatorKind.pow; // 7;
+                // case '!':
+                //      return OperatorKind.root; // 8;
+                /*
+                case '+': // unaryplus:
+                     return OperatorKind.unaryplus; // 9;
+                case '-': // UnaryMinus:
+                     return OperatorKind.unaryminus; // 10;
+                 */
+            }
+
+            return OperatorKind.none;
+        }
+
+        public static OperatorKind Precedence(this OperatorKind operatoren)
+        {
+            return OperatorPrecedence(operatoren);
+        }
     }
 }

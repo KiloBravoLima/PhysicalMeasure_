@@ -250,7 +250,12 @@ namespace PhysicalCalculator
                     {
                         ResultLine = "Reading from file " + FileNameStr;
                     }
-
+                }
+                catch (DirectoryNotFoundException e)
+                {
+                    S = "";
+                    ResultLine = "Directory not found. " + e.Message;
+                    FileNameStr = null;
                 }
                 catch (FileNotFoundException e)
                 {
@@ -289,6 +294,9 @@ namespace PhysicalCalculator
     {
         public String FileNameStr = null;
         public StreamWriter FileStreamWriter = null;
+
+        public List<String> ResultLines = null;
+
         public int LinesWritten = 0;
 
         public ResultWriter()
@@ -300,6 +308,7 @@ namespace PhysicalCalculator
         {
             this.FileNameStr = FileNameStr;
             this.FileStreamWriter = null;
+            this.ResultLines = null;
         }
 
         public void CheckFile(ref string ResultText)
@@ -333,6 +342,10 @@ namespace PhysicalCalculator
             {
                 FileStreamWriter.WriteLine(ResultLine);
             }
+            else if (ResultLines != null)
+            {
+                ResultLines.Add(ResultLine);
+            }
             else
             {
                 Console.WriteLine(ResultLine);
@@ -347,6 +360,17 @@ namespace PhysicalCalculator
             if (FileStreamWriter != null)
             {
                 FileStreamWriter.Write(ResultText);
+            }
+            else if (ResultLines != null)
+            {
+                if (ResultLines.Count > 0)
+                {
+                    ResultLines[ResultLines.Count - 1] += ResultText;
+                }
+                else
+                {
+                    ResultLines.Add(ResultText);
+                }
             }
             else
             {
@@ -368,6 +392,7 @@ namespace PhysicalCalculator
     {
         private CommandAccessorStack CommandAccessors = null;
         public ResultWriter ResultLineWriter = null;
+        public Boolean WriteCommandToResultWriter = true;
         public Boolean ReadFromConsoleWhenEmpty = false;
         private Tracelevel GlobalOutputTracelevel = Tracelevel.normal; //Tracelevel.all; // Tracelevel.normal;
 
@@ -537,7 +562,7 @@ namespace PhysicalCalculator
                     CommandAccessors = null;
                 }
 
-                if (!String.IsNullOrWhiteSpace(CommandLine))
+                if (WriteCommandToResultWriter && !String.IsNullOrWhiteSpace(CommandLine))
                 {   // Echo Command to output
                     if (!String.IsNullOrWhiteSpace(ResultLine))
                     {

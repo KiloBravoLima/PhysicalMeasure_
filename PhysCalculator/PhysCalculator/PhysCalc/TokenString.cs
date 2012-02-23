@@ -61,6 +61,12 @@ namespace TokenParser
 
         #region Class extension parse methodes
 
+        public static Boolean IsHexDigit(this Char c)
+        {
+            //return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9');
+            return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+        }
+
         public static Boolean IsKeyword(this String CommandLine, String Keyword)
         {
             return CommandLine.Equals(Keyword, StringComparison.OrdinalIgnoreCase);
@@ -79,6 +85,7 @@ namespace TokenParser
         public static String ReadToken(this String CommandLine, out String Token)
         {
             int i = PeekToken(CommandLine, out Token);
+            //return CommandLine.Substring(i+1).TrimStart();
             return CommandLine.Substring(i).TrimStart();
         }
 
