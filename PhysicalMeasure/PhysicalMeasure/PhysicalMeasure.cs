@@ -1,4 +1,4 @@
-﻿﻿/*   http://physicalmeasure.codeplex.com   */
+﻿/*   http://physicalmeasure.codeplex.com   */
 
 using System;
 using System.Collections.Generic;
@@ -22,6 +22,21 @@ namespace PhysicalMeasure
         {
         }
     }
+
+
+    public class PhysicalUnitMathException : Exception
+    {
+        public PhysicalUnitMathException()
+            : this("The result of the math operation on the PhysicalUnit argument can't be represented by this implementation of PhysicalMeasure.")
+        {
+        }
+
+        public PhysicalUnitMathException(String message)
+            : base(message)
+        {
+        }
+    }
+
     #endregion Physical Measure Exceptions
 
     #region Physical Measure Constants
@@ -350,6 +365,42 @@ namespace PhysicalMeasure
             }
         }
 
+        static public SByte[] Power(SByte[] exponents, SByte exponent)
+        {
+            SByte[] NewExponents = new SByte[Physics.NoOfMeasures];
+            SByte i = 0;
+            do
+            {
+                NewExponents[i] = (SByte)(exponents[i]/exponent);
+
+                i++;
+            } while (i < Physics.NoOfMeasures);
+
+            return NewExponents;
+        }
+
+        static public SByte[] Root(SByte[] exponents, SByte exponent)
+        {
+            SByte[] NewExponents = new SByte[Physics.NoOfMeasures];
+            SByte i = 0;
+            bool Ok = true;
+            do
+            {
+                int Remainder;
+                int NewExponent = Math.DivRem(exponents[i], exponent, out Remainder);
+                Ok = Remainder == 0;
+                NewExponents[i] = (SByte)(exponents[i]/exponent);
+
+                i++;
+            } while (i < Physics.NoOfMeasures && Ok);
+
+            if (!Ok) 
+            {
+                NewExponents = null;
+            }
+            return NewExponents;
+        }
+
     }
 
     #endregion Dimension Exponets Classes
@@ -553,16 +604,7 @@ namespace PhysicalMeasure
         { 
             get 
             {
-                SByte[] exponents = Exponents;
-
-                foreach (SByte e in exponents)
-                {
-                    if (e != 0)
-                    {
-                        return false; 
-                    }
-                }
-                return true; 
+                return DimensionExponets.IsDimensionless(Exponents);
             } 
         }
 
@@ -608,10 +650,436 @@ namespace PhysicalMeasure
         public static IPhysicalUnit ParseUnit(ref String s)
         {
             IPhysicalUnit pu = null;
-            return Parse(pu, ref s);
+            //return ParseUnit(pu, ref s);
+            return ParseUnitLALR(pu, ref s);
         }
 
-        public static IPhysicalUnit Parse(IPhysicalUnit dimensionless, ref String s)
+        // Token kind enums
+        enum tokenkind
+        {
+            None = 0,
+            Unit = 1,
+            Exponent = 2,
+            Operator = 3
+        }
+
+
+        // Operator kind enums
+        // Precedence for a group of operators is same as first (lowest) enum in the group
+        enum operatorkind
+        {
+            // Precediens == 2
+            mult = 2,
+            div = 3,
+
+            // Precediens == 4
+            pow = 4,
+            root = 5,
+
+        }
+
+        static operatorkind OperatorPrecedence(operatorkind operatoren)
+        {
+            //operatorkind precedence = (operatoren == operatorkind.div ? operatorkind.mult : operatoren);
+            operatorkind precedence = (operatorkind )((int)operatoren & 0XE);
+
+            return precedence;
+        }
+
+        class token
+        {
+            public readonly tokenkind TokenKind;
+
+            public readonly IPhysicalUnit PhysicalUnit;
+            public readonly SByte Exponent;
+            public readonly operatorkind Operator;
+
+            public token(IPhysicalUnit pu)
+            {
+                this.TokenKind = tokenkind.Unit;
+                this.PhysicalUnit = pu;
+            }
+
+            public token(sbyte exponent)
+            {
+                this.TokenKind = tokenkind.Exponent;
+                this.Exponent = exponent;
+            }
+
+            public token(operatorkind Operator)
+            {
+                this.TokenKind = tokenkind.Operator;
+                this.Operator = Operator;
+            }
+        }
+
+        class expressiontokenizer
+        {
+            public String InputString;
+            public int Pos = 0;
+            public int AfterLastOperandPos = 0;
+            public int LastValidPos = 0;
+            public Boolean InputRecognaized = true;
+            public IPhysicalUnit dimensionless = Physics.dimensionless;
+            public Boolean ThrowExceptionOnInvalidInput = false;
+
+            private Stack<operatorkind> Operators = new Stack<operatorkind>();
+            private List<token> Tokens = new List<token>();
+
+            tokenkind LastReadToken = tokenkind.None;
+            
+            public expressiontokenizer(String InputString)
+            {
+                this.InputString = InputString;
+            }
+
+            public expressiontokenizer(IPhysicalUnit dimensionless, String InputString)
+            {
+                this.dimensionless = dimensionless;
+                this.InputString = InputString;
+            }
+
+            public string GetRemainingInput()
+            {
+                return InputString.Substring(Pos); 
+            }
+
+            public string GetRemainingInputForLastValidPos()
+            {
+                return InputString.Substring(LastValidPos);
+            }
+
+            public void SetValidPos()
+            {
+                //if (Operators.Count == 0 && Tokens.Count == 0) 
+                if (Operators.Count <= 1 && Tokens.Count == 0) 
+                {
+                    //LastValidPos = Pos;
+                    LastValidPos = AfterLastOperandPos;
+                }
+            }
+
+            private Boolean PushNewOperator(operatorkind newOperator)
+            {
+                if (LastReadToken != tokenkind.Operator)
+                {
+                    if (Operators.Count > 0)
+                    {
+                        // Pop operators with precedence higher than new operator
+                        operatorkind Precedence = OperatorPrecedence(newOperator);
+                        while ((Operators.Count > 0) && (Operators.Peek() >= Precedence))
+                        {
+                            Tokens.Add(new token(Operators.Pop()));
+                        }
+                    }
+                    Operators.Push(newOperator);
+                    LastReadToken = tokenkind.Operator;
+
+                    return true;
+                }
+                else
+                {
+                    if (ThrowExceptionOnInvalidInput)
+                    {
+                        throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. Invalid or missing unit at pos " + Pos.ToString());
+                    }
+
+                    return false;
+                }
+            }
+
+            private token RemoveFirstToken()
+            {   // return first operator from post fix operators
+                token Token = Tokens[0];
+                Tokens.RemoveAt(0);
+
+                return Token;
+            }
+
+            public token GetToken()
+            {
+                Debug.Assert(InputString != null);
+
+                if (Tokens.Count > 0)
+                {   // return first operator from post fix operators
+                    return RemoveFirstToken();
+                }
+
+                while ((InputString.Length > Pos) && (InputRecognaized))
+                {
+                    Char c = InputString[Pos];
+                    if (Char.IsWhiteSpace(c))
+                    {
+                        // Ignore spaces, tabs, etc.
+                        Pos++;
+                    }
+                    else if (c == '*'
+                        || c == '·') // centre dot  '\0x0B7' (char)183 U+00B7
+                    {
+                        if (PushNewOperator(operatorkind.mult))
+                        {
+                            Pos++;
+                        }
+                        else
+                        {
+                            // return null;
+                            InputRecognaized = false;
+                        }
+                    }
+                    else if (c == '/') 
+                    {
+                        if (PushNewOperator(operatorkind.div))
+                        {
+                            Pos++;
+                        }
+                        else
+                        {
+                            // return null;
+                            InputRecognaized = false;
+                        }
+                    }
+                    else if (c == '^')
+                    {
+                        if (PushNewOperator(operatorkind.pow))
+                        {
+                            Pos++;
+                        }
+                        else
+                        {
+                            // return null;
+                            InputRecognaized = false;
+                        }
+                    }
+                    else if (c == '-'
+                             || c == '+'
+                             || Char.IsDigit(c))
+                    {
+                        // An exponent
+                        if ((LastReadToken != tokenkind.Unit)                // Exponent can follow unit directly 
+                            && ((LastReadToken != tokenkind.Operator)          // or follow pow operator 
+                                 || (Operators.Peek() != operatorkind.pow)))
+                        {
+                            if (ThrowExceptionOnInvalidInput)
+                            {
+                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. An exponent must follow a unit or pow operator. Invalid exponent at '" + c + "' at pos " + Pos.ToString());
+                            }
+                            else
+                            {
+                                // return null;
+                                InputRecognaized = false;
+                            }
+                        }
+                        else
+                        {
+                            // Try to read an exponent from input
+
+                            Int16 numlen = 1;
+
+                            int maxlen = Math.Min(InputString.Length - Pos, 1 + 3); // Max length of sign and digits to look for
+                            while (numlen < maxlen && Char.IsDigit(InputString[Pos + numlen]))
+                            {
+                                numlen++;
+                            }
+
+                            SByte exponent;
+                            if (SByte.TryParse(InputString.Substring(Pos, numlen), out exponent))
+                            {
+                                if ((LastReadToken == tokenkind.Operator)
+                                    && (Operators.Peek() == operatorkind.pow))
+                                {
+                                    // Exponent follow pow operator; 
+                                    // Remove pow operator from operator stack since it is handled as implicit in parser.
+                                    Operators.Pop();
+                                }
+
+                                //InputString = InputString.Substring(numlen);
+                                Pos += numlen;
+                                AfterLastOperandPos = Pos;
+
+                                //puRes = pu.CombinePow(exponent);
+                                //Operators.Push(exponent);
+                                LastReadToken = tokenkind.Exponent;
+
+                                return new token(exponent);
+                            }
+                            else
+                            {
+                                if (ThrowExceptionOnInvalidInput)
+                                {
+                                    throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. Invalid or missing exponent after '" + c + "' at pos " + Pos.ToString());
+                                }
+                                else
+                                {
+                                    // return null;
+                                    InputRecognaized = false;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if ((LastReadToken == tokenkind.Unit)
+                            || (LastReadToken == tokenkind.Exponent)
+                            || ((LastReadToken == tokenkind.Operator)    // Unit follow pow operator; 
+                                && (Operators.Peek() == operatorkind.pow)))
+                        {
+                            if (ThrowExceptionOnInvalidInput)
+                            {
+                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. An unit must not follow an unit. Missing operator at '" + c + "' at pos " + Pos.ToString());
+                            }
+                            else
+                            {
+                                // return null;
+                                InputRecognaized = false;
+                            }
+                        }
+                        else
+                        {
+
+                            // Try to read a unit from input
+                            int maxlen = Math.Min(1 + 3, InputString.Length - Pos); // Max length of scale and symbols to look for
+
+                            String tempstr = InputString.Substring(Pos, maxlen);
+                            maxlen = tempstr.IndexOfAny((new char[] { ' ', '*', '·', '/', '^', '+', '-', '(', ')' }));  // '·'  centre dot '\0x0B7' (char)183 U+00B7
+                            if (maxlen < 0)
+                            {
+                                maxlen = tempstr.Length;
+                            }
+
+                            for (int unitlen = maxlen; unitlen > 0; unitlen--)
+                            {
+                                String UnitStr = tempstr.Substring(0, unitlen);
+                                IPhysicalUnit su = Physics.ScaledUnitFromSymbol(UnitStr);
+                                if (su != null)
+                                {
+                                    Pos += unitlen;
+                                    AfterLastOperandPos = Pos;
+
+                                    LastReadToken = tokenkind.Unit;
+                                    return new token(su);
+                                }
+                            }
+
+                            if (ThrowExceptionOnInvalidInput)
+                            {
+                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. Invalid unit '" + InputString.Substring(Pos, maxlen) + "' at pos " + Pos.ToString());
+                            }
+                            else
+                            {
+                                // return null;
+                                InputRecognaized = false;
+                            }
+                        }
+                    }
+
+                    if (Tokens.Count > 0)
+                    {   // return first operator from post fix operators
+                        return RemoveFirstToken();
+                    }
+                };
+
+                if (InputRecognaized)
+                {
+                    // Retrieve remaining operators from stack
+                    while (Operators.Count > 0)
+                    {
+                        Tokens.Add(new token(Operators.Pop()));
+                    }
+                }
+                if (Tokens.Count > 0)
+                {   // return first operator from post fix operators
+                    return RemoveFirstToken();
+                }
+
+                return null;
+            }
+        }
+
+        public static IPhysicalUnit ParseUnitLALR(IPhysicalUnit dimensionless, ref String s)
+        {
+            if (dimensionless == null)
+            {
+                dimensionless = Physics.dimensionless;
+            }
+
+            expressiontokenizer Tokenizer = new expressiontokenizer(dimensionless, s);
+
+            Tokenizer.ThrowExceptionOnInvalidInput = false;
+            Stack<IPhysicalUnit> Operands = new Stack<IPhysicalUnit>();
+
+            Tokenizer.SetValidPos();
+            token Token = Tokenizer.GetToken();
+            while (Token != null)
+            {
+                if (Token.TokenKind == tokenkind.Unit)
+                {
+                    // Stack unit operand
+                    Operands.Push(Token.PhysicalUnit);
+                }
+                /*
+                else if (Token.TokenKind == tokenkind.Exponent)
+                {
+                    // Stack exponent operand
+                    Operands.Push(Token.PhysicalUnit);
+                }
+                */
+                else if (Token.TokenKind == tokenkind.Exponent)
+                {
+                    IPhysicalUnit pu = Operands.Pop();
+
+                    // Combine pu and expont to the new unit pu^exponent   
+                    Operands.Push(pu.CombinePow(Token.Exponent));
+                }
+                else if (Token.TokenKind == tokenkind.Operator)
+                {
+
+                    /****
+                     * pow operator is handled implicit
+                     * 
+                    if (Token.Operator == operatorkind.pow)
+                    {
+                        Debug.Assert(Operands.Count >= 1);
+                        SByte exponentSecond = Operands.Pop();
+                        IPhysicalUnit puFirst = Operands.Pop();
+                        // Combine pu and expont to the new unit pu^exponent   
+                        Operands.Push(puFirst.CombinePow(exponentSecond));
+                    }
+                    else
+                    ****/
+                    {
+                        Debug.Assert(Operands.Count >= 2);
+
+                        IPhysicalUnit puSecond = Operands.Pop();
+                        IPhysicalUnit puFirst = Operands.Pop();
+
+                        if (Token.Operator == operatorkind.mult)
+                        {
+                            // Combine pu1 and pu2 to the new unit pu1*pu2   
+                            Operands.Push(puFirst.CombineMultiply(puSecond));
+                        }
+                        else if (Token.Operator == operatorkind.div)
+                        {
+                            // Combine pu1 and pu2 to the new unit pu1/pu2
+                            Operands.Push(puFirst.CombineDivide(puSecond));
+                        }
+                    }
+                }
+                if (Operands.Count == 1) {
+                    Tokenizer.SetValidPos();
+                }
+                Token = Tokenizer.GetToken();
+            }
+
+            //s = Tokenizer.GetRemainingInput(); // Remaining of input string
+            s = Tokenizer.GetRemainingInputForLastValidPos(); // Remaining of input string
+
+            Debug.Assert(Operands.Count <= 1);  // 0 or 1
+            
+            //return (Operands.Count > 0) ? Operands.Pop() : null;
+            return (Operands.Count > 0) ? Operands.Last() : null;
+        }
+
+        public static IPhysicalUnit ParseUnit(IPhysicalUnit dimensionless, ref String s)
         {
             if (dimensionless == null)
             {
@@ -642,7 +1110,7 @@ namespace PhysicalMeasure
                     || (s[0] == '·')) // centre dot  '\0x0B7' (char)183 U+00B7
                 {
                     s = s.Substring(1);
-                    IPhysicalUnit pu2 = Parse(pu.Dimensionless, ref s);
+                    IPhysicalUnit pu2 = ParseUnit(pu.Dimensionless, ref s);
                     if (pu2 != null)
                     {   // Combine pu and pu2 to the new unit pu*pu2
                         puRes = pu.CombineMultiply(pu2);
@@ -655,7 +1123,7 @@ namespace PhysicalMeasure
                 else if (s[0] == '/')
                 {
                     s = s.Substring(1);
-                    IPhysicalUnit pu2 = Parse(pu.Dimensionless, ref s);
+                    IPhysicalUnit pu2 = ParseUnit(pu.Dimensionless, ref s);
                     if (pu2 != null)
                     {   // Combine pu and pu2 to the new unit pu/pu2
                         puRes = pu.CombineDivide(pu2);
@@ -671,7 +1139,7 @@ namespace PhysicalMeasure
                     try
                     {
                         String TempStr = s.Substring(1); // Skip ' '
-                        IPhysicalUnit pu2 = Parse(pu.Dimensionless, ref TempStr);
+                        IPhysicalUnit pu2 = ParseUnit(pu.Dimensionless, ref TempStr);
                         if (pu2 != null)
                         {   // Combine pu and pu2 to the new unit pu*pu2
                             puRes = pu.CombineMultiply(pu2);
@@ -696,7 +1164,7 @@ namespace PhysicalMeasure
                 if (s[0] == '(')
                 { // paranteses
                     s = s.Substring(1); // Skip begin parantes '('
-                    pu = Parse(dimensionless, ref s);
+                    pu = ParseUnit(dimensionless, ref s);
                     if (s[0] == ')')
                     {
                         s = s.Substring(1); // Skip end parantes ')'
@@ -775,6 +1243,7 @@ namespace PhysicalMeasure
 
         public virtual String CombinedUnitString(Boolean MayUseSlash = true, Boolean InvertExponents = false)
         {
+            // 2012-01-15 ?? Stil valid to assert InvertExponents == false ?? 
             Debug.Assert(InvertExponents == false);
             return UnitString();
         }
@@ -1490,6 +1959,11 @@ namespace PhysicalMeasure
         {
         }
 
+        public PrefixedUnitExponent(IPrefixedUnitExponent pue)
+            : this(pue.PrefixExponent, pue.Unit, pue.Exponent)
+        {
+        }
+
         public PrefixedUnitExponent(SByte PrefixExponent, IPhysicalUnit Unit, SByte Exponent)
             : base(PrefixExponent, Unit)
         {
@@ -1589,6 +2063,49 @@ namespace PhysicalMeasure
                 }
             }
             return Str;
+        }
+
+        public PrefixedUnitExponentList Power(SByte exponent)
+        {
+            PrefixedUnitExponentList Result = new PrefixedUnitExponentList();
+            foreach (IPrefixedUnitExponent ue in this)
+            {
+                PrefixedUnitExponent pue = new PrefixedUnitExponent(ue);
+                SByte NewExponent = (SByte)(ue.Exponent * exponent);
+
+                Debug.Assert(pue.PrefixExponent == 0);
+                pue.Exponent = NewExponent;
+                Result.Add(ue);
+            }
+
+            return Result;
+        }
+
+        public PrefixedUnitExponentList Root(SByte exponent)
+        {
+            PrefixedUnitExponentList Result = new PrefixedUnitExponentList();
+            Boolean AllFactorsRootIsInteger = true;
+            foreach (IPrefixedUnitExponent ue in this)
+            {
+                PrefixedUnitExponent pue = new PrefixedUnitExponent(ue);
+                int Remainder;
+                int NewExponent = Math.DivRem(ue.Exponent, exponent, out Remainder);
+                AllFactorsRootIsInteger &= (Remainder == 0);
+
+                //Debug.Assert(Math.IEEERemainder(ue.Exponent, exponent) == 0);
+                //Debug.Assert(AllFactorsRootIsInteger);
+
+                Debug.Assert(pue.PrefixExponent == 0);
+                pue.Exponent = (SByte)NewExponent;
+                Result.Add(ue);
+            }
+
+            if (!AllFactorsRootIsInteger)
+            {
+                Result = null;
+            }
+
+            return Result;
         }
     }
 
@@ -1718,7 +2235,10 @@ namespace PhysicalMeasure
 
             foreach (IPrefixedUnitExponent pue in Denominators)
             {
-                pq = pq.Divide(pue.PhysicalQuantity(ref d, ISystem));
+                IPhysicalQuantity pue_pq = pue.PhysicalQuantity(ref d, ISystem);
+                pue_pq = pue_pq.ConvertToSystemUnit();
+
+                pq = pq.Divide(pue_pq);
             }
 
             pq.Value *= d; 
@@ -1731,8 +2251,27 @@ namespace PhysicalMeasure
 
         public override IPhysicalUnit Dimensionless { get { return new CombinedUnit(); } }
 
+        public override Boolean IsDimensionless
+        {
+            get
+            {
+                if (Numerators.Count == 0 && Denominators.Count == 0)
+                {
+                    return true;
+                }
+                return base.IsDimensionless;
+            }
+        }
+
         public override IPhysicalQuantity Multiply(IPrefixedUnitExponent pue2)
         {
+
+            if (pue2.Unit.IsDimensionless)
+            {
+                PhysicalQuantity pqtemp = new PhysicalQuantity(1, this);
+                return pqtemp;
+            }
+
             PrefixedUnitExponentList TempNumerators = new PrefixedUnitExponentList();
             PrefixedUnitExponentList TempDenominators = new PrefixedUnitExponentList();
 
@@ -1866,6 +2405,7 @@ namespace PhysicalMeasure
 
         public override PhysicalQuantity Power(SByte exponent)
         {
+            /*
             PrefixedUnitExponentList TempNumerators = new PrefixedUnitExponentList();
             PrefixedUnitExponentList TempDenominators = new PrefixedUnitExponentList();
 
@@ -1880,32 +2420,81 @@ namespace PhysicalMeasure
                 ue.Exponent *= exponent;
                 TempDenominators.Add(ue);
             }
-
-            CombinedUnit cu = new CombinedUnit(TempNumerators, TempDenominators);
+            */
+            CombinedUnit cu = new CombinedUnit(Numerators.Power(exponent), Denominators.Power(exponent));
             PhysicalQuantity pq = new PhysicalQuantity(1, cu);
             return pq;
         }
 
         public override PhysicalQuantity Root(SByte exponent)
         {
+            /*
             PrefixedUnitExponentList TempNumerators = new PrefixedUnitExponentList();
             PrefixedUnitExponentList TempDenominators = new PrefixedUnitExponentList();
-
+            Boolean AllFactorsRootIsInteger = true;
             foreach (IPrefixedUnitExponent ue in Numerators)
             {
-                ue.Exponent /= exponent;
+                int NewExponent;
+                int Remainder = Math.DivRem(ue.Exponent, exponent, out NewExponent);
+                AllFactorsRootIsInteger &= (Remainder == 0);
+
+                //Debug.Assert(Math.IEEERemainder(ue.Exponent, exponent) == 0);
+                //Debug.Assert(AllFactorsRootIsInteger);
+
+                ue.Exponent = (SByte)NewExponent;
                 TempNumerators.Add(ue);
             }
 
-            foreach (IPrefixedUnitExponent ue in Denominators)
+            if (AllFactorsRootIsInteger)
             {
-                ue.Exponent /= exponent;
-                TempDenominators.Add(ue);
+                foreach (IPrefixedUnitExponent ue in Denominators)
+                {
+                    int NewExponent;
+                    int Remainder = Math.DivRem(ue.Exponent, exponent, out NewExponent);
+                    AllFactorsRootIsInteger &= (Remainder == 0);
+
+                    //Debug.Assert(Math.IEEERemainder(ue.Exponent, exponent) == 0);
+                    //Debug.Assert(AllFactorsRootIsInteger);
+
+                    ue.Exponent = (SByte)NewExponent;
+                    TempDenominators.Add(ue);
+                }
+            }
+            */
+            PrefixedUnitExponentList TempNumerators;
+            PrefixedUnitExponentList TempDenominators = null;
+            TempNumerators = Numerators.Root(exponent);
+            if (TempNumerators != null)
+            { 
+                TempDenominators = Denominators.Root(exponent);
             }
 
-            CombinedUnit cu = new CombinedUnit(TempNumerators, TempDenominators);
-            PhysicalQuantity pq = new PhysicalQuantity(1, cu);
-            return pq;
+            if ((TempNumerators != null) && (TempDenominators != null))
+            {
+                CombinedUnit cu = new CombinedUnit(TempNumerators, TempDenominators);
+                PhysicalQuantity pq = new PhysicalQuantity(1, cu);
+                return pq;
+            }
+            else
+            {
+
+                SByte[] NewExponents = this.Exponents;
+                if (NewExponents != null)
+                {
+                    NewExponents = DimensionExponets.Root(NewExponents, exponent);
+                    DerivedUnit du = new DerivedUnit(this.System, NewExponents);
+                    PhysicalQuantity pq = new PhysicalQuantity(1, du);
+                    return pq;
+                }
+                else
+                {
+                    Debug.Assert(NewExponents != null);
+                    //if (ThrowExceptionOnUnitMathError) {
+                        throw new PhysicalUnitMathException("The result of the math operation on the PhysicalUnit argument can't be represented by this implementation of PhysicalMeasure: ("+  this.ToPrintString()+").Root(" + exponent.ToString()+ ")");
+                    //}
+                    //return null;
+                }
+            }
         }
 
         #endregion IPhysicalUnitMath Members
@@ -3357,7 +3946,8 @@ namespace PhysicalMeasure
         public PhysicalQuantity Root(SByte exponent)
         {
             IPhysicalQuantity pq = this.Unit.Rot(exponent);
-            pq.Value = pq.Value * System.Math.Pow(this.Value, 1.0/exponent);
+            //pq.Value = pq.Value * System.Math.Root(this.Value, exponent);
+            pq.Value = pq.Value * System.Math.Pow(this.Value, 1.0 / exponent);
             return new PhysicalQuantity(pq);
         }
 
@@ -3818,6 +4408,7 @@ namespace PhysicalMeasure
 
     #endregion Physical Unit System Statics
 }
+
 
 namespace PhysicalMeasure.Constants
 {
