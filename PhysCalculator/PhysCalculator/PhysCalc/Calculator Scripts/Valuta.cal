@@ -1,5 +1,6 @@
-// Saved 2011-06-16 09:00:00 to Valuta.cal
-// 
+﻿// Saved 2011-06-16 09:00:00 to Valuta.cal
+// UTF8
+
 unit DKR 
 unit SKR = 0.82 DKR
 unit NKR = 0.96 DKR
