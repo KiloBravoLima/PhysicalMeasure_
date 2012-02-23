@@ -11,6 +11,7 @@ using CommandParser;
 
 using PhysicalMeasure;
 using PhysicalCalculator.Expression;
+using PhysicalCalculator.Function;
 
 namespace PhysicalCalculator.Identifers
 {
@@ -377,6 +378,25 @@ namespace PhysicalCalculator.Identifers
 
     public class CalculatorEnviroment : NametableItem, IEnviroment
     {
+        public class FunctionParseInfo
+        {
+            public ICommandsEvaluator Function = null;
+            public String FunctionName = null;
+            //public IEnviroment Enviroment = null;
+            public INametableItem RedefineItem = null; 
+
+            public FunctionParseInfo(string NewFunctionName)
+            {
+                this.FunctionName = NewFunctionName;
+                this.Function = new PhysicalQuantityCommandsFunction();
+            }
+
+            // FunctionToParseInfo.FunctionName = FunctionName;
+            //FunctionToParseInfo.Function = new PhysicalQuantityCommandsFunction();
+            //CurrentContext.ParseState = CommandPaserState.readfunctionparamlist;
+
+        }
+
         public String Name = null;
         public EnviromentKind enviromentkind = EnviromentKind.unknown;
         public CalculatorEnviroment OuterContext = null;
@@ -402,8 +422,7 @@ namespace PhysicalCalculator.Identifers
         public NamedItemTable NamedItems = new NamedItemTable();
 
         public CommandPaserState ParseState = CommandPaserState.executecommandline;
-        public ICommandsEvaluator FunctionToParse = null;
-        public String FunctionToParseName = null;
+        public FunctionParseInfo FunctionToParseInfo = null;  
 
         public Tracelevel _OutputTracelevel = Tracelevel.normal;
 
@@ -415,7 +434,7 @@ namespace PhysicalCalculator.Identifers
 
         public override String ToListString(String Name)
         {
-            return String.Format("namespace {0}", Name);
+            return String.Format("Namespace {0}", Name);
         }
 
         #endregion INameTableItem interface implementation
@@ -437,6 +456,18 @@ namespace PhysicalCalculator.Identifers
 
             context = null;
             return false;
+        }
+
+        public void BeginParsingFunction(string FunctionName)
+        {
+            FunctionToParseInfo = new FunctionParseInfo(FunctionName);
+            ParseState = CommandPaserState.readfunctionparamlist; 
+        }
+
+        public void EndParsingFunction()
+        {
+            FunctionToParseInfo = null;
+            ParseState = CommandPaserState.executecommandline;
         }
 
         #region Common Identifier access
@@ -484,6 +515,8 @@ namespace PhysicalCalculator.Identifers
             {
                 ListStr = OuterContext.ListIdentifiers(ListContextName);
                 ListStringBuilder.Append(ListStr);
+                // ?? 2012-01-15
+                ListStringBuilder.AppendLine();
             }
             if (ListContextName)
             {
@@ -523,7 +556,6 @@ namespace PhysicalCalculator.Identifers
 
         public Boolean FunctionFind(String FunctionName, out IFunctionEvaluator functionevaluator)
         {
-            //CalculatorEnviroment context;
             IEnviroment context;
             INametableItem Item;
 
