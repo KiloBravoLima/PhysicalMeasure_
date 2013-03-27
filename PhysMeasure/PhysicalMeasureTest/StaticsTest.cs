@@ -70,10 +70,10 @@ namespace PhysicalMeasureTest
             Assert.AreEqual((int)MeasureKind.Length, 0);
             Assert.AreEqual((int)MeasureKind.Mass, 1);
             Assert.AreEqual((int)MeasureKind.Time, 2);
-            Assert.AreEqual((int)MeasureKind.Electric_current, 3);
-            Assert.AreEqual((int)MeasureKind.Thermodynamic_temperature, 4);
-            Assert.AreEqual((int)MeasureKind.Amount_of_substance, 5);
-            Assert.AreEqual((int)MeasureKind.Luminous_intensity, 6);
+            Assert.AreEqual((int)MeasureKind.ElectricCurrent, 3);
+            Assert.AreEqual((int)MeasureKind.ThermodynamicTemperature, 4);
+            Assert.AreEqual((int)MeasureKind.AmountOfSubstance, 5);
+            Assert.AreEqual((int)MeasureKind.LuminousIntensity, 6);
         }
 
 
@@ -190,7 +190,7 @@ namespace PhysicalMeasureTest
         ///A test for GetUnitSystemConversion
         ///</summary>
         [TestMethod()]
-        public void GetUnitSystemConversionTest()
+        public void StaticTest_GetUnitSystemConversionTest()
         {
             IUnitSystem SomeUnitSystem = Physics.SI_Units;
             IUnitSystem SomeOtherUnitSystem = Physics.MGD_Units;
@@ -360,9 +360,9 @@ namespace PhysicalMeasureTest
         public void ScaledUnitFromSymbolTestMilliKelvin()
         {
             String ScaledSymbolStr = "mK";
-            //IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)])));
+            //IPhysicalQuantity expected = (IPhysicalQuantity)(new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)])));
             //IPhysicalQuantity actual;
-            IPhysicalUnit expected = (IPhysicalUnit)(new CombinedUnit(new PrefixedUnitExponent(-3, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)]), 1)));
+            IPhysicalUnit expected = (IPhysicalUnit)(new CombinedUnit(new PrefixedUnitExponent(-3, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)]), 1)));
             IPhysicalUnit actual;
             actual = Physics.ScaledUnitFromSymbol(ScaledSymbolStr);
             Assert.AreEqual(expected, actual);
@@ -426,7 +426,7 @@ namespace PhysicalMeasureTest
         public void ConvertibleUnitTestCelsiusEqualsKelvin()
         {
             IPhysicalQuantity InCelcius = new PhysicalQuantity(-173, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[1])); // °C
-            IPhysicalQuantity InKelvin = new PhysicalQuantity(100.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)])); // K
+            IPhysicalQuantity InKelvin = new PhysicalQuantity(100.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)])); // K
 
             Assert.AreEqual(InCelcius, InKelvin);
         }
@@ -500,7 +500,7 @@ namespace PhysicalMeasureTest
         ///A test for the SI static class
         ///</summary>
         [TestMethod()]
-        public void CalculateEnergyIn1Gram()
+        public void StaticsTest_CalculateEnergyIn1Gram()
         {
             PhysicalQuantity m = new PhysicalQuantity(0.001, SI.Kg);
             PhysicalQuantity c = new PhysicalQuantity(299792458, SI.m / SI.s);

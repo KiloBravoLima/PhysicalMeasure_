@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyCompany("Klaus Bo Larsen")]
 [assembly: AssemblyProduct("PhysCalc")]
-[assembly: AssemblyCopyright("Copyright © Klaus Bo Larsen 2010-2011")]
+[assembly: AssemblyCopyright("Copyright © Klaus Bo Larsen 2010-2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -36,6 +36,7 @@ using System.Runtime.InteropServices;
 //[assembly: AssemblyVersion("1.0.0.0")]
 //[assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyFileVersion("1.0.*")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PhysCalculatorTests")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PhysCalculatorTests2")]

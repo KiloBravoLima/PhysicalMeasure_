@@ -13,7 +13,7 @@ using TokenParser;
 using CommandParser;
 
 using PhysicalMeasure;
-using PhysicalCalculator.Identifers;
+using PhysicalCalculator.Identifiers;
 using PhysicalCalculator.Expression;
 
 namespace PhysicalCalculator.Function
@@ -30,19 +30,19 @@ namespace PhysicalCalculator.Function
 
     abstract class PhysicalQuantityFunction : NametableItem, IFunctionEvaluator
     {
-        override public IdentifierKind identifierkind { get { return IdentifierKind.function; } }
+        override public IdentifierKind identifierkind { get { return IdentifierKind.Function; } }
 
         override public String ToListString(String Name)
         {
             StringBuilder ListStringBuilder = new StringBuilder();
 
-            ListStringBuilder.AppendFormat("Func {0}({1}) // BuildIn ", Name, ParamlistStr());
+            ListStringBuilder.AppendFormat("Func {0}({1}) // BuildIn ", Name, ParameterlistStr());
             return ListStringBuilder.ToString();
         }
 
         protected List<PhysicalQuantityFunctionParam> formalparamlist;
 
-        public List<PhysicalQuantityFunctionParam> Paramlist { get { return formalparamlist; } }
+        public List<PhysicalQuantityFunctionParam> Parameterlist { get { return formalparamlist; } }
 
         public void ParamListAdd(PhysicalQuantityFunctionParam param) 
         {
@@ -53,14 +53,14 @@ namespace PhysicalCalculator.Function
             formalparamlist.Add(param);
         }
 
-        public String ParamlistStr()
+        public String ParameterlistStr()
         {
             StringBuilder ListStringBuilder = new StringBuilder();
 
             if (formalparamlist != null)
             {
                 int ParamCount = 0;
-                foreach (PhysicalQuantityFunctionParam Param in Paramlist)
+                foreach (PhysicalQuantityFunctionParam Param in Parameterlist)
                 {
                     if (ParamCount > 0)
                     {
@@ -78,25 +78,25 @@ namespace PhysicalCalculator.Function
             return ListStringBuilder.ToString();
         }
 
-        public Boolean CheckParams(List<IPhysicalQuantity> parameterlist, ref String ResultLine)
+        public Boolean CheckParams(List<IPhysicalQuantity> actualParameterlist, ref String resultLine)
         {
-            int ParamCount = Paramlist.Count;
-            if (parameterlist.Count < ParamCount)
+            int ParamCount = Parameterlist.Count;
+            if (actualParameterlist.Count < ParamCount)
             {
-                ResultLine = "Missing parameter no " + (parameterlist.Count + 1).ToString() + " " + Paramlist[parameterlist.Count].Name;
+                resultLine = "Missing parameter no " + (actualParameterlist.Count + 1).ToString() + " " + Parameterlist[actualParameterlist.Count].Name;
                 return false;
             }
 
-            if (ParamCount < parameterlist.Count)
+            if (ParamCount < actualParameterlist.Count)
             {
-                ResultLine = "Too many parameters specified in function call: " + parameterlist.Count + ". " + ParamCount + " parameters was expected";
+                resultLine = "Too many parameters specified in function call: " + actualParameterlist.Count + ". " + ParamCount + " parameters was expected";
                 return false;
             }
 
             return true;
         }
 
-        abstract public Boolean Evaluate(CalculatorEnviroment LocalContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity FunctionResult, ref String ResultLine);
+        abstract public Boolean Evaluate(CalculatorEnviroment localContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine);
     }
 
 
@@ -114,22 +114,22 @@ namespace PhysicalCalculator.Function
             this.FF = func;
         }
 
-        override public Boolean Evaluate(CalculatorEnviroment LocalContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity FunctionResult, ref String ResultLine)
+        override public Boolean Evaluate(CalculatorEnviroment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {
 
-            if (!CheckParams(parameterlist, ref ResultLine))
+            if (!CheckParams(actualParameterlist, ref resultLine))
             {
-                FunctionResult = null;
+                functionResult = null;
                 return false;
             }
 
-            //FunctionResult = this.FF(parameterlist[0]);
-            FunctionResult = this.FF(parameterlist);
+            //functionResult = this.FF(parameterlist[0]);
+            functionResult = this.FF(actualParameterlist);
             return true;
         }
     }
     **/
-    
+
     class PhysicalQuantityFunction_PQ_SB : PhysicalQuantityFunction
     {
         //UnaryFunction F;
@@ -151,15 +151,15 @@ namespace PhysicalCalculator.Function
         }
 
 
-        override public Boolean Evaluate(CalculatorEnviroment LocalContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity FunctionResult, ref String ResultLine)
+        override public Boolean Evaluate(CalculatorEnviroment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {
-            if (!CheckParams(parameterlist, ref ResultLine)) 
+            if (!CheckParams(actualParameterlist, ref resultLine)) 
             {
-                FunctionResult = null;
+                functionResult = null;
                 return false;
             }
 
-            FunctionResult = F(parameterlist[0], (SByte)parameterlist[1].Value);
+            functionResult = F(actualParameterlist[0], (SByte)actualParameterlist[1].Value);
             return true;
         }
     }
@@ -175,15 +175,15 @@ namespace PhysicalCalculator.Function
             F = func;
         }
 
-        override public Boolean Evaluate(CalculatorEnviroment LocalContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity FunctionResult, ref String ResultLine)
+        override public Boolean Evaluate(CalculatorEnviroment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {
-            if (!CheckParams(parameterlist, ref ResultLine))
+            if (!CheckParams(actualParameterlist, ref resultLine))
             {
-                FunctionResult = null;
+                functionResult = null;
                 return false;
             }
 
-            FunctionResult = F(parameterlist[0], parameterlist[1]);
+            functionResult = F(actualParameterlist[0], actualParameterlist[1]);
             return true;
         }
     }
@@ -198,15 +198,15 @@ namespace PhysicalCalculator.Function
             F = func;
         }
 
-        public Boolean Evaluate(CalculatorEnviroment LocalContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity FunctionResult, ref String ResultLine)
+        public Boolean Evaluate(CalculatorEnviroment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {
-            if (!CheckParams(parameterlist, ref ResultLine))
+            if (!CheckParams(actualParameterlist, ref resultLine))
             {
-                FunctionResult = null;
+                functionResult = null;
                 return false;
             }
 
-            FunctionResult = F(parameterlist[0], parameterlist[1], parameterlist[2]);
+            functionResult = F(actualParameterlist[0], actualParameterlist[1], actualParameterlist[2]);
             return true;
         }
     }
@@ -214,9 +214,9 @@ namespace PhysicalCalculator.Function
 
     class PhysicalQuantityCommandsFunction : PhysicalQuantityFunction, ICommandsEvaluator 
     {
-        //override public IdentifierKind identifierkind { get { return IdentifierKind.function; } }
+        //override public IdentifierKind identifierkind { get { return IdentifierKind.Function; } }
 
-        override public String ToListString(String Name)
+        override public String ToListString(String name)
         {
             StringBuilder ListStringBuilder = new StringBuilder();
 
@@ -224,12 +224,12 @@ namespace PhysicalCalculator.Function
             if (Commands.Count <= 1)
             {
                 // Single line func
-                ListStringBuilder.AppendFormat("Func {0}({1}) {{ {2} }}", Name, ParamlistStr(), Commands.Count > 0 ? Commands[0] : "");
+                ListStringBuilder.AppendFormat("Func {0}({1}) {{ {2} }}", name, ParameterlistStr(), Commands.Count > 0 ? Commands[0] : "");
             }
             else
             {
                 // Multi line func
-                ListStringBuilder.AppendFormat("Func {0}({1})", Name, ParamlistStr());
+                ListStringBuilder.AppendFormat("Func {0}({1})", name, ParameterlistStr());
                 ListStringBuilder.AppendLine();
                 ListStringBuilder.AppendLine("{");
                 foreach (String CommandLine in Commands)
@@ -248,30 +248,30 @@ namespace PhysicalCalculator.Function
 
         public List<String> Commands { get { return _commands; } set { _commands = value; } }
 
-        override public Boolean Evaluate(CalculatorEnviroment LocalContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity FunctionResult, ref String ResultLine)
+        override public Boolean Evaluate(CalculatorEnviroment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {
             if (PhysicalFunction.ExecuteCommandsCallback != null)
             {
                 // Set params in local context
                 int ParamIndex = 0;
-                foreach (PhysicalQuantityFunctionParam Param in Paramlist)
+                foreach (PhysicalQuantityFunctionParam Param in actualParameterlist)
                 {
-                    if (parameterlist.Count <= ParamIndex)
+                    if (actualParameterlist.Count <= ParamIndex)
                     {
-                        ResultLine = "Missing parameter no " + (ParamIndex + 1).ToString() + " " + Param.Name;
-                        FunctionResult = null;
+                        resultLine = "Missing parameter no " + (ParamIndex + 1).ToString() + " " + Param.Name;
+                        functionResult = null;
                         return false;
                     }
 
-                    IPhysicalQuantity paramValue = parameterlist[ParamIndex];
+                    IPhysicalQuantity paramValue = actualParameterlist[ParamIndex];
                     if (Param.Unit != null)
                     {
                         IPhysicalQuantity paramValueConverted = paramValue.ConvertTo(Param.Unit);
                         if (paramValueConverted == null)
                         {
-                            ResultLine = "Parameter no " + (ParamIndex + 1).ToString() + " " + Param.Name + "  " + paramValue.ToString() + " has invalid unit.\nThe unit " + paramValue.Unit.ToPrintString() + " can't be converted to " + Param.Unit.ToPrintString();
+                            resultLine = "Parameter no " + (ParamIndex + 1).ToString() + " " + Param.Name + "  " + paramValue.ToString() + " has invalid unit.\nThe unit " + paramValue.Unit.ToPrintString() + " can't be converted to " + Param.Unit.ToPrintString();
 
-                            FunctionResult = null;
+                            functionResult = null;
                             return false;
                         }
                         else
@@ -279,27 +279,27 @@ namespace PhysicalCalculator.Function
                             paramValue = paramValueConverted;
                         }
                     }
-                    LocalContext.NamedItems.SetItem(Param.Name, new NamedVariable(paramValue));
+                    localContext.NamedItems.SetItem(Param.Name, new NamedVariable(paramValue));
                     ParamIndex++;
                 }
 
-                if (ParamIndex < parameterlist.Count)
+                if (ParamIndex < actualParameterlist.Count)
                 {
-                    ResultLine = "Too many parameters specified in function call: " + parameterlist.Count + ". " + ParamIndex + " parameters was expected";
-                    FunctionResult = null;
+                    resultLine = "Too many parameters specified in function call: " + actualParameterlist.Count + ". " + ParamIndex + " parameters was expected";
+                    functionResult = null;
                     return false;
                 }
                 // Run commands
                 String FuncBodyResult = ""; // Dummy: Never used
-                return PhysicalFunction.ExecuteCommandsCallback(LocalContext, Commands, ref FuncBodyResult, out FunctionResult);
+                return PhysicalFunction.ExecuteCommandsCallback(localContext, Commands, ref FuncBodyResult, out functionResult);
             }
             else
             {
                 if (Commands != null)
                 {
-                    ResultLine = "Function call: PhysicalFunction.ExecuteCommandsCallback is null. Don't know how to evaluate function.";
+                    resultLine = "Function call: PhysicalFunction.ExecuteCommandsCallback is null. Don't know how to evaluate function.";
                 }
-                FunctionResult = null;
+                functionResult = null;
                 return false;
             }
         }
@@ -320,12 +320,12 @@ namespace PhysicalCalculator.Function
           
          **/
 
-        public delegate Boolean ExecuteCommandsFunc(CalculatorEnviroment LocalContext, List<String> FuncBodyCommands, ref String FuncBodyResult, out IPhysicalQuantity FunctionResult);
+        public delegate Boolean ExecuteCommandsFunc(CalculatorEnviroment localContext, List<String> FuncBodyCommands, ref String funcBodyResult, out IPhysicalQuantity functionResult);
 
         public static ExecuteCommandsFunc ExecuteCommandsCallback;
 
 
-        public static IFunctionEvaluator ParseFunctionDeclaration(CalculatorEnviroment LocalContext, ref String CommandLine, ref String ResultLine)
+        public static IFunctionEvaluator ParseFunctionDeclaration(CalculatorEnviroment localContext, ref String commandLine, ref String resultLine)
         {
             // FUNC = FUNCNAME "(" PARAMLIST ")" "{" FUNCBODY "}" .         
 
@@ -334,108 +334,107 @@ namespace PhysicalCalculator.Function
 
             Boolean OK = true;
                 
-            if (LocalContext.ParseState == CommandPaserState.readfunctionparamlist)    
+            if (localContext.ParseState == CommandPaserState.ReadFunctionParameterList)    
             {
-                if (CommandLine.StartsWith("//"))
+                if (commandLine.StartsWith("//"))
                 {   // #1 
-                    CommandLine = null;
+                    commandLine = null;
                     return null;
                 }
 
-                OK = TokenString.ParseToken("(", ref CommandLine, ref ResultLine);
+                OK = TokenString.ParseToken("(", ref commandLine, ref resultLine);
 
-                LocalContext.ParseState = CommandPaserState.readfunctionparams;
+                localContext.ParseState = CommandPaserState.ReadFunctionParameters;
             }
-            if (String.IsNullOrEmpty(CommandLine))
+            if (String.IsNullOrEmpty(commandLine))
             {
                 return null;
             }
 
-            if (   (   (   LocalContext.ParseState == CommandPaserState.readfunctionparams 
-                        || LocalContext.ParseState == CommandPaserState.readfunctionparamsopt)
-                    && !CommandLine.StartsWith(")")) 
-                || (LocalContext.ParseState == CommandPaserState.readfunctionparam))
+            if (   (   (   localContext.ParseState == CommandPaserState.ReadFunctionParameters 
+                        || localContext.ParseState == CommandPaserState.ReadFunctionParametersOptional)
+                    && !commandLine.StartsWith(")")) 
+                || (localContext.ParseState == CommandPaserState.ReadFunctionParameter))
             {
                 Boolean MoreParamsToParse;
                 do 
                 {
-                    if (CommandLine.StartsWith("//"))
+                    if (commandLine.StartsWith("//"))
                     {   // #2
-                        CommandLine = null;
+                        commandLine = null;
                         return null;
                     }
 
-                    if (   (LocalContext.ParseState == CommandPaserState.readfunctionparams)
-                        || (LocalContext.ParseState == CommandPaserState.readfunctionparam))
+                    if (   (localContext.ParseState == CommandPaserState.ReadFunctionParameters)
+                        || (localContext.ParseState == CommandPaserState.ReadFunctionParameter))
                     {
-                        PhysicalQuantityFunctionParam param = ParseFunctionParam(ref CommandLine, ref ResultLine);
+                        PhysicalQuantityFunctionParam param = ParseFunctionParam(ref commandLine, ref resultLine);
 
                         OK &= param != null;
-                        LocalContext.FunctionToParseInfo.Function.ParamListAdd(param);
-                        LocalContext.ParseState = CommandPaserState.readfunctionparamsopt;
+                        localContext.FunctionToParseInfo.Function.ParamListAdd(param);
+                        localContext.ParseState = CommandPaserState.ReadFunctionParametersOptional;
 
-                        if (CommandLine.StartsWith("//"))
+                        if (commandLine.StartsWith("//"))
                         {   // #3
-                            CommandLine = null;
+                            commandLine = null;
                             return null;
                         }
                     }
 
-                    MoreParamsToParse = TokenString.TryParseToken(",", ref CommandLine);
+                    MoreParamsToParse = TokenString.TryParseToken(",", ref commandLine);
                     if (MoreParamsToParse)
                     {
-                        LocalContext.ParseState = CommandPaserState.readfunctionparam;
+                        localContext.ParseState = CommandPaserState.ReadFunctionParameter;
                     }
 
                 } while (   OK 
-                         && !String.IsNullOrEmpty(CommandLine) 
+                         && !String.IsNullOrEmpty(commandLine) 
                          && MoreParamsToParse);
             }
 
-            if (OK && !String.IsNullOrEmpty(CommandLine))
+            if (OK && !String.IsNullOrEmpty(commandLine))
             {
-                if (   (LocalContext.ParseState == CommandPaserState.readfunctionparams)
-                    || (LocalContext.ParseState == CommandPaserState.readfunctionparamsopt))
+                if (   (localContext.ParseState == CommandPaserState.ReadFunctionParameters)
+                    || (localContext.ParseState == CommandPaserState.ReadFunctionParametersOptional))
                 {
-                    OK = TokenString.ParseToken(")", ref CommandLine, ref ResultLine);
+                    OK = TokenString.ParseToken(")", ref commandLine, ref resultLine);
 
                     if (OK)
                     {
-                        LocalContext.ParseState = CommandPaserState.readfunctionblock;
+                        localContext.ParseState = CommandPaserState.ReadFunctionBlock;
                     }
                 }
                 if (OK)
                 {
-                    if (!String.IsNullOrEmpty(CommandLine))
+                    if (!String.IsNullOrEmpty(commandLine))
                     {
-                        if (LocalContext.ParseState == CommandPaserState.readfunctionblock)
+                        if (localContext.ParseState == CommandPaserState.ReadFunctionBlock)
                         {
-                            if (CommandLine.StartsWith("//"))
+                            if (commandLine.StartsWith("//"))
                             {   // #4
-                                CommandLine = null;
+                                commandLine = null;
                                 return null;
                             }
 
-                            OK = TokenString.ParseToken("{", ref CommandLine, ref ResultLine);
+                            OK = TokenString.ParseToken("{", ref commandLine, ref resultLine);
                             if (OK)
                             {
-                                LocalContext.ParseState = CommandPaserState.readfunctionbody;
+                                localContext.ParseState = CommandPaserState.ReadFunctionBody;
                             }
                         }
-                        if (LocalContext.ParseState == CommandPaserState.readfunctionbody)
+                        if (localContext.ParseState == CommandPaserState.ReadFunctionBody)
                         {
-                            if (!String.IsNullOrEmpty(CommandLine))
+                            if (!String.IsNullOrEmpty(commandLine))
                             {
-
-                                int indexCommandEnd = CommandLine.IndexOf('}');
+                                int indexCommandEnd = commandLine.IndexOf('}');
                                 if (indexCommandEnd == -1)
                                 {   // Line are not terminated by '}'
                                     // Whole CommandLine is part of Command Block 
-                                    indexCommandEnd = CommandLine.Length;
+                                    indexCommandEnd = commandLine.Length;
                                 }
                                 else
                                 {
-                                    int indexStartComment = CommandLine.IndexOf("//");
+                                    int indexStartComment = commandLine.IndexOf("//");
                                     if (indexStartComment >= 0)
                                     {   // Command are terminated by "//"
                                         if (indexCommandEnd > indexStartComment)
@@ -443,33 +442,28 @@ namespace PhysicalCalculator.Function
                                             // '}' is placed inside a comment
                                             // Whole CommandLine is part of Command Block 
 
-                                            indexCommandEnd = CommandLine.Length;
+                                            indexCommandEnd = commandLine.Length;
                                         }
-                                    }
-                                    else
-                                    {
-                                        // Debug brak point
-                                        int test = indexStartComment;
                                     }
                                 }
 
                                 if (indexCommandEnd > 0)
                                 {
-                                    if (LocalContext.FunctionToParseInfo.Function.Commands == null)
+                                    if (localContext.FunctionToParseInfo.Function.Commands == null)
                                     {
-                                        LocalContext.FunctionToParseInfo.Function.Commands = new List<String>();
+                                        localContext.FunctionToParseInfo.Function.Commands = new List<String>();
                                     }
-                                    LocalContext.FunctionToParseInfo.Function.Commands.Add(CommandLine.Substring(0, indexCommandEnd));
-                                    CommandLine = CommandLine.Substring(indexCommandEnd);
+                                    localContext.FunctionToParseInfo.Function.Commands.Add(commandLine.Substring(0, indexCommandEnd));
+                                    commandLine = commandLine.Substring(indexCommandEnd);
                                 }
 
-                                if (!String.IsNullOrEmpty(CommandLine))
+                                if (!String.IsNullOrEmpty(commandLine))
                                 {
-                                    OK = TokenString.ParseToken("}", ref CommandLine, ref ResultLine);
+                                    OK = TokenString.ParseToken("}", ref commandLine, ref resultLine);
                                     if (OK)
                                     {   // Compleated function declaration parsing 
-                                        LocalContext.ParseState = CommandPaserState.executecommandline;
-                                        return LocalContext.FunctionToParseInfo.Function;
+                                        localContext.ParseState = CommandPaserState.ExecuteCommandLine;
+                                        return localContext.FunctionToParseInfo.Function;
                                     }
                                 }
                             }
@@ -480,13 +474,13 @@ namespace PhysicalCalculator.Function
             return null;
         }
 
-        public static PhysicalQuantityFunctionParam ParseFunctionParam(ref String CommandLine, ref String ResultLine)
+        public static PhysicalQuantityFunctionParam ParseFunctionParam(ref String commandLine, ref String resultLine)
         {
             String ParamName;
-            CommandLine = CommandLine.ReadIdentifier(out ParamName);
+            commandLine = commandLine.ReadIdentifier(out ParamName);
             Debug.Assert(ParamName != null);
 
-            IPhysicalUnit ParamUnit = PhysicalCalculator.Expression.PhysicalExpression.ParseOptionalConvertToUnit(ref CommandLine, ref ResultLine);
+            IPhysicalUnit ParamUnit = PhysicalCalculator.Expression.PhysicalExpression.ParseOptionalConvertToUnit(ref commandLine, ref resultLine);
 
             PhysicalQuantityFunctionParam param = new PhysicalQuantityFunctionParam(ParamName, ParamUnit);
 

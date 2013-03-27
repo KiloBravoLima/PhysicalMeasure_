@@ -170,7 +170,7 @@ namespace PhysCalculatorTests
         ///A test for ReadToken
         ///</summary>
         [TestMethod()]
-        public void ReadTokenTest()
+        public void CommandhandlerTest_ReadTokenTest()
         {
             Commandhandler target = new Commandhandler(); 
             string CommandLine = "keyword to find ";
@@ -187,7 +187,7 @@ namespace PhysCalculatorTests
         ///A test for SkipToken
         ///</summary>
         [TestMethod()]
-        public void SkipTokenTest()
+        public void CommandhandlerTest_SkipTokenTest()
         {
             Commandhandler target = new Commandhandler(); 
             string Token = "Keyword";

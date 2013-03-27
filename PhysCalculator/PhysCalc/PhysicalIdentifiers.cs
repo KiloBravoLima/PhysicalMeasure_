@@ -12,8 +12,9 @@ using CommandParser;
 using PhysicalMeasure;
 using PhysicalCalculator.Expression;
 using PhysicalCalculator.Function;
+using System.Runtime.Serialization;
 
-namespace PhysicalCalculator.Identifers
+namespace PhysicalCalculator.Identifiers
 {
     public class PhysicalQuantityFunctionParam
     {
@@ -37,13 +38,13 @@ namespace PhysicalCalculator.Identifers
 
     public interface IFunctionEvaluator : INametableItem
     {
-        List<PhysicalQuantityFunctionParam> Paramlist { get; }
+        List<PhysicalQuantityFunctionParam> Parameterlist { get; }
 
-        String ParamlistStr();
+        String ParameterlistStr();
 
-        void ParamListAdd(PhysicalQuantityFunctionParam param);
+        void ParamListAdd(PhysicalQuantityFunctionParam parameter);
 
-        Boolean Evaluate(CalculatorEnviroment LocalContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity FunctionResult, ref String ResultLine);
+        Boolean Evaluate(CalculatorEnviroment localContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine);
     }
 
     public interface ICommandsEvaluator : IFunctionEvaluator
@@ -61,100 +62,100 @@ namespace PhysicalCalculator.Identifers
         }
         */
 
-        public virtual String ToListString(String Name)
+        public virtual String ToListString(String name)
         {
-            return String.Format("{0} {1}", identifierkind.ToString(), Name);
+            return String.Format("{0} {1}", identifierkind.ToString(), name);
         }
 
-        public void WriteToTextFile(String Name, System.IO.StreamWriter file)
+        public void WriteToTextFile(String name, System.IO.StreamWriter file)
         {
-            file.WriteLine(ToListString(Name));
+            file.WriteLine(ToListString(name));
         }
     }
 
     class NamedSystem : NametableItem, INametableItem
     {
-        public override IdentifierKind identifierkind { get { return IdentifierKind.system; } }
+        public override IdentifierKind identifierkind { get { return IdentifierKind.UnisSystem; } }
 
         public IUnitSystem UnitSystem;
 
-        public NamedSystem(String Name)
+        public NamedSystem(String name)
         {
-            UnitSystem NewUnitSystem = new UnitSystem(Name, null);
+            UnitSystem NewUnitSystem = new UnitSystem(name, null);
 
             UnitSystem = NewUnitSystem;
             Physics.Default_UnitSystem_Stack.Push(NewUnitSystem);
         }
 
-        public override String ToListString(String Name)
+        public override String ToListString(String name)
         {
-            return String.Format("system {0}", Name);
+            return String.Format("system {0}", name);
         }
     }
 
     class NamedUnit : NametableItem, INametableItem
     {
-        public override IdentifierKind identifierkind { get { return IdentifierKind.unit; } }
+        public override IdentifierKind identifierkind { get { return IdentifierKind.Unit; } }
 
         public IPhysicalUnit pu;
 
-        public NamedUnit(IUnitSystem UnitSystem, String Name, IPhysicalUnit pu)
+        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalUnit physicalUnit)
         {
-            if (pu != null)
+            if (physicalUnit != null)
             {
-                this.pu = pu;
+                this.pu = physicalUnit;
             }
             else
             {
-                this.pu = MakeBaseUnit(Name, UnitSystem);
+                this.pu = MakeBaseUnit(name, unitSystem);
             }
         }
 
-        public NamedUnit(IUnitSystem UnitSystem, String Name, IPhysicalQuantity pq)
+        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalQuantity physicalQuantity)
         {
-            if (pq != null)
+            if (physicalQuantity != null)
             {
-                if ((UnitSystem == null) && (pq.Unit != null))
+                if ((unitSystem == null) && (physicalQuantity.Unit != null))
                 {
-                    UnitSystem = pq.Unit.System;
+                    unitSystem = physicalQuantity.Unit.System;
                 }
 
-                if (pq.Value != 0 && pq.Value != 1)
+                if (physicalQuantity.Value != 0 && physicalQuantity.Value != 1)
                 {
-                    this.pu = MakeScaledUnit(Name, UnitSystem, pq.Unit, pq.Value);
+                    this.pu = MakeScaledUnit(name, unitSystem, physicalQuantity.Unit, physicalQuantity.Value);
                 }
                 else
                 {
-                    this.pu = pq.Unit;
+                    this.pu = physicalQuantity.Unit;
                 }
             }
             else
             {
-                this.pu = MakeBaseUnit(Name, UnitSystem);
+                this.pu = MakeBaseUnit(name, unitSystem);
             }
         }
 
-        private static IBaseUnit MakeBaseUnit(String Name, IUnitSystem us)
+        private static IBaseUnit MakeBaseUnit(String name, IUnitSystem unitSystem)
         {
-            if (us == null)
+            if (unitSystem == null)
             {
-                us = new UnitSystem(Name + "_system", null, null, null, null);
+                unitSystem = new UnitSystem(name + "_system", null, null, null, null);
             }
             
-            if (us != null)
+            if (unitSystem != null)
             {
                 int NoOfBaseUnits = 0;
-                if (us.BaseUnits != null)
+                if (unitSystem.BaseUnits != null)
                 {
-                    NoOfBaseUnits = us.BaseUnits.Length;
+                    NoOfBaseUnits = unitSystem.BaseUnits.Length;
                 }
                 IBaseUnit[] baseunitarray = new BaseUnit[NoOfBaseUnits + 1];
                 if (NoOfBaseUnits > 0)
                 {
-                    us.BaseUnits.CopyTo(baseunitarray, 0);
+                    unitSystem.BaseUnits.CopyTo(baseunitarray, 0);
                 }
-                baseunitarray[NoOfBaseUnits] = new BaseUnit(0, Name, Name);
-                UnitSystem uso = us as UnitSystem;
+                baseunitarray[NoOfBaseUnits] = new BaseUnit(0, name, name);
+                UnitSystem uso = unitSystem as UnitSystem;
                 uso.BaseUnits = baseunitarray;
                 return baseunitarray[NoOfBaseUnits];
             }
@@ -162,55 +163,55 @@ namespace PhysicalCalculator.Identifers
             return null;
         }
 
-        private static IConvertibleUnit MakeScaledUnit(String Name, IUnitSystem us, IPhysicalUnit PrimaryUnit, Double ScaleFactor)
+        private static IConvertibleUnit MakeScaledUnit(String name, IUnitSystem unitSystem, IPhysicalUnit primaryUnit, Double scaleFactor)
         {
-            if (us == null)
+            if (unitSystem == null)
             {
                 ConvertibleUnit[] convertibleunitarray = new ConvertibleUnit[1];
-                convertibleunitarray[0] = new ConvertibleUnit(Name, Name, PrimaryUnit, new ScaledValueConversion(1.0 / ScaleFactor));
-                us = new UnitSystem(Name + "_system", null, null, null, convertibleunitarray);
+                convertibleunitarray[0] = new ConvertibleUnit(name, name, primaryUnit, new ScaledValueConversion(1.0 / scaleFactor));
+                unitSystem = new UnitSystem(name + "_system", null, null, null, convertibleunitarray);
                 return convertibleunitarray[0];
             }
             else
             {
                 int NoOfConvertibleUnits = 0;
-                if (us.ConvertibleUnits != null)
+                if (unitSystem.ConvertibleUnits != null)
                 {
-                    NoOfConvertibleUnits = us.ConvertibleUnits.Length;
+                    NoOfConvertibleUnits = unitSystem.ConvertibleUnits.Length;
                 }
                 ConvertibleUnit[] convertibleunitarray = new ConvertibleUnit[NoOfConvertibleUnits + 1];
                 if (NoOfConvertibleUnits > 0)
                 {
-                    us.ConvertibleUnits.CopyTo(convertibleunitarray, 0);
+                    unitSystem.ConvertibleUnits.CopyTo(convertibleunitarray, 0);
                 }
-                convertibleunitarray[NoOfConvertibleUnits] = new ConvertibleUnit(Name, Name, PrimaryUnit, new ScaledValueConversion(1.0 / ScaleFactor));
-                UnitSystem uso = us as UnitSystem;
+                convertibleunitarray[NoOfConvertibleUnits] = new ConvertibleUnit(name, name, primaryUnit, new ScaledValueConversion(1.0 / scaleFactor));
+                UnitSystem uso = unitSystem as UnitSystem;
                 uso.ConvertibleUnits = convertibleunitarray;
                 return convertibleunitarray[NoOfConvertibleUnits];
             }
         }
 
-        private static IBaseUnit MakeBaseUnit(String Name)
+        private static IBaseUnit MakeBaseUnit(String name)
         {
-            return MakeBaseUnit(Name, null);
+            return MakeBaseUnit(name, null);
         }
 
-        public override String ToListString(String Name)
+        public override String ToListString(String name)
         {
-            String Unitname = String.Format("{0}", Name);
+            String Unitname = String.Format("{0}", name);
 
-            if ((pu == null) || (pu.Kind == UnitKind.ukBaseUnit))
+            if ((pu == null) || (pu.Kind == UnitKind.BaseUnit))
             {
                 return String.Format("unit {0}", Unitname); 
             }
             else
             {
-                if (pu.Kind == UnitKind.ukConvertibleUnit)
+                if (pu.Kind == UnitKind.ConvertibleUnit)
                 {
                     ConvertibleUnit cu = (ConvertibleUnit)pu;
                     Double val = cu.Conversion.ConvertToPrimaryUnit(1);
 
-                    if (val != 1.0 && Name.Equals(cu.Symbol))
+                    if (val != 1.0 && name.Equals(cu.Symbol))
                     {   // User defined scaled unit
                         return String.Format("unit {0} = {1} {2}", Unitname, val.ToString(CultureInfo.InvariantCulture), cu.PrimaryUnit.ToString());
                     }
@@ -223,61 +224,62 @@ namespace PhysicalCalculator.Identifers
 
     class NamedVariable : PhysicalQuantity, INametableItem
     {
-        public virtual IdentifierKind identifierkind { get { return IdentifierKind.variable; } }
+        public virtual IdentifierKind identifierkind { get { return IdentifierKind.Variable; } }
 
         public NamedVariable(IPhysicalQuantity somephysicalquantity)
             : base(somephysicalquantity)
         {
         }
 
-        public virtual String ToListString(String Name)
+        public virtual String ToListString(String name)
         {
-            return String.Format("var {0} = {1}", Name, this.ToString());
+            return String.Format("var {0} = {1}", name, this.ToString());
         }
 
-        public void WriteToTextFile(String Name, System.IO.StreamWriter file)
+        public void WriteToTextFile(String name, System.IO.StreamWriter file)
         {
-            file.WriteLine(ToListString(Name));
+            file.WriteLine(ToListString(name));
         }
     }
 
     public enum EnviromentKind
     {
-        unknown = 0,
-        namespaceenv = 1,
-        functionenv = 2
+        Unknown = 0,
+        NamespaceEnv = 1,
+        FunctionEnv = 2
     }
 
     public enum IdentifierKind
     {
-        unknown = 0,
-        enviroment = 1,
-        variable = 2,
-        function = 3,
-        system = 4,
-        unit = 5
+        Unknown = 0,
+        Enviroment = 1,
+        Variable = 2,
+        Function = 3,
+        UnisSystem = 4,
+        Unit = 5
     }
 
     public enum CommandPaserState
     {
-        unknown = 0,
-        executecommandline = 1,
-        readfunctionparamlist = 2,
-        readfunctionparams = 3,
-        readfunctionparam = 4,
-        readfunctionparamsopt = 5,
-        readfunctionblock = 6,
-        readfunctionbody = 7  
+        Unknown = 0,
+        ExecuteCommandLine = 1,
+        ReadFunctionParameterList = 2,
+        ReadFunctionParameters = 3,
+        ReadFunctionParameter = 4,
+        ReadFunctionParametersOptional = 5,
+        ReadFunctionBlock = 6,
+        ReadFunctionBody = 7  
     }
     
     public enum VariableDeclarationEnviroment
     {
-        unknown = 0,
-        global = 1,
-        outher = 2,
-        local = 3
+        Unknown = 0,
+        Global = 1,
+        Outher = 2,
+        Local = 3
     }
 
+    [Serializable]
     public class NamedItemTable : Dictionary<String, INametableItem>
     {
         public NamedItemTable()
@@ -285,32 +287,37 @@ namespace PhysicalCalculator.Identifers
         {
         }
 
-        public Boolean AddItem(String ItemName, INametableItem ItemValue)
+        protected NamedItemTable(SerializationInfo info, StreamingContext context)
+            : base (info, context)
         {
-            Debug.Assert(!this.ContainsKey(ItemName));
+        }
 
-            this.Add(ItemName, ItemValue);
+        public Boolean AddItem(String itemName, INametableItem itemValue)
+        {
+            Debug.Assert(!this.ContainsKey(itemName));
+
+            this.Add(itemName, itemValue);
 
             return true;
         }
 
-        public Boolean SetItem(String ItemName, INametableItem ItemValue)
+        public Boolean SetItem(String itemName, INametableItem itemValue)
         {
-            if (this.ContainsKey(ItemName))
+            if (this.ContainsKey(itemName))
             {
-                this[ItemName] = ItemValue;
+                this[itemName] = itemValue;
             }
             else
             {
-                this.Add(ItemName, ItemValue);
+                this.Add(itemName, itemValue);
             }
 
             return true;
         }
 
-        public Boolean RemoveItem(String ItemName)
+        public Boolean RemoveItem(String itemName)
         {
-            return this.Remove(ItemName);
+            return this.Remove(itemName);
         }
 
         public Boolean ClearItems()
@@ -320,19 +327,19 @@ namespace PhysicalCalculator.Identifers
             return true;
         }
 
-        public Boolean GetItem(String ItemName, out INametableItem ItemValue)
+        public Boolean GetItem(String itemName, out INametableItem itemValue)
         {
-            Debug.Assert(ItemName != null);
+            Debug.Assert(itemName != null);
 
-            //return this.TryGetValue(ItemName, out ItemValue);
-            Boolean Found = this.ContainsKey(ItemName);
+            //return this.TryGetValue(itemName, out itemValue);
+            Boolean Found = this.ContainsKey(itemName);
             if (Found)
             {
-                ItemValue = this[ItemName];
+                itemValue = this[itemName];
             }
             else
             {
-                ItemValue = null;
+                itemValue = null;
             }
             return Found;
         }
@@ -391,14 +398,14 @@ namespace PhysicalCalculator.Identifers
                 this.Function = new PhysicalQuantityCommandsFunction();
             }
 
-            // FunctionToParseInfo.FunctionName = FunctionName;
+            // FunctionToParseInfo.functionName = functionName;
             //FunctionToParseInfo.Function = new PhysicalQuantityCommandsFunction();
-            //CurrentContext.ParseState = CommandPaserState.readfunctionparamlist;
+            //CurrentContext.ParseState = CommandPaserState.ReadFunctionParameterList;
 
         }
 
         public String Name = null;
-        public EnviromentKind enviromentkind = EnviromentKind.unknown;
+        public EnviromentKind enviromentkind = EnviromentKind.Unknown;
         public CalculatorEnviroment OuterContext = null;
 
         public CalculatorEnviroment()
@@ -410,39 +417,39 @@ namespace PhysicalCalculator.Identifers
         {
         }
 
-        public CalculatorEnviroment(CalculatorEnviroment outercontext, string name, EnviromentKind enviromentkind)
+        public CalculatorEnviroment(CalculatorEnviroment outerContext, string name, EnviromentKind enviromentkind)
         {
-            this.OuterContext = outercontext;
+            this.OuterContext = outerContext;
             this.Name = name;
             this.enviromentkind = enviromentkind;
         }
 
-        public VariableDeclarationEnviroment DefaultDeclarationEnviroment = VariableDeclarationEnviroment.local;
+        public VariableDeclarationEnviroment DefaultDeclarationEnviroment = VariableDeclarationEnviroment.Local;
 
         public NamedItemTable NamedItems = new NamedItemTable();
 
-        public CommandPaserState ParseState = CommandPaserState.executecommandline;
+        public CommandPaserState ParseState = CommandPaserState.ExecuteCommandLine;
         public FunctionParseInfo FunctionToParseInfo = null;  
 
-        public Tracelevel _OutputTracelevel = Tracelevel.normal;
+        public TraceLevels _OutputTracelevel = TraceLevels.Normal;
 
-        public Tracelevel OutputTracelevel { get { return _OutputTracelevel; } set { _OutputTracelevel = value; } }
+        public TraceLevels OutputTracelevel { get { return _OutputTracelevel; } set { _OutputTracelevel = value; } }
 
         #region INameTableItem interface implementation
 
-        public override IdentifierKind identifierkind { get { return IdentifierKind.enviroment; } }
+        public override IdentifierKind identifierkind { get { return IdentifierKind.Enviroment; } }
 
-        public override String ToListString(String Name)
+        public override String ToListString(String name)
         {
-            return String.Format("Namespace {0}", Name);
+            return String.Format("Namespace {0}", name);
         }
 
         #endregion INameTableItem interface implementation
 
-        public Boolean FindNameSpace(String NameSpaceName, out CalculatorEnviroment context)
+        public Boolean FindNameSpace(String nameSpaceName, out CalculatorEnviroment context)
         {
             // Check this namespace
-            if (Name != null && Name.Equals(NameSpaceName))
+            if (Name != null && Name.Equals(nameSpaceName))
             {
                 context = this;
                 return true;
@@ -451,65 +458,65 @@ namespace PhysicalCalculator.Identifers
             // Check outher context
             if (OuterContext != null)
             {
-                return OuterContext.FindNameSpace(NameSpaceName, out context);
+                return OuterContext.FindNameSpace(nameSpaceName, out context);
             }
 
             context = null;
             return false;
         }
 
-        public void BeginParsingFunction(string FunctionName)
+        public void BeginParsingFunction(string functionName)
         {
-            FunctionToParseInfo = new FunctionParseInfo(FunctionName);
-            ParseState = CommandPaserState.readfunctionparamlist; 
+            FunctionToParseInfo = new FunctionParseInfo(functionName);
+            ParseState = CommandPaserState.ReadFunctionParameterList; 
         }
 
         public void EndParsingFunction()
         {
             FunctionToParseInfo = null;
-            ParseState = CommandPaserState.executecommandline;
+            ParseState = CommandPaserState.ExecuteCommandLine;
         }
 
         #region Common Identifier access
 
-        public Boolean SetLocalIdentifier(String IdentifierName, INametableItem Item)
+        public Boolean SetLocalIdentifier(String identifierName, INametableItem item)
         {
             // Update or add local item
-            return NamedItems.SetItem(IdentifierName, Item);
+            return NamedItems.SetItem(identifierName, item);
         }
 
-        public Boolean FindLocalIdentifier(String IdentifierName, out INametableItem Item)
+        public Boolean FindLocalIdentifier(String identifierName, out INametableItem item)
         {
             // Check local items
-            return NamedItems.GetItem(IdentifierName, out Item);
+            return NamedItems.GetItem(identifierName, out item);
         }
 
-        public Boolean FindIdentifier(String IdentifierName, out IEnviroment FoundInContext, out INametableItem Item)
+        public Boolean FindIdentifier(String identifierName, out IEnviroment foundInContext, out INametableItem item)
         {
             // Check local items
-            Boolean Found = FindLocalIdentifier(IdentifierName, out Item);
+            Boolean Found = FindLocalIdentifier(identifierName, out item);
             if (Found)
             {
-                FoundInContext = this;
+                foundInContext = this;
                 return true;
             }
             else
             // Check outher context
             if (OuterContext != null)
             {
-                return OuterContext.FindIdentifier(IdentifierName, out FoundInContext, out Item);
+                return OuterContext.FindIdentifier(identifierName, out foundInContext, out item);
             }
 
-            FoundInContext = null;
+            foundInContext = null;
             return false;
         }
 
-        public String ListIdentifiers(Boolean ForceListContextName = false)
+        public String ListIdentifiers(Boolean forceListContextName = false)
         {
             StringBuilder ListStringBuilder = new StringBuilder();
 
             Boolean HasItemsToShow = (NamedItems.Count > 0);
-            Boolean ListContextName = ForceListContextName | HasItemsToShow;
+            Boolean ListContextName = forceListContextName | HasItemsToShow;
             String ListStr;
             if (OuterContext != null)
             {
@@ -537,10 +544,10 @@ namespace PhysicalCalculator.Identifers
             return ListStringBuilder.ToString();
         }
 
-        public Boolean RemoveLocalIdentifier(String IdentifierName)
+        public Boolean RemoveLocalIdentifier(String identifierName)
         {
             // Check local items
-            return NamedItems.RemoveItem(IdentifierName);
+            return NamedItems.RemoveItem(identifierName);
         }
 
         public Boolean ClearLocalIdentifiers()
@@ -554,19 +561,19 @@ namespace PhysicalCalculator.Identifers
 
         #region Function Identifier access
 
-        public Boolean FunctionFind(String FunctionName, out IFunctionEvaluator functionevaluator)
+        public Boolean FunctionFind(String functionName, out IFunctionEvaluator functionEvaluator)
         {
             IEnviroment context;
             INametableItem Item;
 
-            Boolean Found = FindIdentifier(FunctionName, out context, out Item) && Item.identifierkind == IdentifierKind.function;
+            Boolean Found = FindIdentifier(functionName, out context, out Item) && Item.identifierkind == IdentifierKind.Function;
             if (Found)
             {
-                functionevaluator = Item as IFunctionEvaluator;
+                functionEvaluator = Item as IFunctionEvaluator;
             }
             else
             {
-                functionevaluator = null;
+                functionEvaluator = null;
             }
 
             return Found;
@@ -576,13 +583,13 @@ namespace PhysicalCalculator.Identifers
 
         #region Unit Identifier access
 
-        public Boolean SystemSet(String SystemName, out INametableItem SystemItem)
+        public Boolean SystemSet(String systemName, out INametableItem systemItem)
         {
             // Find identifier 
             IEnviroment context;
-            Boolean Found = FindIdentifier(SystemName, out context, out SystemItem);
+            Boolean Found = FindIdentifier(systemName, out context, out systemItem);
 
-            if (Found && (context == this) && (SystemItem.identifierkind != IdentifierKind.system))
+            if (Found && (context == this) && (systemItem.identifierkind != IdentifierKind.UnisSystem))
             {   // Found locally but is not a system; Can't set as system
                 return false;
             }
@@ -594,17 +601,17 @@ namespace PhysicalCalculator.Identifers
 
             // Either is identifier a system in some context; set it to specified value
             // or identifier not found; No local identifier with that name, Declare local system
-            SystemItem = new NamedSystem(SystemName);
-            return context.SetLocalIdentifier(SystemName, SystemItem);
+            systemItem = new NamedSystem(systemName);
+            return context.SetLocalIdentifier(systemName, systemItem);
         }
 
-        public Boolean UnitSet(IUnitSystem UnitSystem, String UnitName, IPhysicalQuantity UnitValue, out INametableItem UnitItem)
+        public Boolean UnitSet(IUnitSystem unitSystem, String unitName, IPhysicalQuantity unitValue, out INametableItem unitItem)
         {
             // Find identifier 
             IEnviroment context;
-            Boolean Found = FindIdentifier(UnitName, out context, out UnitItem);
+            Boolean Found = FindIdentifier(unitName, out context, out unitItem);
 
-            if (Found && (context == this) && (UnitItem.identifierkind != IdentifierKind.unit))
+            if (Found && (context == this) && (unitItem.identifierkind != IdentifierKind.Unit))
             {   // Found locally but is not a unit; Can't set as unit
                 return false;
             }
@@ -616,44 +623,44 @@ namespace PhysicalCalculator.Identifers
 
             // Either is identifier an unit in some context; set it to specified value
             // or identifier not found; No local identifier with that name, Declare local unit
-            if (UnitSystem == null)
+            if (unitSystem == null)
             {
-                if (UnitValue != null && UnitValue.Unit != null)
+                if (unitValue != null && unitValue.Unit != null)
                 {   // Is same system as values unit
-                    UnitSystem = UnitValue.Unit.System;
+                    unitSystem = unitValue.Unit.System;
                 }
 
-                if (UnitSystem == null)
+                if (unitSystem == null)
                 {   // Is first unit in a new system
                     INametableItem SystemItem;
-                    if (SystemSet(UnitName + "_system", out SystemItem))
+                    if (SystemSet(unitName + "_system", out SystemItem))
                     {
-                        UnitSystem = ((NamedSystem)SystemItem).UnitSystem;
+                        unitSystem = ((NamedSystem)SystemItem).UnitSystem;
                     }
                 }
             }
 
-            UnitItem = new NamedUnit(UnitSystem, UnitName, UnitValue);
-            return context.SetLocalIdentifier(UnitName, UnitItem);
+            unitItem = new NamedUnit(unitSystem, unitName, unitValue);
+            return context.SetLocalIdentifier(unitName, unitItem);
         }
 
-        public Boolean UnitGet(String UnitName, out IPhysicalUnit UnitValue, ref String ResultLine)
+        public Boolean UnitGet(String unitName, out IPhysicalUnit unitValue, ref String resultLine)
         {
             // Find identifier 
             IEnviroment context;
             INametableItem Item;
-            Boolean Found = FindIdentifier(UnitName, out context, out Item);
-            if (Found && Item.identifierkind == IdentifierKind.unit)
+            Boolean Found = FindIdentifier(unitName, out context, out Item);
+            if (Found && Item.identifierkind == IdentifierKind.Unit)
             {   // Identifier is a unit in some context; Get it
                 NamedUnit nu = Item as NamedUnit;
 
-                UnitValue = nu.pu;
+                unitValue = nu.pu;
                 return true;
             }
             else
             {
-                UnitValue = null;
-                ResultLine = "Unit '" + UnitName + "' not found";
+                unitValue = null;
+                resultLine = "Unit '" + unitName + "' not found";
                 return false;
             }
         }
@@ -662,26 +669,26 @@ namespace PhysicalCalculator.Identifers
 
         #region Variable Identifier access
 
-        public Boolean VariableSetLocal(String VariableName, IPhysicalQuantity VariableValue)
+        public Boolean VariableSetLocal(String variableName, IPhysicalQuantity variableValue)
         {
             // Find identifier 
             INametableItem Item;
-            Boolean Found = FindLocalIdentifier(VariableName, out Item);
-            if (Found && Item.identifierkind == IdentifierKind.variable)
+            Boolean Found = FindLocalIdentifier(variableName, out Item);
+            if (Found && Item.identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in local context; set it to specified value
                 NamedVariable nv = Item as NamedVariable;
-                nv.Value = VariableValue.Value;
-                nv.Unit = VariableValue.Unit;
+                nv.Value = variableValue.Value;
+                nv.Unit = variableValue.Unit;
             }
             else
             {
-                if (Found && Item.identifierkind != IdentifierKind.variable)
+                if (Found && Item.identifierkind != IdentifierKind.Variable)
                 {   // Found locally but not as variable; Can't set as variable
                     return false;
                 }
                 else
                 {   // Variable not found; No local identifier with that name, Declare local variable
-                    this.NamedItems.Add(VariableName, new NamedVariable(VariableValue));
+                    this.NamedItems.Add(variableName, new NamedVariable(variableValue));
                 }
             }
 
@@ -694,7 +701,7 @@ namespace PhysicalCalculator.Identifers
             IEnviroment context;
             INametableItem Item;
             Boolean Found = FindIdentifier(VariableName, out context, out Item);
-            if (Found && Item.identifierkind == IdentifierKind.variable)
+            if (Found && Item.identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in some context; set it to specified value
                 NamedVariable nv = Item as NamedVariable;
                 nv.Value = VariableValue.Value;
@@ -702,7 +709,7 @@ namespace PhysicalCalculator.Identifers
             }
             else
             {
-                if (Found && Item.identifierkind != IdentifierKind.variable && context == this)
+                if (Found && Item.identifierkind != IdentifierKind.Variable && context == this)
                 {   // Found locally but not as variable; Can't set as variable
                     return false;
                 }
@@ -721,7 +728,7 @@ namespace PhysicalCalculator.Identifers
             IEnviroment context;
             INametableItem Item;
             Boolean Found = FindIdentifier(VariableName, out context, out Item);
-            if (Found && Item.identifierkind == IdentifierKind.variable)
+            if (Found && Item.identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in some context; Get it
                 VariableValue = Item as IPhysicalQuantity;
                 return true;
