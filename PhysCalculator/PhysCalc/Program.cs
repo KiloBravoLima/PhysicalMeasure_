@@ -5,11 +5,13 @@ using System.Collections.Generic;
 using CommandParser;
 
 
+// Assembly marked as compliant to CLS.
+// [assembly: CLSCompliant(true)]  Using sbyte is not CLS-compliant
+
 namespace PhysicalCalculator
 {
     class Program
     {
-
         static string PhysicalExpressionEval(string txtExpression)
         {
             string Result = "Internal error";
@@ -116,10 +118,18 @@ namespace PhysicalCalculator
         {
             ResultWriter ResultLineWriter = new ResultWriter();
 
-            // ShowStartLines(ResultLineWriter);
+            //  ShowStartLines(ResultLineWriter);
 
             Commandreader CommandLineReader = new Commandreader(args, ResultLineWriter);
             CommandLineReader.ReadFromConsoleWhenEmpty = true;
+#if DEBUG // Unit tests only included in debug build 
+            if (System.Reflection.Assembly.GetEntryAssembly() == null)    
+            {
+                // Do some setup to avoid error    
+                // We want the test to run only the commands in the args
+                CommandLineReader.ReadFromConsoleWhenEmpty = false;
+            }
+#endif 
             if (CommandLineReader == null)
             {
                 ResultLineWriter.WriteLine(String.Format("PhysCalculator Commandreader failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));

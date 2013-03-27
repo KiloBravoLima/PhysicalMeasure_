@@ -10,7 +10,7 @@ using TokenParser;
 
 using PhysicalMeasure;
 
-using PhysicalCalculator.Identifers;
+using PhysicalCalculator.Identifiers;
 using PhysicalCalculator.Function;
 
 namespace PhysicalCalculator.Expression
@@ -18,21 +18,21 @@ namespace PhysicalCalculator.Expression
 
     public interface IEnviroment
     {
-        Tracelevel OutputTracelevel { get; set; } 
+        TraceLevels OutputTracelevel { get; set; } 
 
-        Boolean SetLocalIdentifier(String IdentifierName, INametableItem Item);
-        Boolean RemoveLocalIdentifier(String IdentifierName);
+        Boolean SetLocalIdentifier(String identifierName, INametableItem item);
+        Boolean RemoveLocalIdentifier(String identifierName);
 
-        Boolean FindIdentifier(String IdentifierName, out IEnviroment FoundInContext, out INametableItem Item);
+        Boolean FindIdentifier(String identifierName, out IEnviroment foundInContext, out INametableItem item);
 
-        Boolean SystemSet(String SystemName, out INametableItem SystemItem);
+        Boolean SystemSet(String systemName, out INametableItem systemItem);
 
-        Boolean UnitSet(IUnitSystem UnitSystem, String UnitName, IPhysicalQuantity UnitValue, out INametableItem UnitItem);
+        Boolean UnitSet(IUnitSystem unitSystem, String unitName, IPhysicalQuantity unitValue, out INametableItem unitItem);
 
-        Boolean VariableGet(String VariableName, out IPhysicalQuantity VariableValue, ref String ResultLine);
-        Boolean VariableSet(String VariableName, IPhysicalQuantity VariableValue);
+        Boolean VariableGet(String variableName, out IPhysicalQuantity variableValue, ref String resultLine);
+        Boolean VariableSet(String variableName, IPhysicalQuantity variableValue);
 
-        Boolean FunctionFind(String FunctionName, out IFunctionEvaluator functionevaluator);
+        Boolean FunctionFind(String functionName, out IFunctionEvaluator functionEvaluator);
     }
 
     static class PhysicalExpression 
@@ -83,16 +83,15 @@ namespace PhysicalCalculator.Expression
 
         // Delegert types
         // VariableLookup callback
-        public delegate Boolean IdentifierItemLookupFunc(String IdentifierName, out IEnviroment FoundInContext, out INametableItem Item);
-        public delegate Boolean IdentifierContextLookupFunc(String IdentifierName, out IEnviroment FoundInContext, out IdentifierKind identifierkind);
-        public delegate Boolean QualifiedIdentifierContextLookupFunc(IEnviroment LookInContext, String IdentifierName, out IEnviroment FoundInContext, out IdentifierKind identifierkind);
+        public delegate Boolean IdentifierItemLookupFunc(String identifierName, out IEnviroment foundInContext, out INametableItem item);
+        public delegate Boolean IdentifierContextLookupFunc(String identifierName, out IEnviroment foundInContext, out IdentifierKind identifierKind);
+        public delegate Boolean QualifiedIdentifierContextLookupFunc(IEnviroment lookInContext, String identifierName, out IEnviroment foundInContext, out IdentifierKind identifierKind);
 
-        public delegate Boolean VariableValueLookupFunc(IEnviroment LookInContext, String VariableName, out IPhysicalQuantity VariableValue, ref String ResultLine);
-        public delegate Boolean FunctionLookupFunc(IEnviroment LookInContext, String FunctionName, out IFunctionEvaluator functionevaluator);
-        public delegate Boolean FunctionEvaluateFunc(String FunctionName, IFunctionEvaluator functionevaluator, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity FunctionResult, ref String ResultLine);
-        public delegate Boolean FunctionEvaluateFileReadFunc(String FunctionName, out IPhysicalQuantity FunctionResult, ref String ResultLine);
-
-
+        public delegate Boolean VariableValueLookupFunc(IEnviroment lookInContext, String variableName, out IPhysicalQuantity variableValue, ref String resultLine);
+        public delegate Boolean FunctionLookupFunc(IEnviroment lookInContext, String functionName, out IFunctionEvaluator functionEvaluator);
+        public delegate Boolean FunctionEvaluateFunc(String functionName, IFunctionEvaluator functionevaluator, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine);
+        public delegate Boolean FunctionEvaluateFileReadFunc(String functionName, out IPhysicalQuantity functionResult, ref String resultLine);
+        
         // Delegert static globals
         public static IdentifierItemLookupFunc IdentifierItemLookupCallback;
         public static IdentifierContextLookupFunc IdentifierContextLookupCallback;
@@ -105,87 +104,87 @@ namespace PhysicalCalculator.Expression
 
         // static access functions
 
-        public static Boolean IdentifierItemLookup(String IdentifierName, out IEnviroment FoundInContext, out INametableItem Item, ref String ResultLine)
+        public static Boolean IdentifierItemLookup(String identifierName, out IEnviroment foundInContext, out INametableItem item, ref String resultLine)
         {
-            Item = null;
-            FoundInContext = null;
+            item = null;
+            foundInContext = null;
             if (IdentifierItemLookupCallback != null)
             {
-                return IdentifierItemLookupCallback(IdentifierName, out FoundInContext, out Item);
+                return IdentifierItemLookupCallback(identifierName, out foundInContext, out item);
             }
             return false;
         }
 
-        public static Boolean IdentifierContextLookup(String VariableName, out IEnviroment FoundInContext, out IdentifierKind identifierkind, ref String ResultLine)
+        public static Boolean IdentifierContextLookup(String variableName, out IEnviroment foundInContext, out IdentifierKind identifierKind, ref String resultLine)
         {
-            identifierkind = IdentifierKind.unknown;
-            FoundInContext = null;
+            identifierKind = IdentifierKind.Unknown;
+            foundInContext = null;
             if (IdentifierContextLookupCallback != null)
             {
-                return IdentifierContextLookupCallback(VariableName, out FoundInContext, out identifierkind);
+                return IdentifierContextLookupCallback(variableName, out foundInContext, out identifierKind);
             }
             return false;
         }
 
-        public static Boolean QualifiedIdentifierContextLookup(IEnviroment LookInContext, String VariableName, out IEnviroment FoundInContext, out IdentifierKind identifierkind, ref String ResultLine)
+        public static Boolean QualifiedIdentifierContextLookup(IEnviroment lookInContext, String variableName, out IEnviroment foundInContext, out IdentifierKind identifierKind, ref String resultLine)
         {
-            identifierkind = IdentifierKind.unknown;
-            FoundInContext = null;
+            identifierKind = IdentifierKind.Unknown;
+            foundInContext = null;
             if (QualifiedIdentifierContextLookupCallback != null)
             {
-                return QualifiedIdentifierContextLookupCallback(LookInContext, VariableName, out FoundInContext, out identifierkind);
+                return QualifiedIdentifierContextLookupCallback(lookInContext, variableName, out foundInContext, out identifierKind);
             }
             return false;
         }
 
-        public static Boolean VariableGet(IEnviroment LookInContext, String VariableName, out IPhysicalQuantity VariableValue, ref String ResultLine)
+        public static Boolean VariableGet(IEnviroment lookInContext, String variableName, out IPhysicalQuantity variableValue, ref String resultLine)
         {
-            VariableValue = null;
+            variableValue = null;
             if (VariableValueGetCallback != null)
             {
-                return VariableValueGetCallback(LookInContext, VariableName, out VariableValue, ref ResultLine);
+                return VariableValueGetCallback(lookInContext, variableName, out variableValue, ref resultLine);
             }
             return false;
         }
 
-        public static Boolean FunctionGet(IEnviroment LookInContext, String FunctionName, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity FunctionResult, ref String ResultLine)
+        public static Boolean FunctionGet(IEnviroment lookInContext, String functionName, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {
-            FunctionResult = null;
+            functionResult = null;
             IFunctionEvaluator functionevaluator;
-            if (FunctionLookupCallback(LookInContext, FunctionName, out functionevaluator))
+            if (FunctionLookupCallback(lookInContext, functionName, out functionevaluator))
             {
                 if (FunctionEvaluateCallback != null)
                 {
-                    return FunctionEvaluateCallback(FunctionName, functionevaluator, parameterlist, out FunctionResult, ref ResultLine);
+                    return FunctionEvaluateCallback(functionName, functionevaluator, parameterlist, out functionResult, ref resultLine);
                 }
                 else
                 {
-                    ResultLine = "Internal error: No FunctionEvaluateCallback handler specified";
+                    resultLine = "Internal error: No FunctionEvaluateCallback handler specified";
                 }
             }
             else
             {
-                ResultLine = "Internal error: FunctionLookupCallback failed";
+                resultLine = "Internal error: FunctionLookupCallback failed";
             }
 
             return false;
         }
 
-        public static Boolean FileFunctionGet(String FunctionName, out IPhysicalQuantity FunctionResult, ref String ResultLine)
+        public static Boolean FileFunctionGet(String functionName, out IPhysicalQuantity functionResult, ref String resultLine)
         {
-            FunctionResult = null;
+            functionResult = null;
             if (FunctionEvaluateFileReadCallback != null)
             {
-                return FunctionEvaluateFileReadCallback(FunctionName, out FunctionResult, ref ResultLine);
+                return FunctionEvaluateFileReadCallback(functionName, out functionResult, ref resultLine);
             }
             else
             {
-                ResultLine = "Internal error: No FunctionEvaluateFileReadCallback handler specified";
+                resultLine = "Internal error: No FunctionEvaluateFileReadCallback handler specified";
             }
             return false;
         }
 
-        public static List<IPhysicalQuantity> ParseExpressionList(ref String CommandLine, ref String ResultLine)
+        public static List<IPhysicalQuantity> ParseExpressionList(ref String commandLine, ref String resultLine)
         {
             List<IPhysicalQuantity> pqList = new List<IPhysicalQuantity>();
             Boolean MoreToParse = false;
@@ -193,12 +192,12 @@ namespace PhysicalCalculator.Expression
             do
             {
                 IPhysicalQuantity pq = null;
-                pq = ParseConvertedExpression(ref CommandLine, ref ResultLine);
+                pq = ParseConvertedExpression(ref commandLine, ref resultLine);
                 OK = pq != null;
                 if (OK)
                 {
                     pqList.Add(pq);
-                    MoreToParse = TokenString.TryParseToken(",", ref CommandLine);
+                    MoreToParse = TokenString.TryParseToken(",", ref commandLine);
                 }
                 else
                 {
@@ -208,31 +207,31 @@ namespace PhysicalCalculator.Expression
             return pqList;
         }
 
-        public static IPhysicalQuantity ParseConvertedExpression(ref String CommandLine, ref String ResultLine)
+        public static IPhysicalQuantity ParseConvertedExpression(ref String commandLine, ref String resultLine)
         {
             IPhysicalQuantity pq;
 
-            pq = ParseExpression(ref CommandLine, ref ResultLine);
+            pq = ParseExpression(ref commandLine, ref resultLine);
             if (pq != null)
             {
-                pq = ParseOptionalConvertedExpression(pq, ref CommandLine, ref ResultLine);
+                pq = ParseOptionalConvertedExpression(pq, ref commandLine, ref resultLine);
             }
 
             return pq;
         }
 
-        public static IPhysicalQuantity ParseOptionalConvertedExpression(IPhysicalQuantity pq, ref String CommandLine, ref String ResultLine)
+        public static IPhysicalQuantity ParseOptionalConvertedExpression(IPhysicalQuantity pq, ref String commandLine, ref String resultLine)
         {
             IPhysicalQuantity pqRes = pq;
-            if (!String.IsNullOrEmpty(CommandLine))
+            if (!String.IsNullOrEmpty(commandLine))
             {
-                IPhysicalUnit pu = ParseOptionalConvertToUnit(ref CommandLine, ref ResultLine);
+                IPhysicalUnit pu = ParseOptionalConvertToUnit(ref commandLine, ref resultLine);
                 if (pu != null)
                 {
                     pqRes = pq.ConvertTo(pu);
                     if (pqRes == null)
                     {
-                        ResultLine = "The unit " + pq.Unit.ToPrintString() + " can't be converted to " + pu.ToPrintString();
+                        resultLine = "The unit " + pq.Unit.ToPrintString() + " can't be converted to " + pu.ToPrintString();
                     }
                 }
             }
@@ -240,16 +239,16 @@ namespace PhysicalCalculator.Expression
             return pqRes;
         }
 
-        public static IPhysicalUnit ParseOptionalConvertToUnit(ref String CommandLine, ref String ResultLine)
+        public static IPhysicalUnit ParseOptionalConvertToUnit(ref String commandLine, ref String resultLine)
         {
             IPhysicalUnit pu = null;
-            if (TokenString.TryParseToken("[", ref CommandLine))
+            if (TokenString.TryParseToken("[", ref commandLine))
             { // "Convert to unit" square paranteses
 
-                int UnitStrLen = CommandLine.IndexOf(']');
+                int UnitStrLen = commandLine.IndexOf(']');
                 if (UnitStrLen == 0)
                 {
-                    ResultLine = "Missing unit to convert to";
+                    resultLine = "Missing unit to convert to";
                 }
                 else
                 {
@@ -257,19 +256,19 @@ namespace PhysicalCalculator.Expression
                     if (UnitStrLen == -1)
                     {   // Not terminated by ']', but handle that later
                         // Try to parse rest of line as an unit 
-                        UnitString = CommandLine;
-                        UnitStrLen = CommandLine.Length;
+                        UnitString = commandLine;
+                        UnitStrLen = commandLine.Length;
                     }
                     else
                     {   // Parse only the valid unit formatted string
-                        UnitString = CommandLine.Substring(0, UnitStrLen);
+                        UnitString = commandLine.Substring(0, UnitStrLen);
                     }
 
                     /*** 
-                    int SpacePos = CommandLine.IndexOf(' ');
+                    int SpacePos = commandLine.IndexOf(' ');
                     if (SpacePos == 1)
                     {
-                        Char NumberBaseChar = Char.ToLower(CommandLine[0]);
+                        Char NumberBaseChar = Char.ToLower(commandLine[0]);
                         if ((NumberBaseChar == 'h')
                             || (NumberBaseChar == 'x'))
                         {
@@ -282,15 +281,15 @@ namespace PhysicalCalculator.Expression
                     String UnitStringAll = UnitString;
                     UnitStrLen = UnitString.Length;
 
-                    pu = ParsePhysicalUnit(ref UnitString, ref ResultLine);
+                    pu = ParsePhysicalUnit(ref UnitString, ref resultLine);
 
-                    CommandLine = CommandLine.Substring(UnitStrLen - UnitString.Length);
-                    CommandLine = CommandLine.TrimStart();
-                    TokenString.ParseToken("]", ref CommandLine, ref ResultLine);
+                    commandLine = commandLine.Substring(UnitStrLen - UnitString.Length);
+                    commandLine = commandLine.TrimStart();
+                    TokenString.ParseToken("]", ref commandLine, ref resultLine);
 
                     if (pu == null)
                     {
-                        ResultLine = "'" + UnitStringAll + "' is not a valid unit.";
+                        resultLine = "'" + UnitStringAll + "' is not a valid unit.";
                     }
                 }
             }
@@ -313,7 +312,7 @@ namespace PhysicalCalculator.Expression
         public enum OperatorKind
         {
             // Precediens == 0
-            none = 0,
+            None = 0,
 
             // Precediens == 1
             parenbegin = 1,
@@ -324,12 +323,12 @@ namespace PhysicalCalculator.Expression
             sub = 4,
 
             // Precediens == 5
-            mult = 5,
-            div = 6,
+            Mult = 5,
+            Div = 6,
 
             // Precediens == 7
-            pow = 7,
-            root = 8,
+            Pow = 7,
+            Root = 8,
 
             // Precediens == 9
             unaryplus = 9,
@@ -346,18 +345,18 @@ namespace PhysicalCalculator.Expression
                 case OperatorKind.add: // "+"
                 case OperatorKind.sub: // "-":
                      return OperatorKind.add; // 3;
-                case OperatorKind.mult: // "*":
-                case OperatorKind.div: // "/":
-                     return OperatorKind.mult; // 5;
-                case OperatorKind.pow: // "^":
-                case OperatorKind.root: // "!":
-                     return OperatorKind.pow; // 7;
+                case OperatorKind.Mult: // "*":
+                case OperatorKind.Div: // "/":
+                     return OperatorKind.Mult; // 5;
+                case OperatorKind.Pow: // "^":
+                case OperatorKind.Root: // "!":
+                     return OperatorKind.Pow; // 7;
                 case OperatorKind.unaryplus: // unaryplus:
                 case OperatorKind.unaryminus: // UnaryMinus:
                      return OperatorKind.unaryplus; // 9;
             }
 
-            return OperatorKind.none;
+            return OperatorKind.None;
         }
 
         public static OperatorKind OperatorKindFromChar(Char c)
@@ -374,13 +373,13 @@ namespace PhysicalCalculator.Expression
                      return OperatorKind.sub; // 4;
                 case '*': 
                 case '·':  // centre dot  '\0x0B7' (char)183 U+00B7
-                     return OperatorKind.mult; // 5;
+                     return OperatorKind.Mult; // 5;
                 case '/':
-                     return OperatorKind.div; // 6;
+                     return OperatorKind.Div; // 6;
                 case '^': 
-                     return OperatorKind.pow; // 7;
+                     return OperatorKind.Pow; // 7;
                 // case '!':
-                //      return OperatorKind.root; // 8;
+                //      return OperatorKind.Root; // 8;
                 / *
                 case '+': // unaryplus:
                      return OperatorKind.unaryplus; // 9;
@@ -389,7 +388,7 @@ namespace PhysicalCalculator.Expression
                  * /
             }
 
-            return OperatorKind.none;
+            return OperatorKind.None;
         }
         
         public static OperatorKind Precedence(this OperatorKind operatoren)
@@ -424,7 +423,7 @@ namespace PhysicalCalculator.Expression
             public String InputString;
             public String ResultString;
             public int Pos = 0;
-            public Boolean InputRecognaized = true;
+            public Boolean InputRecognized = true;
             public IPhysicalUnit dimensionless = Physics.dimensionless;
             public Boolean ThrowExceptionOnInvalidInput = false;
 
@@ -522,7 +521,7 @@ namespace PhysicalCalculator.Expression
                 {
                     // Push opening parenthesis onto stack
                     Operators.Push(OperatorKind.parenbegin);
-                    //LastReadToken = tokenkind.Operator;
+                    //LastReadToken = TokenKind.Operator;
                     // Track number of parentheses
                     ParenCount++;
 
@@ -589,7 +588,7 @@ namespace PhysicalCalculator.Expression
                     return RemoveFirstToken();
                 }
 
-                while (InputString.Length > Pos && InputRecognaized)
+                while (InputString.Length > Pos && InputRecognized)
                 {
                     Char c = InputString[Pos];
 
@@ -608,8 +607,8 @@ namespace PhysicalCalculator.Expression
                         else
                         {
                             //return null;
-                            // End of recognatized input; Stop reading and return operator tokens from stack.
-                            InputRecognaized = false;
+                            // End of recognized input; Stop reading and return operator tokens from stack.
+                            InputRecognized = false;
                         }
                     }
                     else if (c == ')')
@@ -622,8 +621,8 @@ namespace PhysicalCalculator.Expression
                         else
                         {
                             //return null;
-                            // End of recognatized input; Stop reading and return operator tokens from stack.
-                            InputRecognaized = false;
+                            // End of recognized input; Stop reading and return operator tokens from stack.
+                            InputRecognized = false;
                         }
                     }
                     else
@@ -639,8 +638,8 @@ namespace PhysicalCalculator.Expression
                             else
                             {
                                 //return null;
-                                // End of recognatized input; Stop reading and return operator tokens from stack.
-                                InputRecognaized = false;
+                                // End of recognized input; Stop reading and return operator tokens from stack.
+                                InputRecognized = false;
                             }
                         }
                         else if (Char.IsDigit(c))
@@ -654,8 +653,8 @@ namespace PhysicalCalculator.Expression
                                 else
                                 {
                                     //return null;
-                                    // End of recognatized input; Stop reading and return operator tokens from stack.
-                                    InputRecognaized = false;
+                                    // End of recognized input; Stop reading and return operator tokens from stack.
+                                    InputRecognized = false;
                                 }
                             }
                             else
@@ -697,8 +696,8 @@ namespace PhysicalCalculator.Expression
                                 else
                                 {
                                     //return null;
-                                    // End of recognatized input; Stop reading and return operator tokens from stack.
-                                    InputRecognaized = false;
+                                    // End of recognized input; Stop reading and return operator tokens from stack.
+                                    InputRecognized = false;
                                 }
                             }
                         }
@@ -738,7 +737,7 @@ namespace PhysicalCalculator.Expression
                                 /**
                                 if (!IdentifierFound)
                                 {
-                                    ResultLine = "Unknown identifier: '" + IdentifierName + "'";
+                                    resultLine = "Unknown identifier: '" + IdentifierName + "'";
                                 }
                                 **/
 
@@ -757,8 +756,8 @@ namespace PhysicalCalculator.Expression
                             else
                             {
                                 //return null;
-                                // End of recognatized input; Stop reading and return operator tokens from stack.
-                                InputRecognaized = false;
+                                // End of recognized input; Stop reading and return operator tokens from stack.
+                                InputRecognized = false;
                             }
 
                         }
@@ -771,8 +770,8 @@ namespace PhysicalCalculator.Expression
                             else
                             {
                                 //return null;
-                                // End of recognatized input; Stop reading and return operator tokens from stack.
-                                InputRecognaized = false;
+                                // End of recognized input; Stop reading and return operator tokens from stack.
+                                InputRecognized = false;
                             }
                         }
                     }
@@ -794,8 +793,8 @@ namespace PhysicalCalculator.Expression
                     else
                     {
                         //return null;
-                        // End of recognatized input; Stop reading and return operator tokens from stack.
-                        InputRecognaized = false;                    
+                        // End of recognized input; Stop reading and return operator tokens from stack.
+                        InputRecognized = false;                    
                     }
                 }
                 // Check for balanced parentheses
@@ -808,8 +807,8 @@ namespace PhysicalCalculator.Expression
                     else
                     {
                         //return null;
-                        // End of recognatized input; Stop reading and return operator tokens from stack.
-                        InputRecognaized = false;
+                        // End of recognized input; Stop reading and return operator tokens from stack.
+                        InputRecognized = false;
                     }
                 }
                 // Retrieve remaining operators from stack
@@ -827,12 +826,12 @@ namespace PhysicalCalculator.Expression
             }
         }
 
-        public static IPhysicalQuantity ParseExpression(ref String CommandLine, ref String ResultLine)
+        public static IPhysicalQuantity ParseExpression(ref String commandLine, ref String resultLine)
         {
             //public static readonly 
             PhysicalUnit dimensionless = new CombinedUnit();
 
-            expressiontokenizer Tokenizer = new expressiontokenizer(dimensionless, CommandLine);
+            expressiontokenizer Tokenizer = new expressiontokenizer(dimensionless, commandLine);
 
             Tokenizer.ThrowExceptionOnInvalidInput = false;
             Stack<IPhysicalQuantity> Operands = new Stack<IPhysicalQuantity>();
@@ -930,8 +929,8 @@ namespace PhysicalCalculator.Expression
                 Token = Tokenizer.GetToken();
             }
 
-            CommandLine = Tokenizer.GetRemainingInput(); // Remaining of input string
-            ResultLine = Tokenizer.ResultString;
+            commandLine = Tokenizer.GetRemainingInput(); // Remaining of input string
+            resultLine = Tokenizer.ResultString;
 
             Debug.Assert(Operands.Count <= 1);  // 0 or 1
 
@@ -939,75 +938,75 @@ namespace PhysicalCalculator.Expression
         }
 
 
-        public static Boolean ParseQualifiedIdentifier(ref String CommandLine, ref String ResultLine, out String IdentifierName, out IPhysicalQuantity pq)
+        public static Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, out String identifierName, out IPhysicalQuantity identifierValue)
         {
-            pq = null;
+            identifierValue = null;
 
             String QualifiedIdentifierName;
             IEnviroment PrimaryContext;
             IEnviroment QualifiedIdentifierContext;
             IdentifierKind identifierkind;
 
-            CommandLine = CommandLine.ReadIdentifier(out IdentifierName);
-            Debug.Assert(IdentifierName != null);
+            commandLine = commandLine.ReadIdentifier(out identifierName);
+            Debug.Assert(identifierName != null);
 
-            Boolean PrimaryIdentifierFound = IdentifierContextLookup(IdentifierName, out PrimaryContext, out identifierkind, ref ResultLine);
+            Boolean PrimaryIdentifierFound = IdentifierContextLookup(identifierName, out PrimaryContext, out identifierkind, ref resultLine);
 
             Boolean IdentifierFound = PrimaryIdentifierFound;
 
             QualifiedIdentifierContext = PrimaryContext;
-            QualifiedIdentifierName = IdentifierName;
+            QualifiedIdentifierName = identifierName;
 
-            while (IdentifierFound && !String.IsNullOrEmpty(CommandLine) && CommandLine[0] == '.')
+            while (IdentifierFound && !String.IsNullOrEmpty(commandLine) && commandLine[0] == '.')
             {
-                TokenString.ParseChar('.', ref CommandLine, ref ResultLine);
-                CommandLine = CommandLine.TrimStart();
+                TokenString.ParseChar('.', ref commandLine, ref resultLine);
+                commandLine = commandLine.TrimStart();
 
-                CommandLine = CommandLine.ReadIdentifier(out IdentifierName);
-                Debug.Assert(IdentifierName != null);
-                CommandLine = CommandLine.TrimStart();
+                commandLine = commandLine.ReadIdentifier(out identifierName);
+                Debug.Assert(identifierName != null);
+                commandLine = commandLine.TrimStart();
 
                 IEnviroment FoundInContext;
                 IdentifierKind FoundIdentifierkind;
 
-                IdentifierFound = QualifiedIdentifierContextLookup(QualifiedIdentifierContext, IdentifierName, out FoundInContext, out FoundIdentifierkind, ref ResultLine);
+                IdentifierFound = QualifiedIdentifierContextLookup(QualifiedIdentifierContext, identifierName, out FoundInContext, out FoundIdentifierkind, ref resultLine);
                 if (IdentifierFound)
                 {
                     QualifiedIdentifierContext = FoundInContext;
                     identifierkind = FoundIdentifierkind;
 
-                    QualifiedIdentifierName += "." + IdentifierName;
+                    QualifiedIdentifierName += "." + identifierName;
                 }
                 else
                 {
-                    ResultLine = QualifiedIdentifierName + " don't have a field named '" + IdentifierName + "'";
+                    resultLine = QualifiedIdentifierName + " don't have a field named '" + identifierName + "'";
                 }
             }
 
             if (IdentifierFound)
             {
-                if (identifierkind == IdentifierKind.variable)
+                if (identifierkind == IdentifierKind.Variable)
                 {
-                    VariableGet(QualifiedIdentifierContext, IdentifierName, out pq, ref ResultLine);
+                    VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
                 }
-                else if (identifierkind == IdentifierKind.function)
+                else if (identifierkind == IdentifierKind.Function)
                 {
-                    TokenString.ParseChar('(', ref CommandLine, ref ResultLine);
-                    CommandLine = CommandLine.TrimStart();
-                    List<IPhysicalQuantity> parameterlist = ParseExpressionList(ref CommandLine, ref ResultLine);
+                    TokenString.ParseChar('(', ref commandLine, ref resultLine);
+                    commandLine = commandLine.TrimStart();
+                    List<IPhysicalQuantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine);
                     Boolean OK = parameterlist != null;
                     if (OK)
                     {
-                        TokenString.ParseChar(')', ref CommandLine, ref ResultLine);
+                        TokenString.ParseChar(')', ref commandLine, ref resultLine);
 
-                        FunctionGet(QualifiedIdentifierContext, IdentifierName, parameterlist, out pq, ref ResultLine);
+                        FunctionGet(QualifiedIdentifierContext, identifierName, parameterlist, out identifierValue, ref resultLine);
 
-                        CommandLine = CommandLine.TrimStart();
+                        commandLine = commandLine.TrimStart();
                     }
                     else
                     {
                         // Error in result line
-                        Debug.Assert(!String.IsNullOrEmpty(ResultLine));
+                        Debug.Assert(!String.IsNullOrEmpty(resultLine));
                     }
                 }
             }
@@ -1015,15 +1014,15 @@ namespace PhysicalCalculator.Expression
             return PrimaryIdentifierFound;
         }
 
-        public static Boolean ParseDouble(ref String CommandLine, ref String ResultLine, out Double D)
+        public static Boolean ParseDouble(ref String commandLine, ref String resultLine, out Double D)
         {
             Boolean OK = false;
             D = 0.0;
-            CommandLine = CommandLine.TrimStart();
+            commandLine = commandLine.TrimStart();
 
-            if (String.IsNullOrEmpty(CommandLine))
+            if (String.IsNullOrEmpty(commandLine))
             {
-                // ResultLine = "Double not found";
+                // resultLine = "Double not found";
             }
             else
             {
@@ -1033,7 +1032,7 @@ namespace PhysicalCalculator.Expression
 
                 // Scan number
                 int numlen = 0;
-                int maxlen = CommandLine.Length; // Max length of sign and digits to look for
+                int maxlen = commandLine.Length; // Max length of sign and digits to look for
                 int numberBase = 10; // Decimal number expected
                 int exponentNumberBase = 10; // Decimal exponentnumber expected
 
@@ -1044,23 +1043,23 @@ namespace PhysicalCalculator.Expression
                 int exponentNumberSignPos = -1; // No exponent number sign found
                 int exponentHexNumberPos = -1; // No exponent hex number prefix found
 
-                if ((CommandLine[0] == '-') || (CommandLine[0] == '+'))
+                if ((commandLine[0] == '-') || (commandLine[0] == '+'))
                 {
                     numberSignPos = numlen;
                     numlen = 1;
                 }
 
-                while (numlen < maxlen && Char.IsDigit(CommandLine[numlen]))
+                while (numlen < maxlen && Char.IsDigit(commandLine[numlen]))
                 {
                     numlen++;
                 }
 
                 if (   (numlen < maxlen)
-                    && (CommandLine[numlen] == 'x')
+                    && (commandLine[numlen] == 'x')
                     && (numlen > 0)
-                    && (CommandLine[numlen-1] == '0')
+                    && (commandLine[numlen-1] == '0')
                     && (   (numlen < 2)
-                        || (!Char.IsDigit(CommandLine[numlen-2]))))
+                        || (!Char.IsDigit(commandLine[numlen-2]))))
                 {
                     numlen++;
                     hexNumberPos = numlen;
@@ -1068,60 +1067,60 @@ namespace PhysicalCalculator.Expression
                 }
 
                 while ((numlen < maxlen)
-                       && (Char.IsDigit(CommandLine[numlen])
+                       && (Char.IsDigit(commandLine[numlen])
                            || ((numberBase == 0x10)
-                               && Char.IsLetter(CommandLine[numlen])
-                    //&& Char.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
-                               && TokenString.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
+                               && Char.IsLetter(commandLine[numlen])
+                    //&& Char.IsHexDigit(Char.ToLower(commandLine[numlen])))))
+                               && TokenString.IsHexDigit(Char.ToLower(commandLine[numlen])))))
                 {
                     numlen++;
                 }
 
                 if ((numlen < maxlen)
-                    && ((CommandLine[numlen] == '.')
-                        || (CommandLine[numlen] == ',')))
+                    && ((commandLine[numlen] == '.')
+                        || (commandLine[numlen] == ',')))
                 {
                     DecimalCharPos = numlen;
                     numlen++;
                 }
                 while (   (numlen < maxlen)
-                       && (   Char.IsDigit(CommandLine[numlen]) 
+                       && (   Char.IsDigit(commandLine[numlen]) 
                            || (   (numberBase == 0x10) 
-                               && Char.IsLetter(CommandLine[numlen])
-                               //&& Char.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
-                               && TokenString.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
+                               && Char.IsLetter(commandLine[numlen])
+                               //&& Char.IsHexDigit(Char.ToLower(commandLine[numlen])))))
+                               && TokenString.IsHexDigit(Char.ToLower(commandLine[numlen])))))
                 {
                     numlen++;
                 }
 
                 if ((numlen < maxlen)
-                    && ((CommandLine[numlen] == 'E')
-                        || (CommandLine[numlen] == 'e')
-                        || (CommandLine[numlen] == 'H')
-                        || (CommandLine[numlen] == 'h')))
+                    && ((commandLine[numlen] == 'E')
+                        || (commandLine[numlen] == 'e')
+                        || (commandLine[numlen] == 'H')
+                        || (commandLine[numlen] == 'h')))
                 {
                     exponentCharPos = numlen;
 
                     numlen++;
                     if ((numlen < maxlen)
-                        && ((CommandLine[numlen] == '-')
-                            || (CommandLine[numlen] == '+')))
+                        && ((commandLine[numlen] == '-')
+                            || (commandLine[numlen] == '+')))
                     {
                         exponentNumberSignPos = numlen;
                         numlen++;
                     }
 
-                    while (numlen < maxlen && Char.IsDigit(CommandLine[numlen]))
+                    while (numlen < maxlen && Char.IsDigit(commandLine[numlen]))
                     {
                         numlen++;
                     }
 
                     if ((numlen < maxlen)
-                        && (CommandLine[numlen] == 'x')
+                        && (commandLine[numlen] == 'x')
                         && (numlen > 0)
-                        && (CommandLine[numlen - 1] == '0')
+                        && (commandLine[numlen - 1] == '0')
                         && ((numlen < 2)
-                            || (!Char.IsDigit(CommandLine[numlen - 2]))))
+                            || (!Char.IsDigit(commandLine[numlen - 2]))))
                     {
                         numlen++;
                         exponentHexNumberPos = numlen;
@@ -1129,11 +1128,11 @@ namespace PhysicalCalculator.Expression
                     }
 
                     while ((numlen < maxlen)
-                           && (Char.IsDigit(CommandLine[numlen])
+                           && (Char.IsDigit(commandLine[numlen])
                                || ((exponentNumberBase == 0x10)
-                                   && Char.IsLetter(CommandLine[numlen])
-                        //&& Char.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
-                                   && TokenString.IsHexDigit(Char.ToLower(CommandLine[numlen])))))
+                                   && Char.IsLetter(commandLine[numlen])
+                        //&& Char.IsHexDigit(Char.ToLower(commandLine[numlen])))))
+                                   && TokenString.IsHexDigit(Char.ToLower(commandLine[numlen])))))
                     {
                         numlen++;
                     }
@@ -1152,12 +1151,12 @@ namespace PhysicalCalculator.Expression
                         {
                             baseNumberLen = exponentCharPos -1;
                         }
-                        //OK = Double.TryParse(CommandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); 
+                        //OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); 
 
                         if (numberBase == 10)
                         {
                             System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
-                            OK = Double.TryParse(CommandLine.Substring(0, baseNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out D);
+                            OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out D);
                         }
                         else
                         {
@@ -1169,18 +1168,18 @@ namespace PhysicalCalculator.Expression
                             }
                             
                             System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.AllowHexSpecifier; // HexNumber
-                            OK = long.TryParse(CommandLine.Substring(hexNumberPos, baseIntegralNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out baseNumberL);
+                            OK = long.TryParse(commandLine.Substring(hexNumberPos, baseIntegralNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out baseNumberL);
                             D = baseNumberL;
 
                             if (DecimalCharPos > 0)
                             {
                                 int NoOfChars = baseNumberLen - (DecimalCharPos + 1);
-                                OK = long.TryParse(CommandLine.Substring(DecimalCharPos + 1, NoOfChars), numberstyle, NumberFormatInfo.InvariantInfo, out baseNumberL);
+                                OK = long.TryParse(commandLine.Substring(DecimalCharPos + 1, NoOfChars), numberstyle, NumberFormatInfo.InvariantInfo, out baseNumberL);
                                 D = D + (baseNumberL / Math.Pow(16, NoOfChars)) ;
                                 
                             }
                             
-                            if (numberSignPos > 0 && CommandLine[numberSignPos] == '-')
+                            if (numberSignPos > 0 && commandLine[numberSignPos] == '-')
                             {
                                 D = -D;
                             }
@@ -1191,16 +1190,16 @@ namespace PhysicalCalculator.Expression
                             if (numberBase == 10)
                             {
                                 System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
-                                OK = Double.TryParse(CommandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumberD);
+                                OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumberD);
                             }
                             else
                             {
                                 long exponentNumber = 0;
                                 System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.AllowHexSpecifier; // HexNumber
-                                OK = long.TryParse(CommandLine.Substring(exponentHexNumberPos, numlen - (exponentHexNumberPos-1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumber);
+                                OK = long.TryParse(commandLine.Substring(exponentHexNumberPos, numlen - (exponentHexNumberPos-1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumber);
                                 exponentNumberD = exponentNumber;
 
-                                if (exponentNumberSignPos > 0 && CommandLine[exponentNumberSignPos] == '-')
+                                if (exponentNumberSignPos > 0 && commandLine[exponentNumberSignPos] == '-')
                                 {
                                     exponentNumberD = -exponentNumberD;
                                 }
@@ -1209,7 +1208,7 @@ namespace PhysicalCalculator.Expression
                             if (OK)
                             {
                                 Double Exponent;
-                                if ((CommandLine[exponentCharPos] == 'H') || (CommandLine[exponentCharPos] == 'h'))
+                                if ((commandLine[exponentCharPos] == 'H') || (commandLine[exponentCharPos] == 'h'))
                                 {
                                     Exponent = 0x10;
                                 }
@@ -1225,55 +1224,55 @@ namespace PhysicalCalculator.Expression
                     else
                     {
                         System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
-                        OK = Double.TryParse(CommandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); // styles, provider
+                        OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); // styles, provider
                     }
                     if (OK)
                     {
-                        CommandLine = CommandLine.Substring(numlen);
+                        commandLine = commandLine.Substring(numlen);
                     }
                     else
                     {
-                        ResultLine = CommandLine.Substring(0, numlen) + " is not a valid number";
+                        resultLine = commandLine.Substring(0, numlen) + " is not a valid number";
                     }
                 }
             }
             return OK;
         }
 
-        public static IPhysicalUnit ParsePhysicalUnit(ref String CommandLine, ref String ResultLine)
+        public static IPhysicalUnit ParsePhysicalUnit(ref String commandLine, ref String resultLine)
         {
             IPhysicalUnit pu = null;
             Boolean UnitIdentifierFound = false;
             String IdentifierName;
             IEnviroment Context;
 
-            String CommandLineRest = CommandLine.ReadIdentifier(out IdentifierName);
+            String CommandLineRest = commandLine.ReadIdentifier(out IdentifierName);
 
             if (IdentifierName != null)
             {
                 // Check for custom defined unit
                 INametableItem Item;
-                UnitIdentifierFound = IdentifierItemLookup(IdentifierName, out Context, out Item, ref ResultLine);
+                UnitIdentifierFound = IdentifierItemLookup(IdentifierName, out Context, out Item, ref resultLine);
                 if (UnitIdentifierFound)
                 {
-                    if (Item.identifierkind == IdentifierKind.unit)
+                    if (Item.identifierkind == IdentifierKind.Unit)
                     {
-                        CommandLine = CommandLineRest;
+                        commandLine = CommandLineRest;
                         pu = ((NamedUnit)Item).pu;
                     }
                     else
                     {
-                        ResultLine = IdentifierName + " is a " + Item.identifierkind.ToString() + ". Expected an unit";
+                        resultLine = IdentifierName + " is a " + Item.identifierkind.ToString() + ". Expected an unit";
                     }
                 }
             }
             //if (!UnitIdentifierFound)
             if (pu == null)
             {   // Standard units
-                pu = PhysicalUnit.ParseUnit(ref CommandLine);
+                pu = PhysicalUnit.ParseUnit(ref commandLine);
                 if (pu != null && UnitIdentifierFound)
                 {   
-                    ResultLine = "";
+                    resultLine = "";
                 }
             }
             return pu;
@@ -1358,7 +1357,7 @@ namespace PhysicalCalculator.Expression
                 case '^':
                     return OperatorKind.pow; // 7;
                 // case '!':
-                //      return OperatorKind.root; // 8;
+                //      return OperatorKind.Root; // 8;
                 /*
                 case '+': // unaryplus:
                      return OperatorKind.unaryplus; // 9;

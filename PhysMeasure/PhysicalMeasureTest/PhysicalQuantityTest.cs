@@ -121,7 +121,7 @@ namespace PhysicalMeasureTest
         ///A test for mult operator
         ///</summary>
         [TestMethod()]
-        public void MultBaseunitAndDerivedUnitTest()
+        public void PhysicalQuantityTest_MultBaseunitAndDerivedUnitTest()
         {
             PhysicalUnit pu1 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)];
             PhysicalUnit pu2 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"); // m2∙kg∙s−2
@@ -136,7 +136,7 @@ namespace PhysicalMeasureTest
         ///A test for div operator
         ///</summary>
         [TestMethod()]
-        public void DivBaseunitAndDerivedUnitTest()
+        public void PhysicalQuantityTest_DivBaseunitAndDerivedUnitTest()
         {
             PhysicalUnit pu1 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)];
             PhysicalUnit pu2 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"); // m2∙kg∙s−2
@@ -151,7 +151,7 @@ namespace PhysicalMeasureTest
         ///A test for div operator
         ///</summary>
         [TestMethod()]
-        public void DivDerivedunitAndBaseUnitTest()
+        public void PhysicalQuantityTest_DivDerivedunitAndBaseUnitTest()
         {
             PhysicalUnit pu1 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"); // m2∙kg∙s−2
             PhysicalUnit pu2 = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)];
@@ -166,7 +166,7 @@ namespace PhysicalMeasureTest
         ///A test for power operator
         ///</summary>
         [TestMethod()]
-        public void PowerOfBaseUnit()
+        public void PhysicalQuantityTest_PowerOfBaseUnit()
         {
             PhysicalUnit pu = (PhysicalUnit)PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Length)];
 
@@ -180,7 +180,7 @@ namespace PhysicalMeasureTest
         ///A test for power operator
         ///</summary>
         [TestMethod()]
-        public void PowerOfDerivedUnitTest()
+        public void PhysicalQuantityTest_PowerOfDerivedUnitTest()
         {
             PhysicalUnit pu = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
 
@@ -194,7 +194,7 @@ namespace PhysicalMeasureTest
         ///A test for root operator
         ///</summary>
         [TestMethod()]
-        public void RootOfDerivedUnitTest()
+        public void PhysicalQuantityTest_RootOfDerivedUnitTest()
         {
             PhysicalUnit pu = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
@@ -208,7 +208,7 @@ namespace PhysicalMeasureTest
         ///A test for mult and div operator
         ///</summary>
         [TestMethod()]
-        public void KmPrHourUnitTest()
+        public void PhysicalQuantityTest_KmPrHourUnitTest()
         {
             PhysicalQuantity KmPrHour_example1 = PhysicalMeasure.Prefix.K * SI.m / SI.h;
 
@@ -237,7 +237,7 @@ namespace PhysicalMeasureTest
         ///A test for mult and div operator
         ///</summary>
         [TestMethod()]
-        public void WattHourUnitTest()
+        public void PhysicalQuantityTest_WattHourUnitTest()
         {
             IPhysicalQuantity WattHour_example1 = SI.W * SI.h;
 
@@ -348,7 +348,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void BaseUnitTestBaseUnitNumberAccessLuminousIntensity()
         {
-            BaseUnit u = (BaseUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Luminous_intensity)]);
+            BaseUnit u = (BaseUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.LuminousIntensity)]);
 
             SByte expected = 6;
 
@@ -474,7 +474,7 @@ namespace PhysicalMeasureTest
         {
             //String s = "594.15 mK";
             //String s = "3.21 K°C";
-            IPhysicalQuantity InMilliKelvin = (IPhysicalQuantity)(new PhysicalQuantity(321273.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Thermodynamic_temperature)]))); // In Kelvin
+            IPhysicalQuantity InMilliKelvin = (IPhysicalQuantity)(new PhysicalQuantity(321273.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)]))); // In Kelvin
             IPhysicalQuantity InKiloCelcius = (IPhysicalQuantity)(new PhysicalQuantity(321, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("°C"), 1))))); // In Kilo Celsius
 
             Assert.AreEqual(InMilliKelvin, InKiloCelcius);
@@ -552,7 +552,7 @@ namespace PhysicalMeasureTest
         ///A test for == operator
         ///</summary>
         [TestMethod()]
-        public void CompareOperatorEqualsTest()
+        public void PhysicalQuantityTest_CompareOperatorEqualsTest()
         {
             PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
             PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
@@ -568,7 +568,7 @@ namespace PhysicalMeasureTest
         ///A test for != operator
         ///</summary>
         [TestMethod()]
-        public void CompareOperatorNotEqualsTest()
+        public void PhysicalQuantityTest_CompareOperatorNotEqualsTest()
         {
             PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
             PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
@@ -584,7 +584,7 @@ namespace PhysicalMeasureTest
         ///A test for < operator
         ///</summary>
         [TestMethod()]
-        public void CompareOperatorLessTest()
+        public void PhysicalQuantityTest_CompareOperatorLessTest()
         {
             PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
             PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
@@ -596,7 +596,7 @@ namespace PhysicalMeasureTest
         ///A test for <= operator
         ///</summary>
         [TestMethod()]
-        public void CompareOperatorLessOrEqualsTest()
+        public void PhysicalQuantityTest_CompareOperatorLessOrEqualsTest()
         {
             PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
             PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
@@ -608,7 +608,7 @@ namespace PhysicalMeasureTest
         ///A test for > operator
         ///</summary>
         [TestMethod()]
-        public void CompareOperatorLargerTest()
+        public void PhysicalQuantityTest_CompareOperatorLargerTest()
         {
             PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
             PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
@@ -620,7 +620,7 @@ namespace PhysicalMeasureTest
         ///A test for > operator
         ///</summary>
         [TestMethod()]
-        public void CompareOperatorLargerOrEqualTest()
+        public void PhysicalQuantityTest_CompareOperatorLargerOrEqualTest()
         {
             PhysicalQuantity pg1 = new PhysicalQuantity(0.000123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
             PhysicalQuantity pg2 = new PhysicalQuantity(456, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
@@ -699,7 +699,7 @@ namespace PhysicalMeasureTest
         ///A test for power operator
         ///</summary>
         [TestMethod()]
-        public void CalculateEnergyIn1Gram()
+        public void PowerOperatorCalculateEnergyIn1Gram()
         {
             PhysicalQuantity m = new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
 
@@ -855,7 +855,7 @@ namespace PhysicalMeasureTest
         ///A test for PhysicalQuantity 
         ///</summary>
         [TestMethod()]
-        public void PhysicalQuantityGeVTest()
+        public void PhysicalQuantityTest_PhysicalQuantityGeVTest()
         {
 
             PhysicalQuantity GeV = Prefix.G * Constants.e * SI.V;
@@ -878,7 +878,7 @@ namespace PhysicalMeasureTest
         ///A test for PhysicalQuantity 
         ///</summary>
         [TestMethod()]
-        public void PhysicalQuantityFunctionTest()
+        public void PhysicalQuantityTest_PhysicalQuantityFunctionTest()
         {
             PhysicalQuantity m = new PhysicalQuantity(0.001, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
 

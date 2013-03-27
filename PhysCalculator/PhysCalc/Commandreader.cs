@@ -6,30 +6,30 @@ using System.Text;
 namespace PhysicalCalculator
 {
     [Flags]
-    public enum Tracelevel : byte
+    public enum TraceLevels : byte
     {
-        none = 0x00,
-        results = 0x01,
-        fileenterleave = 0x02,
-        functionenterleave = 0x04,
-        debug = 0x08,
-        low = results,
-        normal = results | fileenterleave,
-        high = results | fileenterleave | functionenterleave,
-        all = 0xFF
+        None = 0x00,
+        Results = 0x01,
+        FileEnterLeave = 0x02,
+        FunctionEnterLeave = 0x04,
+        Debug = 0x08,
+        Low = Results,
+        Normal = Results | FileEnterLeave,
+        High = Results | FileEnterLeave | FunctionEnterLeave,
+        All = 0xFF
     }
 
     interface ICommandAccessor
     {
         String Name { get; }
-        Tracelevel OutputTracelevel { get; set; }
+        TraceLevels OutputTracelevel { get; set; }
         Boolean IsEmpty { get; }
         String GetCommandLine(ref String ResultLine);
     }
 
     class CommandAccessorStack : List<ICommandAccessor>
     {
-        public Tracelevel OutputTracelevel
+        public TraceLevels OutputTracelevel
         {
             get
             {
@@ -38,8 +38,8 @@ namespace PhysicalCalculator
                 {
                     return CA.OutputTracelevel;
                 }
-                // Error; just trace all
-                return Tracelevel.all;
+                // Error; just trace All
+                return TraceLevels.All;
             }
 
             set
@@ -110,11 +110,11 @@ namespace PhysicalCalculator
     abstract class CommandAccessor : ICommandAccessor
     {
         private String _name;
-        private Tracelevel OutTracelevel = Tracelevel.normal; // Tracelevel.all; //Tracelevel.normal;
+        private TraceLevels OutTracelevel = TraceLevels.Normal; // TraceLevels.All; //TraceLevels.Normal;
         public int LinesRead = 0;
 
         public String Name { get { return (_name != null ? _name : ""); } set { _name = value;  } }
-        public Tracelevel OutputTracelevel { get { return OutTracelevel; } set { OutTracelevel = value; } }
+        public TraceLevels OutputTracelevel { get { return OutTracelevel; } set { OutTracelevel = value; } }
 
         //virtual public Boolean IsEmpty { get { return true; } } 
         abstract public Boolean IsEmpty { get; } 
@@ -164,7 +164,7 @@ namespace PhysicalCalculator
             }
             else if (LinesRead == 0)
             {
-                if (OutputTracelevel.HasFlag(Tracelevel.functionenterleave))
+                if (OutputTracelevel.HasFlag(TraceLevels.FunctionEnterLeave))
                 {
                     ResultLine = "Reading from '" + Name + "'";
                 }
@@ -176,13 +176,13 @@ namespace PhysicalCalculator
                 if (S == null)
                 {
                     S = "";
-                    if (OutputTracelevel.HasFlag(Tracelevel.functionenterleave))
+                    if (OutputTracelevel.HasFlag(TraceLevels.FunctionEnterLeave))
                     {
                         if (!String.IsNullOrEmpty(ResultLine))
                         {
                             ResultLine += "\n";
                         }
-                        //ResultLine += "End of CommandBlock '" + Name + "'";
+                        //resultLine += "End of CommandBlock '" + name + "'";
                         ResultLine += "End of '" + Name + "'";
                     }
 
@@ -207,12 +207,19 @@ namespace PhysicalCalculator
         public CommandFileAccessor()
             : this(null)
         {
-        }
+        } 
 
         public CommandFileAccessor(String FileNameStr)
         {
             this.FileNameStr = FileNameStr;
             this.FileReader = null;
+        }
+
+        // IDisposable
+        // public virtual void Dispose()
+        public void Dispose()
+        {
+            FileReader.Dispose();
         }
 
         public String FileNameStr { 
@@ -246,7 +253,7 @@ namespace PhysicalCalculator
                     //Encoding FileEncoding = Encoding.ASCII;
                     //Encoding FileEncoding = Encoding.UTF7;
                     FileReader = new StreamReader(FileNameStr, Encoding.UTF7);
-                    if (OutputTracelevel.HasFlag(Tracelevel.fileenterleave))
+                    if (OutputTracelevel.HasFlag(TraceLevels.FileEnterLeave))
                     {
                         ResultLine = "Reading from file " + FileNameStr;
                     }
@@ -271,7 +278,7 @@ namespace PhysicalCalculator
                 if (S == null)
                 {
                     S = "";
-                    if (OutputTracelevel.HasFlag(Tracelevel.fileenterleave))
+                    if (OutputTracelevel.HasFlag(TraceLevels.FileEnterLeave))
                     {
                         ResultLine = "End of File '" + FileNameStr + "'";
                     }
@@ -394,7 +401,7 @@ namespace PhysicalCalculator
         public ResultWriter ResultLineWriter = null;
         public Boolean WriteCommandToResultWriter = true;
         public Boolean ReadFromConsoleWhenEmpty = false;
-        private Tracelevel GlobalOutputTracelevel = Tracelevel.normal; //Tracelevel.all; // Tracelevel.normal;
+        private TraceLevels GlobalOutputTracelevel = TraceLevels.Normal; //TraceLevels.All; // TraceLevels.Normal;
 
         public Commandreader(ResultWriter ResultLineWriter = null)
         {
@@ -404,6 +411,8 @@ namespace PhysicalCalculator
         public Commandreader(String[] args, ResultWriter ResultLineWriter = null)
             : this(ResultLineWriter)
         {
+            // args = CheckForOptions(args);
+
             if (args.Length == 1 && File.Exists(args[0]))
             {
                 AddFile(args[0]);
@@ -453,7 +462,7 @@ namespace PhysicalCalculator
             }
         }
 
-        public Tracelevel OutputTracelevel { 
+        public TraceLevels OutputTracelevel { 
             get {
                 if (CommandAccessors != null)
                 {
@@ -575,7 +584,7 @@ namespace PhysicalCalculator
             }
             else if (ReadFromConsoleWhenEmpty)
             {
-                // Show that we are ready to next command from user
+                // Show that we are ready to next Command from user
                 Write("|>");
 
                 CommandLine = Console.ReadLine();

@@ -1,9 +1,9 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysCalc", "PhysCalc\PhysCalc.csproj", "{74C979DF-C059-4DC4-BCA7-FC904F131B37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasure", "..\..\PhysicalMeasure\PhysicalMeasure\PhysicalMeasure.csproj", "{4A1384AC-58AA-4758-822F-25CCC6123F51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasure", "..\PhysMeasure\PhysicalMeasure\PhysicalMeasure.csproj", "{4A1384AC-58AA-4758-822F-25CCC6123F51}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{023D025A-0D6F-464C-AFC2-A61EE955F6C8}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasureTest", "..\..\PhysicalMeasure\PhysicalMeasureTest\PhysicalMeasureTest.csproj", "{3D655BBE-CBDC-4023-ACD4-6B5F65AF01FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasureTest", "..\PhysMeasure\PhysicalMeasureTest\PhysicalMeasureTest.csproj", "{3D655BBE-CBDC-4023-ACD4-6B5F65AF01FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysCalculatorTests", "PhysCalculatorTests\PhysCalculatorTests.csproj", "{02BDC068-8801-44EB-B355-AD4C48EEC54D}"
 EndProject
@@ -20,16 +20,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7EFECBE3
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 5
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs12
 		SccLocalPath0 = .
-		SccProjectUniqueName1 = PhysicalMeasure\\PhysicalMeasure.csproj
-		SccProjectName1 = PhysicalMeasure
-		SccLocalPath1 = PhysicalMeasure
-		SccProjectUniqueName2 = PhysicalMeasureTest\\PhysicalMeasureTest.csproj
-		SccProjectName2 = PhysicalMeasureTest
-		SccLocalPath2 = PhysicalMeasureTest
+		SccProjectUniqueName1 = ..\\PhysMeasure\\PhysicalMeasureTest\\PhysicalMeasureTest.csproj
+		SccProjectTopLevelParentUniqueName1 = PhysCalculator.sln
+		SccProjectName1 = ../PhysMeasure/PhysicalMeasureTest
+		SccLocalPath1 = ..\\PhysMeasure\\PhysicalMeasureTest
+		SccProjectUniqueName2 = ..\\PhysMeasure\\PhysicalMeasure\\PhysicalMeasure.csproj
+		SccProjectName2 = ../PhysMeasure/PhysicalMeasure
+		SccLocalPath2 = ..\\PhysMeasure\\PhysicalMeasure
+		SccProjectUniqueName3 = PhysCalculatorTests\\PhysCalculatorTests.csproj
+		SccProjectTopLevelParentUniqueName3 = PhysCalculator.sln
+		SccProjectName3 = PhysCalculatorTests
+		SccLocalPath3 = PhysCalculatorTests
+		SccProjectUniqueName4 = PhysCalc\\PhysCalc.csproj
+		SccProjectName4 = PhysCalc
+		SccLocalPath4 = PhysCalc
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = PhysCalculator.vsmdi

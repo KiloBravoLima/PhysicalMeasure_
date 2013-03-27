@@ -84,7 +84,7 @@ namespace PhysCalculatorTests
         ///A test for ReadToken
         ///</summary>
         [TestMethod()]
-        public void ReadTokenTest()
+        public void PhysCalculatorTests_ReadTokenTest()
         {
             string CommandLine = "Some_token in this line";
             string Token = string.Empty;
@@ -100,7 +100,7 @@ namespace PhysCalculatorTests
         ///A test for SkipToken
         ///</summary>
         [TestMethod()]
-        public void SkipTokenTest()
+        public void PhysCalculatorTests_SkipTokenTest()
         {
             string CommandLine = "Some_token in this line";
             string Token = "Some_token";

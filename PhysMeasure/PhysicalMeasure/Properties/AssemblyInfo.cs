@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Klaus Bo Larsen")]
 [assembly: AssemblyProduct("PhysicalMeasure")]
-[assembly: AssemblyCopyright("Copyright © Klaus Bo Larsen 2010-2011")]
+[assembly: AssemblyCopyright("Copyright © Klaus Bo Larsen 2010-2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -36,4 +36,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyFileVersion("1.0.*")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

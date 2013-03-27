@@ -192,6 +192,19 @@ namespace PhysCalculatorTests
                     +"    List\n"
                     +"    Read <filename>"; 
             ***/
+
+            /***
+            List<String> ResultLineExpected = new List<String>();
+            ResultLineExpected.Add("Include <filename>");
+            ResultLineExpected.Add("Save <filename>");
+            ResultLineExpected.Add("Set <varname> [ = ] <expression> [, <varname> [ = ] <expression> ]*");
+            ResultLineExpected.Add("[ Print ] <expression> [, <expression> ]*");
+            ResultLineExpected.Add("List");
+            ResultLineExpected.Add("Store <varname>");
+            ResultLineExpected.Add("Remove <varname>");
+            ResultLineExpected.Add("Clear");
+            ***/
+
             List<String> ResultLineExpected = new List<String>();
             ResultLineExpected.Add("Include <filename>");
             ResultLineExpected.Add("Save <filename>");
@@ -210,7 +223,7 @@ namespace PhysCalculatorTests
 
             for (int i = 0; i < ResultLineExpected.Count; i++)
             {
-                Assert.IsTrue(ResultLine.Contains(ResultLineExpected[i]), "ResultLine expected to contain " + ResultLineExpected[i]);
+                Assert.IsTrue(ResultLine.Contains(ResultLineExpected[i]), "ResultLine expected to contain " + ResultLineExpected[i] + ", but contains \"" + ResultLine + "\"");
             }
 
         }
