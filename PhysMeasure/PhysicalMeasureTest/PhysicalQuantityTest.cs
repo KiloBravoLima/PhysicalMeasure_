@@ -892,6 +892,48 @@ namespace PhysicalMeasureTest
         }
 
 
+        /// <summary>
+        ///A test for PhysicalQuantity 
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalQuantityHectoLitreTest()
+        {
+
+            PhysicalUnit cubicmeter = new NamedDerivedUnit(PhysicalMeasure.Physics.SI_Units, "cubicmeter", "m3", new SByte[] { 3, 0, 0, 0, 0, 0, 0 });
+
+            // PhysicalUnit hl = new ConvertibleUnit("hectolitre", "hl", SI.m3, new ScaledValueConversion(1/10));
+            //PhysicalUnit kWh = (PhysicalUnit)new ConvertibleUnit("kiloWattHour", "kWh", Wh, new ScaledValueConversion(1.0 / 1000)); /* [kWh] = 1/1000 * [Wh] */
+            PhysicalUnit hl = new ConvertibleUnit("hectolitre", "hl", cubicmeter, new ScaledValueConversion(10)); /* [hl] = 10 * [cubicmeter] */
+
+            PhysicalQuantity _10_hectolitre = new PhysicalQuantity(10, hl);
+
+            //IPhysicalQuantity hektoLiterIncubicmeters = _10_hectolitre.ConvertTo(SI.m3);
+            IPhysicalQuantity _10_hektoLiterIncubicmeters = _10_hectolitre.ConvertTo(cubicmeter);
+
+            PhysicalQuantity expected = new PhysicalQuantity(1, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("m").Pow(3));
+            Assert.AreEqual(expected, _10_hektoLiterIncubicmeters);
+        }
+
+
+        /// <summary>
+        ///A test for PhysicalQuantity 
+        ///</summary>
+        [TestMethod()]
+        public void PhysicalQuantityLitreTest()
+        {
+
+            PhysicalUnit hl = new ConvertibleUnit("hectolitre", "hl", SI.l, new ScaledValueConversion(1.0/100)); /* [hl] = 1/100 * [l] */
+        
+            PhysicalQuantity _10_hectolitre = new PhysicalQuantity(10, hl);
+
+            PhysicalUnit cubicmeter = SI.m^3;
+            IPhysicalQuantity _10_hektoLiterIncubicmeters = _10_hectolitre.ConvertTo(SI.m^3);
+
+            PhysicalQuantity expected = new PhysicalQuantity(1, SI.m^3);
+            Assert.AreEqual(expected, _10_hektoLiterIncubicmeters);
+        }
+
+
         #endregion PhysicalQuantity functions test
 
     }
