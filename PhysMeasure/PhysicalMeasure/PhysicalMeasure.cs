@@ -123,8 +123,8 @@ namespace PhysicalMeasure
 
     public interface IPrefixedUnit
     {
-        SByte PrefixExponent { get; set; }
-        IPhysicalUnit Unit { get; set; }
+        SByte PrefixExponent { get; }
+        IPhysicalUnit Unit { get;  }
 
         IPhysicalQuantity PhysicalQuantity();
         IPhysicalQuantity PhysicalQuantity(ref double quantity, IUnitSystem unitSystem);
@@ -132,7 +132,7 @@ namespace PhysicalMeasure
 
     public interface IPrefixedUnitExponent : IPrefixedUnit
     {
-        SByte Exponent { get; set; }
+        SByte Exponent { get; }
 
         IPrefixedUnitExponent CombinePrefixAndExponents(SByte outerPUE_PrefixExponent, SByte outerPUE_Exponent, out Double scaleFactor);
 
@@ -195,7 +195,7 @@ namespace PhysicalMeasure
         IPhysicalUnit CombineRot(SByte exponent);
     }
 
-    public interface IPhysicalQuantityConvertable
+    public interface IPhysicalQuantityConvertible
     {
         IPhysicalQuantity ConvertTo(IPhysicalUnit convertToUnit);
         IPhysicalQuantity ConvertTo(IUnitSystem convertToUnitSystem);
@@ -203,7 +203,7 @@ namespace PhysicalMeasure
         IPhysicalQuantity ConvertToSystemUnit();
     }
 
-    public interface IPhysicalUnitConvertable : IPhysicalQuantityConvertable
+    public interface IPhysicalUnitConvertible : IPhysicalQuantityConvertible
     {
         IPhysicalQuantity ConvertTo(ref double quantity, IPhysicalUnit convertToUnit);
         IPhysicalQuantity ConvertTo(ref double quantity, IUnitSystem convertToUnitSystem);
@@ -211,7 +211,7 @@ namespace PhysicalMeasure
         IPhysicalQuantity ConvertToSystemUnit(ref double quantity);
     }
 
-    public interface IPhysicalUnit : ISystemUnit, IPhysicalUnitMath, IPhysicalUnitCombine, IPhysicalUnitConvertable /*  : <BaseUnit | DerivedUnit | ConvertibleUnit>  */
+    public interface IPhysicalUnit : ISystemUnit, IPhysicalUnitMath, IPhysicalUnitCombine, IPhysicalUnitConvertible /*  : <BaseUnit | DerivedUnit | ConvertibleUnit>  */
     {
     }
 
@@ -271,7 +271,7 @@ namespace PhysicalMeasure
         IPhysicalQuantity Subtract(IPhysicalQuantity physicalQuantity);
     }
 
-    public interface IPhysicalQuantity : IFormattable, IPhysicalQuantityMath, IPhysicalQuantityConvertable
+    public interface IPhysicalQuantity : IFormattable, IPhysicalQuantityMath, IPhysicalQuantityConvertible
     {
         double Value { get; set; }
         IPhysicalUnit Unit { get; set; }
@@ -1829,10 +1829,10 @@ namespace PhysicalMeasure
 
         #endregion Unit Combine math methods
 
-        public static implicit operator PhysicalQuantity(PhysicalUnit physicalunit)
+        public static implicit operator PhysicalQuantity(PhysicalUnit physicalUnit)
         {
             //return physicalunit. .PhysicalQuantity() as PhysicalQuantity;
-            return new PhysicalQuantity(physicalunit);
+            return new PhysicalQuantity(physicalUnit);
         }
     }
 
@@ -1877,9 +1877,9 @@ namespace PhysicalMeasure
                     NoOfBaseUnits = System.BaseUnits.Length;
                 }
 
-                SByte[] tempexponents = new SByte[NoOfBaseUnits]; 
-                tempexponents[_baseunitnumber] = 1; 
-                return tempexponents; 
+                SByte[] tempExponents = new SByte[NoOfBaseUnits]; 
+                tempExponents[_baseunitnumber] = 1; 
+                return tempExponents; 
             } 
         } 
 
@@ -1890,8 +1890,8 @@ namespace PhysicalMeasure
             this.NamedSymbol = someNamedSymbol;
         }
 
-        public BaseUnit(IUnitSystem someUnitSystem, SByte someBaseUnitNumber, String somename, String somesymbol)
-            : this(someUnitSystem, someBaseUnitNumber, new NamedSymbol(somename, somesymbol))
+        public BaseUnit(IUnitSystem someUnitSystem, SByte someBaseUnitNumber, String someName, String someSymbol)
+            : this(someUnitSystem, someBaseUnitNumber, new NamedSymbol(someName, someSymbol))
         {
         }
 
@@ -1911,7 +1911,7 @@ namespace PhysicalMeasure
 
     public class DerivedUnit : SystemUnit, IDerivedUnit
     {
-        private SByte[] _exponents;
+        private readonly SByte[] _exponents;
 
         public override UnitKind Kind { get { return UnitKind.DerivedUnit; } }
 
@@ -1984,10 +1984,10 @@ namespace PhysicalMeasure
 
     public class NamedDerivedUnit : DerivedUnit, INamedSymbol, ISystemUnit, IPhysicalUnit, INamedDerivedUnit
     {
-        private NamedSymbol NamedSymbol;
+        private readonly NamedSymbol NamedSymbol;
 
-        public String Name { get { return this.NamedSymbol.Name; } set { this.NamedSymbol.Name = value; } }
-        public String Symbol { get { return this.NamedSymbol.Symbol; } set { this.NamedSymbol.Symbol = value; } }
+        public String Name { get { return this.NamedSymbol.Name; } }
+        public String Symbol { get { return this.NamedSymbol.Symbol; } }
 
         public NamedDerivedUnit(UnitSystem someSystem, NamedSymbol someNamedSymbol, SByte[] someExponents = null)
             : base(someSystem, someExponents)
@@ -2009,18 +2009,17 @@ namespace PhysicalMeasure
 
             return Symbol;
         }
-
     }
 
     public class ConvertibleUnit : SystemUnit, INamedSymbol, IConvertibleUnit
     {
-        private NamedSymbol _NamedSymbol;
+        private readonly NamedSymbol _NamedSymbol;
 
-        public String Name { get { return this._NamedSymbol.Name; } set { this._NamedSymbol.Name = value; } }
-        public String Symbol { get { return this._NamedSymbol.Symbol; } set { this._NamedSymbol.Symbol = value; } }
+       public String Name { get { return this._NamedSymbol.Name; } }
+        public String Symbol { get { return this._NamedSymbol.Symbol; } }
 
-        private IPhysicalUnit _primaryunit;
-        private IValueConversion _conversion;
+        private readonly IPhysicalUnit _primaryunit;
+        private readonly IValueConversion _conversion;
 
         public IPhysicalUnit PrimaryUnit { get { return _primaryunit; } }
         public IValueConversion Conversion { get { return _conversion; } }
@@ -2113,11 +2112,11 @@ namespace PhysicalMeasure
 
     public class PrefixedUnit : IPrefixedUnit
     {
-        private SByte _PrefixExponent;
-        private IPhysicalUnit _Unit;
+        private readonly SByte _PrefixExponent;
+        private readonly IPhysicalUnit _Unit;
 
-        public SByte PrefixExponent { get { return _PrefixExponent; } set { _PrefixExponent = value; } }
-        public IPhysicalUnit Unit { get { return _Unit; } set { _Unit = value; } }
+        public SByte PrefixExponent { get { return _PrefixExponent; }  }
+        public IPhysicalUnit Unit { get { return _Unit; }  }
 
         public PrefixedUnit(IPhysicalUnit unit)
             : this(0, unit)
@@ -2126,8 +2125,8 @@ namespace PhysicalMeasure
 
         public PrefixedUnit(SByte PrefixExponent, IPhysicalUnit unit)
         {
-            this.PrefixExponent = PrefixExponent;
-            this.Unit = unit;
+            this._PrefixExponent = PrefixExponent;
+            this._Unit = unit;
         }
 
         public virtual IPhysicalQuantity PhysicalQuantity()
@@ -2159,9 +2158,9 @@ namespace PhysicalMeasure
 
     public class PrefixedUnitExponent : PrefixedUnit, IPrefixedUnitExponent
     {
-        private SByte _Exponent;
+        private readonly SByte _Exponent;
 
-        public SByte Exponent { get { return _Exponent; } set { _Exponent = value; } }
+        public SByte Exponent { get { return _Exponent; } }
 
         public PrefixedUnitExponent(IPhysicalUnit Unit, SByte Exponent)
             : this(0, Unit, Exponent)
@@ -2176,7 +2175,7 @@ namespace PhysicalMeasure
         public PrefixedUnitExponent(SByte prefixExponent, IPhysicalUnit unit, SByte exponent)
             : base(prefixExponent, unit)
         {
-            this.Exponent = exponent;
+            this._Exponent = exponent;
         }
 
         public override IPhysicalQuantity PhysicalQuantity()
@@ -2278,14 +2277,14 @@ namespace PhysicalMeasure
         public PrefixedUnitExponentList Power(SByte exponent)
         {
             PrefixedUnitExponentList Result = new PrefixedUnitExponentList();
-            foreach (IPrefixedUnitExponent ue in this)
+            foreach (IPrefixedUnitExponent pue in this)
             {
-                PrefixedUnitExponent pue = new PrefixedUnitExponent(ue);
-                SByte NewExponent = (SByte)(ue.Exponent * exponent);
-
                 Debug.Assert(pue.PrefixExponent == 0);
-                pue.Exponent = NewExponent;
-                Result.Add(ue);
+                SByte NewExponent = (SByte)(pue.Exponent * exponent);
+
+                PrefixedUnitExponent result_pue = new PrefixedUnitExponent(pue.PrefixExponent, pue.Unit, NewExponent);
+
+                Result.Add(result_pue);
             }
 
             return Result;
@@ -2294,25 +2293,23 @@ namespace PhysicalMeasure
         public PrefixedUnitExponentList Root(SByte exponent)
         {
             PrefixedUnitExponentList Result = new PrefixedUnitExponentList();
-            Boolean AllFactorsRootIsInteger = true;
-            foreach (IPrefixedUnitExponent ue in this)
+            foreach (IPrefixedUnitExponent pue in this)
             {
-                PrefixedUnitExponent pue = new PrefixedUnitExponent(ue);
-                int Remainder;
-                int NewExponent = Math.DivRem(ue.Exponent, exponent, out Remainder);
-                AllFactorsRootIsInteger &= (Remainder == 0);
+                Debug.Assert(pue.PrefixExponent == 0);
 
-                //Debug.Assert(Math.IEEERemainder(ue.Exponent, exponent) == 0);
+                int Remainder;
+                int NewExponent = Math.DivRem(pue.Exponent, exponent, out Remainder);
+                if (Remainder != 0)
+                {
+                    return null;
+                }
+
+                //Debug.Assert(Math.IEEERemainder(pue.Exponent, exponent) == 0);
                 //Debug.Assert(AllFactorsRootIsInteger);
 
-                Debug.Assert(pue.PrefixExponent == 0);
-                pue.Exponent = (SByte)NewExponent;
-                Result.Add(ue);
-            }
+                PrefixedUnitExponent result_pue = new PrefixedUnitExponent(pue.PrefixExponent, pue.Unit, (SByte)NewExponent);
 
-            if (!AllFactorsRootIsInteger)
-            {
-                Result = null;
+                Result.Add(result_pue);
             }
 
             return Result;
@@ -2488,6 +2485,7 @@ namespace PhysicalMeasure
             PrefixedUnitExponentList TempNumerators = new PrefixedUnitExponentList();
             PrefixedUnitExponentList TempDenominators = new PrefixedUnitExponentList();
 
+            SByte multExponent = prefixedUnitExponent.Exponent;
             Boolean PrimaryUnitFound = false;
             Boolean ChangedExponentSign = false;
             // Check if pue2.Unit is already among our Numerators or Denominators
@@ -2497,15 +2495,16 @@ namespace PhysicalMeasure
                 {
                     PrimaryUnitFound = true;
                     // Reduce the found CombinedUnit exponent with ue2´s exponent; 
-                    ue.Exponent -= prefixedUnitExponent.Exponent;
-                    if (ue.Exponent > 0)
+                    sbyte NewExponent = (sbyte)(ue.Exponent - multExponent);
+                    if (NewExponent > 0)
                     {
-                        TempDenominators.Add(ue);
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
+                        TempDenominators.Add(temp_pue);
                         // Done
                     }
                     else
                     {   // Convert to Numerator
-                        prefixedUnitExponent.Exponent = (SByte)(-ue.Exponent);
+                        multExponent = (SByte)(-NewExponent);
                         ChangedExponentSign = true;
                     }
                 }
@@ -2521,15 +2520,17 @@ namespace PhysicalMeasure
                 {
                     PrimaryUnitFound = true;
                     // Add the found CombinedUnit exponent with ue2´s exponent; 
-                    ue.Exponent += prefixedUnitExponent.Exponent;
-                    if (ue.Exponent > 0)
+                    SByte NewExponent = (SByte)(ue.Exponent + multExponent);
+
+                    if (NewExponent > 0)
                     {
-                        TempNumerators.Add(ue);
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
+                        TempNumerators.Add(temp_pue);
                         // Done
                     }
                     else
                     {   // Convert to Denominator
-                        prefixedUnitExponent.Exponent = ue.Exponent;
+                        multExponent = (SByte)(NewExponent);
                         ChangedExponentSign = true;
                     }
                 }
@@ -2543,44 +2544,45 @@ namespace PhysicalMeasure
             {   // pue2.Unit is not among our Numerators or Denominators (or has changed from Numerators to Denominators)
                 if (!PrimaryUnitFound && (prefixedUnitExponent.Unit.Kind == UnitKind.CombinedUnit))
                 {
-                    //IPhysicalUnit resUnit = new CombinedUnit(this);
-                    IPhysicalQuantity respq = new PhysicalQuantity(1, this);
+                    IPhysicalQuantity result_pq = new PhysicalQuantity(1, this);
                     ICombinedUnit cu2 = prefixedUnitExponent.Unit as ICombinedUnit;
                     foreach (IPrefixedUnitExponent pue2Num_pue in cu2.Numerators)
                     {
                         Double PrefixScale;
-                        IPrefixedUnitExponent CombinedPUE = pue2Num_pue.CombinePrefixAndExponents(prefixedUnitExponent.PrefixExponent, prefixedUnitExponent.Exponent, out PrefixScale);
+                        IPrefixedUnitExponent CombinedPUE = pue2Num_pue.CombinePrefixAndExponents(prefixedUnitExponent.PrefixExponent, multExponent, out PrefixScale);
 
-                        respq = respq.Multiply(CombinedPUE);
+                        result_pq = result_pq.Multiply(CombinedPUE);
                         if (PrefixScale != 1)
                         {
-                            respq = respq.Multiply(PrefixScale);
+                            result_pq = result_pq.Multiply(PrefixScale);
                         }
                     }
                     foreach (IPrefixedUnitExponent pue2DOM_pue in cu2.Denominators)
                     {
                         Double PrefixScale;
-                        IPrefixedUnitExponent CombinedPUE = pue2DOM_pue.CombinePrefixAndExponents(prefixedUnitExponent.PrefixExponent, prefixedUnitExponent.Exponent, out PrefixScale);
+                        IPrefixedUnitExponent CombinedPUE = pue2DOM_pue.CombinePrefixAndExponents(prefixedUnitExponent.PrefixExponent, multExponent, out PrefixScale);
 
-                        respq = respq.Divide(CombinedPUE);
+                        result_pq = result_pq.Divide(CombinedPUE);
                         if (PrefixScale != 1)
                         {
-                            respq = respq.Divide(PrefixScale);
+                            result_pq = result_pq.Divide(PrefixScale);
                         }
                     }
 
-                    return respq;
+                    return result_pq;
                 }
                 else
                 {
-                    if (prefixedUnitExponent.Exponent > 0)
+                    if (multExponent > 0)
                     {
-                        TempNumerators.Add(prefixedUnitExponent);
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.PrefixExponent, prefixedUnitExponent.Unit, multExponent);
+                        TempNumerators.Add(temp_pue);
                     }
-                    else if (prefixedUnitExponent.Exponent < 0)
+                    else if (multExponent < 0)
                     {
-                        prefixedUnitExponent.Exponent = (SByte)(-prefixedUnitExponent.Exponent);
-                        TempDenominators.Add(prefixedUnitExponent);
+                        multExponent = (SByte)(-multExponent);
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.PrefixExponent, prefixedUnitExponent.Unit, multExponent);
+                        TempDenominators.Add(temp_pue);
                     }
                 }
             }
@@ -2594,8 +2596,9 @@ namespace PhysicalMeasure
         {
             Debug.Assert(prefixedUnitExponent != null);
 
-            prefixedUnitExponent.Exponent = (SByte)(-prefixedUnitExponent.Exponent);
-            return this.Multiply(prefixedUnitExponent);
+            SByte NewExponent = (SByte)(-prefixedUnitExponent.Exponent);
+            PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.PrefixExponent, prefixedUnitExponent.Unit, NewExponent);
+            return this.Multiply(temp_pue);
         }
 
         public override IPhysicalQuantity Multiply(IPhysicalUnit physicalUnit)
@@ -2739,14 +2742,16 @@ namespace PhysicalMeasure
 
             foreach (IPrefixedUnitExponent ue in Numerators)
             {
-                ue.Exponent *= exponent;
-                TempNumerators.Add(ue);
+                SByte NewExponent = (SByte)(ue.Exponent * exponent);
+                PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
+                TempNumerators.Add(temp_pue);
             }
 
             foreach (IPrefixedUnitExponent ue in Denominators)
             {
-                ue.Exponent *= exponent;
-                TempDenominators.Add(ue);
+                SByte NewExponent = (SByte)(ue.Exponent * exponent);
+                PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
+                TempDenominators.Add(temp_pue);
             }
 
             CombinedUnit cu = new CombinedUnit(TempNumerators, TempDenominators);
@@ -2760,14 +2765,16 @@ namespace PhysicalMeasure
 
             foreach (IPrefixedUnitExponent ue in Numerators)
             {
-                ue.Exponent /= exponent;
-                TempNumerators.Add(ue);
+                SByte NewExponent = (SByte)(ue.Exponent / exponent);
+                PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
+                TempNumerators.Add(temp_pue);
             }
 
             foreach (IPrefixedUnitExponent ue in Denominators)
             {
-                ue.Exponent /= exponent;
-                TempDenominators.Add(ue);
+                SByte NewExponent = (SByte)(ue.Exponent / exponent);
+                PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
+                TempDenominators.Add(temp_pue);
             }
 
             CombinedUnit cu = new CombinedUnit(TempNumerators, TempDenominators);
@@ -2781,6 +2788,7 @@ namespace PhysicalMeasure
             PrefixedUnitExponentList TempNumerators = new PrefixedUnitExponentList();
             PrefixedUnitExponentList TempDenominators = new PrefixedUnitExponentList();
 
+            SByte multExponent = prefixedUnitExponent.Exponent;
             Boolean Found = false;
 
             foreach (IPrefixedUnitExponent ue in Denominators)
@@ -2788,16 +2796,17 @@ namespace PhysicalMeasure
                 if (!Found && prefixedUnitExponent.PrefixExponent.Equals(ue.PrefixExponent) && prefixedUnitExponent.Unit.Equals(ue.Unit))
                 {
                     // Reduce the found CombinedUnit exponent with ue2´s exponent; 
-                    ue.Exponent -= prefixedUnitExponent.Exponent;
-                    if (ue.Exponent > 0)
+                    SByte NewExponent = (SByte)(ue.Exponent - multExponent);
+                    if (NewExponent > 0)
                     {
                         Found = true;
-                        TempDenominators.Add(ue);
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
+                        TempDenominators.Add(temp_pue);
                         // Done
                     }
                     else
                     {   // Convert to Numerator
-                        prefixedUnitExponent.Exponent = (SByte)(-ue.Exponent);
+                        multExponent = (SByte)(NewExponent);
                     }
                 }
                 else
@@ -2811,16 +2820,17 @@ namespace PhysicalMeasure
                 if (!Found && prefixedUnitExponent.PrefixExponent.Equals(ue.PrefixExponent) && prefixedUnitExponent.Unit.Equals(ue.Unit))
                 {
                     // Add the found CombinedUnit exponent with ue2´s exponent; 
-                    ue.Exponent += prefixedUnitExponent.Exponent;
-                    if (ue.Exponent > 0)
+                    SByte NewExponent = (SByte)(ue.Exponent + multExponent);
+                    if (NewExponent > 0)
                     {
                         Found = true;
-                        TempNumerators.Add(ue);
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
+                        TempNumerators.Add(temp_pue);
                         // Done
                     }
                     else
                     {   // Convert to Denominator
-                        prefixedUnitExponent.Exponent = ue.Exponent;
+                        multExponent = NewExponent;
                     }
                 }
                 else
@@ -2832,14 +2842,16 @@ namespace PhysicalMeasure
             if (!Found)
             {
                 Found = true;
-                if (prefixedUnitExponent.Exponent > 0)
+                if (multExponent > 0)
                 {
-                    TempNumerators.Add(prefixedUnitExponent);
+                    PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.PrefixExponent, prefixedUnitExponent.Unit, multExponent);
+                    TempNumerators.Add(temp_pue);
                 }
-                else if (prefixedUnitExponent.Exponent < 0)
+                else if (multExponent < 0)
                 {
-                    prefixedUnitExponent.Exponent = (SByte)(-prefixedUnitExponent.Exponent);
-                    TempDenominators.Add(prefixedUnitExponent);
+                    multExponent = (SByte)(-multExponent);
+                    PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.PrefixExponent, prefixedUnitExponent.Unit, multExponent);
+                    TempDenominators.Add(temp_pue);
                 }
             }
 
@@ -2851,8 +2863,9 @@ namespace PhysicalMeasure
         {
             Debug.Assert(prefixedUnitExponent != null);
 
-            prefixedUnitExponent.Exponent = (SByte)(-prefixedUnitExponent.Exponent);
-            return this.CombineMultiply(prefixedUnitExponent);
+            SByte NewExponent = (SByte)(-prefixedUnitExponent.Exponent);
+            PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.PrefixExponent, prefixedUnitExponent.Unit, NewExponent);
+            return this.CombineMultiply(temp_pue);
         }
 
         #endregion IPhysicalUnitMath Members
