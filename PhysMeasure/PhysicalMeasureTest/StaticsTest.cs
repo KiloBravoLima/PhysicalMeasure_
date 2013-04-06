@@ -186,6 +186,7 @@ namespace PhysicalMeasureTest
         #endregion Units must differ test
 
         #region GetUnitSystemConversion test
+
         /// <summary>
         ///A test for GetUnitSystemConversion
         ///</summary>
@@ -198,6 +199,35 @@ namespace PhysicalMeasureTest
             UnitSystemConversion actual = Physics.GetUnitSystemConversion(SomeUnitSystem, SomeOtherUnitSystem);
             Assert.AreEqual(expected, actual);
         }
+
+        /// <summary>
+        ///A test for GetUnitSystemConversion
+        ///</summary>
+        [TestMethod()]
+        public void StaticTest_GetUnitSystemCombinedConversionTest()
+        {
+            IUnitSystem SomeUnitSystem = Physics.CGS_Units;
+            IUnitSystem SomeOtherUnitSystem = Physics.MGM_Units;
+            //UnitSystemConversion expected = Physics.SItoMGDConversion;
+            UnitSystemConversion actual = Physics.GetUnitSystemConversion(SomeUnitSystem, SomeOtherUnitSystem);
+            Assert.AreEqual(actual.BaseUnitSystem, SomeUnitSystem);
+            Assert.AreEqual(actual.ConvertedUnitSystem, SomeOtherUnitSystem);
+        }
+
+        /// <summary>
+        ///A test for GetUnitSystemConversion
+        ///</summary>
+        [TestMethod()]
+        public void StaticTest_GetUnitSystemCombinedReversedConversionTest()
+        {
+            IUnitSystem SomeUnitSystem = Physics.MGM_Units;
+            IUnitSystem SomeOtherUnitSystem = Physics.CGS_Units;
+            //UnitSystemConversion expected = Physics.SItoMGDConversion;
+            UnitSystemConversion actual = Physics.GetUnitSystemConversion(SomeUnitSystem, SomeOtherUnitSystem);
+            Assert.AreEqual(actual.BaseUnitSystem, SomeUnitSystem);
+            Assert.AreEqual(actual.ConvertedUnitSystem, SomeOtherUnitSystem);
+        }
+
 
         #endregion GetUnitSystemConversion test
 
