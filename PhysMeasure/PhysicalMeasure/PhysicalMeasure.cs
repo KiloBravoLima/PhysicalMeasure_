@@ -134,7 +134,11 @@ namespace PhysicalMeasure
     {
         SByte Exponent { get; }
 
+        String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false);
+
         IPrefixedUnitExponent CombinePrefixAndExponents(SByte outerPUE_PrefixExponent, SByte outerPUE_Exponent, out Double scaleFactor);
+
+
 
         //IPhysicalQuantity PhysicalQuantity();
         //IPhysicalQuantity PhysicalQuantity(ref double quantity, IUnitSystem unitSystem);
@@ -213,6 +217,10 @@ namespace PhysicalMeasure
 
     public interface IPhysicalUnit : ISystemUnit, IPhysicalUnitMath, IPhysicalUnitCombine, IPhysicalUnitConvertible /*  : <BaseUnit | DerivedUnit | ConvertibleUnit>  */
     {
+        
+        // public static PhysicalQuantity operator *(IPhysicalUnit u1, IPhysicalUnit u2);
+
+        // public static PhysicalQuantity operator /(IPhysicalUnit u1, IPhysicalUnit u2);
     }
 
     public interface INamedSymbolUnit : IPhysicalUnit, INamedSymbolSystemItem
@@ -550,7 +558,18 @@ namespace PhysicalMeasure
 
     public abstract class ValueConversion : IValueConversion
     {
-        public abstract double Convert(double value, bool backwards = false);
+        public double Convert(double value, bool backwards = false)
+        {
+            if (backwards)
+            {
+                return ConvertToPrimaryUnit(value);
+            }
+            else
+            {
+                return ConvertFromPrimaryUnit(value);
+            }
+        }
+
         public abstract double ConvertFromPrimaryUnit(double value);
         public abstract double ConvertToPrimaryUnit(double value);
     }
@@ -576,18 +595,6 @@ namespace PhysicalMeasure
         {
             this.Offset = someOffset;
             this.Scale = someScale;
-        }
-
-        public override double Convert(double value, bool backwards)
-        {
-            if (backwards)
-            {
-                return ConvertToPrimaryUnit(value);
-            }
-            else
-            {
-                return ConvertFromPrimaryUnit(value);
-            }
         }
 
         public override double ConvertFromPrimaryUnit(double value)
@@ -626,6 +633,34 @@ namespace PhysicalMeasure
         public IdentityValueConversion()
             : base(1)
         {
+        }
+    }
+
+    public class CombinedValueConversion : ValueConversion 
+    {
+        private IValueConversion _FirstValueConversion;
+        private IValueConversion _SecondValueConversion;
+
+        private Boolean _FirstValueConversionDirectionInverted;
+        private Boolean _SecondValueConversionDirectionInverted;
+
+
+        public CombinedValueConversion(IValueConversion firstValueConversion, Boolean firstValueConversionDirectionInverted, IValueConversion secondValueConversion, Boolean secondValueConversionDirectionInverted)
+        {
+            this._FirstValueConversion = firstValueConversion;
+            this._FirstValueConversionDirectionInverted = firstValueConversionDirectionInverted;
+            this._SecondValueConversion = secondValueConversion;
+            this._SecondValueConversionDirectionInverted = secondValueConversionDirectionInverted;
+        }
+
+        public override double ConvertFromPrimaryUnit(double value)
+        {
+            return this._SecondValueConversion.Convert(this._FirstValueConversion.Convert(value, this._FirstValueConversionDirectionInverted), this._SecondValueConversionDirectionInverted);
+        }
+
+        public override double ConvertToPrimaryUnit(double value)
+        {
+            return this._FirstValueConversion.Convert(this._SecondValueConversion.Convert(value, !this._SecondValueConversionDirectionInverted), !this._FirstValueConversionDirectionInverted);
         }
     }
 
@@ -1089,9 +1124,11 @@ namespace PhysicalMeasure
             // Tokenizer.ThrowExceptionOnInvalidInput = false;
             Stack<IPhysicalUnit> Operands = new Stack<IPhysicalUnit>();
 
+            Boolean InputTokenInvalid = false;
             Tokenizer.SetValidPos();
             token Token = Tokenizer.GetToken();
-            while (Token != null)
+
+            while (Token != null && !InputTokenInvalid)
             {
                 if (Token.TokenKind == TokenKind.Unit)
                 {
@@ -1128,6 +1165,7 @@ namespace PhysicalMeasure
                     }
                     else
                     ****/
+                    if (Operands.Count >= 2)
                     {
                         Debug.Assert(Operands.Count >= 2);
 
@@ -1145,11 +1183,19 @@ namespace PhysicalMeasure
                             Operands.Push(puFirst.CombineDivide(puSecond));
                         }
                     }
+                    else
+                    {   // Missing operant(s). Operator not valid part of (this) unit
+                        InputTokenInvalid = true;
+                    }
                 }
-                if (Operands.Count == 1) {
-                    Tokenizer.SetValidPos();
+                if (!InputTokenInvalid)
+                {
+                    if (Operands.Count == 1)
+                    {
+                        Tokenizer.SetValidPos();
+                    }
+                    Token = Tokenizer.GetToken();
                 }
-                Token = Tokenizer.GetToken();
             }
 
             //s = Tokenizer.GetRemainingInput(); // Remaining of input string
@@ -2162,6 +2208,11 @@ namespace PhysicalMeasure
 
         public SByte Exponent { get { return _Exponent; } }
 
+        public PrefixedUnitExponent(IPhysicalUnit Unit)
+            : this(0, Unit, 1)
+        {
+        }
+
         public PrefixedUnitExponent(IPhysicalUnit Unit, SByte Exponent)
             : this(0, Unit, Exponent)
         {
@@ -2176,6 +2227,45 @@ namespace PhysicalMeasure
             : base(prefixExponent, unit)
         {
             this._Exponent = exponent;
+        }
+
+        /// <summary>
+        /// IFormattable.ToString implementation.
+        /// </summary>
+        // public override String ToString()
+
+        public override String ToString()
+        {
+            return this.CombinedUnitString();
+        }
+
+        public String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
+        {
+            String Str = "";
+            Debug.Assert(_Exponent != 0);
+
+            if (PrefixExponent != 0)
+            {
+                char Prefix;
+                if (Physics.UnitPrefixes.GetPrefixCharFromExponent(PrefixExponent, out Prefix))
+                {
+                    Str += Prefix;
+                }
+                else
+                {
+                    Debug.Assert(PrefixExponent == 0);
+                }
+            }
+            Str += Unit.CombinedUnitString(mayUseSlash, invertExponents);
+            SByte expo = Exponent;
+            if (invertExponents)
+                expo = (SByte)(-expo);
+            if (expo != 1)
+            {
+                Str += expo.ToString();
+            }
+
+            return Str;
         }
 
         public override IPhysicalQuantity PhysicalQuantity()
@@ -2222,7 +2312,7 @@ namespace PhysicalMeasure
                 }
             }
 
-            PrefixedUnitExponent CombinedPUE = new PrefixedUnitExponent((SByte)(CombinedPrefix + this.PrefixExponent), this.Unit, (SByte)(this.Exponent * outerPUE_PrefixExponent));
+            PrefixedUnitExponent CombinedPUE = new PrefixedUnitExponent((SByte)(CombinedPrefix + this.PrefixExponent), this.Unit, (SByte)(this.Exponent * outerPUE_Exponent));
             return CombinedPUE;
         }
 
@@ -2234,10 +2324,10 @@ namespace PhysicalMeasure
 
     public class PrefixedUnitExponentList : List<IPrefixedUnitExponent>
     {
+
         /// <summary>
         /// IFormattable.ToString implementation.
         /// </summary>
-        // public override String ToString()
         public String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
         {
             String Str = "";
@@ -2250,26 +2340,7 @@ namespace PhysicalMeasure
                     Str += '·';  // centre dot '\0x0B7' (char)183 U+00B7
                 }
 
-                if (ue.PrefixExponent != 0)
-                {
-                    char Prefix;
-                    if (Physics.UnitPrefixes.GetPrefixCharFromExponent(ue.PrefixExponent, out Prefix))
-                    {
-                        Str += Prefix;
-                    }
-                    else
-                    {
-                        Debug.Assert(ue.PrefixExponent == 0);
-                    }
-                }
-                Str += ue.Unit.CombinedUnitString(mayUseSlash, invertExponents);
-                SByte expo = ue.Exponent;
-                if (invertExponents)
-                    expo = (SByte)(-expo);
-                if (expo != 1)
-                {
-                    Str += expo.ToString();
-                }
+                Str += ue.CombinedUnitString(mayUseSlash, invertExponents);
             }
             return Str;
         }
@@ -2331,8 +2402,8 @@ namespace PhysicalMeasure
 
         public CombinedUnit(PrefixedUnitExponentList someNumerators, PrefixedUnitExponentList someDenominators)
         {
-            this._Numerators = someNumerators;
-            this._Denominators = someDenominators;
+            this._Numerators = someNumerators != null ? someNumerators : new PrefixedUnitExponentList();
+            this._Denominators = someDenominators != null ? someDenominators : new PrefixedUnitExponentList();
         }
 
         public CombinedUnit(IPrefixedUnitExponent prefixedUnitExponent)
@@ -3443,42 +3514,25 @@ namespace PhysicalMeasure
         public IUnitSystem BaseUnitSystem
         {
             get { return _BaseUnitSystem; }
-            set { _BaseUnitSystem = value; }
+            // set { _BaseUnitSystem = value; }
         }
+
         private IUnitSystem _ConvertedUnitSystem;
 
         public IUnitSystem ConvertedUnitSystem
         {
             get { return _ConvertedUnitSystem; }
-            set { _ConvertedUnitSystem = value; }
+            // set { _ConvertedUnitSystem = value; }
         }
 
         public ValueConversion[] BaseUnitConversions;
 
-        public UnitSystemConversion(IUnitSystem somebaseunitsystem, IUnitSystem someconvertedunitsystem, ValueConversion[] somebaseunitconversions)
+        public UnitSystemConversion(IUnitSystem someBaseUnitsystem, IUnitSystem someConvertedUnitsystem, ValueConversion[] someBaseUnitConversions)
         {
-            this.BaseUnitSystem = somebaseunitsystem;
-            this.ConvertedUnitSystem = someconvertedunitsystem;
-            this.BaseUnitConversions = somebaseunitconversions;
+            this._BaseUnitSystem = someBaseUnitsystem;
+            this._ConvertedUnitSystem = someConvertedUnitsystem;
+            this.BaseUnitConversions = someBaseUnitConversions;
         }
-
-        /*
-        public static bool IsSameUnit(IPhysicalUnit unit1, IPhysicalUnit unit2)
-        {
-            Debug.Assert(unit1 != null);
-
-            if (unit1 == unit2)
-            {
-                return true;
-            }
-            else
-            if (unit1.System == unit2.System)
-            {
-                return DimensionExponents.Equals(unit1.Exponents, unit2.Exponents);
-            }
-            return false;
-        }
-        */
 
         public IPhysicalQuantity Convert(IPhysicalUnit convertUnit, bool backwards = false)
         {
@@ -4628,21 +4682,215 @@ namespace PhysicalMeasure
                                                                                                                                      });
 
 
-        public static UnitSystemConversion[] UnitSystemConversions = new UnitSystemConversion[] { SItoCGSConversion, SItoMGDConversion, MGDtoMGMConversion };
+        public static IList<UnitSystemConversion> UnitSystemConversions = new List<UnitSystemConversion> { SItoCGSConversion, SItoMGDConversion, MGDtoMGMConversion };
 
         public static UnitSystemConversion GetUnitSystemConversion(IUnitSystem unitsystem1, IUnitSystem unitsystem2)
         {
             foreach (UnitSystemConversion usc in UnitSystemConversions)
             {
-                if ((usc.BaseUnitSystem == unitsystem1 && usc.ConvertedUnitSystem == unitsystem2)
+
+                if (   (usc.BaseUnitSystem == unitsystem1 && usc.ConvertedUnitSystem == unitsystem2)
                     || (usc.BaseUnitSystem == unitsystem2 && usc.ConvertedUnitSystem == unitsystem1))
                 {
                     return usc;
                 }
             }
 
-            /* TO DO: Missing direct unit system conversion from  SomeUnitSystem to SomeOtherUnitSystem. 
-             *        Try to find intermediere unit system with conversion to/from SomeUnitSystem and SomeOtherUnitSystem */
+            /*  Missing direct unit system conversion from  unitsystem1 to unitsystem2. 
+             *  Try to find intermediere unit system with conversion to/from unitsystem1 and unitsystem2 */
+
+            IList<IUnitSystem> unitsystems1 = new List<IUnitSystem>() { unitsystem1 };
+            IList<IUnitSystem> unitsystems2 = new List<IUnitSystem>() { unitsystem2 };
+            return GetUnitSystemConversion(unitsystems1, unitsystems2, UnitSystemConversions);
+        }
+
+        public static UnitSystemConversion GetUnitSystemConversion(IEnumerable<IUnitSystem> unitsystems1, IEnumerable<IUnitSystem> unitsystems2, IEnumerable<UnitSystemConversion> unitSystemConversions)
+        {
+            IList<IUnitSystem> unitSystemsConvertableToUnitsystems1 = new List<IUnitSystem>();
+            IList<IUnitSystem> unitSystemsConvertableToUnitsystems2 = new List<IUnitSystem>();
+
+            IList<UnitSystemConversion> Unitsystems1Conversions = new List<UnitSystemConversion>();
+            IList<UnitSystemConversion> Unitsystems2Conversions = new List<UnitSystemConversion>();
+            foreach (UnitSystemConversion usc in unitSystemConversions )
+            {
+                foreach (IUnitSystem unitsystem1 in unitsystems1)
+                {
+                    foreach (IUnitSystem unitsystem2 in unitsystems2)
+                    {
+                        if ((usc.BaseUnitSystem == unitsystem1 && usc.ConvertedUnitSystem == unitsystem2)
+                            || (usc.BaseUnitSystem == unitsystem2 && usc.ConvertedUnitSystem == unitsystem1))
+                        {
+                            return usc;
+                        }
+
+                        // Try to clasify the 
+                        if (usc.BaseUnitSystem == unitsystem1)
+                        {
+                            if (   !unitsystems1.Contains(usc.ConvertedUnitSystem) 
+                                && !unitSystemsConvertableToUnitsystems1.Contains(usc.ConvertedUnitSystem) )
+                            {
+                                unitSystemsConvertableToUnitsystems1.Add(usc.ConvertedUnitSystem);
+                            }
+                            if (!Unitsystems1Conversions.Contains(usc))
+                            {
+                                Unitsystems1Conversions.Add(usc);
+                            }
+                        }
+                        else if (usc.ConvertedUnitSystem == unitsystem1)
+                        {
+                            if (   !unitsystems1.Contains(usc.BaseUnitSystem) 
+                                && !unitSystemsConvertableToUnitsystems1.Contains(usc.BaseUnitSystem) )
+                            {
+                                unitSystemsConvertableToUnitsystems1.Add(usc.BaseUnitSystem);
+                            }
+                            if (!Unitsystems1Conversions.Contains(usc))
+                            {
+                                Unitsystems1Conversions.Add(usc);
+                            }
+                        } 
+                        else if (usc.BaseUnitSystem == unitsystem2)
+                        {
+                            if (   !unitsystems2.Contains(usc.BaseUnitSystem) 
+                                && !unitSystemsConvertableToUnitsystems2.Contains(usc.ConvertedUnitSystem) )
+                            {
+                                unitSystemsConvertableToUnitsystems2.Add(usc.ConvertedUnitSystem);
+                            }
+                            if (!Unitsystems2Conversions.Contains(usc))
+                            {
+                                Unitsystems2Conversions.Add(usc);
+                            }
+                        }
+                        else if (usc.ConvertedUnitSystem == unitsystem2)
+                        {
+                            if (   !unitsystems2.Contains(usc.BaseUnitSystem) 
+                                && !unitSystemsConvertableToUnitsystems2.Contains(usc.BaseUnitSystem) )
+                            {
+                                unitSystemsConvertableToUnitsystems2.Add(usc.BaseUnitSystem);
+                            }
+                            if (!Unitsystems2Conversions.Contains(usc))
+                            {
+                                Unitsystems2Conversions.Add(usc);
+                            }
+                        }
+                    }
+                }
+            }
+
+            /*  Missing direct unit system conversion from  unitsystems1 to unitsystems2. 
+             *  Try to find intermediere unit system with conversion to/from unitsystems1 and unitsystems2 */
+
+            if (unitSystemsConvertableToUnitsystems1.Count > 0 || unitSystemsConvertableToUnitsystems2.Count > 0)
+            {
+                IEnumerable<IUnitSystem> tempUnitSystems1 = unitsystems1.Union(unitSystemsConvertableToUnitsystems1);
+                IEnumerable<IUnitSystem> tempUnitSystems2 = unitsystems2.Union(unitSystemsConvertableToUnitsystems2);
+
+                IEnumerable<UnitSystemConversion> notIntermediereUnitSystemConversions = unitSystemConversions.Except(Unitsystems1Conversions.Union(Unitsystems2Conversions));
+                UnitSystemConversion subIntermediereUnitSystemConversion = GetUnitSystemConversion(tempUnitSystems1, tempUnitSystems2, notIntermediereUnitSystemConversions);
+
+                if (subIntermediereUnitSystemConversion != null)
+                {
+                    if (!unitsystems1.Contains(subIntermediereUnitSystemConversion.BaseUnitSystem)
+                        && !unitsystems1.Contains(subIntermediereUnitSystemConversion.ConvertedUnitSystem))
+                    {
+                        // Combine system conversion from some unit system in unitsystems1 to one of subIntermediereUnitSystemConversion's systems
+                        // Find Pre UnitSystemConversion
+
+                        IUnitSystem CombinedUnitSystemConversionBaseUnitSystem;
+                        IUnitSystem CombinedUnitSystemConversionIntermedierUnitSystem;
+                        IUnitSystem CombinedUnitSystemConversionConvertedUnitSystem;
+
+                        UnitSystemConversion SecondUnitSystemConversion = subIntermediereUnitSystemConversion;
+                        Boolean SecondValueConversionDirectionInverted = !unitSystemsConvertableToUnitsystems1.Contains(subIntermediereUnitSystemConversion.BaseUnitSystem);
+                        if (!SecondValueConversionDirectionInverted)
+                        {
+                            CombinedUnitSystemConversionIntermedierUnitSystem = subIntermediereUnitSystemConversion.BaseUnitSystem;
+                            CombinedUnitSystemConversionConvertedUnitSystem = subIntermediereUnitSystemConversion.ConvertedUnitSystem;
+                        }
+                        else
+                        {
+                            Debug.Assert(unitSystemsConvertableToUnitsystems1.Contains(subIntermediereUnitSystemConversion.ConvertedUnitSystem));
+                            CombinedUnitSystemConversionIntermedierUnitSystem = subIntermediereUnitSystemConversion.ConvertedUnitSystem;
+                            CombinedUnitSystemConversionConvertedUnitSystem = subIntermediereUnitSystemConversion.BaseUnitSystem;
+                        }
+
+                        UnitSystemConversion FirstUnitSystemConversion = GetUnitSystemConversion(unitsystems1, new List<IUnitSystem>() { CombinedUnitSystemConversionIntermedierUnitSystem }, Unitsystems1Conversions);
+                        Boolean FirstValueConversionDirectionInverted = FirstUnitSystemConversion.BaseUnitSystem == CombinedUnitSystemConversionIntermedierUnitSystem;
+
+                        if (!FirstValueConversionDirectionInverted)
+                        {
+                            CombinedUnitSystemConversionBaseUnitSystem = FirstUnitSystemConversion.BaseUnitSystem;
+                        }
+                        else
+                        {
+                            CombinedUnitSystemConversionBaseUnitSystem = FirstUnitSystemConversion.ConvertedUnitSystem;
+                        }
+
+                        // Make the Combined unit system conversion
+                        ValueConversion[] CombinedValueConversions = new ValueConversion[] {  new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[0], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[0], SecondValueConversionDirectionInverted),
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[1], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[1], SecondValueConversionDirectionInverted),  
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[2], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[2], SecondValueConversionDirectionInverted),
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[3], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[3], SecondValueConversionDirectionInverted),  
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[4], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[4], SecondValueConversionDirectionInverted),  
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[5], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[5], SecondValueConversionDirectionInverted),  
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[6], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[6], SecondValueConversionDirectionInverted)    
+                                                                                            };
+
+                        subIntermediereUnitSystemConversion = new UnitSystemConversion(CombinedUnitSystemConversionBaseUnitSystem, CombinedUnitSystemConversionConvertedUnitSystem, CombinedValueConversions);
+                    }
+
+                    if (   !unitsystems2.Contains(subIntermediereUnitSystemConversion.BaseUnitSystem)
+                        && !unitsystems2.Contains(subIntermediereUnitSystemConversion.ConvertedUnitSystem))
+                    {
+                        // Combine system conversion from one of subIntermediereUnitSystemConversion's systems to some unit system in unitsystems2
+                        // Find Post UnitSystemConversion
+
+                        IUnitSystem CombinedUnitSystemConversionBaseUnitSystem;
+                        IUnitSystem CombinedUnitSystemConversionIntermedierUnitSystem;
+                        IUnitSystem CombinedUnitSystemConversionConvertedUnitSystem;
+
+                        UnitSystemConversion FirstUnitSystemConversion = subIntermediereUnitSystemConversion;
+                        Boolean FirstValueConversionDirectionInverted = !unitSystemsConvertableToUnitsystems2.Contains(subIntermediereUnitSystemConversion.ConvertedUnitSystem);
+                        if (!FirstValueConversionDirectionInverted)
+                        {
+                            CombinedUnitSystemConversionBaseUnitSystem = subIntermediereUnitSystemConversion.BaseUnitSystem;
+                            CombinedUnitSystemConversionIntermedierUnitSystem = subIntermediereUnitSystemConversion.ConvertedUnitSystem;
+                        }
+                        else
+                        {
+                            Debug.Assert(unitSystemsConvertableToUnitsystems1.Contains(subIntermediereUnitSystemConversion.ConvertedUnitSystem));
+
+                            CombinedUnitSystemConversionBaseUnitSystem = subIntermediereUnitSystemConversion.ConvertedUnitSystem;  
+                            CombinedUnitSystemConversionIntermedierUnitSystem = subIntermediereUnitSystemConversion.BaseUnitSystem; 
+                        }
+
+                        UnitSystemConversion SecondUnitSystemConversion = GetUnitSystemConversion(new List<IUnitSystem>() { CombinedUnitSystemConversionIntermedierUnitSystem }, unitsystems2, Unitsystems2Conversions);
+                        Boolean SecondValueConversionDirectionInverted = SecondUnitSystemConversion.ConvertedUnitSystem == CombinedUnitSystemConversionIntermedierUnitSystem;
+
+                        if (!SecondValueConversionDirectionInverted)
+                        {
+                            CombinedUnitSystemConversionConvertedUnitSystem = SecondUnitSystemConversion.ConvertedUnitSystem;
+                        }
+                        else
+                        {
+                            CombinedUnitSystemConversionConvertedUnitSystem = SecondUnitSystemConversion.BaseUnitSystem;
+                        }
+
+                        // Make the Combined unit system conversion
+                        ValueConversion[] CombinedValueConversions = new ValueConversion[] {  new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[0], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[0], SecondValueConversionDirectionInverted),
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[1], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[1], SecondValueConversionDirectionInverted),  
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[2], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[2], SecondValueConversionDirectionInverted),
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[3], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[3], SecondValueConversionDirectionInverted),  
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[4], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[4], SecondValueConversionDirectionInverted),  
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[5], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[5], SecondValueConversionDirectionInverted),  
+                                                                                              new CombinedValueConversion(FirstUnitSystemConversion.BaseUnitConversions[6], FirstValueConversionDirectionInverted, SecondUnitSystemConversion.BaseUnitConversions[6], SecondValueConversionDirectionInverted)    
+                                                                                            };
+
+                        subIntermediereUnitSystemConversion = new UnitSystemConversion(CombinedUnitSystemConversionBaseUnitSystem, CombinedUnitSystemConversionConvertedUnitSystem, CombinedValueConversions);
+                    }
+                    return subIntermediereUnitSystemConversion;
+                }
+            }
+ 
             return null;
         }
 

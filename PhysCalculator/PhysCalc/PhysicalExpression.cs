@@ -232,6 +232,8 @@ namespace PhysicalCalculator.Expression
                     if (pqRes == null)
                     {
                         resultLine = "The unit " + pq.Unit.ToPrintString() + " can't be converted to " + pu.ToPrintString();
+                        //  pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit) }, new PrefixedUnitExponentList { new PrefixedUnitExponent(pu) }));
+                        pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit.Divide(pu).Unit) }, null));
                     }
                 }
             }
