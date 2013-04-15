@@ -231,7 +231,7 @@ namespace PhysicalCalculator.Expression
                     pqRes = pq.ConvertTo(pu);
                     if (pqRes == null)
                     {
-                        resultLine = "The unit " + pq.Unit.ToPrintString() + " can't be converted to " + pu.ToPrintString();
+                        resultLine = "The unit " + pq.Unit.ToPrintString() + " can't be converted to " + pu.ToPrintString() + "\n";
                         //  pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit) }, new PrefixedUnitExponentList { new PrefixedUnitExponent(pu) }));
                         pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit.Divide(pu).Unit) }, null));
                     }
@@ -247,23 +247,23 @@ namespace PhysicalCalculator.Expression
             if (TokenString.TryParseToken("[", ref commandLine))
             { // "Convert to unit" square paranteses
 
-                int UnitStrLen = commandLine.IndexOf(']');
-                if (UnitStrLen == 0)
+                int UnitStringLen = commandLine.IndexOf(']');
+                if (UnitStringLen == 0)
                 {
                     resultLine = "Missing unit to convert to";
                 }
                 else
                 {
                     String UnitString;
-                    if (UnitStrLen == -1)
+                    if (UnitStringLen == -1)
                     {   // Not terminated by ']', but handle that later
                         // Try to parse rest of line as an unit 
                         UnitString = commandLine;
-                        UnitStrLen = commandLine.Length;
+                        UnitStringLen = commandLine.Length;
                     }
                     else
                     {   // Parse only the valid unit formatted string
-                        UnitString = commandLine.Substring(0, UnitStrLen);
+                        UnitString = commandLine.Substring(0, UnitStringLen);
                     }
 
                     /*** 
@@ -279,20 +279,147 @@ namespace PhysicalCalculator.Expression
                     }
                     ***/
 
-                    UnitString = UnitString.TrimEnd();
-                    String UnitStringAll = UnitString;
-                    UnitStrLen = UnitString.Length;
+                    Char timeSeparator = ':';
+                    Char[] separators = { timeSeparator };
 
-                    pu = ParsePhysicalUnit(ref UnitString, ref resultLine);
+                    Char FractionUnitSeparator = '\0';
+                    String FractionUnitSeparatorStr = null;
 
-                    commandLine = commandLine.Substring(UnitStrLen - UnitString.Length);
+                    int UnitStrCount = 0;
+                    int UnitStrStartCharIndex = 0;
+                    Boolean ValidFractionalUnit = true;
+
+                    Stack<Tuple<string, IPhysicalUnit>> FractionalUnits = new Stack<Tuple<string, IPhysicalUnit>>();
+
+                    while (ValidFractionalUnit && (UnitStrStartCharIndex >= 0) && (UnitStrStartCharIndex < UnitString.Length))
+                    {
+                        int UnitStrLen;
+                        int NextUnitStrStartCharIndex;
+
+                        int UnitStrSeparatorCharIndex = UnitString.IndexOfAny(separators, UnitStrStartCharIndex);
+                        if (UnitStrSeparatorCharIndex == -1)
+                        {
+                            UnitStrLen = UnitString.Length - UnitStrStartCharIndex;
+                            //FractionUnitSeparator = '\0';
+
+                            NextUnitStrStartCharIndex = UnitString.Length;
+                        }
+                        else
+                        {
+                            UnitStrLen = UnitStrSeparatorCharIndex - UnitStrStartCharIndex;
+                            //FractionUnitSeparator = UnitString[UnitStrSeparatorCharIndex];
+
+                            NextUnitStrStartCharIndex = UnitStrSeparatorCharIndex + 1;
+                        }
+
+                        if (UnitStrLen > 0)
+                        {
+                            UnitStrCount++;
+                            string UnitFieldString = UnitString.Substring(UnitStrStartCharIndex, UnitStrLen).Trim();
+
+                            IPhysicalUnit tempPU = ParsePhysicalUnit(ref UnitFieldString, ref resultLine);
+                            if (tempPU == null)
+                            {
+                                ValidFractionalUnit = false;
+                                resultLine = "'" + UnitFieldString + "' is not a valid unit.";
+                            }
+                            else
+                            {
+                                FractionUnitSeparatorStr = FractionUnitSeparator.ToString();
+                                FractionalUnits.Push(new Tuple<string, IPhysicalUnit>(FractionUnitSeparatorStr, tempPU));
+                            }
+                        }
+
+                        // Shift to next field
+                        if (UnitStrSeparatorCharIndex >= 0)
+                        {
+                            FractionUnitSeparator = UnitString[UnitStrSeparatorCharIndex];
+                        }
+                        UnitStrStartCharIndex = NextUnitStrStartCharIndex;
+                    }
+
+                    foreach (Tuple<string, IPhysicalUnit> tempFU in FractionalUnits)
+                    {
+                        IPhysicalUnit tempPU = tempFU.Item2;
+                        String tempFractionUnitSeparator = tempFU.Item1;
+                        if (pu == null)
+                        {
+                            pu = tempPU;
+                            FractionUnitSeparatorStr = tempFractionUnitSeparator;
+                        }
+                        else
+                        {
+                            if (new PhysicalQuantity(tempPU).ConvertTo(pu) != null)
+                            {
+                                Debug.Assert(FractionUnitSeparatorStr != null);
+                                pu = new PhysicalMeasure.MixedUnit(tempPU, FractionUnitSeparatorStr, pu);
+
+                                FractionUnitSeparatorStr = tempFractionUnitSeparator;
+                            }
+                            else
+                            {
+                                Debug.Assert(resultLine == null);
+                                resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
+                            }
+                        }
+                    }
+
+                    commandLine = commandLine.Substring(UnitStringLen);
                     commandLine = commandLine.TrimStart();
+
                     TokenString.ParseToken("]", ref commandLine, ref resultLine);
 
+                    //if (pu == PhysicalMeasure.Physics.MGD_Units.BaseUnits[3] /* day */ )
+                    //{
+                    //    if (tempPU == PhysicalMeasure.SI.h /* hour */ )
+                    //    { // Result to be shown as h:min
+                    //        pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
+                    //    }
+                    //    else
+                    //    {
+                    //        // pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
+                    //        ValidFractionalUnit = false;
+                    //        resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
+                    //    }
+                    //}
+                    //else if (pu == PhysicalMeasure.SI.h /* hour */ )
+                    //{
+                    //    if (tempPU == PhysicalMeasure.Physics.MGD_Units.ConvertibleUnits[1] /* MGD.min */ )
+                    //    { // Result to be shown as h:min
+                    //        pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
+                    //    }
+                    //    else
+                    //    {
+                    //        // pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
+                    //        ValidFractionalUnit = false;
+                    //        resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
+                    //    }
+                    //}
+                    //else if (pu == PhysicalMeasure.Physics.MGD_Units.ConvertibleUnits[1] /* MGD.min */ )
+                    //{
+                    //    if (tempPU == PhysicalMeasure.SI.s /* SI.s */)
+                    //    { // Result to be shown as min:s
+                    //        pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
+                    //    }
+                    //    else
+                    //    {
+                    //        // pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
+                    //        //resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
+                    //        ValidFractionalUnit = false;
+                    //        resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    // pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
+                    //    resultLine = pu.ToPrintString() + " has no valid fractional units.";
+                    //}
+                    /*
                     if (pu == null)
                     {
-                        resultLine = "'" + UnitStringAll + "' is not a valid unit.";
+                        resultLine = "'" + UnitString + "' is not a valid unit.";
                     }
+                    */
                 }
             }
 
@@ -670,7 +797,7 @@ namespace PhysicalCalculator.Expression
                                 Pos += OldLen - CommandLine.Length;
                                 if (OK)
                                 {
-                                    IPhysicalQuantity pq =  new PhysicalQuantity(D, dimensionless);
+                                    IPhysicalUnit pu = null;
                                     if (!String.IsNullOrWhiteSpace(CommandLine))
                                     {   // Parse optional unit
                                         OldLen = CommandLine.Length;
@@ -678,14 +805,16 @@ namespace PhysicalCalculator.Expression
                                         if (!String.IsNullOrEmpty(CommandLine) && (Char.IsLetter(CommandLine[0])))
                                         {
                                             ResultLine = "";
-                                            IPhysicalUnit pu = ParsePhysicalUnit(ref CommandLine, ref ResultLine);
+                                            pu = ParsePhysicalUnit(ref CommandLine, ref ResultLine);
                                             Pos += OldLen - CommandLine.Length;
-                                            if (pu != null)
-                                            {
-                                                pq.Unit = pu;
-                                            }
                                         }
                                     }
+                                    if (pu == null)
+                                    {
+                                        pu = dimensionless;
+                                    }
+
+                                    IPhysicalQuantity pq = new PhysicalQuantity(D, pu);
 
                                     LastReadToken = TokenKind.Operand;
                                     return new token(pq);
@@ -1270,8 +1399,24 @@ namespace PhysicalCalculator.Expression
             }
             //if (!UnitIdentifierFound)
             if (pu == null)
-            {   // Standard units
-                pu = PhysicalUnit.ParseUnit(ref commandLine);
+            {   // Standard physical unit expressions
+
+                // Parse unit
+                commandLine = commandLine.TrimStart();
+                if (!String.IsNullOrEmpty(commandLine) && (Char.IsLetter(commandLine[0])))
+                {
+                    int UnitStringLen = commandLine.IndexOfAny(new char[] { ' ' });  // ' '
+                    if (UnitStringLen < 0 )
+                    {
+                        UnitStringLen = commandLine.Length;
+                    }
+                    String UnitStr = commandLine.Substring(0, UnitStringLen);
+
+                    pu = PhysicalUnit.ParseUnit(ref UnitStr);
+                    int Pos = UnitStringLen - UnitStr.Length;
+                    commandLine = commandLine.Substring(Pos);
+                }
+
                 if (pu != null && UnitIdentifierFound)
                 {   
                     resultLine = "";

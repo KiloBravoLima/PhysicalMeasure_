@@ -676,9 +676,7 @@ namespace PhysicalCalculator.Identifiers
             Boolean Found = FindLocalIdentifier(variableName, out Item);
             if (Found && Item.identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in local context; set it to specified value
-                NamedVariable nv = Item as NamedVariable;
-                nv.Value = variableValue.Value;
-                nv.Unit = variableValue.Unit;
+                SetLocalIdentifier(variableName, new NamedVariable(variableValue));
             }
             else
             {
@@ -695,17 +693,15 @@ namespace PhysicalCalculator.Identifiers
             return true;
         }
 
-        public Boolean VariableSet(String VariableName, IPhysicalQuantity VariableValue)
+        public Boolean VariableSet(String variableName, IPhysicalQuantity variableValue)
         {
             // Find identifier 
             IEnviroment context;
             INametableItem Item;
-            Boolean Found = FindIdentifier(VariableName, out context, out Item);
+            Boolean Found = FindIdentifier(variableName, out context, out Item);
             if (Found && Item.identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in some context; set it to specified value
-                NamedVariable nv = Item as NamedVariable;
-                nv.Value = VariableValue.Value;
-                nv.Unit = VariableValue.Unit;
+                context.SetLocalIdentifier(variableName, new NamedVariable(variableValue));
             }
             else
             {
@@ -715,28 +711,28 @@ namespace PhysicalCalculator.Identifiers
                 }
                 else
                 {   // Variable not found; No local function with that name, Declare local variable
-                    this.NamedItems.Add(VariableName, new NamedVariable(VariableValue));
+                    this.NamedItems.Add(variableName, new NamedVariable(variableValue));
                 }
             }
 
             return true;
         }
 
-        public Boolean VariableGet(String VariableName, out IPhysicalQuantity VariableValue, ref String ResultLine)
+        public Boolean VariableGet(String variableName, out IPhysicalQuantity variableValue, ref String resultLine)
         {
             // Find identifier 
             IEnviroment context;
             INametableItem Item;
-            Boolean Found = FindIdentifier(VariableName, out context, out Item);
+            Boolean Found = FindIdentifier(variableName, out context, out Item);
             if (Found && Item.identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in some context; Get it
-                VariableValue = Item as IPhysicalQuantity;
+                variableValue = Item as IPhysicalQuantity;
                 return true;
             }
             else
             {
-                VariableValue = null;
-                ResultLine = "Variable '" + VariableName + "' not found";
+                variableValue = null;
+                resultLine = "Variable '" + variableName + "' not found";
                 return false;
             }
         }
