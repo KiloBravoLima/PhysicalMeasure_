@@ -79,7 +79,8 @@ namespace PhysicalMeasure
         LuminousIntensity
     }
 
-    public enum UnitKind { BaseUnit, DerivedUnit, ConvertibleUnit, CombinedUnit };
+    //public enum UnitKind { BaseUnit, DerivedUnit, ConvertibleUnit, CombinedUnit };
+    public enum UnitKind { BaseUnit, DerivedUnit, ConvertibleUnit, CombinedUnit, MixedUnit };
 
     #endregion Physical Measure Constants
 
@@ -114,11 +115,21 @@ namespace PhysicalMeasure
 
         String ToPrintString();
 
+        String ValueString(double quantity);
+        String ValueString(double quantity, String format, IFormatProvider formatProvider);
+
         String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false);
     }
 
     public interface ISystemUnit : ISystemItem, IUnit
     {
+    }
+
+    public interface IMixedUnit : ISystemUnit
+    {
+        IPhysicalUnit MainUnit { get; }
+        IPhysicalUnit FractionalUnit { get; }
+        String Separator { get; }
     }
 
     public interface IPrefixedUnit
@@ -281,8 +292,10 @@ namespace PhysicalMeasure
 
     public interface IPhysicalQuantity : IFormattable, IPhysicalQuantityMath, IPhysicalQuantityConvertible
     {
-        double Value { get; set; }
-        IPhysicalUnit Unit { get; set; }
+        //double Value { get; set; }
+        double Value { get;  /* set; */ }
+        //IPhysicalUnit Unit { get; set; }
+        IPhysicalUnit Unit { get; /* set; */  }
 
         String ToPrintString();
     }
@@ -1425,6 +1438,25 @@ namespace PhysicalMeasure
             return UnitName;
         }
 
+        public virtual string ValueString(double quantity)
+        {
+            return quantity.ToString();
+        }
+
+        public virtual string ValueString(double quantity, String format, IFormatProvider formatProvider)
+        {
+            String ValStr = null;
+            try
+            {
+                ValStr = quantity.ToString(format, formatProvider);
+            }
+            catch
+            {
+                ValStr = quantity.ToString() + " ?" + format + "?";
+            }
+            return ValStr;
+        }
+
         #region Unit convertion methods
 
         public virtual IPhysicalQuantity ConvertTo(IPhysicalUnit convertToUnit)
@@ -1751,32 +1783,28 @@ namespace PhysicalMeasure
         {
             Debug.Assert(physicalQuantity != null);
             IPhysicalQuantity pq2 = this.Multiply(physicalQuantity.Unit);
-            pq2.Value = pq2.Value * quantity * physicalQuantity.Value;
-            return pq2;
+            return pq2.Multiply(quantity * physicalQuantity.Value);
         }
 
         public virtual IPhysicalQuantity Divide(double quantity, IPhysicalQuantity physicalQuantity)
         {
             Debug.Assert(physicalQuantity != null);
             IPhysicalQuantity pq2 = this.Divide(physicalQuantity.Unit);
-            pq2.Value = pq2.Value * quantity / physicalQuantity.Value;
-            return pq2;
+            return pq2.Multiply(quantity / physicalQuantity.Value);
         }
 
         public virtual IPhysicalQuantity Multiply(IPhysicalQuantity physicalQuantity)
         {
             Debug.Assert(physicalQuantity != null);
             IPhysicalQuantity pq2 = this.Multiply(physicalQuantity.Unit);
-            pq2.Value = pq2.Value * physicalQuantity.Value;
-            return pq2;
+            return pq2.Multiply(physicalQuantity.Value);
         }
 
         public virtual IPhysicalQuantity Divide(IPhysicalQuantity physicalQuantity)
         {
             Debug.Assert(physicalQuantity != null);
             IPhysicalQuantity pq2 = this.Divide(physicalQuantity.Unit);
-            pq2.Value = pq2.Value / physicalQuantity.Value;
-            return pq2;
+            return pq2.Divide(physicalQuantity.Value);
         }
 
         public virtual IPhysicalQuantity Multiply(IPrefixedUnit prefixedUnit)
@@ -2521,9 +2549,7 @@ namespace PhysicalMeasure
                 pq = pq.Divide(pue_pq);
             }
 
-            pq.Value *= quantity; 
-
-            return pq;
+            return pq.Multiply(quantity);
         }
 
 
@@ -2999,6 +3025,150 @@ namespace PhysicalMeasure
 
     #endregion Combined Unit Classes
 
+    #region Mixed Unit Classes
+    
+    public class MixedUnit : PhysicalUnit, IMixedUnit
+    {
+        protected readonly IPhysicalUnit _MainUnit;
+        protected readonly IPhysicalUnit _FractionalUnit;
+
+        protected readonly String _Separator;
+        protected readonly String _FractionalValueFormat;
+
+        public IPhysicalUnit MainUnit 
+        { 
+            get 
+            {
+                Debug.Assert(_MainUnit != null);
+                return this._MainUnit;
+            } 
+        }
+
+        public IPhysicalUnit FractionalUnit 
+        {
+            get
+            {
+                Debug.Assert(_MainUnit != null);
+                return this._FractionalUnit;
+            }
+        }
+
+        public String Separator
+        {
+            get
+            {
+                Debug.Assert(_Separator != null);
+                return this._Separator;
+            }
+        }
+
+        public MixedUnit(IPhysicalUnit mainUnit, String separator, IPhysicalUnit fractionalUnit, String fractionalValueFormat)
+        {
+            this._MainUnit = mainUnit;
+            this._Separator = separator;
+            this._FractionalUnit = fractionalUnit;
+            this._FractionalValueFormat = fractionalValueFormat;
+        }
+
+        public MixedUnit(IPhysicalUnit mainUnit, String separator, IPhysicalUnit fractionalUnit)
+            : this(mainUnit, separator, fractionalUnit, "00.################")
+        {
+        }
+
+        public MixedUnit(IPhysicalUnit mainUnit, IPhysicalUnit fractionalUnit)
+            : this(mainUnit, ":", fractionalUnit)
+        {
+        }
+
+        public override UnitKind Kind { get { return UnitKind.MixedUnit; } }
+
+        public override IUnitSystem System 
+        { 
+            get 
+            {
+                Debug.Assert(_MainUnit != null);
+                return MainUnit.System;
+            } 
+            set 
+            {
+                Debug.Assert(_MainUnit != null);
+                /* Just do nothing */ 
+                //MainUnit.System = value; 
+                Debug.Assert(MainUnit.System == value); 
+            }
+        }
+
+        public override SByte[] Exponents 
+        { 
+            get 
+            {
+                Debug.Assert(_MainUnit != null);
+                return MainUnit.Exponents; 
+            } 
+        }
+
+        /*
+        public override IPhysicalQuantity ConvertToSystemUnit()
+        {
+            double quatity = 1;
+            return this.ConvertToSystemUnit(ref quatity);
+        }
+        */
+
+        public override IPhysicalQuantity ConvertToSystemUnit(ref double quantity)
+        {
+            Debug.Assert(_MainUnit != null);
+            return MainUnit.ConvertToSystemUnit(ref quantity);
+        }
+
+        public override string UnitString()
+        {
+            Debug.Assert(_MainUnit != null);
+
+            string us = MainUnit.UnitString();
+            if (FractionalUnit != null)
+            {
+                us = us + this._Separator + FractionalUnit.UnitString();
+            }
+            return us;
+        }
+
+        public override string ValueString(double quantity)
+        {
+            return ValueString(quantity, null, null);
+        }
+
+        public override string ValueString(double quantity, String format, IFormatProvider formatProvider)
+        {
+            Debug.Assert(_MainUnit != null);
+
+            string ValStr;
+            if (FractionalUnit != null)
+            {
+                double integralValue = Math.Truncate(quantity);
+                double fractionalValue = quantity - integralValue;
+                IPhysicalQuantity fracPQ = new PhysicalQuantity(fractionalValue, this.MainUnit);
+                IPhysicalQuantity fracPQConv = fracPQ.ConvertTo(this.FractionalUnit);
+                if (fracPQConv != null)
+                {
+                    ValStr = _MainUnit.ValueString(integralValue, format, formatProvider) + _Separator + _FractionalUnit.ValueString(fracPQConv.Value, _FractionalValueFormat, null);
+                }
+                else
+                {
+                    ValStr = _MainUnit.ValueString(quantity);
+                }
+            }
+            else
+            {
+                ValStr = _MainUnit.ValueString(quantity);
+            }
+            return ValStr;
+        }
+
+    }
+
+    #endregion Mixed Unit Classes
+
     #endregion Physical Unit Classes
 
     #region Physical Unit System Classes
@@ -3415,7 +3585,26 @@ namespace PhysicalMeasure
                 if (convertfromunitsystem != null && convertfromunitsystem == converttounitsystem)
                 {   /* Intra unit system conversion */
 
-                    if (physicalQuantity.Unit.Kind == UnitKind.CombinedUnit)
+                    if (physicalQuantity.Unit.Kind == UnitKind.MixedUnit)
+                    {
+                        IMixedUnit imu = (IMixedUnit)physicalQuantity.Unit;
+
+                        IPhysicalQuantity pq = new PhysicalQuantity(physicalQuantity.Value, imu.MainUnit);
+                        pq = pq.ConvertTo(convertToUnit);
+                        return pq;
+                    }
+                    else if (convertToUnit.Kind == UnitKind.MixedUnit)
+                    {
+                        IMixedUnit imu = (IMixedUnit)convertToUnit;
+
+                        IPhysicalQuantity pq = ConvertTo(physicalQuantity, imu.MainUnit);
+                        if (pq != null)
+                        {
+                            pq = new PhysicalQuantity(pq.Value, convertToUnit);
+                        }
+                        return pq;
+                    }
+                    else if (physicalQuantity.Unit.Kind == UnitKind.CombinedUnit)
                     {
                         ICombinedUnit icu = (ICombinedUnit)physicalQuantity.Unit;
                         double d = physicalQuantity.Value;
@@ -3708,8 +3897,8 @@ namespace PhysicalMeasure
     public class PhysicalQuantity : IPhysicalQuantity
     {
         // The value holders
-        private double _value;
-        private IPhysicalUnit _unit;
+        private readonly double _value;
+        private readonly IPhysicalUnit _unit;
 
         public double Value
         {
@@ -3717,10 +3906,12 @@ namespace PhysicalMeasure
             {
                 return this._value;
             }
+            /*
             set
             {
                 this._value = value;
             }
+            */ 
         }
 
         public IPhysicalUnit Unit
@@ -3729,10 +3920,12 @@ namespace PhysicalMeasure
             {
                 return this._unit;
             }
+            /*
             set
             {
                 this._unit = value;
             }
+            */
         }
 
         public IPhysicalUnit Dimensionless { get { return Unit.Dimensionless; } }
@@ -3804,7 +3997,7 @@ namespace PhysicalMeasure
         /// </summary>
         public String ToString(String format, IFormatProvider formatProvider)
         {
-            String ValStr = this.Value.ToString(format, formatProvider);
+            String ValStr = this.Unit.ValueString(this.Value, format, formatProvider);
             String UnitStr = this.Unit.ToString();
             if (String.IsNullOrEmpty(UnitStr))
             {
@@ -3818,7 +4011,7 @@ namespace PhysicalMeasure
 
         public override String ToString()
         {
-            String ValStr = this.Value.ToString(CultureInfo.InvariantCulture);
+            String ValStr = this.Unit.ValueString(this.Value);
             String UnitStr = this.Unit.ToString();
             if (String.IsNullOrEmpty(UnitStr))
             {
@@ -3833,7 +4026,7 @@ namespace PhysicalMeasure
 
         public virtual String ToPrintString()
         {
-            String ValStr = this.Value.ToString(CultureInfo.InvariantCulture);
+            String ValStr = this.Unit.ValueString(this.Value);
             String UnitStr = this.Unit.ToPrintString();
             if (String.IsNullOrEmpty(UnitStr))
             {
@@ -3888,35 +4081,6 @@ namespace PhysicalMeasure
         public static IPhysicalQuantity Parse(String physicalQuantityStr)
         {
             return Parse(physicalQuantityStr, System.Globalization.NumberStyles.Float, NumberFormatInfo.InvariantInfo);
-
-
-            /****
-            String[] Strings = physicalQuantityStr.Trim().Split(' ');
-
-            if (Strings.GetLength(0) > 0)
-            {
-                // Parse value
-                String ValueStr = Strings[0];
-                Double value = Double.Parse(ValueStr, System.Globalization.NumberStyles.Float, NumberFormatInfo.InvariantInfo);
-
-                IPhysicalUnit unit = null;
-
-                if (Strings.GetLength(0) > 1)
-                {
-                    // Parse unit
-                    String UnitStr = Strings[1];
-                    unit = PhysicalUnit.ParseUnit(ref UnitStr);
-                }
-                else
-                {
-                    unit = Physics.dimensionless;
-                }
-
-                return new PhysicalQuantity(value, unit);
-            }
-
-            throw new ArgumentException("Not a valid physical quantity format", "physicalQuantityStr");
-            ****/ 
         }
 
         public IPhysicalQuantity Zero { get { return new PhysicalQuantity(0, this.Unit.Dimensionless); } }
@@ -3947,7 +4111,7 @@ namespace PhysicalMeasure
             {
                 if (convertToUnit.IsDimensionless)
                 {   // Any dimensionless can be converted to any systems dimensionless
-                    this.Unit = convertToUnit;
+                    // this.Unit = convertToUnit;
                     IPhysicalQuantity quantity = new PhysicalQuantity(this.Value, convertToUnit);
                     return quantity;
                 }
@@ -4302,10 +4466,7 @@ namespace PhysicalMeasure
 
         public static PhysicalQuantity operator /(double d, PhysicalQuantity pq)
         {
-            IPhysicalQuantity pq2 = new PhysicalQuantity(1);
-            pq2 = pq2.Divide(pq);
-            pq2.Value = pq2.Value * d;
-            return new PhysicalQuantity(pq2);
+            return new PhysicalQuantity( new PhysicalQuantity(d).Divide(pq));
         }
 
         public static PhysicalQuantity operator *(PhysicalQuantity pq, IPhysicalUnit pu)
@@ -4343,27 +4504,16 @@ namespace PhysicalMeasure
         public PhysicalQuantity Power(SByte exponent)
         {
             IPhysicalQuantity pq = this.Unit.Pow(exponent);
-            pq.Value = pq.Value * System.Math.Pow(this.Value, exponent);
-            return new PhysicalQuantity(pq);
-
-            /*
-            IPhysicalUnit pu = this.Unit.Pow(exponent);
-            return new PhysicalQuantity(System.Math.Pow(this.Value, exponent), pu);
-            */
+            Double Value = pq.Value * System.Math.Pow(this.Value, exponent);
+            return new PhysicalQuantity(Value, pq.Unit);
         }
 
         public PhysicalQuantity Root(SByte exponent)
         {
-            
             IPhysicalQuantity pq = this.Unit.Rot(exponent);
             //pq.Value = pq.Value * System.Math.Root(this.Value, exponent);
-            pq.Value = pq.Value * System.Math.Pow(this.Value, 1.0 / exponent);
-            return new PhysicalQuantity(pq);
-            
-            /*
-            IPhysicalUnit pu = this.Unit.Rot(exponent);
-            return new PhysicalQuantity(System.Math.Pow(this.Value, 1.0 / exponent), pu);
-            */
+            Double Value = pq.Value * System.Math.Pow(this.Value, 1.0 / exponent);
+            return new PhysicalQuantity(Value, pq.Unit);
         }
 
         #region Physical Quantity IPhysicalUnitMath implementation
@@ -4423,29 +4573,29 @@ namespace PhysicalMeasure
         public IPhysicalQuantity Multiply(IPrefixedUnit prefixedUnit)
         {
             IPhysicalQuantity pq = this.Unit.Multiply(prefixedUnit);
-            pq.Value = this.Value * pq.Value;
-            return pq;
+            Double Value = this.Value * pq.Value;
+            return new PhysicalQuantity(Value, pq.Unit);
         }
 
         public IPhysicalQuantity Divide(IPrefixedUnit prefixedUnit)
         {
             IPhysicalQuantity pq = this.Unit.Divide(prefixedUnit);
-            pq.Value = this.Value * pq.Value;
-            return pq;
+            Double Value = this.Value * pq.Value;
+            return new PhysicalQuantity(Value, pq.Unit);
         }
 
         public IPhysicalQuantity Multiply(IPrefixedUnitExponent prefixedUnitExponent)
         {
             IPhysicalQuantity pq = this.Unit.Multiply(prefixedUnitExponent);
-            pq.Value = this.Value * pq.Value;
-            return pq;
+            Double Value = this.Value * pq.Value;
+            return new PhysicalQuantity(Value, pq.Unit);
         }
 
         public IPhysicalQuantity Divide(IPrefixedUnitExponent prefixedUnitExponent)
         {
             IPhysicalQuantity pq = this.Unit.Divide(prefixedUnitExponent);
-            pq.Value = this.Value * pq.Value;
-            return pq;
+            Double Value = this.Value * pq.Value;
+            return new PhysicalQuantity(Value, pq.Unit);
         }
 
         #endregion Physical Quantity IPhysicalUnitMath implementation

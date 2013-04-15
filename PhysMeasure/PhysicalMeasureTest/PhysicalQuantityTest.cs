@@ -787,10 +787,10 @@ namespace PhysicalMeasureTest
             PhysicalQuantity m = PhysicalQuantity.Parse("1 g") as PhysicalQuantity;
             double h = 10.0; 
 
-            // Will not compile:  
+            // Must not compile:  
             // PhysicalQuantity m_plus_h = m + h;
 
-            // Will not compile:  
+            // Must not compile:  
             // PhysicalQuantity h_plus_m = h + m;
 
         }
@@ -804,10 +804,10 @@ namespace PhysicalMeasureTest
             PhysicalQuantity m = PhysicalQuantity.Parse("1 g") as PhysicalQuantity;
             double h = 10.0;
 
-            // Will not compile:  
+            // Must not compile:  
             // PhysicalQuantity m_sub_h = m - h;
 
-            // Will not compile:  
+            // Must not compile:  
             // PhysicalQuantity h_sub_m = h - m;
 
         }
@@ -825,7 +825,8 @@ namespace PhysicalMeasureTest
             PhysicalQuantity pq = new PhysicalQuantity(123.4, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("Kg"));
 
             //String expected = (123.4).ToString()+" SI.Kg";
-            String expected = (123.4).ToString(CultureInfo.InvariantCulture) + " Kg";
+            //String expected = (123.4).ToString(CultureInfo.InvariantCulture) + " Kg";
+            String expected = (123.4).ToString() + " Kg";
 
             String actual = pq.ToString();
 
@@ -841,7 +842,8 @@ namespace PhysicalMeasureTest
             PhysicalQuantity pq = new PhysicalQuantity(0.001 * 9.81 * 10, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"));
 
             //String expected = (0.0981).ToString()+" SI.J";
-            String expected = (0.0981).ToString(CultureInfo.InvariantCulture) + " J";
+            //String expected = (0.0981).ToString(CultureInfo.InvariantCulture) + " J";
+            String expected = (0.0981).ToString() + " J";
 
             String actual = pq.ToString();
 
@@ -857,7 +859,8 @@ namespace PhysicalMeasureTest
             PhysicalQuantity pq = new PhysicalQuantity(0.00987654321, new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 }));
 
             //String expected = (0.00987654321).ToString() + " SI.ms-2";
-            String expected = (0.00987654321).ToString(CultureInfo.InvariantCulture) + " m·s-2";
+            //String expected = (0.00987654321).ToString(CultureInfo.InvariantCulture) + " m·s-2";
+            String expected = (0.00987654321).ToString() + " m·s-2";
 
             String actual = pq.ToString();
 

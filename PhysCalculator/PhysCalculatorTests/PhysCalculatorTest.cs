@@ -122,7 +122,7 @@ namespace PhysCalculatorTests
             string CommandLine = "Print 13 g + 99.987 Kg - 10 mg";
             string ResultLine = string.Empty;
             //string ResultLineExpected = "99.99999 Kg"; 
-            string ResultLineExpected = "99999.99 g"; 
+            string ResultLineExpected = (99999.99).ToString()+" g"; 
             bool expected = true; 
             bool actual;
             actual = target.Command(ref CommandLine, out ResultLine);
@@ -278,7 +278,7 @@ namespace PhysCalculatorTests
             string CommandLine = "123 J·S·Ω/m + 0.456 m·Kg·s-2"; 
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = "123.456 J·S·Ω/m"; 
+            string ResultLineExpected = (123.456).ToString()+" J·S·Ω/m"; 
             bool expected = true; 
             bool actual;
             actual = target.CommandPrint(ref CommandLine, ref ResultLine);
@@ -286,6 +286,88 @@ namespace PhysCalculatorTests
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
         }
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_HPlusMinPlusS_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "123.25 h + 38.920123133333 min + 364.789012 s";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            //string ResultLineExpected = "123:59:59,9964000000091 h:min:s";
+            string ResultLineExpected = (123.999999).ToString() + " h";
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_HPlusMinPlusS_ConvertTo_HMinS_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "123.25 h + 38.920123133333 min + 364.789012 s [h:min:s]";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = "123:59:59,9964000000091 h:min:s";
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_HPlusMinPlusS_ConvertTo_DHMinS_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "123.25 h + 38.920123133333 min + 364.789012 s [d:h:min:s]";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = "5:03:59:59,9963999999579 MGD.d:h:min:s";
+
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_DPlusHPlusMinPlusS_ConvertTo_DHMinS_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "5 d  + 23.25 h + 42.5 min + 149.123 s [d:h:min:s]";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = "5:23:59:59,1230000000314 MGD.d:h:min:s";
+
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
 
         /// <summary>
         ///A test for CommandReadFromFile
