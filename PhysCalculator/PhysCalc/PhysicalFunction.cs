@@ -254,7 +254,7 @@ namespace PhysicalCalculator.Function
             {
                 // Set params in local context
                 int ParamIndex = 0;
-                foreach (PhysicalQuantityFunctionParam Param in actualParameterlist)
+                foreach (PhysicalQuantityFunctionParam Param in formalparamlist)
                 {
                     if (actualParameterlist.Count <= ParamIndex)
                     {
