@@ -235,6 +235,28 @@ namespace PhysicalCalculator.Expression
                         //  pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit) }, new PrefixedUnitExponentList { new PrefixedUnitExponent(pu) }));
                         pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit.Divide(pu).Unit) }, null));
                     }
+                    return pqRes;
+                }
+            }
+
+            pqRes = CheckForNamedDerivedUnit(pqRes);
+
+            return pqRes;
+        }
+
+        public static IPhysicalQuantity CheckForNamedDerivedUnit(IPhysicalQuantity pq)
+        {
+            IPhysicalQuantity pqRes = pq;
+            if (pqRes != null)
+            {   
+                IUnitSystem unitSystem = pqRes.Unit.System;
+                if (unitSystem != null)
+                {
+                    IPhysicalUnit namedDerivedUnit = unitSystem.NamedDerivedUnitFromUnit(pqRes.Unit);
+                    if (namedDerivedUnit != null)
+                    {
+                        pqRes = new PhysicalQuantity(pqRes.Value, namedDerivedUnit);
+                    }
                 }
             }
 
@@ -364,10 +386,6 @@ namespace PhysicalCalculator.Expression
                         }
                     }
 
-                    commandLine = commandLine.Substring(UnitStringLen);
-                    commandLine = commandLine.TrimStart();
-
-                    TokenString.ParseToken("]", ref commandLine, ref resultLine);
 
                     //if (pu == PhysicalMeasure.Physics.MGD_Units.BaseUnits[3] /* day */ )
                     //{
@@ -421,6 +439,11 @@ namespace PhysicalCalculator.Expression
                     }
                     */
                 }
+
+                commandLine = commandLine.Substring(UnitStringLen);
+                commandLine = commandLine.TrimStart();
+
+                TokenString.ParseToken("]", ref commandLine, ref resultLine);
             }
 
             return pu;
@@ -1288,6 +1311,10 @@ namespace PhysicalCalculator.Expression
                         {
                             System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
                             OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out D);
+                            if (!OK)
+                            {
+                                OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberstyle, null, out D);
+                            }
                         }
                         else
                         {
@@ -1322,6 +1349,10 @@ namespace PhysicalCalculator.Expression
                             {
                                 System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
                                 OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumberD);
+                                if (!OK)
+                                {
+                                    OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, null, out exponentNumberD);
+                                }
                             }
                             else
                             {
@@ -1356,6 +1387,11 @@ namespace PhysicalCalculator.Expression
                     {
                         System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
                         OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); // styles, provider
+                        if (!OK)
+                        {
+                            OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, null, out D); // styles, provider
+                        }
+
                     }
                     if (OK)
                     {

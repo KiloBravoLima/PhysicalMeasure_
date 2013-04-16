@@ -71,13 +71,15 @@ namespace PhysicalCalculator
         {
             // Physical quantity functions
             somePredefinedSystem.NamedItems.AddItem("Pow", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Pow(exp)));
-            somePredefinedSystem.NamedItems.AddItem("rot", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Rot(exp)));
+            somePredefinedSystem.NamedItems.AddItem("Rot", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Rot(exp)));
         }
 
         private CalculatorEnviroment InitPredefinedSystemContext()
         {
             CalculatorEnviroment PredefinedSystem = new CalculatorEnviroment("Predefined Identifiers", EnviromentKind.NamespaceEnv);
             PredefinedSystem.OutputTracelevel = TraceLevels.None;
+            //PredefinedSystem.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+            PredefinedSystem.FormatProviderSource = FormatProviderKind.InvariantFormatProvider;
 
             FillPredefinedSystemContext(PredefinedSystem);
 
@@ -87,6 +89,9 @@ namespace PhysicalCalculator
         private void InitGlobalContext()
         {
             GlobalContext = new CalculatorEnviroment(InitPredefinedSystemContext(), "Global", EnviromentKind.NamespaceEnv);
+            //GlobalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+            GlobalContext.FormatProviderSource = FormatProviderKind.InvariantFormatProvider;
+
             CurrentContext = GlobalContext;
         }
 
@@ -271,6 +276,7 @@ namespace PhysicalCalculator
                                     || CheckForCommand("Func", CommandFunc, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Help", CommandHelp, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Version", CommandVersion, ref commandLine, ref resultLine, ref CommandHandled)
+                                    || CheckForCommand("About", CommandAbout, ref commandLine, ref resultLine, ref CommandHandled)
                                     || (CommandHandled = IdentifierAssumed(ref commandLine, ref resultLine)) // Assume a print or set Command
                                     || (CommandHandled = CommandPrint(ref commandLine, ref resultLine)) // Assume a print Command
                                     || (CommandHandled = base.Command(ref commandLine, out resultLine));
@@ -321,7 +327,7 @@ namespace PhysicalCalculator
                             + "                                                                                 else a converted (scaled) unit\n"
                             + "    [ Print ] <expression> [, <expression> ]*                                Evaluate expressions and show values\n"
                             + "    List                                                                     Show All Variable values and functions declarations\n"
-                            + "    Store <varname>                                                          Save last calculation'unitStr result to Variable\n"
+                            + "    Store <varname>                                                          Save last calculation's result to Variable\n"
                             + "    Remove <varname> [, <varname> ]*                                         Remove Variable\n"
                             + "    Clear                                                                    Remove All variables\n"
                             + "    Func <functionname> ( <paramlist> )  { <commands> }                      Declare a function\n"
@@ -887,7 +893,10 @@ namespace PhysicalCalculator
                 {
                     if (!String.IsNullOrWhiteSpace(resultLine))
                     {
-                        resultLine += ", ";
+                        if (resultLine[resultLine.Length-1] != '\n')
+                        {
+                            resultLine += ", ";
+                        }
                     }
                     resultLine += pq.ToString();
 
@@ -1231,6 +1240,9 @@ namespace PhysicalCalculator
             if (functionevaluator != null)
             {
                 CalculatorEnviroment LocalContext = new CalculatorEnviroment(CurrentContext, "Function " + FunctionName, EnviromentKind.FunctionEnv);
+                //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+                LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
+
                 CurrentContext = LocalContext;
 
                 OK = functionevaluator.Evaluate(LocalContext, parameterlist, out functionResult, ref resultLine);
@@ -1249,6 +1261,9 @@ namespace PhysicalCalculator
             if (CommandLineReader != null)
             {
                 CalculatorEnviroment LocalContext = new CalculatorEnviroment(CurrentContext, "File Function " + functionName, EnviromentKind.FunctionEnv);
+                //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+                LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
+
                 CurrentContext = LocalContext;
 
                 Commandreader functionCommandLineReader = new Commandreader(functionName + ".cal", CommandLineReader.ResultLineWriter);

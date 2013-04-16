@@ -73,7 +73,6 @@ namespace PhysicalMeasureTest
         {
             PhysicalUnit u = (PhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]);
 
-            //String expected = "SI.Kg";
             String expected = "Kg";
 
             String actual = u.ToString();
@@ -89,7 +88,6 @@ namespace PhysicalMeasureTest
         {
             PhysicalUnit u = (PhysicalUnit)(PhysicalMeasure.Physics.SI_Units.NamedDerivedUnits[5]);
 
-            //String expected = "SI.J";
             String expected = "J";
 
             String actual = u.ToString();
@@ -112,6 +110,74 @@ namespace PhysicalMeasureTest
 
             Assert.AreEqual(expected, actual);
         }
+
+
+
+        /// <summary>
+        ///A test for (unnamed) derived unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void DerivedUnitBaseUnitStringTest()
+        {
+            PhysicalUnit MeterPrSecond2 = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+
+            String expected = "m·s-2";
+
+            IPhysicalQuantity pq = MeterPrSecond2.ConvertToBaseUnit();
+
+            Assert.AreEqual(pq.Value, 1d);
+
+            String actual = pq.Unit.ToString();
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for (unnamed) derived unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void NamedDerivedUnitBaseUnitStringTest()
+        {
+            IPhysicalUnit Watt = PhysicalMeasure.Physics.SI_Units.NamedDerivedUnits[6];
+
+            String expected = "1 m2·Kg·s-3";
+
+            String actual = Watt.ConvertToBaseUnit().ToString();
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for (unnamed) derived unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void NamedDerivedUnitReducedUnitStringTest()
+        {
+            IPhysicalUnit Watt = PhysicalMeasure.Physics.SI_Units.NamedDerivedUnits[6];
+
+            String expected = "W";
+
+            String actual = Watt.ReducedUnitString().ToString();
+
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for (unnamed) derived unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void MixedUnitBaseUnitStringTest()
+        {
+            IPhysicalUnit HourMin= new MixedUnit(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[2], ":",  PhysicalMeasure.Physics.MGD_Units.ConvertibleUnits[1]);
+
+            String expected = "3600 s";
+
+            String actual = HourMin.ConvertToBaseUnit().ToString();
+
+            Assert.AreEqual(expected, actual);
+        }
+
 
         #endregion PhysicalUnit StringTo tests
 

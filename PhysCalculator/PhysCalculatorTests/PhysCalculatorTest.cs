@@ -150,6 +150,37 @@ namespace PhysCalculatorTests
         }
 
         /// <summary>
+        ///A test for Command About
+        ///</summary>
+        [TestMethod()]
+        public void CommandAboutTest()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "About";
+            string ResultLine = string.Empty;
+            string CommandLineExpected = string.Empty; 
+            List<String> ResultLineExpected = new List<String>();
+            ResultLineExpected.Add("PhysCalculator");
+            ResultLineExpected.Add("PhysCalc");
+            ResultLineExpected.Add("PhysicalMeasure");
+            ResultLineExpected.Add("codeplex");
+
+            bool expected = true;
+            bool actual;
+            actual = target.Command(ref CommandLine, out ResultLine);
+
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(expected, actual);
+
+            for (int i = 0; i < ResultLineExpected.Count; i++)
+            {
+                Assert.IsTrue(ResultLine.Contains(ResultLineExpected[i]), "ResultLine (" + (i+1).ToString() + ") expected to contain " + ResultLineExpected[i] + ", but contains \"" + ResultLine + "\"");
+            }
+
+        }
+
+
+        /// <summary>
         ///A test for CommandComment
         ///</summary>
         [TestMethod()]
@@ -253,7 +284,8 @@ namespace PhysCalculatorTests
             //ResultLineExpected = " Global:\r\nvar varname = 12 m2·Kg·s-2";
             List<String> ResultLinesExpected = new List<String>();
             ResultLinesExpected.Add("Global:");
-            ResultLinesExpected.Add("var varname = 12 m2·Kg·s-2");
+            //ResultLinesExpected.Add("var varname = 12 m2·Kg·s-2");
+            ResultLinesExpected.Add("var varname = 12 J");
 
             expected = true;
             actual = target.CommandList(ref CommandLine, ref ResultLine);
@@ -278,7 +310,7 @@ namespace PhysCalculatorTests
             string CommandLine = "123 J·S·Ω/m + 0.456 m·Kg·s-2"; 
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = (123.456).ToString()+" J·S·Ω/m"; 
+            string ResultLineExpected = (123.456).ToString()+" N"; 
             bool expected = true; 
             bool actual;
             actual = target.CommandPrint(ref CommandLine, ref ResultLine);
@@ -464,7 +496,7 @@ namespace PhysCalculatorTests
             string CommandLine = "varname = 3 N * 4 m";
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = "varname = 12 m2·Kg·s-2";
+            string ResultLineExpected = "varname = 12 J";
             bool expected = true; 
             bool actual;
             actual = target.CommandSet(ref CommandLine, ref ResultLine);
@@ -490,7 +522,7 @@ namespace PhysCalculatorTests
             CommandLine = "Varname";
             string CommandLineExpected = string.Empty; 
             ResultLine = string.Empty;
-            string ResultLineExpected = "12 m2·Kg·s-2";
+            string ResultLineExpected = "12 J";
             bool expected = true; 
             bool actual;
             actual = target.CommandStore(ref CommandLine, ref ResultLine);
