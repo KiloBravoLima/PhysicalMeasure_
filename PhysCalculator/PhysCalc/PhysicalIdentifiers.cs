@@ -73,7 +73,7 @@ namespace PhysicalCalculator.Identifiers
         }
     }
 
-    class NamedSystem : NametableItem, INametableItem
+    class NamedSystem : NametableItem 
     {
         public override IdentifierKind identifierkind { get { return IdentifierKind.UnisSystem; } }
 
@@ -93,14 +93,17 @@ namespace PhysicalCalculator.Identifiers
         }
     }
 
-    class NamedUnit : NametableItem, INametableItem
+    class NamedUnit : NametableItem 
     {
         public override IdentifierKind identifierkind { get { return IdentifierKind.Unit; } }
 
         public IPhysicalUnit pu;
 
-        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalUnit physicalUnit)
+        public CalculatorEnviroment Enviroment = null;
+
+        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalUnit physicalUnit, CalculatorEnviroment enviroment = null /* = null */)
         {
+            this.Enviroment = enviroment;
             if (physicalUnit != null)
             {
                 this.pu = physicalUnit;
@@ -111,8 +114,9 @@ namespace PhysicalCalculator.Identifiers
             }
         }
 
-        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalQuantity physicalQuantity)
+        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalQuantity physicalQuantity, CalculatorEnviroment enviroment /* = null */)
         {
+            this.Enviroment = enviroment;
             if (physicalQuantity != null)
             {
                 if ((unitSystem == null) && (physicalQuantity.Unit != null))
@@ -213,7 +217,13 @@ namespace PhysicalCalculator.Identifiers
 
                     if (val != 1.0 && name.Equals(cu.Symbol))
                     {   // User defined scaled unit
-                        return String.Format("unit {0} = {1} {2}", Unitname, val.ToString(CultureInfo.InvariantCulture), cu.PrimaryUnit.ToString());
+                        CultureInfo cultureInfo = null;
+                        if (Enviroment != null)
+                        {
+                            cultureInfo = Enviroment.CurrentCultureInfo;
+                        }
+
+                        return String.Format("unit {0} = {1} {2}", Unitname, val.ToString(cultureInfo), cu.PrimaryUnit.ToString());
                     }
                 }
 
@@ -277,6 +287,13 @@ namespace PhysicalCalculator.Identifiers
         Global = 1,
         Outher = 2,
         Local = 3
+    }
+
+    public enum FormatProviderKind
+    {
+        InvariantFormatProvider = 0,
+        DefaultFormatProvider = 1,
+        InheritedFormatProvider = 2
     }
 
     [Serializable]
@@ -408,6 +425,8 @@ namespace PhysicalCalculator.Identifiers
         public EnviromentKind enviromentkind = EnviromentKind.Unknown;
         public CalculatorEnviroment OuterContext = null;
 
+        public FormatProviderKind FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+
         public CalculatorEnviroment()
         {
         }
@@ -426,6 +445,25 @@ namespace PhysicalCalculator.Identifiers
 
         public VariableDeclarationEnviroment DefaultDeclarationEnviroment = VariableDeclarationEnviroment.Local;
 
+        public CultureInfo CurrentCultureInfo
+        {
+            get
+            {
+                if (FormatProviderSource == FormatProviderKind.InvariantFormatProvider)
+                {
+                    return CultureInfo.InvariantCulture;
+                }
+                else if (FormatProviderSource == FormatProviderKind.InheritedFormatProvider)
+                {
+                    if (this.OuterContext != null)
+                    {
+                        return this.OuterContext.CurrentCultureInfo;
+                    }
+                }
+
+                return null;
+            }
+        }
         public NamedItemTable NamedItems = new NamedItemTable();
 
         public CommandPaserState ParseState = CommandPaserState.ExecuteCommandLine;
@@ -640,7 +678,7 @@ namespace PhysicalCalculator.Identifiers
                 }
             }
 
-            unitItem = new NamedUnit(unitSystem, unitName, unitValue);
+            unitItem = new NamedUnit(unitSystem, unitName, unitValue, this);
             return context.SetLocalIdentifier(unitName, unitItem);
         }
 
