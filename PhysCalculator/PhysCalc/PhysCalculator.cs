@@ -300,6 +300,7 @@ namespace PhysicalCalculator
             Expression = 1,
             Parameter = 2,
             Command = 3,
+            Setting = 4,
             all = 0xF
         }
 
@@ -310,6 +311,10 @@ namespace PhysicalCalculator
                 HelpPart = CommandHelpParts.Expression;
             else if (commandLine.StartsWithKeyword("Par"))
                 HelpPart = CommandHelpParts.Parameter;
+            else if (commandLine.StartsWithKeyword("com"))
+                HelpPart = CommandHelpParts.Command;
+            else if (commandLine.StartsWithKeyword("Set"))
+                HelpPart = CommandHelpParts.Setting;
             else if (commandLine.StartsWithKeyword("All"))
                 HelpPart = CommandHelpParts.all;
 
@@ -326,11 +331,13 @@ namespace PhysicalCalculator
                             + "    Unit <unitname> [ [ = ] <expression> ]                                   Define new unit. Without an Expression it becomes a base unit,\n"
                             + "                                                                                 else a converted (scaled) unit\n"
                             + "    [ Print ] <expression> [, <expression> ]*                                Evaluate expressions and show values\n"
-                            + "    List                                                                     Show All Variable values and functions declarations\n"
+                            + "    List [ items ] [ settings ]                                              Show All Variable values and functions declarations, \n"
+                            + "                                                                                 and settings as specified\n"
                             + "    Store <varname>                                                          Save last calculation's result to Variable\n"
                             + "    Remove <varname> [, <varname> ]*                                         Remove Variable\n"
                             + "    Clear                                                                    Remove All variables\n"
                             + "    Func <functionname> ( <paramlist> )  { <commands> }                      Declare a function\n"
+                            + "    Help [expression|parameter|setting|all]                                  Help on topic\n"
                             + "    Version                                                                  Shows application version info\n"
                             + "    About                                                                    Shows application info";
             }
@@ -363,10 +370,21 @@ namespace PhysicalCalculator
                     resultLine += "\n\n";
                 }
                 resultLine += "Parameter list:\n"
-                            + "    <paramlist> = <parameter> [ ',' <parameter> ]*                            Parameter list\n"
-                            + "    <parameter> = <paramname> [ '[' <SYS> ']' ]                               Parameter";
+                            + "    <paramlist> = <parameter> [ ',' <parameter> ]*                           Parameter list\n"
+                            + "    <parameter> = <paramname> [ '[' <SYS> ']' ]                              Parameter";
             }
-            
+
+            if (HelpPart == CommandHelpParts.Setting || HelpPart == CommandHelpParts.all)
+            {
+                if (HelpPart == CommandHelpParts.all)
+                {
+                    resultLine += "\n\n";
+                }
+                resultLine += "Settings:\n"
+                            + "    set [ <contextname> . ] Tracelevel = [normal|on|off|debug]               Set Tracelevel for current or specified context\n"
+                            + "    set [ <contextname> . ] FormatProvider = [invariant|default|Inherited]   Set FormatProvider for current or specified context";
+            }
+
             commandLine = "";
             return true;
         }
@@ -872,10 +890,18 @@ namespace PhysicalCalculator
 
         public Boolean CommandList(ref String commandLine, ref String resultLine)
         {
-            StringBuilder ListStringBuilder = new StringBuilder();
+            Boolean listNamedItems = TryParseToken("Items", ref commandLine);
+            Boolean listSettings = TryParseToken("Settings", ref commandLine);
 
-            ListStringBuilder.AppendLine("Default unit system: " + Physics.Default_UnitSystem.Name); 
-            ListStringBuilder.Append(CurrentContext.ListIdentifiers());
+            if (!listNamedItems && !listSettings)
+            {
+                listNamedItems = true;
+            }
+
+            StringBuilder ListStringBuilder = new StringBuilder();
+            
+            ListStringBuilder.AppendLine("Default unit system: " + Physics.Default_UnitSystem.Name);
+            ListStringBuilder.Append(CurrentContext.ListIdentifiers(false, listNamedItems, listSettings));
 
             resultLine = ListStringBuilder.ToString();
 
@@ -898,7 +924,7 @@ namespace PhysicalCalculator
                             resultLine += ", ";
                         }
                     }
-                    resultLine += pq.ToString();
+                    resultLine += pq.ToString(null, CurrentContext.CurrentCultureInfo);
 
                     Accumulator = pq;
                 }
@@ -1125,7 +1151,7 @@ namespace PhysicalCalculator
             {
                 SettingFound = true;
                 String tracelevelvaluestr;
-                TraceLevels tl = TraceLevels.All ;
+                TraceLevels tl; // = TraceLevels.All ;
                 commandLine = commandLine.ReadToken(out tracelevelvaluestr);
                 if (tracelevelvaluestr.IsKeyword("Normal"))
                 {
@@ -1139,19 +1165,55 @@ namespace PhysicalCalculator
                 {
                     tl = TraceLevels.Low;
                 }
-                else if (tracelevelvaluestr.IsKeyword("Debug"))
+                //else if (tracelevelvaluestr.IsKeyword("Debug"))
+                else 
                 {
+                    tracelevelvaluestr = "Debug";
                     tl = TraceLevels.All;
                 }
 
                 if (identifierContext != null)
                 {
                     identifierContext.OutputTracelevel = tl;
+                    resultLine = "Tracelevel set to " + tracelevelvaluestr;
                 }
                 else
                 {
                     CommandLineReader.OutputTracelevel = tl;
                     CurrentContext.OutputTracelevel = tl;
+                    resultLine = "Current tracelevel set to " + tracelevelvaluestr;
+                }
+            }
+            else if (variableName.IsKeyword("FormatProvider"))
+            {
+                SettingFound = true;
+                String formatProviderValuestr;
+                FormatProviderKind fp; // = FormatProviderKind.InvariantFormatProvider;
+                commandLine = commandLine.ReadToken(out formatProviderValuestr);
+                if (formatProviderValuestr.IsKeyword("Inherited"))
+                {
+                    fp = FormatProviderKind.InheritedFormatProvider;
+                }
+                else if (formatProviderValuestr.IsKeyword("Default"))
+                {
+                    fp = FormatProviderKind.DefaultFormatProvider;
+                }
+                else // if (formatProviderValuestr.IsKeyword("Invariant"))
+                {
+                    fp = FormatProviderKind.InvariantFormatProvider;
+                    formatProviderValuestr = "Invariant";
+                }
+
+                if (identifierContext != null)
+                {
+                    identifierContext.FormatProviderSource = fp;
+                    resultLine = "FormatProvider set to " + formatProviderValuestr;
+                }
+                else
+                {
+                    CommandLineReader.FormatProviderSource = fp;
+                    CurrentContext.FormatProviderSource = fp;
+                    resultLine = "Current FormatProvider set to " + formatProviderValuestr;
                 }
             }
 

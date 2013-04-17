@@ -1,5 +1,5 @@
 ﻿// Saved 2011-06-03 10:02:22 to EpotFunc.cal
-// UTF8 
+// Updated 2013-04-17 15:00:00
 
 set gj = 9.82 m·s-2
 var E 
@@ -26,6 +26,7 @@ Func V_from_M_and_H(M [Kg], H [m])
 
 	var Eres = Epot(M, H)
 	var Vres = V_from_EKin(M, Eres) 
+	set E = Eres
 
 	print H, M, Eres, Vres
 }
