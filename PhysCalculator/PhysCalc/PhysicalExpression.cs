@@ -18,7 +18,10 @@ namespace PhysicalCalculator.Expression
 
     public interface IEnviroment
     {
-        TraceLevels OutputTracelevel { get; set; } 
+        TraceLevels OutputTracelevel { get; set; }
+        FormatProviderKind FormatProviderSource { get; set; }
+
+        CultureInfo CurrentCultureInfo { get; }
 
         Boolean SetLocalIdentifier(String identifierName, INametableItem item);
         Boolean RemoveLocalIdentifier(String identifierName);

@@ -19,10 +19,18 @@ namespace PhysicalCalculator
         All = 0xFF
     }
 
+    public enum FormatProviderKind
+    {
+        InvariantFormatProvider = 0,
+        DefaultFormatProvider = 1,
+        InheritedFormatProvider = 2
+    }
+
     interface ICommandAccessor
     {
         String Name { get; }
         TraceLevels OutputTracelevel { get; set; }
+        FormatProviderKind FormatProviderSource { get; set; }
         Boolean IsEmpty { get; }
         String GetCommandLine(ref String ResultLine);
     }
@@ -48,6 +56,29 @@ namespace PhysicalCalculator
                 if (CA != null)
                 {
                     CA.OutputTracelevel = value;
+                }
+            }
+        }
+
+        public FormatProviderKind FormatProviderSource
+        {
+            get
+            {
+                ICommandAccessor CA = Count > 0 ? this[Count - 1] : null;
+                if (CA != null)
+                {
+                    return CA.FormatProviderSource;
+                }
+                // Error; just use Invariant
+                return FormatProviderKind.InvariantFormatProvider;
+            }
+
+            set
+            {
+                ICommandAccessor CA = Count > 0 ? this[Count - 1] : null;
+                if (CA != null)
+                {
+                    CA.FormatProviderSource = value;
                 }
             }
         }
@@ -111,10 +142,12 @@ namespace PhysicalCalculator
     {
         private String _name;
         private TraceLevels OutTracelevel = TraceLevels.Normal; // TraceLevels.All; //TraceLevels.Normal;
+        private FormatProviderKind FormatProviderSrc = FormatProviderKind.InheritedFormatProvider; 
         public int LinesRead = 0;
 
         public String Name { get { return (_name != null ? _name : ""); } set { _name = value;  } }
         public TraceLevels OutputTracelevel { get { return OutTracelevel; } set { OutTracelevel = value; } }
+        public FormatProviderKind FormatProviderSource { get { return FormatProviderSrc; } set { FormatProviderSrc = value; } }
 
         //virtual public Boolean IsEmpty { get { return true; } } 
         abstract public Boolean IsEmpty { get; } 
@@ -402,6 +435,7 @@ namespace PhysicalCalculator
         public Boolean WriteCommandToResultWriter = true;
         public Boolean ReadFromConsoleWhenEmpty = false;
         private TraceLevels GlobalOutputTracelevel = TraceLevels.Normal; //TraceLevels.All; // TraceLevels.Normal;
+        private FormatProviderKind GlobalFormatProviderSource = FormatProviderKind.DefaultFormatProvider;
 
         public Commandreader(ResultWriter ResultLineWriter = null)
         {
@@ -484,6 +518,33 @@ namespace PhysicalCalculator
                     GlobalOutputTracelevel = value;
                 }
             } 
+        }
+
+        public FormatProviderKind FormatProviderSource
+        {
+            get
+            {
+                if (CommandAccessors != null)
+                {
+                    return CommandAccessors.FormatProviderSource;
+                }
+                else
+                {
+                    return GlobalFormatProviderSource;
+                }
+            }
+
+            set
+            {
+                if (CommandAccessors != null)
+                {
+                    CommandAccessors.FormatProviderSource = value;
+                }
+                else
+                {
+                    GlobalFormatProviderSource = value;
+                }
+            }
         }
 
         public void Write(string Line)

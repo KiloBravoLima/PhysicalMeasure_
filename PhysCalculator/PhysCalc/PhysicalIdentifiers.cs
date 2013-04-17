@@ -99,7 +99,7 @@ namespace PhysicalCalculator.Identifiers
 
         public IPhysicalUnit pu;
 
-        public CalculatorEnviroment Enviroment = null;
+        public IEnviroment Enviroment = null;
 
         public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalUnit physicalUnit, CalculatorEnviroment enviroment = null /* = null */)
         {
@@ -236,14 +236,22 @@ namespace PhysicalCalculator.Identifiers
     {
         public virtual IdentifierKind identifierkind { get { return IdentifierKind.Variable; } }
 
-        public NamedVariable(IPhysicalQuantity somephysicalquantity)
+        public IEnviroment Enviroment = null;
+
+        public NamedVariable(IPhysicalQuantity somephysicalquantity, IEnviroment enviroment = null)
             : base(somephysicalquantity)
         {
+            this.Enviroment = enviroment;
         }
 
         public virtual String ToListString(String name)
         {
-            return String.Format("var {0} = {1}", name, this.ToString());
+            CultureInfo cultureInfo = null;
+            if (Enviroment != null)
+            {
+                cultureInfo = Enviroment.CurrentCultureInfo;
+            }
+            return String.Format("var {0} = {1}", name, this.ToString(null, cultureInfo));
         }
 
         public void WriteToTextFile(String name, System.IO.StreamWriter file)
@@ -287,13 +295,6 @@ namespace PhysicalCalculator.Identifiers
         Global = 1,
         Outher = 2,
         Local = 3
-    }
-
-    public enum FormatProviderKind
-    {
-        InvariantFormatProvider = 0,
-        DefaultFormatProvider = 1,
-        InheritedFormatProvider = 2
     }
 
     [Serializable]
@@ -418,14 +419,11 @@ namespace PhysicalCalculator.Identifiers
             // FunctionToParseInfo.functionName = functionName;
             //FunctionToParseInfo.Function = new PhysicalQuantityCommandsFunction();
             //CurrentContext.ParseState = CommandPaserState.ReadFunctionParameterList;
-
         }
 
         public String Name = null;
         public EnviromentKind enviromentkind = EnviromentKind.Unknown;
         public CalculatorEnviroment OuterContext = null;
-
-        public FormatProviderKind FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
 
         public CalculatorEnviroment()
         {
@@ -467,11 +465,13 @@ namespace PhysicalCalculator.Identifiers
         public NamedItemTable NamedItems = new NamedItemTable();
 
         public CommandPaserState ParseState = CommandPaserState.ExecuteCommandLine;
-        public FunctionParseInfo FunctionToParseInfo = null;  
+        public FunctionParseInfo FunctionToParseInfo = null;
 
-        public TraceLevels _OutputTracelevel = TraceLevels.Normal;
-
+        private TraceLevels _OutputTracelevel = TraceLevels.Normal;
         public TraceLevels OutputTracelevel { get { return _OutputTracelevel; } set { _OutputTracelevel = value; } }
+
+        private FormatProviderKind FormatProviderSrc = FormatProviderKind.DefaultFormatProvider; 
+        public FormatProviderKind FormatProviderSource { get { return FormatProviderSrc; } set { FormatProviderSrc = value; } }
 
         #region INameTableItem interface implementation
 
@@ -549,18 +549,17 @@ namespace PhysicalCalculator.Identifiers
             return false;
         }
 
-        public String ListIdentifiers(Boolean forceListContextName = false)
+        public String ListIdentifiers(Boolean forceListContextName = false, Boolean listNamedItems  = false, Boolean listSettings = false)
         {
             StringBuilder ListStringBuilder = new StringBuilder();
 
-            Boolean HasItemsToShow = (NamedItems.Count > 0);
-            Boolean ListContextName = forceListContextName | HasItemsToShow;
+            Boolean HasItemsToShow = listNamedItems && (NamedItems.Count > 0);
+            Boolean ListContextName = forceListContextName | HasItemsToShow | listSettings;
             String ListStr;
             if (OuterContext != null)
             {
-                ListStr = OuterContext.ListIdentifiers(ListContextName);
+                ListStr = OuterContext.ListIdentifiers(ListContextName, listNamedItems, listSettings);
                 ListStringBuilder.Append(ListStr);
-                // ?? 2012-01-15
                 ListStringBuilder.AppendLine();
             }
             if (ListContextName)
@@ -570,9 +569,58 @@ namespace PhysicalCalculator.Identifiers
                     ListStringBuilder.AppendLine();
                 }
                 ListStringBuilder.AppendFormat("{0}:", Name);
+                if (listSettings)
+                {
+                    ListStringBuilder.AppendLine();
+                    ListStringBuilder.AppendLine("Settings");
+                    
+                    switch (OutputTracelevel)
+                    {
+                        case TraceLevels.Debug:
+                            ListStr = "Debug";
+                            break;
+                        case TraceLevels.Low:
+                            ListStr = "Low";
+                            break;
+                        case TraceLevels.Normal:
+                            ListStr = "Normal";
+                            break;
+                        case TraceLevels.High:
+                            ListStr = "High";
+                            break;
+                        default:
+                            ListStr = OutputTracelevel.ToString();
+                            break;
+                    }
+
+                    ListStringBuilder.AppendFormat("Tracelevel = {0}", ListStr);
+                    ListStringBuilder.AppendLine();
+
+                    switch (FormatProviderSource)
+                    {
+                        case FormatProviderKind.InvariantFormatProvider:
+                            ListStr = "Invariant";
+                            break;
+                        case FormatProviderKind.DefaultFormatProvider:
+                            ListStr = "Default";
+                            break;
+                        case FormatProviderKind.InheritedFormatProvider:
+                            ListStr = "Inherited";
+                            break;
+                        default:
+                            ListStr = FormatProviderSource.ToString(); 
+                            break;
+                    }
+                    ListStringBuilder.AppendFormat("FormatProvider = {0}", ListStr);
+                }
                 if (HasItemsToShow)
                 {
                     ListStringBuilder.AppendLine();
+
+                    if (listSettings)
+                    {
+                        ListStringBuilder.AppendLine("Items");
+                    }
 
                     ListStr = NamedItems.ListItems();
                     ListStringBuilder.Append(ListStr);
@@ -714,7 +762,7 @@ namespace PhysicalCalculator.Identifiers
             Boolean Found = FindLocalIdentifier(variableName, out Item);
             if (Found && Item.identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in local context; set it to specified value
-                SetLocalIdentifier(variableName, new NamedVariable(variableValue));
+                SetLocalIdentifier(variableName, new NamedVariable(variableValue, this));
             }
             else
             {
@@ -724,7 +772,7 @@ namespace PhysicalCalculator.Identifiers
                 }
                 else
                 {   // Variable not found; No local identifier with that name, Declare local variable
-                    this.NamedItems.Add(variableName, new NamedVariable(variableValue));
+                    this.NamedItems.Add(variableName, new NamedVariable(variableValue, this));
                 }
             }
 
@@ -739,7 +787,7 @@ namespace PhysicalCalculator.Identifiers
             Boolean Found = FindIdentifier(variableName, out context, out Item);
             if (Found && Item.identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in some context; set it to specified value
-                context.SetLocalIdentifier(variableName, new NamedVariable(variableValue));
+                context.SetLocalIdentifier(variableName, new NamedVariable(variableValue, context as CalculatorEnviroment));
             }
             else
             {
@@ -749,7 +797,7 @@ namespace PhysicalCalculator.Identifiers
                 }
                 else
                 {   // Variable not found; No local function with that name, Declare local variable
-                    this.NamedItems.Add(variableName, new NamedVariable(variableValue));
+                    this.NamedItems.Add(variableName, new NamedVariable(variableValue, this));
                 }
             }
 
