@@ -78,8 +78,9 @@ namespace PhysicalCalculator
         {
             CalculatorEnviroment PredefinedSystem = new CalculatorEnviroment("Predefined Identifiers", EnviromentKind.NamespaceEnv);
             PredefinedSystem.OutputTracelevel = TraceLevels.None;
-            //PredefinedSystem.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
-            PredefinedSystem.FormatProviderSource = FormatProviderKind.InvariantFormatProvider;
+            //
+            PredefinedSystem.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+            //PredefinedSystem.FormatProviderSource = FormatProviderKind.InvariantFormatProvider;
 
             FillPredefinedSystemContext(PredefinedSystem);
 
@@ -89,8 +90,9 @@ namespace PhysicalCalculator
         private void InitGlobalContext()
         {
             GlobalContext = new CalculatorEnviroment(InitPredefinedSystemContext(), "Global", EnviromentKind.NamespaceEnv);
-            //GlobalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
-            GlobalContext.FormatProviderSource = FormatProviderKind.InvariantFormatProvider;
+            //
+            GlobalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+            //GlobalContext.FormatProviderSource = FormatProviderKind.InvariantFormatProvider;
 
             CurrentContext = GlobalContext;
         }
@@ -1188,7 +1190,7 @@ namespace PhysicalCalculator
             {
                 SettingFound = true;
                 String formatProviderValuestr;
-                FormatProviderKind fp; // = FormatProviderKind.InvariantFormatProvider;
+                FormatProviderKind fp; 
                 commandLine = commandLine.ReadToken(out formatProviderValuestr);
                 if (formatProviderValuestr.IsKeyword("Inherited"))
                 {

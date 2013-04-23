@@ -304,6 +304,12 @@ namespace PhysicalCalculator.Expression
                     }
                     ***/
 
+                    pu = ParsePhysicalUnit(ref UnitString, ref resultLine);
+
+                    /*****
+                    * Handling of mixedUnits moved to PhysicalMeasure.PhysicalUnit.ParseUnit()
+                     
+                      
                     Char timeSeparator = ':';
                     Char[] separators = { timeSeparator };
 
@@ -388,59 +394,7 @@ namespace PhysicalCalculator.Expression
                             }
                         }
                     }
-
-
-                    //if (pu == PhysicalMeasure.Physics.MGD_Units.BaseUnits[3] /* day */ )
-                    //{
-                    //    if (tempPU == PhysicalMeasure.SI.h /* hour */ )
-                    //    { // Result to be shown as h:min
-                    //        pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
-                    //    }
-                    //    else
-                    //    {
-                    //        // pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
-                    //        ValidFractionalUnit = false;
-                    //        resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
-                    //    }
-                    //}
-                    //else if (pu == PhysicalMeasure.SI.h /* hour */ )
-                    //{
-                    //    if (tempPU == PhysicalMeasure.Physics.MGD_Units.ConvertibleUnits[1] /* MGD.min */ )
-                    //    { // Result to be shown as h:min
-                    //        pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
-                    //    }
-                    //    else
-                    //    {
-                    //        // pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
-                    //        ValidFractionalUnit = false;
-                    //        resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
-                    //    }
-                    //}
-                    //else if (pu == PhysicalMeasure.Physics.MGD_Units.ConvertibleUnits[1] /* MGD.min */ )
-                    //{
-                    //    if (tempPU == PhysicalMeasure.SI.s /* SI.s */)
-                    //    { // Result to be shown as min:s
-                    //        pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
-                    //    }
-                    //    else
-                    //    {
-                    //        // pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
-                    //        //resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
-                    //        ValidFractionalUnit = false;
-                    //        resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    // pu = new PhysicalMeasure.MixedUnit(pu, tempPU);
-                    //    resultLine = pu.ToPrintString() + " has no valid fractional units.";
-                    //}
-                    /*
-                    if (pu == null)
-                    {
-                        resultLine = "'" + UnitString + "' is not a valid unit.";
-                    }
-                    */
+                    *****/
                 }
 
                 commandLine = commandLine.Substring(UnitStringLen);
@@ -460,98 +414,6 @@ namespace PhysicalCalculator.Expression
             Operator = 2 /*,
             UnaryOperator = 3 */
         }
-
-        /*****
-        // Operator kinds
-        // Precedence for a group of operators is same as first (lowest) enum in the group
-        public enum OperatorKind
-        {
-            // Precediens == 0
-            None = 0,
-
-            // Precediens == 1
-            parenbegin = 1,
-            parenend = 2,
-
-            // Precediens == 3
-            add = 3,
-            sub = 4,
-
-            // Precediens == 5
-            Mult = 5,
-            Div = 6,
-
-            // Precediens == 7
-            Pow = 7,
-            Root = 8,
-
-            // Precediens == 9
-            unaryplus = 9,
-            unaryminus = 10
-        }
-
-        public static OperatorKind OperatorPrecedence(OperatorKind operatoren)
-        {
-            switch (operatoren)
-            {
-                case OperatorKind.parenbegin: // "("
-                case OperatorKind.parenend: // ")":
-                    return OperatorKind.parenbegin; // 1;
-                case OperatorKind.add: // "+"
-                case OperatorKind.sub: // "-":
-                     return OperatorKind.add; // 3;
-                case OperatorKind.Mult: // "*":
-                case OperatorKind.Div: // "/":
-                     return OperatorKind.Mult; // 5;
-                case OperatorKind.Pow: // "^":
-                case OperatorKind.Root: // "!":
-                     return OperatorKind.Pow; // 7;
-                case OperatorKind.unaryplus: // unaryplus:
-                case OperatorKind.unaryminus: // UnaryMinus:
-                     return OperatorKind.unaryplus; // 9;
-            }
-
-            return OperatorKind.None;
-        }
-
-        public static OperatorKind OperatorKindFromChar(Char c)
-        {
-            switch (c)
-            {
-                case '(': 
-                    return OperatorKind.parenbegin; // 1;
-                case ')': 
-                    return OperatorKind.parenend; // 2;
-                case '+':
-                     return OperatorKind.add; // 3;
-                case '-': 
-                     return OperatorKind.sub; // 4;
-                case '*': 
-                case '·':  // centre dot  '\0x0B7' (char)183 U+00B7
-                     return OperatorKind.Mult; // 5;
-                case '/':
-                     return OperatorKind.Div; // 6;
-                case '^': 
-                     return OperatorKind.Pow; // 7;
-                // case '!':
-                //      return OperatorKind.Root; // 8;
-                / *
-                case '+': // unaryplus:
-                     return OperatorKind.unaryplus; // 9;
-                case '-': // UnaryMinus:
-                     return OperatorKind.unaryminus; // 10;
-                 * /
-            }
-
-            return OperatorKind.None;
-        }
-        
-        public static OperatorKind Precedence(this OperatorKind operatoren)
-        {
-            return OperatorPrecedence(operatoren);
-        }
- 
-        *****/
 
         class token
         {
@@ -1313,10 +1175,10 @@ namespace PhysicalCalculator.Expression
                         if (numberBase == 10)
                         {
                             System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
-                            OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out D);
+                            OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberstyle, null, out D);
                             if (!OK)
                             {
-                                OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberstyle, null, out D);
+                                OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out D);
                             }
                         }
                         else
@@ -1351,10 +1213,10 @@ namespace PhysicalCalculator.Expression
                             if (numberBase == 10)
                             {
                                 System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
-                                OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumberD);
+                                OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, null, out exponentNumberD);
                                 if (!OK)
                                 {
-                                    OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, null, out exponentNumberD);
+                                    OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumberD);
                                 }
                             }
                             else
@@ -1389,10 +1251,10 @@ namespace PhysicalCalculator.Expression
                     else
                     {
                         System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
-                        OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); // styles, provider
+                        OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, null, out D); // styles, provider
                         if (!OK)
                         {
-                            OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, null, out D); // styles, provider
+                            OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); // styles, provider
                         }
 
                     }
@@ -1450,16 +1312,17 @@ namespace PhysicalCalculator.Expression
                         UnitStringLen = commandLine.Length;
                     }
                     String UnitStr = commandLine.Substring(0, UnitStringLen);
+                    String tempResultLine = null;
+                    pu = PhysicalUnit.ParseUnit(ref UnitStr, ref tempResultLine, false);
+                    if (pu != null || String.IsNullOrEmpty(resultLine))
+                    {
+                        resultLine = tempResultLine;
+                    }
 
-                    pu = PhysicalUnit.ParseUnit(ref UnitStr);
                     int Pos = UnitStringLen - UnitStr.Length;
                     commandLine = commandLine.Substring(Pos);
                 }
 
-                if (pu != null && UnitIdentifierFound)
-                {   
-                    resultLine = "";
-                }
             }
             return pu;
         }

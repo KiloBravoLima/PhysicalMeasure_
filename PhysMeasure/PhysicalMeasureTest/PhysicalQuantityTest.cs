@@ -288,8 +288,8 @@ namespace PhysicalMeasureTest
             PhysicalQuantity Speed2 = new PhysicalQuantity(123, KmPrHour_example2);
 
             string KmPrHour_Str = "Km/h";
-            string Tempstr = KmPrHour_Str;
-            IPhysicalUnit KmPrHour_example3 = PhysicalMeasure.PhysicalUnit.ParseUnit(ref Tempstr);
+
+            IPhysicalUnit KmPrHour_example3 = PhysicalMeasure.PhysicalUnit.Parse(KmPrHour_Str);
             PhysicalQuantity Speed3 = new PhysicalQuantity(123, KmPrHour_example3);
 
             PhysicalQuantity expected = new PhysicalQuantity(123 * 1000.0/(60 * 60) , SI.m / SI.s);
