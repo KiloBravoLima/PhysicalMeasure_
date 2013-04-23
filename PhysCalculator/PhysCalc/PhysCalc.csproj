@@ -55,6 +55,9 @@
   <PropertyGroup>
     <StartupObject>PhysicalCalculator.Program</StartupObject>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>PhysicalMeasure.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -116,6 +119,9 @@
       <Project>{4a1384ac-58aa-4758-822f-25ccc6123f51}</Project>
       <Name>PhysicalMeasure</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="PhysicalMeasure.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

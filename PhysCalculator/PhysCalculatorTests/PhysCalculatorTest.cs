@@ -314,9 +314,9 @@ namespace PhysCalculatorTests
             bool expected = true; 
             bool actual;
             actual = target.CommandPrint(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
-            Assert.AreEqual(ResultLineExpected, ResultLine);
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(CommandLineExpected, CommandLine, "for CommandLine" );
+            Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
+            Assert.AreEqual(expected, actual, "for result");
         }
 
         /// <summary>
@@ -400,25 +400,53 @@ namespace PhysCalculatorTests
             Assert.AreEqual(expected, actual);
         }
 
+        /// <summary>
+        ///A test for CommandReadFromFile
+        ///</summary>
+        [TestMethod()]
+        public void CommandReadFromFileNameTest()
+        {
+            PhysCalculator target = new PhysCalculator();
+            //string CommandLine = string.Empty; 
+            string CommandLine = "epotfunc.cal";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = "";
+            string ResultLineExpected = "Reading from 'epotfunc.cal' ";
+            bool expected = true;
+            bool actual;
+            actual = target.CommandReadFromFile(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine, "for CommandLine");
+            Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
+            Assert.AreEqual(expected, actual, "for actual");
+        }
+
 
         /// <summary>
         ///A test for CommandReadFromFile
         ///</summary>
         [TestMethod()]
-        public void CommandReadFromFileTest()
+        public void CommandReadFromFileCommandTest()
         {
             PhysCalculator target = new PhysCalculator(); 
-            string CommandLine = string.Empty; 
+            //string CommandLine = string.Empty; 
+            string CommandLine = "epotfunc.cal";
+            //string CommandLine = "testfunc.cal"; 
             string CommandLineExpected = string.Empty; 
-            string ResultLine = string.Empty; 
-            string ResultLineExpected = ""; 
+            string ResultLine = "";
+            string ResultLineExpected = "Reading from 'epotfunc.cal' ";
+            // string ResultLineExpected = "Reading from 'testfunc.cal' "; 
             bool expected = true; 
             bool actual;
             actual = target.CommandReadFromFile(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
-            Assert.AreEqual(ResultLineExpected, ResultLine);
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(CommandLineExpected, CommandLine, "for CommandLine");
+            Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
+            Assert.AreEqual(expected, actual, "for actual");
+
+            target.Run();
+
+            //Assert.AreEqual(expectedResultLines, target.resultLines , "for resultLines");
         }
+
 
         /// <summary>
         ///A test for CommandRemove

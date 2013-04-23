@@ -492,6 +492,28 @@ namespace PhysicalMeasureTest
 
         #endregion Convertible unit test
 
+        #region Mixed unit  test
+
+        /// <summary>
+        ///A test for Mixed unit 
+        ///</summary>
+        [TestMethod()]
+        public void MixedUnitTestParseString_DHMinS()
+        {
+            String MixedUnitStr = "d:h:min:s";
+
+            IPhysicalUnit expected = new MixedUnit(Physics.MGD_Units.UnitFromSymbol("d"), ":" , new MixedUnit(Physics.SI_Units.UnitFromSymbol("h"), ":" , new MixedUnit(Physics.MGD_Units.UnitFromSymbol("min"), ":" , SI.s)));
+
+            IPhysicalUnit actual = PhysicalUnit.Parse(MixedUnitStr);
+
+            Assert.IsNotNull( actual);
+            Assert.IsInstanceOfType(actual, typeof(MixedUnit) );
+            Assert.AreEqual(expected, actual);
+        }
+
+        #endregion Mixed unit test
+
+
         #region SI unit symbol test
 
         /// <summary>

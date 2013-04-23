@@ -790,14 +790,114 @@ namespace PhysicalMeasure
         public static IPhysicalUnit Parse(String unitString)
         {
             IPhysicalUnit pu = null;
-            pu = ParseUnit(ref unitString);
+            String resultLine = null;
+            pu = ParseUnit(ref unitString, ref resultLine, ThrowExceptionOnInvalidInput: true);
             return pu;
         }
 
-        public static IPhysicalUnit ParseUnit(ref String unitString)
+        public static IPhysicalUnit ParseUnit(ref String unitString, ref String resultLine, Boolean ThrowExceptionOnInvalidInput = true)
         {
             IPhysicalUnit pu = null;
-            return ParseUnitLALR(pu, ref unitString);
+            //return ParseUnitLALR(pu, ref unitString);
+
+
+            Char timeSeparator = ':';
+            Char[] separators = { timeSeparator };
+
+            Char FractionUnitSeparator = '\0';
+            String FractionUnitSeparatorStr = null;
+
+            int UnitStrCount = 0;
+            int UnitStrStartCharIndex = 0;
+            int NextUnitStrStartCharIndex = 0;
+            Boolean ValidFractionalUnit = true;
+
+            Stack<Tuple<string, IPhysicalUnit>> FractionalUnits = new Stack<Tuple<string, IPhysicalUnit>>();
+
+            while (ValidFractionalUnit && (UnitStrStartCharIndex >= 0) && (UnitStrStartCharIndex < unitString.Length))
+            {
+                int UnitStrLen;
+
+                int UnitStrSeparatorCharIndex = unitString.IndexOfAny(separators, UnitStrStartCharIndex);
+                if (UnitStrSeparatorCharIndex == -1)
+                {
+                    UnitStrLen = unitString.Length - UnitStrStartCharIndex;
+                    //FractionUnitSeparator = '\0';
+
+                    NextUnitStrStartCharIndex = unitString.Length;
+                }
+                else
+                {
+                    UnitStrLen = UnitStrSeparatorCharIndex - UnitStrStartCharIndex;
+                    //FractionUnitSeparator = UnitString[UnitStrSeparatorCharIndex];
+
+                    NextUnitStrStartCharIndex = UnitStrSeparatorCharIndex + 1;
+                }
+
+                if (UnitStrLen > 0)
+                {
+                    UnitStrCount++;
+                    string UnitFieldString = unitString.Substring(UnitStrStartCharIndex, UnitStrLen).Trim();
+
+                    IPhysicalUnit tempPU = ParseUnitLALR(pu, ref UnitFieldString);
+
+                    if (tempPU == null)
+                    {
+                        ValidFractionalUnit = false;
+                        resultLine = "'" + UnitFieldString + "' is not a valid unit.";
+                        if (ThrowExceptionOnInvalidInput)
+                        {
+                            throw new PhysicalUnitFormatException("The string argument unitString is not in a valid physical unit format. " + resultLine);
+                        }
+                    }
+                    else
+                    {
+                        FractionUnitSeparatorStr = FractionUnitSeparator.ToString();
+                        FractionalUnits.Push(new Tuple<string, IPhysicalUnit>(FractionUnitSeparatorStr, tempPU));
+                    }
+                }
+
+                // Shift to next field
+                if (UnitStrSeparatorCharIndex >= 0)
+                {
+                    FractionUnitSeparator = unitString[UnitStrSeparatorCharIndex];
+                }
+                UnitStrStartCharIndex = NextUnitStrStartCharIndex;
+            }
+
+            unitString = unitString.Substring(NextUnitStrStartCharIndex);
+
+            foreach (Tuple<string, IPhysicalUnit> tempFU in FractionalUnits)
+            {
+                IPhysicalUnit tempPU = tempFU.Item2;
+                String tempFractionUnitSeparator = tempFU.Item1;
+                if (pu == null)
+                {
+                    pu = tempPU;
+                    FractionUnitSeparatorStr = tempFractionUnitSeparator;
+                }
+                else
+                {
+                    if (new PhysicalQuantity(tempPU).ConvertTo(pu) != null)
+                    {
+                        Debug.Assert(FractionUnitSeparatorStr != null);
+                        pu = new PhysicalMeasure.MixedUnit(tempPU, FractionUnitSeparatorStr, pu);
+
+                        FractionUnitSeparatorStr = tempFractionUnitSeparator;
+                    }
+                    else
+                    {
+                        Debug.Assert(resultLine == null);
+                        resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
+
+                        if (ThrowExceptionOnInvalidInput)
+                        {
+                            throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. " + resultLine);
+                        }
+                    }
+                }
+            }
+            return pu;
         }
 
         // Token kind enums
@@ -1555,7 +1655,9 @@ namespace PhysicalMeasure
                 return new PhysicalQuantity(1, this) == other.ConvertTo(this.System);
             } 
             if (   (this.Kind != UnitKind.ConvertibleUnit)
-                && (other.Kind != UnitKind.ConvertibleUnit))
+                && (other.Kind != UnitKind.ConvertibleUnit)
+                && (this.Kind != UnitKind.MixedUnit)
+                && (other.Kind != UnitKind.MixedUnit))
             {
                 //return (this.Exponents == other.Exponents));
                 return DimensionExponents.Equals(this.Exponents, other.Exponents);
@@ -1564,7 +1666,7 @@ namespace PhysicalMeasure
             IPhysicalQuantity pq1 = this.ConvertToSystemUnit();
             IPhysicalQuantity pq2 = other.ConvertToSystemUnit();
 
-            return pq1 == pq2;
+            return pq1.Equals(pq2);
         }
 
         public override bool Equals(Object obj)
@@ -4229,7 +4331,10 @@ namespace PhysicalMeasure
                 //if (!Double.TryParse(NumValueStr, styles, provider, out NumValue) && provider != null)
                 if (!Double.TryParse(NumValueStr, styles, provider, out NumValue))
                 {
-                    NumValue = Double.Parse(NumValueStr, styles, null);
+                    if (!Double.TryParse(NumValueStr, styles, null, out NumValue)) // Try  to use Default Format Provider
+                    {
+                        NumValue = Double.Parse(NumValueStr, styles, NumberFormatInfo.InvariantInfo);     // Try  to use invariant Format Provider
+                    }
                 }
 
                 IPhysicalUnit unit = null;
@@ -4238,7 +4343,7 @@ namespace PhysicalMeasure
                 {
                     // Parse unit
                     String UnitStr = Strings[1];
-                    unit = PhysicalUnit.ParseUnit(ref UnitStr);
+                    unit = PhysicalUnit.Parse(UnitStr);
                 }
                 else
                 {
@@ -4259,7 +4364,8 @@ namespace PhysicalMeasure
         /// </summary>
         public static IPhysicalQuantity Parse(String physicalQuantityStr)
         {
-            return Parse(physicalQuantityStr, System.Globalization.NumberStyles.Float, NumberFormatInfo.InvariantInfo);
+            //return Parse(physicalQuantityStr, System.Globalization.NumberStyles.Float, NumberFormatInfo.InvariantInfo);
+            return Parse(physicalQuantityStr, System.Globalization.NumberStyles.Float, null);
         }
 
         public IPhysicalQuantity Zero { get { return new PhysicalQuantity(0, this.Unit.Dimensionless); } }
