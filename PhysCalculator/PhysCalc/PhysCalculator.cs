@@ -24,8 +24,8 @@ namespace PhysicalCalculator
 
         const string AccumulatorName = "Accumulator";
         IPhysicalQuantity Accumulator = null;
-        CalculatorEnviroment GlobalContext;
-        public CalculatorEnviroment CurrentContext;
+        CalculatorEnvironment GlobalContext;
+        public CalculatorEnvironment CurrentContext;
 
         public PhysCalculator()
         {
@@ -67,16 +67,16 @@ namespace PhysicalCalculator
             this.CommandLineReader = someCommandLineReader;
         }
 
-        private void FillPredefinedSystemContext(CalculatorEnviroment somePredefinedSystem)
+        private void FillPredefinedSystemContext(CalculatorEnvironment somePredefinedSystem)
         {
             // Physical quantity functions
             somePredefinedSystem.NamedItems.AddItem("Pow", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Pow(exp)));
             somePredefinedSystem.NamedItems.AddItem("Rot", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Rot(exp)));
         }
 
-        private CalculatorEnviroment InitPredefinedSystemContext()
+        private CalculatorEnvironment InitPredefinedSystemContext()
         {
-            CalculatorEnviroment PredefinedSystem = new CalculatorEnviroment("Predefined Identifiers", EnviromentKind.NamespaceEnv);
+            CalculatorEnvironment PredefinedSystem = new CalculatorEnvironment("Predefined Identifiers", EnvironmentKind.NamespaceEnv);
             PredefinedSystem.OutputTracelevel = TraceLevels.None;
             //
             PredefinedSystem.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
@@ -89,7 +89,7 @@ namespace PhysicalCalculator
 
         private void InitGlobalContext()
         {
-            GlobalContext = new CalculatorEnviroment(InitPredefinedSystemContext(), "Global", EnviromentKind.NamespaceEnv);
+            GlobalContext = new CalculatorEnvironment(InitPredefinedSystemContext(), "Global", EnvironmentKind.NamespaceEnv);
             //
             GlobalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
             //GlobalContext.FormatProviderSource = FormatProviderKind.InvariantFormatProvider;
@@ -97,9 +97,9 @@ namespace PhysicalCalculator
             CurrentContext = GlobalContext;
         }
 
-        public IEnviroment GetDeclarationEnviroment()
+        public IEnvironment GetDeclarationEnviroment()
         {
-            IEnviroment NewItemDeclarationNamespace;
+            IEnvironment NewItemDeclarationNamespace;
 
             if (CurrentContext.DefaultDeclarationEnviroment == VariableDeclarationEnviroment.Global)
             {
@@ -129,12 +129,12 @@ namespace PhysicalCalculator
 
             PhysicalFunction.ExecuteCommandsCallback = ExecuteCommandsCallback;
 
-            CurrentContext.ParseState = CommandPaserState.ExecuteCommandLine;
+            CurrentContext.ParseState = CommandParserState.ExecuteCommandLine;
 
             ExecuteCommands(CurrentContext, CommandLineReader, ResultLineWriter);
         }
 
-        public void ExecuteCommands(CalculatorEnviroment localContext, Commandreader commandLineReader, ResultWriter resultLineWriter)
+        public void ExecuteCommands(CalculatorEnvironment localContext, Commandreader commandLineReader, ResultWriter resultLineWriter)
         {
             Boolean CommandLineFromAccessor = false;
 
@@ -238,7 +238,7 @@ namespace PhysicalCalculator
             } while ((CommandLineFromAccessor || !CommandLineEmpty || !ResultLineEmpty) && !LoopExit);
         }
 
-        public Boolean ExecuteCommandsCallback(CalculatorEnviroment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out IPhysicalQuantity functionResult)
+        public Boolean ExecuteCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out IPhysicalQuantity functionResult)
         {
             // Dummy: Never used    funcBodyResult
             Commandreader functionCommandLineReader = new Commandreader(localContext.Name, funcBodyCommands.ToArray(), CommandLineReader.ResultLineWriter);
@@ -471,7 +471,7 @@ namespace PhysicalCalculator
             return true;
         }
 
-        public void SaveContextToFile(CalculatorEnviroment context, System.IO.StreamWriter file)
+        public void SaveContextToFile(CalculatorEnvironment context, System.IO.StreamWriter file)
         {
             if (context.OuterContext != null)
             {
@@ -597,15 +597,15 @@ namespace PhysicalCalculator
                 {
                     Debug.Assert(VariableName != null);
 
-                    IEnviroment VariableContext;
+                    IEnvironment VariableContext;
                     INametableItem Item;
 
                     Boolean IdentifierFound = CurrentContext.FindIdentifier(VariableName, out VariableContext, out Item);
 
-                    IEnviroment NewVariableDeclarationNamespace = GetDeclarationEnviroment();
+                    IEnvironment NewVariableDeclarationNamespace = GetDeclarationEnviroment();
 
                     Boolean ALocalIdentifier = IdentifierFound && VariableContext == NewVariableDeclarationNamespace;
-                    OK = !ALocalIdentifier || Item.identifierkind == IdentifierKind.Variable;
+                    OK = !ALocalIdentifier || Item.Identifierkind == IdentifierKind.Variable;
 
                     if (OK)
                     {
@@ -633,8 +633,8 @@ namespace PhysicalCalculator
                     }
                     else 
                     {
-                        Debug.Assert(ALocalIdentifier && Item.identifierkind != IdentifierKind.Variable);
-                        resultLine = "Local identifier '" + VariableName + "' is already declared as a " + Item.identifierkind.ToString();
+                        Debug.Assert(ALocalIdentifier && Item.Identifierkind != IdentifierKind.Variable);
+                        resultLine = "Local identifier '" + VariableName + "' is already declared as a " + Item.Identifierkind.ToString();
                     }
                 }
             } while (OK && TryParseToken(",", ref commandLine));
@@ -643,7 +643,7 @@ namespace PhysicalCalculator
 
         public Boolean CommandSet(ref String commandLine, ref String resultLine)
         {
-            IEnviroment IdentifierContext;
+            IEnvironment IdentifierContext;
             String QualifiedIdentifierName;
             String VariableName;
             INametableItem Item;
@@ -661,10 +661,10 @@ namespace PhysicalCalculator
                 }
                 else
                 {
-                    IEnviroment NewVariableDeclarationNamespace = GetDeclarationEnviroment();
+                    IEnvironment NewVariableDeclarationNamespace = GetDeclarationEnviroment();
 
                     Boolean ALocalIdentifier = IdentifierFound && IdentifierContext == NewVariableDeclarationNamespace;
-                    OK = !ALocalIdentifier || Item.identifierkind == IdentifierKind.Variable;
+                    OK = !ALocalIdentifier || Item.Identifierkind == IdentifierKind.Variable;
 
                     if (OK)
                     {
@@ -686,8 +686,8 @@ namespace PhysicalCalculator
                     }
                     else
                     {
-                        Debug.Assert(ALocalIdentifier && Item.identifierkind != IdentifierKind.Variable);
-                        resultLine = "Local identifier '" + VariableName + "' is already declared as a " + Item.identifierkind.ToString();
+                        Debug.Assert(ALocalIdentifier && Item.Identifierkind != IdentifierKind.Variable);
+                        resultLine = "Local identifier '" + VariableName + "' is already declared as a " + Item.Identifierkind.ToString();
                     }
                 }
             } while (OK && TryParseToken(",", ref commandLine));
@@ -713,15 +713,15 @@ namespace PhysicalCalculator
                 {
                     Debug.Assert(SystemName != null);
 
-                    IEnviroment SystemContext;
+                    IEnvironment SystemContext;
                     INametableItem Item;
 
                     Boolean IdentifierFound = CurrentContext.FindIdentifier(SystemName, out SystemContext, out Item);
 
-                    IEnviroment NewSystemDeclarationNamespace = GetDeclarationEnviroment();
+                    IEnvironment NewSystemDeclarationNamespace = GetDeclarationEnviroment();
 
                     Boolean LocalIdentifier = IdentifierFound && SystemContext == NewSystemDeclarationNamespace;
-                    OK = !LocalIdentifier || Item.identifierkind == IdentifierKind.Unit;
+                    OK = !LocalIdentifier || Item.Identifierkind == IdentifierKind.Unit;
 
                     if (OK)
                     {
@@ -738,7 +738,7 @@ namespace PhysicalCalculator
                     }
                     else
                     {
-                        resultLine = "Identifier '" + SystemName + "' is already declared as a " + Item.identifierkind.ToString();
+                        resultLine = "Identifier '" + SystemName + "' is already declared as a " + Item.Identifierkind.ToString();
                     }
                 }
             } while (OK && TryParseToken(",", ref commandLine));
@@ -747,7 +747,7 @@ namespace PhysicalCalculator
 
         public Boolean CommandUnit(ref String commandLine, ref String resultLine)
         {
-            IEnviroment IdentifierContext;
+            IEnvironment IdentifierContext;
             String QualifiedIdentifierName;
             String UnitName;
             INametableItem Item;
@@ -768,10 +768,10 @@ namespace PhysicalCalculator
                 {
                     Debug.Assert(UnitName != null);
 
-                    IEnviroment NewUnitDeclarationNamespace = GetDeclarationEnviroment();
+                    IEnvironment NewUnitDeclarationNamespace = GetDeclarationEnviroment();
 
                     Boolean LocalIdentifier = IdentifierFound && IdentifierContext == NewUnitDeclarationNamespace;
-                    OK = !LocalIdentifier || Item.identifierkind == IdentifierKind.Unit;
+                    OK = !LocalIdentifier || Item.Identifierkind == IdentifierKind.Unit;
 
                     if (OK)
                     {
@@ -789,9 +789,9 @@ namespace PhysicalCalculator
 
                             IUnitSystem UnitSys = null;
                             INametableItem SystemItem = null;
-                            IEnviroment SystemContext;
+                            IEnvironment SystemContext;
                             Boolean SystemIdentifierFound = CurrentContext.FindIdentifier(QualifiedIdentifierName, out SystemContext, out SystemItem);
-                            if (SystemItem != null && SystemItem.identifierkind == IdentifierKind.UnisSystem)
+                            if (SystemItem != null && SystemItem.Identifierkind == IdentifierKind.UnisSystem)
                             {
                                 UnitSys = ((NamedSystem)SystemItem).UnitSystem;
                             }
@@ -817,7 +817,7 @@ namespace PhysicalCalculator
                     }
                     else
                     {
-                        resultLine = "Identifier '" + UnitName + "' is already declared as a " + Item.identifierkind.ToString();
+                        resultLine = "Identifier '" + UnitName + "' is already declared as a " + Item.Identifierkind.ToString();
                     }
                 }
             } while (OK && TryParseToken(",", ref commandLine));
@@ -864,7 +864,7 @@ namespace PhysicalCalculator
                 }
                 else
                 {
-                    IEnviroment IdentifierContext;
+                    IEnvironment IdentifierContext;
                     INametableItem Item;
 
                     Boolean IdentifierFound = CurrentContext.FindIdentifier(ItemName, out IdentifierContext, out Item);
@@ -971,15 +971,15 @@ namespace PhysicalCalculator
             }
             else
             {
-                IEnviroment IdentifierContext;
+                IEnvironment IdentifierContext;
                 INametableItem Item;
 
                 Boolean IdentifierFound = CurrentContext.FindIdentifier(FunctionName, out IdentifierContext, out Item);
 
-                IEnviroment NewFunctionDeclarationNamespace = GetDeclarationEnviroment();
+                IEnvironment NewFunctionDeclarationNamespace = GetDeclarationEnviroment();
 
                 Boolean ALocalIdentifier = IdentifierFound && IdentifierContext == NewFunctionDeclarationNamespace;
-                Boolean OK = !ALocalIdentifier || Item.identifierkind == IdentifierKind.Function;
+                Boolean OK = !ALocalIdentifier || Item.Identifierkind == IdentifierKind.Function;
                 if (OK)
                 {
                     CurrentContext.BeginParsingFunction(FunctionName);
@@ -994,7 +994,7 @@ namespace PhysicalCalculator
                 }
                 else
                 {
-                    resultLine = "'" + FunctionName + "' is already definded as a " + Item.identifierkind.ToString();
+                    resultLine = "'" + FunctionName + "' is already definded as a " + Item.Identifierkind.ToString();
                 }
             }
             return true;
@@ -1022,9 +1022,9 @@ namespace PhysicalCalculator
         }
 
         public Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, 
-                        out IEnviroment qualifiedIdentifierContext, out String qualifiedIdentifierName, out String identifierName, out INametableItem item)
+                        out IEnvironment qualifiedIdentifierContext, out String qualifiedIdentifierName, out String identifierName, out INametableItem item)
         {
-            IEnviroment PrimaryContext;
+            IEnvironment PrimaryContext;
             IdentifierKind identifierkind;
 
             commandLine = commandLine.ReadIdentifier(out identifierName);
@@ -1034,7 +1034,7 @@ namespace PhysicalCalculator
 
             if (IdentifierFound)
             {
-                identifierkind = item.identifierkind;
+                identifierkind = item.Identifierkind;
             }
             else
             {   // Look for Global system settings and predefined symbols
@@ -1087,7 +1087,7 @@ namespace PhysicalCalculator
 
                 if (identifierkind == IdentifierKind.Enviroment)
                 {
-                    IEnviroment FoundInContext;
+                    IEnvironment FoundInContext;
 
                     IdentifierFound = qualifiedIdentifierContext.FindIdentifier(identifierName, out FoundInContext, out item);
                     if (IdentifierFound)
@@ -1108,7 +1108,7 @@ namespace PhysicalCalculator
                 }
                 if (IdentifierFound)
                 {
-                    identifierkind = item.identifierkind;
+                    identifierkind = item.Identifierkind;
 
                     qualifiedIdentifierName += "." + identifierName;
                 }
@@ -1140,13 +1140,13 @@ namespace PhysicalCalculator
                 */
                 CurrentContext.FunctionToParseInfo = null;
 
-                CurrentContext.ParseState = CommandPaserState.ExecuteCommandLine;
+                CurrentContext.ParseState = CommandParserState.ExecuteCommandLine;
             }
 
             return FuncEval != null;
         }
 
-        public Boolean CheckForCalculatorSetting(IEnviroment identifierContext, String variableName, ref String commandLine, ref String resultLine)
+        public Boolean CheckForCalculatorSetting(IEnvironment identifierContext, String variableName, ref String commandLine, ref String resultLine)
         {
             Boolean SettingFound = false;
             if (variableName.IsKeyword("Tracelevel"))
@@ -1226,7 +1226,7 @@ namespace PhysicalCalculator
 
         #region Variables access
 
-        public Boolean VariableSet(IEnviroment context, String variableName, IPhysicalQuantity variableValue)
+        public Boolean VariableSet(IEnvironment context, String variableName, IPhysicalQuantity variableValue)
         {
             if (variableName == AccumulatorName)
             {
@@ -1267,7 +1267,7 @@ namespace PhysicalCalculator
             }
         }
 
-        public Boolean VariableGet(IEnviroment context, String variableName, out IPhysicalQuantity variableValue, ref String resultLine)
+        public Boolean VariableGet(IEnvironment context, String variableName, out IPhysicalQuantity variableValue, ref String resultLine)
         {
             return context.VariableGet(variableName, out variableValue, ref resultLine);
         }
@@ -1276,13 +1276,13 @@ namespace PhysicalCalculator
 
         #region  Costum Unit access
 
-        public Boolean SystemSet(IEnviroment context, String systemName, IPhysicalQuantity unitValue, out INametableItem systemItem)
+        public Boolean SystemSet(IEnvironment context, String systemName, IPhysicalQuantity unitValue, out INametableItem systemItem)
         {
             //return context.SystemSet(systemName, unitValue, out systemItem);
             return context.SystemSet(systemName, out systemItem);
         }
 
-        public Boolean UnitSet(IEnviroment context, IUnitSystem unitSystem, String unitName, IPhysicalQuantity unitValue, out INametableItem unitItem)
+        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, IPhysicalQuantity unitValue, out INametableItem unitItem)
         {
             return context.UnitSet(unitSystem, unitName, unitValue, out unitItem);
         }
@@ -1291,7 +1291,7 @@ namespace PhysicalCalculator
 
         #region  Function access
 
-        public Boolean FunctionLookup(IEnviroment context, String functionName, out IFunctionEvaluator functionevaluator)
+        public Boolean FunctionLookup(IEnvironment context, String functionName, out IFunctionEvaluator functionevaluator)
         {
             return context.FunctionFind(functionName, out functionevaluator);
         }
@@ -1303,7 +1303,7 @@ namespace PhysicalCalculator
 
             if (functionevaluator != null)
             {
-                CalculatorEnviroment LocalContext = new CalculatorEnviroment(CurrentContext, "Function " + FunctionName, EnviromentKind.FunctionEnv);
+                CalculatorEnvironment LocalContext = new CalculatorEnvironment(CurrentContext, "Function " + FunctionName, EnvironmentKind.FunctionEnv);
                 //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
                 LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
 
@@ -1324,7 +1324,7 @@ namespace PhysicalCalculator
 
             if (CommandLineReader != null)
             {
-                CalculatorEnviroment LocalContext = new CalculatorEnviroment(CurrentContext, "File Function " + functionName, EnviromentKind.FunctionEnv);
+                CalculatorEnvironment LocalContext = new CalculatorEnvironment(CurrentContext, "File Function " + functionName, EnvironmentKind.FunctionEnv);
                 //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
                 LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
 
@@ -1357,7 +1357,7 @@ namespace PhysicalCalculator
 
         #region  Identifier access
 
-        public Boolean IdentifierItemLookup(String identifierName, out IEnviroment context, out INametableItem item)
+        public Boolean IdentifierItemLookup(String identifierName, out IEnvironment context, out INametableItem item)
         {
             Boolean IdentifierFound = CurrentContext.FindIdentifier(identifierName, out context, out item);
             if (!IdentifierFound)
@@ -1398,7 +1398,7 @@ namespace PhysicalCalculator
             return IdentifierFound;
         }
 
-        public Boolean PredefinedContextIdentifierLookup(String IdentifierName, out IEnviroment FoundInContext, out IdentifierKind identifierkind)
+        public Boolean PredefinedContextIdentifierLookup(String IdentifierName, out IEnvironment FoundInContext, out IdentifierKind identifierkind)
         {
             // Look for Global system settings and predefined symbols
             Boolean IdentifierFound = IdentifierName.Equals("Global", StringComparison.OrdinalIgnoreCase);
@@ -1434,14 +1434,14 @@ namespace PhysicalCalculator
             return IdentifierFound;
         }
         /**
-        public Boolean PredefinedFunctionIdentifierLookup(String identifierName, out IEnviroment foundInContext, out IdentifierKind identifierkind)
+        public Boolean PredefinedFunctionIdentifierLookup(String identifierName, out IEnvironment foundInContext, out IdentifierKind Identifierkind)
         {
             // Look for Global system settings and predefined symbols
             Boolean IdentifierFound = identifierName.Equals("Global", StringComparison.OrdinalIgnoreCase);
             if (IdentifierFound)
             {
                 foundInContext = GlobalContext.OuterContext;
-                identifierkind = IdentifierKind.Function;
+                Identifierkind = IdentifierKind.Function;
             }
             else
             {
@@ -1449,7 +1449,7 @@ namespace PhysicalCalculator
                 if (IdentifierFound)
                 {
                     foundInContext = CurrentContext.OuterContext;
-                    identifierkind = IdentifierKind.Function;
+                    Identifierkind = IdentifierKind.Function;
                 }
                 else
                 {
@@ -1457,12 +1457,12 @@ namespace PhysicalCalculator
                     if (IdentifierFound)
                     {
                         foundInContext = CurrentContext;
-                        identifierkind = IdentifierKind.Function;
+                        Identifierkind = IdentifierKind.Function;
                     }
                     else
                     {
                         foundInContext = null;
-                        identifierkind = IdentifierKind.Unknown;
+                        Identifierkind = IdentifierKind.Unknown;
                     }
                 }
             }
@@ -1471,14 +1471,14 @@ namespace PhysicalCalculator
         }
         **/
 
-        public Boolean IdentifierContextLookup(String IdentifierName, out IEnviroment FoundInContext, out IdentifierKind identifierkind)
+        public Boolean IdentifierContextLookup(String IdentifierName, out IEnvironment FoundInContext, out IdentifierKind identifierkind)
         {
             INametableItem Item;
 
             Boolean IdentifierFound = CurrentContext.FindIdentifier(IdentifierName, out FoundInContext, out Item);
             if (IdentifierFound)
             {
-                identifierkind = Item.identifierkind;
+                identifierkind = Item.Identifierkind;
             }
             else
             {   // Look for Global system settings and predefined symbols
@@ -1488,7 +1488,7 @@ namespace PhysicalCalculator
             return IdentifierFound;
         }
 
-        public Boolean QualifiedIdentifierCalculatorContextLookup(IEnviroment LookInContext, String IdentifierName, out IEnviroment FoundInContext, out IdentifierKind identifierkind)
+        public Boolean QualifiedIdentifierCalculatorContextLookup(IEnvironment LookInContext, String IdentifierName, out IEnvironment FoundInContext, out IdentifierKind identifierkind)
         {
             INametableItem Item;
 
@@ -1496,7 +1496,7 @@ namespace PhysicalCalculator
 
             if (Found)
             {
-                identifierkind = Item.identifierkind;
+                identifierkind = Item.Identifierkind;
             }
             else
             {
@@ -1533,7 +1533,7 @@ namespace PhysicalCalculator
         {
             System.Reflection.AssemblyName AsmName = Asm.GetName();
 
-            FileInfo AsmFileInfo = new FileInfo(Asm.Location);
+            //FileInfo AsmFileInfo = new FileInfo(Asm.Location);
             Version AsemVersion = AsmName.Version;
             DateTime buildDateTime = new DateTime(2000, 1, 1).Add(new TimeSpan(TimeSpan.TicksPerDay * AsemVersion.Build +             // days since 1 January 2000
                                                                                TimeSpan.TicksPerSecond * 2 * AsemVersion.Revision));  // seconds since midnight, (multiply by 2 to get original              

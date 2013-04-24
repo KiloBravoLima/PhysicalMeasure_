@@ -47,7 +47,7 @@ namespace PhysicalCalculator
                             ResultLineWriter.ResultLines.ForEach(ResultLine =>
                             {
                                 // Console.WriteLine(name);
-                                if (Result != "")
+                                if (!String.IsNullOrEmpty(Result))
                                 {
                                     Result += "\n";
                                 }
