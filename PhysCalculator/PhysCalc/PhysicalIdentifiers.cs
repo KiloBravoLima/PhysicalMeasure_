@@ -99,11 +99,11 @@ namespace PhysicalCalculator.Identifiers
 
         public IPhysicalUnit pu;
 
-        public IEnvironment Enviroment = null;
+        public IEnvironment Environment = null;
 
-        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalUnit physicalUnit, CalculatorEnvironment enviroment = null /* = null */)
+        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalUnit physicalUnit, CalculatorEnvironment environment = null /* = null */)
         {
-            this.Enviroment = enviroment;
+            this.Environment = environment;
             if (physicalUnit != null)
             {
                 this.pu = physicalUnit;
@@ -114,9 +114,9 @@ namespace PhysicalCalculator.Identifiers
             }
         }
 
-        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalQuantity physicalQuantity, CalculatorEnvironment enviroment /* = null */)
+        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalQuantity physicalQuantity, CalculatorEnvironment environment /* = null */)
         {
-            this.Enviroment = enviroment;
+            this.Environment = environment;
             if (physicalQuantity != null)
             {
                 if ((unitSystem == null) && (physicalQuantity.Unit != null))
@@ -219,9 +219,9 @@ namespace PhysicalCalculator.Identifiers
                     if (val != 1.0 && name.Equals(cu.Symbol))
                     {   // User defined scaled unit
                         CultureInfo cultureInfo = null;
-                        if (Enviroment != null)
+                        if (Environment != null)
                         {
-                            cultureInfo = Enviroment.CurrentCultureInfo;
+                            cultureInfo = Environment.CurrentCultureInfo;
                         }
 
                         return String.Format("unit {0} = {1} {2}", Unitname, val.ToString(cultureInfo), cu.PrimaryUnit.ToString());
@@ -237,20 +237,20 @@ namespace PhysicalCalculator.Identifiers
     {
         public virtual IdentifierKind Identifierkind { get { return IdentifierKind.Variable; } }
 
-        public IEnvironment Enviroment = null;
+        public IEnvironment Environment = null;
 
-        public NamedVariable(IPhysicalQuantity somephysicalquantity, IEnvironment enviroment = null)
+        public NamedVariable(IPhysicalQuantity somephysicalquantity, IEnvironment environment = null)
             : base(somephysicalquantity)
         {
-            this.Enviroment = enviroment;
+            this.Environment = environment;
         }
 
         public virtual String ToListString(String name)
         {
             CultureInfo cultureInfo = null;
-            if (Enviroment != null)
+            if (Environment != null)
             {
-                cultureInfo = Enviroment.CurrentCultureInfo;
+                cultureInfo = Environment.CurrentCultureInfo;
             }
             return String.Format("var {0} = {1}", name, this.ToString(null, cultureInfo));
         }
@@ -271,7 +271,7 @@ namespace PhysicalCalculator.Identifiers
     public enum IdentifierKind
     {
         Unknown = 0,
-        Enviroment = 1,
+        Environment = 1,
         Variable = 2,
         Function = 3,
         UnisSystem = 4,
@@ -290,7 +290,7 @@ namespace PhysicalCalculator.Identifiers
         ReadFunctionBody = 7  
     }
     
-    public enum VariableDeclarationEnviroment
+    public enum VariableDeclarationEnvironment
     {
         Unknown = 0,
         Global = 1,
@@ -408,7 +408,7 @@ namespace PhysicalCalculator.Identifiers
         {
             public ICommandsEvaluator Function = null;
             public String FunctionName = null;
-            //public IEnvironment Enviroment = null;
+            //public IEnvironment Environment = null;
             public INametableItem RedefineItem = null; 
 
             public FunctionParseInfo(string NewFunctionName)
@@ -423,26 +423,26 @@ namespace PhysicalCalculator.Identifiers
         }
 
         public String Name = null;
-        public EnvironmentKind enviromentkind = EnvironmentKind.Unknown;
+        public EnvironmentKind environmentkind = EnvironmentKind.Unknown;
         public CalculatorEnvironment OuterContext = null;
 
         public CalculatorEnvironment()
         {
         }
 
-        public CalculatorEnvironment(string name, EnvironmentKind enviromentkind)
-            : this(null, name, enviromentkind)
+        public CalculatorEnvironment(string name, EnvironmentKind environmentkind)
+            : this(null, name, environmentkind)
         {
         }
 
-        public CalculatorEnvironment(CalculatorEnvironment outerContext, string name, EnvironmentKind enviromentkind)
+        public CalculatorEnvironment(CalculatorEnvironment outerContext, string name, EnvironmentKind environmentkind)
         {
             this.OuterContext = outerContext;
             this.Name = name;
-            this.enviromentkind = enviromentkind;
+            this.environmentkind = environmentkind;
         }
 
-        public VariableDeclarationEnviroment DefaultDeclarationEnviroment = VariableDeclarationEnviroment.Local;
+        public VariableDeclarationEnvironment DefaultDeclarationEnvironment = VariableDeclarationEnvironment.Local;
 
         public CultureInfo CurrentCultureInfo
         {
@@ -476,7 +476,7 @@ namespace PhysicalCalculator.Identifiers
 
         #region INameTableItem interface implementation
 
-        public override IdentifierKind Identifierkind { get { return IdentifierKind.Enviroment; } }
+        public override IdentifierKind Identifierkind { get { return IdentifierKind.Environment; } }
 
         public override String ToListString(String name)
         {

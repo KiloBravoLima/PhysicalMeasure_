@@ -97,11 +97,11 @@ namespace PhysicalCalculator
             CurrentContext = GlobalContext;
         }
 
-        public IEnvironment GetDeclarationEnviroment()
+        public IEnvironment GetDeclarationEnvironment()
         {
             IEnvironment NewItemDeclarationNamespace;
 
-            if (CurrentContext.DefaultDeclarationEnviroment == VariableDeclarationEnviroment.Global)
+            if (CurrentContext.DefaultDeclarationEnvironment == VariableDeclarationEnvironment.Global)
             {
                 NewItemDeclarationNamespace = GlobalContext;
             }
@@ -602,7 +602,7 @@ namespace PhysicalCalculator
 
                     Boolean IdentifierFound = CurrentContext.FindIdentifier(VariableName, out VariableContext, out Item);
 
-                    IEnvironment NewVariableDeclarationNamespace = GetDeclarationEnviroment();
+                    IEnvironment NewVariableDeclarationNamespace = GetDeclarationEnvironment();
 
                     Boolean ALocalIdentifier = IdentifierFound && VariableContext == NewVariableDeclarationNamespace;
                     OK = !ALocalIdentifier || Item.Identifierkind == IdentifierKind.Variable;
@@ -661,7 +661,7 @@ namespace PhysicalCalculator
                 }
                 else
                 {
-                    IEnvironment NewVariableDeclarationNamespace = GetDeclarationEnviroment();
+                    IEnvironment NewVariableDeclarationNamespace = GetDeclarationEnvironment();
 
                     Boolean ALocalIdentifier = IdentifierFound && IdentifierContext == NewVariableDeclarationNamespace;
                     OK = !ALocalIdentifier || Item.Identifierkind == IdentifierKind.Variable;
@@ -718,7 +718,7 @@ namespace PhysicalCalculator
 
                     Boolean IdentifierFound = CurrentContext.FindIdentifier(SystemName, out SystemContext, out Item);
 
-                    IEnvironment NewSystemDeclarationNamespace = GetDeclarationEnviroment();
+                    IEnvironment NewSystemDeclarationNamespace = GetDeclarationEnvironment();
 
                     Boolean LocalIdentifier = IdentifierFound && SystemContext == NewSystemDeclarationNamespace;
                     OK = !LocalIdentifier || Item.Identifierkind == IdentifierKind.Unit;
@@ -768,7 +768,7 @@ namespace PhysicalCalculator
                 {
                     Debug.Assert(UnitName != null);
 
-                    IEnvironment NewUnitDeclarationNamespace = GetDeclarationEnviroment();
+                    IEnvironment NewUnitDeclarationNamespace = GetDeclarationEnvironment();
 
                     Boolean LocalIdentifier = IdentifierFound && IdentifierContext == NewUnitDeclarationNamespace;
                     OK = !LocalIdentifier || Item.Identifierkind == IdentifierKind.Unit;
@@ -976,7 +976,7 @@ namespace PhysicalCalculator
 
                 Boolean IdentifierFound = CurrentContext.FindIdentifier(FunctionName, out IdentifierContext, out Item);
 
-                IEnvironment NewFunctionDeclarationNamespace = GetDeclarationEnviroment();
+                IEnvironment NewFunctionDeclarationNamespace = GetDeclarationEnvironment();
 
                 Boolean ALocalIdentifier = IdentifierFound && IdentifierContext == NewFunctionDeclarationNamespace;
                 Boolean OK = !ALocalIdentifier || Item.Identifierkind == IdentifierKind.Function;
@@ -1043,7 +1043,7 @@ namespace PhysicalCalculator
                 {
                     //PrimaryContext = GlobalContext.OuterContext;
                     PrimaryContext = GlobalContext;
-                    identifierkind = IdentifierKind.Enviroment;
+                    identifierkind = IdentifierKind.Environment;
                 }
                 else
                 {
@@ -1051,7 +1051,7 @@ namespace PhysicalCalculator
                     if (IdentifierFound)
                     {
                         PrimaryContext = CurrentContext.OuterContext;
-                        identifierkind = IdentifierKind.Enviroment;
+                        identifierkind = IdentifierKind.Environment;
                     }
                     else
                     {
@@ -1059,7 +1059,7 @@ namespace PhysicalCalculator
                         if (IdentifierFound)
                         {
                             PrimaryContext = CurrentContext;
-                            identifierkind = IdentifierKind.Enviroment;
+                            identifierkind = IdentifierKind.Environment;
                         }
                         else
                         {
@@ -1074,7 +1074,7 @@ namespace PhysicalCalculator
             qualifiedIdentifierName = identifierName;
 
             while (IdentifierFound
-                && (identifierkind == IdentifierKind.Enviroment || identifierkind == IdentifierKind.UnisSystem) 
+                && (identifierkind == IdentifierKind.Environment || identifierkind == IdentifierKind.UnisSystem) 
                 && !String.IsNullOrEmpty(commandLine) 
                 && commandLine[0] == '.')
             {
@@ -1085,7 +1085,7 @@ namespace PhysicalCalculator
                 Debug.Assert(identifierName != null);
                 commandLine = commandLine.TrimStart();
 
-                if (identifierkind == IdentifierKind.Enviroment)
+                if (identifierkind == IdentifierKind.Environment)
                 {
                     IEnvironment FoundInContext;
 
@@ -1405,7 +1405,7 @@ namespace PhysicalCalculator
             if (IdentifierFound)
             {
                 FoundInContext = GlobalContext.OuterContext;
-                identifierkind = IdentifierKind.Enviroment;
+                identifierkind = IdentifierKind.Environment;
             }
             else
             {
@@ -1413,7 +1413,7 @@ namespace PhysicalCalculator
                 if (IdentifierFound)
                 {
                     FoundInContext = CurrentContext.OuterContext;
-                    identifierkind = IdentifierKind.Enviroment;
+                    identifierkind = IdentifierKind.Environment;
                 }
                 else
                 {
@@ -1421,7 +1421,7 @@ namespace PhysicalCalculator
                     if (IdentifierFound)
                     {
                         FoundInContext = CurrentContext;
-                        identifierkind = IdentifierKind.Enviroment;
+                        identifierkind = IdentifierKind.Environment;
                     }
                     else
                     {
