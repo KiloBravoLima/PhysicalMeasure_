@@ -314,7 +314,7 @@ namespace PhysCalculatorTests
             bool expected = true; 
             bool actual;
             actual = target.CommandPrint(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine, "for CommandLine" );
+            Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine" );
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
             Assert.AreEqual(expected, actual, "for result");
         }
@@ -401,13 +401,54 @@ namespace PhysCalculatorTests
         }
 
         /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_Nm_ConvertTo_kWh_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "12 N * 34 m [kWh]";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = (12d*34/(1000*3600)).ToString() +" KW·h";
+
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_m3_ConvertTo_hl_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "1.2 m * 3.4 m * 0.56 m [hl]";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = (1.2 * 3.4 * 0.56 * 1000/100).ToString() + " Hl";
+
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
         ///A test for CommandReadFromFile
         ///</summary>
         [TestMethod()]
         public void CommandReadFromFileNameTest()
         {
             PhysCalculator target = new PhysCalculator();
-            //string CommandLine = string.Empty; 
+            //string commandLine = string.Empty; 
             string CommandLine = "epotfunc.cal";
             string CommandLineExpected = string.Empty;
             string ResultLine = "";
@@ -415,7 +456,7 @@ namespace PhysCalculatorTests
             bool expected = true;
             bool actual;
             actual = target.CommandReadFromFile(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine, "for CommandLine");
+            Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
             Assert.AreEqual(expected, actual, "for actual");
         }
@@ -428,9 +469,9 @@ namespace PhysCalculatorTests
         public void CommandReadFromFileCommandTest()
         {
             PhysCalculator target = new PhysCalculator(); 
-            //string CommandLine = string.Empty; 
+            //string commandLine = string.Empty; 
             string CommandLine = "epotfunc.cal";
-            //string CommandLine = "testfunc.cal"; 
+            //string commandLine = "testfunc.cal"; 
             string CommandLineExpected = string.Empty; 
             string ResultLine = "";
             string ResultLineExpected = "Reading from 'epotfunc.cal' ";
@@ -438,7 +479,7 @@ namespace PhysCalculatorTests
             bool expected = true; 
             bool actual;
             actual = target.CommandReadFromFile(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine, "for CommandLine");
+            Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
             Assert.AreEqual(expected, actual, "for actual");
 
@@ -528,7 +569,7 @@ namespace PhysCalculatorTests
             bool expected = true; 
             bool actual;
             actual = target.CommandSet(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine, "CommandLine not as expected");
+            Assert.AreEqual(CommandLineExpected, CommandLine, "commandLine not as expected");
             Assert.AreEqual(ResultLineExpected, ResultLine, "ResultLine not as expected");
             Assert.AreEqual(expected, actual, "CommandSet() retur value not as expected");
         }
@@ -567,14 +608,14 @@ namespace PhysCalculatorTests
         public void GetPhysicalQuantityTest()
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
-            string CommandLine = string.Empty; // TODO: Initialize to an appropriate value
+            string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
             IPhysicalQuantity actual;
-            actual = target.GetPhysicalQuantity(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
+            actual = target.GetPhysicalQuantity(ref commandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
             Assert.Inconclusive("Verify the correctness of this test method.");
@@ -587,14 +628,14 @@ namespace PhysCalculatorTests
         public void ParseConvertedExpressionTest()
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
-            string CommandLine = string.Empty; // TODO: Initialize to an appropriate value
+            string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
             IPhysicalQuantity actual;
-            actual = target.ParseConvertedExpression(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
+            actual = target.ParseConvertedExpression(ref commandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
             Assert.Inconclusive("Verify the correctness of this test method.");
@@ -607,14 +648,14 @@ namespace PhysCalculatorTests
         public void ParseExpressionTest()
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
-            string CommandLine = string.Empty; // TODO: Initialize to an appropriate value
+            string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
             IPhysicalQuantity actual;
-            actual = target.ParseExpression(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
+            actual = target.ParseExpression(ref commandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
             Assert.Inconclusive("Verify the correctness of this test method.");
@@ -629,7 +670,7 @@ namespace PhysCalculatorTests
         public void ParseExpressionListTest_1()
         {
             PhysCalculator target = new PhysCalculator();
-            string CommandLine = " 1 , 2 m, 3 KgN, 4.5 J/K , 6 h,7 g, 8 Km , 9 mm , 10 mKgs-2 ";
+            string commandLine = " 1 , 2 m, 3 KgN, 4.5 J/K , 6 h,7 g, 8 Km , 9 mm , 10 mKgs-2 ";
             string CommandLineExpected = string.Empty; 
             string ResultLine = string.Empty; 
             string ResultLineExpected = string.Empty; 
@@ -645,8 +686,8 @@ namespace PhysCalculatorTests
             expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("10 mKgs-2"));
 
             List<IPhysicalQuantity> actual;
-            actual = target.ParseExpressionList(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
+            actual = target.ParseExpressionList(ref commandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
 
             for (int i = 0; i < expected.Count; i++ )
@@ -696,14 +737,14 @@ namespace PhysCalculatorTests
         public void ParseFactorTest()
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
-            string CommandLine = string.Empty; // TODO: Initialize to an appropriate value
+            string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
             IPhysicalQuantity actual;
-            actual = target.ParseFactor(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
+            actual = target.ParseFactor(ref commandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
             Assert.Inconclusive("Verify the correctness of this test method.");
@@ -717,14 +758,14 @@ namespace PhysCalculatorTests
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
             IPhysicalQuantity pq = null; // TODO: Initialize to an appropriate value
-            string CommandLine = string.Empty; // TODO: Initialize to an appropriate value
+            string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
             IPhysicalQuantity actual;
-            actual = target.ParseOptionalConvertedExpression(pq, ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
+            actual = target.ParseOptionalConvertedExpression(pq, ref commandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
             Assert.Inconclusive("Verify the correctness of this test method.");
@@ -738,14 +779,14 @@ namespace PhysCalculatorTests
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
             IPhysicalQuantity pq = null; // TODO: Initialize to an appropriate value
-            string CommandLine = string.Empty; // TODO: Initialize to an appropriate value
+            string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
             IPhysicalQuantity actual;
-            actual = target.ParseOptionalExpression(pq, ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
+            actual = target.ParseOptionalExpression(pq, ref commandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
             Assert.Inconclusive("Verify the correctness of this test method.");
@@ -759,14 +800,14 @@ namespace PhysCalculatorTests
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
             IPhysicalQuantity pq = null; // TODO: Initialize to an appropriate value
-            string CommandLine = string.Empty; // TODO: Initialize to an appropriate value
+            string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
             IPhysicalQuantity actual;
-            actual = target.ParseOptionalTerm(pq, ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
+            actual = target.ParseOptionalTerm(pq, ref commandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
             Assert.Inconclusive("Verify the correctness of this test method.");
@@ -780,14 +821,14 @@ namespace PhysCalculatorTests
         public void ParseTermTest()
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
-            string CommandLine = string.Empty; // TODO: Initialize to an appropriate value
+            string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
             IPhysicalQuantity actual;
-            actual = target.ParseTerm(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
+            actual = target.ParseTerm(ref commandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
             Assert.Inconclusive("Verify the correctness of this test method.");

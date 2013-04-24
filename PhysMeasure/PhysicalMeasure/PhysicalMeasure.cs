@@ -559,12 +559,22 @@ namespace PhysicalMeasure
         {
             exponent = 0;
 
-            if (somePrefixChar == '\x03BC')
+            switch (somePrefixChar)
             {
-                // 'μ' // '\0x03BC' (char)956  
-                // 'µ' // '\0x00B5' (char)181
-                somePrefixChar = 'µ'; // 'µ' MICRO SIGN  '\0x00B5' (char)181
+                case '\x03BC':
+                
+                    // 'μ' // '\0x03BC' (char)956  
+                    // 'µ' // '\0x00B5' (char)181
+                    somePrefixChar = 'µ'; // 'µ' MICRO SIGN  '\0x00B5' (char)181
+                    break;
+                case 'k':
+                    somePrefixChar = 'K'; // Kilo
+                    break;
+                case 'h':
+                    somePrefixChar = 'H'; // Hecto
+                    break;
             }
+
             // exponent = (from up in UnitPrefixes where up.PrefixChar == somePrefixChar select up.PrefixExponent).Single();  
             foreach (UnitPrefix up in UnitPrefixes)
             {
@@ -1170,14 +1180,19 @@ namespace PhysicalMeasure
                     }
                     else
                     {
+                        /*
                         if ((LastReadToken == TokenKind.Unit)
                             || (LastReadToken == TokenKind.Exponent)
                             || ((LastReadToken == TokenKind.Operator)    // Unit follow pow operator; 
                                 && (Operators.Peek() == OperatorKind.Pow)))
+                         */
+                        if (   (LastReadToken == TokenKind.Operator)    // Unit follow pow operator; 
+                            && (Operators.Peek() == OperatorKind.Pow))
                         {
                             if (ThrowExceptionOnInvalidInput)
                             {
-                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. An unit must not follow an unit. Missing operator at '" + c + "' at position " + Pos.ToString());
+                                //throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. An unit must not follow an unit. Missing operator at '" + c + "' at position " + Pos.ToString());
+                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. An unit must not follow an pow operator. Missing exponent at '" + c + "' at position " + Pos.ToString());
                             }
                             else
                             {
@@ -1187,7 +1202,6 @@ namespace PhysicalMeasure
                         }
                         else
                         {
-
                             // Try to read a unit from input
                             int maxlen = Math.Min(1 + 3, InputString.Length - Pos); // Max length of scale and symbols to look for
 
@@ -1204,6 +1218,11 @@ namespace PhysicalMeasure
                                 IPhysicalUnit su = Physics.ScaledUnitFromSymbol(UnitStr);
                                 if (su != null)
                                 {
+                                    if (LastReadToken == TokenKind.Unit)
+                                    {   // Assume implicit mult operator
+                                        PushNewOperator(OperatorKind.Mult);
+                                    }
+
                                     Pos += unitlen;
                                     AfterLastOperandPos = Pos;
 
@@ -1723,18 +1742,31 @@ namespace PhysicalMeasure
                 u2_pq = u1_pq.Unit.System.ConvertTo(u2_pq, u1_pq.Unit.System);
                 u2_pq = u2_pq.ConvertToSystemUnit();
             }
-            SByte[] exponents = u1_pq.Unit.Exponents;
-            int NoOfBaseUnits = exponents.Length;
+            SByte[] u1Exponents = u1_pq.Unit.Exponents;
+            SByte[] u2Exponents = u2_pq.Unit.Exponents;
+            SByte u1ExponentsLen = (SByte)u1_pq.Unit.Exponents.Length;
+            SByte u2ExponentsLen = (SByte)u2_pq.Unit.Exponents.Length;
+            int NoOfBaseUnits = Math.Max(u1ExponentsLen, u2ExponentsLen);
             Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures);
 
-            SByte[] someexponents = new SByte[NoOfBaseUnits];
+            SByte[] combinedExponents = new SByte[NoOfBaseUnits];
 
             for (int i = 0; i < NoOfBaseUnits; i++)
             {
-                someexponents[i] = cef(u1_pq.Unit.Exponents[i], u2_pq.Unit.Exponents[i]);
+                SByte u1Exponent = 0;
+                SByte u2Exponent = 0;
+                if (i < u1ExponentsLen)
+                {
+                   u1Exponent = u1Exponents[i];
+                }
+                if (i < u2ExponentsLen)
+                {
+                   u2Exponent = u2Exponents[i];
+                }
+                combinedExponents[i] = cef(u1Exponent, u2Exponent);
             }
             Debug.Assert(u1.System != null);
-            PhysicalUnit pu = new DerivedUnit(u1.System, someexponents);
+            PhysicalUnit pu = new DerivedUnit(u1.System, combinedExponents);
             return new PhysicalQuantity(cqf(u1_pq.Value, u2_pq.Value), pu);
         }
 
@@ -3610,19 +3642,18 @@ namespace PhysicalMeasure
         {
             SByte scaleExponent = 0;
             IPhysicalUnit unit = UnitFromSymbol(scaledUnitSymbol);
-            if (unit == null)
+            if (unit == null && scaledUnitSymbol.Length > 1)
             {   /* Check for prefixed unit */
                 char prefixchar = scaledUnitSymbol[0];
                 if (UnitPrefixes.GetExponentFromPrefixChar(prefixchar, out scaleExponent))
                 {
                     unit = UnitFromSymbol(scaledUnitSymbol.Substring(1));
+                    if (unit != null && scaleExponent != 0)
+                    {
+                        //unit = unit.Dimensionless.CombineMultiply(new PrefixedUnit(scaleExponent, unit));
+                        unit = unit.CombinePrefix(scaleExponent);
+                    }
                 }
-            }
-
-            if (unit != null && scaleExponent != 0)
-            {
-                //unit = unit.Dimensionless.CombineMultiply(new PrefixedUnit(scaleExponent, unit));
-                unit = unit.CombinePrefix(scaleExponent);
             }
 
             return unit;

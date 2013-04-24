@@ -16,7 +16,7 @@ using PhysicalCalculator.Function;
 namespace PhysicalCalculator.Expression
 {
 
-    public interface IEnviroment
+    public interface IEnvironment
     {
         TraceLevels OutputTracelevel { get; set; }
         FormatProviderKind FormatProviderSource { get; set; }
@@ -26,7 +26,7 @@ namespace PhysicalCalculator.Expression
         Boolean SetLocalIdentifier(String identifierName, INametableItem item);
         Boolean RemoveLocalIdentifier(String identifierName);
 
-        Boolean FindIdentifier(String identifierName, out IEnviroment foundInContext, out INametableItem item);
+        Boolean FindIdentifier(String identifierName, out IEnvironment foundInContext, out INametableItem item);
 
         Boolean SystemSet(String systemName, out INametableItem systemItem);
 
@@ -86,12 +86,12 @@ namespace PhysicalCalculator.Expression
 
         // Delegert types
         // VariableLookup callback
-        public delegate Boolean IdentifierItemLookupFunc(String identifierName, out IEnviroment foundInContext, out INametableItem item);
-        public delegate Boolean IdentifierContextLookupFunc(String identifierName, out IEnviroment foundInContext, out IdentifierKind identifierKind);
-        public delegate Boolean QualifiedIdentifierContextLookupFunc(IEnviroment lookInContext, String identifierName, out IEnviroment foundInContext, out IdentifierKind identifierKind);
+        public delegate Boolean IdentifierItemLookupFunc(String identifierName, out IEnvironment foundInContext, out INametableItem item);
+        public delegate Boolean IdentifierContextLookupFunc(String identifierName, out IEnvironment foundInContext, out IdentifierKind identifierKind);
+        public delegate Boolean QualifiedIdentifierContextLookupFunc(IEnvironment lookInContext, String identifierName, out IEnvironment foundInContext, out IdentifierKind identifierKind);
 
-        public delegate Boolean VariableValueLookupFunc(IEnviroment lookInContext, String variableName, out IPhysicalQuantity variableValue, ref String resultLine);
-        public delegate Boolean FunctionLookupFunc(IEnviroment lookInContext, String functionName, out IFunctionEvaluator functionEvaluator);
+        public delegate Boolean VariableValueLookupFunc(IEnvironment lookInContext, String variableName, out IPhysicalQuantity variableValue, ref String resultLine);
+        public delegate Boolean FunctionLookupFunc(IEnvironment lookInContext, String functionName, out IFunctionEvaluator functionEvaluator);
         public delegate Boolean FunctionEvaluateFunc(String functionName, IFunctionEvaluator functionevaluator, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine);
         public delegate Boolean FunctionEvaluateFileReadFunc(String functionName, out IPhysicalQuantity functionResult, ref String resultLine);
         
@@ -107,7 +107,7 @@ namespace PhysicalCalculator.Expression
 
         // static access functions
 
-        public static Boolean IdentifierItemLookup(String identifierName, out IEnviroment foundInContext, out INametableItem item, ref String resultLine)
+        public static Boolean IdentifierItemLookup(String identifierName, out IEnvironment foundInContext, out INametableItem item, ref String resultLine)
         {
             item = null;
             foundInContext = null;
@@ -118,7 +118,7 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static Boolean IdentifierContextLookup(String variableName, out IEnviroment foundInContext, out IdentifierKind identifierKind, ref String resultLine)
+        public static Boolean IdentifierContextLookup(String variableName, out IEnvironment foundInContext, out IdentifierKind identifierKind, ref String resultLine)
         {
             identifierKind = IdentifierKind.Unknown;
             foundInContext = null;
@@ -129,7 +129,7 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static Boolean QualifiedIdentifierContextLookup(IEnviroment lookInContext, String variableName, out IEnviroment foundInContext, out IdentifierKind identifierKind, ref String resultLine)
+        public static Boolean QualifiedIdentifierContextLookup(IEnvironment lookInContext, String variableName, out IEnvironment foundInContext, out IdentifierKind identifierKind, ref String resultLine)
         {
             identifierKind = IdentifierKind.Unknown;
             foundInContext = null;
@@ -140,7 +140,7 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static Boolean VariableGet(IEnviroment lookInContext, String variableName, out IPhysicalQuantity variableValue, ref String resultLine)
+        public static Boolean VariableGet(IEnvironment lookInContext, String variableName, out IPhysicalQuantity variableValue, ref String resultLine)
         {
             variableValue = null;
             if (VariableValueGetCallback != null)
@@ -150,7 +150,7 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static Boolean FunctionGet(IEnviroment lookInContext, String functionName, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
+        public static Boolean FunctionGet(IEnvironment lookInContext, String functionName, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {
             functionResult = null;
             IFunctionEvaluator functionevaluator;
@@ -291,110 +291,7 @@ namespace PhysicalCalculator.Expression
                         UnitString = commandLine.Substring(0, UnitStringLen);
                     }
 
-                    /*** 
-                    int SpacePos = commandLine.IndexOf(' ');
-                    if (SpacePos == 1)
-                    {
-                        Char NumberBaseChar = Char.ToLower(commandLine[0]);
-                        if ((NumberBaseChar == 'h')
-                            || (NumberBaseChar == 'x'))
-                        {
-                            UnitString = UnitString.Substring(2);
-                        }
-                    }
-                    ***/
-
                     pu = ParsePhysicalUnit(ref UnitString, ref resultLine);
-
-                    /*****
-                    * Handling of mixedUnits moved to PhysicalMeasure.PhysicalUnit.ParseUnit()
-                     
-                      
-                    Char timeSeparator = ':';
-                    Char[] separators = { timeSeparator };
-
-                    Char FractionUnitSeparator = '\0';
-                    String FractionUnitSeparatorStr = null;
-
-                    int UnitStrCount = 0;
-                    int UnitStrStartCharIndex = 0;
-                    Boolean ValidFractionalUnit = true;
-
-                    Stack<Tuple<string, IPhysicalUnit>> FractionalUnits = new Stack<Tuple<string, IPhysicalUnit>>();
-
-                    while (ValidFractionalUnit && (UnitStrStartCharIndex >= 0) && (UnitStrStartCharIndex < UnitString.Length))
-                    {
-                        int UnitStrLen;
-                        int NextUnitStrStartCharIndex;
-
-                        int UnitStrSeparatorCharIndex = UnitString.IndexOfAny(separators, UnitStrStartCharIndex);
-                        if (UnitStrSeparatorCharIndex == -1)
-                        {
-                            UnitStrLen = UnitString.Length - UnitStrStartCharIndex;
-                            //FractionUnitSeparator = '\0';
-
-                            NextUnitStrStartCharIndex = UnitString.Length;
-                        }
-                        else
-                        {
-                            UnitStrLen = UnitStrSeparatorCharIndex - UnitStrStartCharIndex;
-                            //FractionUnitSeparator = UnitString[UnitStrSeparatorCharIndex];
-
-                            NextUnitStrStartCharIndex = UnitStrSeparatorCharIndex + 1;
-                        }
-
-                        if (UnitStrLen > 0)
-                        {
-                            UnitStrCount++;
-                            string UnitFieldString = UnitString.Substring(UnitStrStartCharIndex, UnitStrLen).Trim();
-
-                            IPhysicalUnit tempPU = ParsePhysicalUnit(ref UnitFieldString, ref resultLine);
-                            if (tempPU == null)
-                            {
-                                ValidFractionalUnit = false;
-                                resultLine = "'" + UnitFieldString + "' is not a valid unit.";
-                            }
-                            else
-                            {
-                                FractionUnitSeparatorStr = FractionUnitSeparator.ToString();
-                                FractionalUnits.Push(new Tuple<string, IPhysicalUnit>(FractionUnitSeparatorStr, tempPU));
-                            }
-                        }
-
-                        // Shift to next field
-                        if (UnitStrSeparatorCharIndex >= 0)
-                        {
-                            FractionUnitSeparator = UnitString[UnitStrSeparatorCharIndex];
-                        }
-                        UnitStrStartCharIndex = NextUnitStrStartCharIndex;
-                    }
-
-                    foreach (Tuple<string, IPhysicalUnit> tempFU in FractionalUnits)
-                    {
-                        IPhysicalUnit tempPU = tempFU.Item2;
-                        String tempFractionUnitSeparator = tempFU.Item1;
-                        if (pu == null)
-                        {
-                            pu = tempPU;
-                            FractionUnitSeparatorStr = tempFractionUnitSeparator;
-                        }
-                        else
-                        {
-                            if (new PhysicalQuantity(tempPU).ConvertTo(pu) != null)
-                            {
-                                Debug.Assert(FractionUnitSeparatorStr != null);
-                                pu = new PhysicalMeasure.MixedUnit(tempPU, FractionUnitSeparatorStr, pu);
-
-                                FractionUnitSeparatorStr = tempFractionUnitSeparator;
-                            }
-                            else
-                            {
-                                Debug.Assert(resultLine == null);
-                                resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
-                            }
-                        }
-                    }
-                    *****/
                 }
 
                 commandLine = commandLine.Substring(UnitStringLen);
@@ -710,7 +607,7 @@ namespace PhysicalCalculator.Expression
 
                                 if (ThrowExceptionOnInvalidInput)
                                 {
-                                    throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid or missing operand after '" + c + "' at pos " + Pos.ToString());
+                                    throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid or missing operand after '" + c + "' at position " + Pos.ToString());
                                 }
                                 else
                                 {
@@ -770,7 +667,7 @@ namespace PhysicalCalculator.Expression
 
                             if (ThrowExceptionOnInvalidInput)
                             {
-                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid or missing operand at '" + c + "' at pos " + Pos.ToString());
+                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid or missing operand at '" + c + "' at position " + Pos.ToString());
                             }
                             else
                             {
@@ -784,7 +681,7 @@ namespace PhysicalCalculator.Expression
                         {
                             if (ThrowExceptionOnInvalidInput)
                             {
-                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid input '" + InputString.Substring(Pos) + "' at pos " + Pos.ToString());
+                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid input '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
                             }
                             else
                             {
@@ -807,7 +704,7 @@ namespace PhysicalCalculator.Expression
                 {
                     if (ThrowExceptionOnInvalidInput)
                     {
-                        throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Operand expected '" + InputString.Substring(Pos) + "' at pos " + Pos.ToString());
+                        throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Operand expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
                     }
                     else
                     {
@@ -821,7 +718,7 @@ namespace PhysicalCalculator.Expression
                 {
                     if (ThrowExceptionOnInvalidInput)
                     {
-                        throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Closing parenthesis expected '" + InputString.Substring(Pos) + "' at pos " + Pos.ToString());
+                        throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Closing parenthesis expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
                     } 
                     else
                     {
@@ -962,8 +859,8 @@ namespace PhysicalCalculator.Expression
             identifierValue = null;
 
             String QualifiedIdentifierName;
-            IEnviroment PrimaryContext;
-            IEnviroment QualifiedIdentifierContext;
+            IEnvironment PrimaryContext;
+            IEnvironment QualifiedIdentifierContext;
             IdentifierKind identifierkind;
 
             commandLine = commandLine.ReadIdentifier(out identifierName);
@@ -985,7 +882,7 @@ namespace PhysicalCalculator.Expression
                 Debug.Assert(identifierName != null);
                 commandLine = commandLine.TrimStart();
 
-                IEnviroment FoundInContext;
+                IEnvironment FoundInContext;
                 IdentifierKind FoundIdentifierkind;
 
                 IdentifierFound = QualifiedIdentifierContextLookup(QualifiedIdentifierContext, identifierName, out FoundInContext, out FoundIdentifierkind, ref resultLine);
@@ -1276,7 +1173,7 @@ namespace PhysicalCalculator.Expression
             IPhysicalUnit pu = null;
             Boolean UnitIdentifierFound = false;
             String IdentifierName;
-            IEnviroment Context;
+            IEnvironment Context;
 
             String CommandLineRest = commandLine.ReadIdentifier(out IdentifierName);
 
@@ -1287,14 +1184,14 @@ namespace PhysicalCalculator.Expression
                 UnitIdentifierFound = IdentifierItemLookup(IdentifierName, out Context, out Item, ref resultLine);
                 if (UnitIdentifierFound)
                 {
-                    if (Item.identifierkind == IdentifierKind.Unit)
+                    if (Item.Identifierkind == IdentifierKind.Unit)
                     {
                         commandLine = CommandLineRest;
                         pu = ((NamedUnit)Item).pu;
                     }
                     else
                     {
-                        resultLine = IdentifierName + " is a " + Item.identifierkind.ToString() + ". Expected an unit";
+                        resultLine = IdentifierName + " is a " + Item.Identifierkind.ToString() + ". Expected an unit";
                     }
                 }
             }
