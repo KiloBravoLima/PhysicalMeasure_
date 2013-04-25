@@ -821,6 +821,7 @@ namespace PhysicalMeasure
             int UnitStrStartCharIndex = 0;
             int NextUnitStrStartCharIndex = 0;
             Boolean ValidFractionalUnit = true;
+            int LastUnitFieldRemainingLen = 0;
 
             Stack<Tuple<string, IPhysicalUnit>> FractionalUnits = new Stack<Tuple<string, IPhysicalUnit>>();
 
@@ -864,6 +865,13 @@ namespace PhysicalMeasure
                     {
                         FractionUnitSeparatorStr = FractionUnitSeparator.ToString();
                         FractionalUnits.Push(new Tuple<string, IPhysicalUnit>(FractionUnitSeparatorStr, tempPU));
+
+                        LastUnitFieldRemainingLen = UnitFieldString.Length;
+                        if (LastUnitFieldRemainingLen != 0)
+                        {   // Unparsed chars in (last?) field
+                            UnitStrLen -= LastUnitFieldRemainingLen;
+
+                        }
                     }
                 }
 
@@ -875,7 +883,7 @@ namespace PhysicalMeasure
                 UnitStrStartCharIndex = NextUnitStrStartCharIndex;
             }
 
-            unitString = unitString.Substring(NextUnitStrStartCharIndex);
+            unitString = unitString.Substring(NextUnitStrStartCharIndex - LastUnitFieldRemainingLen);
 
             foreach (Tuple<string, IPhysicalUnit> tempFU in FractionalUnits)
             {
@@ -4432,7 +4440,7 @@ namespace PhysicalMeasure
 
             if (this.Unit == null)
             {
-                if (convertToUnit.IsDimensionless)
+                if (convertToUnit == null || convertToUnit.IsDimensionless)
                 {   // Any dimensionless can be converted to any systems dimensionless
                     // this.Unit = convertToUnit;
                     IPhysicalQuantity quantity = new PhysicalQuantity(this.Value, convertToUnit);
@@ -4447,6 +4455,14 @@ namespace PhysicalMeasure
             if (convertToUnit == null)
             {
                 throw new ArgumentNullException("convertToUnit");
+            }
+
+            if (this.Unit.IsDimensionless && convertToUnit.IsDimensionless)
+            {
+                // Any dimensionless can be converted to any systems dimensionless
+                // this.Unit = convertToUnit;
+                IPhysicalQuantity quantity = new PhysicalQuantity(this.Value, convertToUnit);
+                return quantity;
             }
 
             IUnitSystem converttounitsystem = convertToUnit.System; 

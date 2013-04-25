@@ -72,6 +72,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Commandreader.cs" />
+    <Compile Include="PhysicalCommandBlock.cs" />
     <Compile Include="PhysicalIdentifiers.cs" />
     <Compile Include="PhysicalExpression.cs" />
     <Compile Include="PhysicalFunction.cs" />

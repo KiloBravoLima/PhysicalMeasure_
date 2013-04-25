@@ -600,6 +600,36 @@ namespace PhysCalculatorTests
             Assert.AreEqual(expected, actual);
         }
 
+
+        /// <summary>
+        ///A test for CommandIf
+        ///</summary>
+        [TestMethod()]
+        public void CommandIfTest()
+        {
+            PhysCalculator target = new PhysCalculator();
+            target.Setup();
+            string CommandLine = "if (123 J·S·Ω/m + 0.456 m·Kg·s-2 == 123.456 N) { Print 111 } else { if (1 == 2-1 ) { print 222/0 } else { print 333/0} }";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = null;
+            IPhysicalQuantity AccumulatorExpected = new PhysicalQuantity(111);
+            bool expected = true;
+            bool actual;
+            IPhysicalQuantity AccumulatorActual;
+            actual = target.Command(ref CommandLine, out ResultLine);
+            string AccumulatorAccessResultLineExpected = "";
+
+            Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
+            Assert.AreEqual(AccumulatorExpected, AccumulatorActual, "for accumulator");
+
+            Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
+            Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
+            Assert.AreEqual(expected, actual, "for result");
+        }
+
+
+
         /*****************
         /// <summary>
         ///A test for GetPhysicalQuantity

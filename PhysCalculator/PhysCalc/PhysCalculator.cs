@@ -12,6 +12,7 @@ using TokenParser;
 using CommandParser;
 
 using PhysicalCalculator.Identifiers;
+using PhysicalCalculator.CommandBlock;
 using PhysicalCalculator.Function;
 using PhysicalCalculator.Expression;
 
@@ -69,6 +70,10 @@ namespace PhysicalCalculator
 
         private void FillPredefinedSystemContext(CalculatorEnvironment somePredefinedSystem)
         {
+            // (Physical quantity) constants
+            somePredefinedSystem.NamedItems.AddItem("False", new NamedConstant(PhysicalCalculator.Expression.PhysicalExpression.PQ_False));
+            somePredefinedSystem.NamedItems.AddItem("True", new NamedConstant(PhysicalCalculator.Expression.PhysicalExpression.PQ_True));
+
             // Physical quantity functions
             somePredefinedSystem.NamedItems.AddItem("Pow", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Pow(exp)));
             somePredefinedSystem.NamedItems.AddItem("Rot", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Rot(exp)));
@@ -113,7 +118,7 @@ namespace PhysicalCalculator
             return NewItemDeclarationNamespace;
         }
 
-        public void Run()
+        public void Setup()
         {
             // Setup Lookup callback delegert static globals
 
@@ -127,10 +132,16 @@ namespace PhysicalCalculator
             PhysicalExpression.FunctionEvaluateCallback = FunctionEvaluate;
             PhysicalExpression.FunctionEvaluateFileReadCallback = FunctionEvaluateFileRead;
 
-            PhysicalFunction.ExecuteCommandsCallback = ExecuteCommandsCallback;
+            PhysicalCommandBlock.ExecuteCommandsCallback = ExecuteCommandsCallback;
+
+            PhysicalFunction.ExecuteCommandsCallback = ExecuteFunctionCommandsCallback; // ExecuteCommandsCallback;
 
             CurrentContext.ParseState = CommandParserState.ExecuteCommandLine;
+        }
 
+        public void Run()
+        {
+            Setup();
             ExecuteCommands(CurrentContext, CommandLineReader, ResultLineWriter);
         }
 
@@ -238,7 +249,7 @@ namespace PhysicalCalculator
             } while ((CommandLineFromAccessor || !CommandLineEmpty || !ResultLineEmpty) && !LoopExit);
         }
 
-        public Boolean ExecuteCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out IPhysicalQuantity functionResult)
+        public Boolean ExecuteFunctionCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out IPhysicalQuantity functionResult)
         {
             // Dummy: Never used    funcBodyResult
             Commandreader functionCommandLineReader = new Commandreader(localContext.Name, funcBodyCommands.ToArray(), CommandLineReader.ResultLineWriter);
@@ -256,6 +267,26 @@ namespace PhysicalCalculator
             }
             return true;
         }
+
+        public Boolean ExecuteCommandsCallback(CalculatorEnvironment localContext, List<String> commands, ref String resultLine, out IPhysicalQuantity commandBlockResult)
+        {
+            // Dummy: Never used    resultLine
+            Commandreader CommandBlockLineReader = new Commandreader(localContext.Name, commands.ToArray(), CommandLineReader.ResultLineWriter);
+            CommandBlockLineReader.ReadFromConsoleWhenEmpty = false; // Return from ExecuteCommands() function when funcBodyCommands are done
+
+            if (localContext.OutputTracelevel.HasFlag(TraceLevels.BlockEnterLeave))
+            {
+                ResultLineWriter.WriteLine("Enter " + localContext.Name);
+            }
+            ExecuteCommands(localContext, CommandBlockLineReader, ResultLineWriter);
+            commandBlockResult = Accumulator;
+            if (localContext.OutputTracelevel.HasFlag(TraceLevels.BlockEnterLeave))
+            {
+                ResultLineWriter.WriteLine("Leave " + localContext.Name);
+            }
+            return true;
+        }
+
 
         public override Boolean Command(ref String commandLine, out String resultLine)
         {
@@ -276,6 +307,7 @@ namespace PhysicalCalculator
                                     || CheckForCommand("Remove", CommandRemove, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Clear", CommandClear, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Func", CommandFunc, ref commandLine, ref resultLine, ref CommandHandled)
+                                    || CheckForCommand("If", CommandIf, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Help", CommandHelp, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Version", CommandVersion, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("About", CommandAbout, ref commandLine, ref resultLine, ref CommandHandled)
@@ -1000,6 +1032,31 @@ namespace PhysicalCalculator
             return true;
         }
 
+        public Boolean CommandIf(ref String commandLine, ref String resultLine)
+        {
+            resultLine = "";
+            Boolean testResult = GetBoolean(ref commandLine, ref resultLine);
+            CurrentContext.BeginParsingCommandBlock();
+            ICommandsEvaluator thenBlock = ParseCommandBlockDeclaration(ref commandLine, ref resultLine);
+            if (thenBlock != null && testResult)
+            {
+                //thenBlock.Evaluate(CurrentContext, out Accumulator, ref resultLine);
+                CommandsBlockEvaluate("", thenBlock, out Accumulator, ref resultLine);
+            }
+            if (TryParseToken("else", ref commandLine))
+            {
+                CurrentContext.BeginParsingCommandBlock();
+                ICommandsEvaluator elseBlock = ParseCommandBlockDeclaration(ref commandLine, ref resultLine);
+                if (elseBlock != null && !testResult)
+                {
+                    //elseBlock.Evaluate(CurrentContext, out Accumulator, ref resultLine);
+                    CommandsBlockEvaluate("", elseBlock, out Accumulator, ref resultLine);
+                }
+            }
+
+            return true;
+        }
+
 
         #endregion Command methods
 
@@ -1020,6 +1077,24 @@ namespace PhysicalCalculator
 
             return pq;
         }
+
+        public Boolean GetBoolean(ref String commandLine, ref String resultLine)
+        {
+            Nullable<Boolean> boolRes = PhysicalCalculator.Expression.PhysicalExpression.ParseBooleanExpression(ref commandLine, ref resultLine);
+
+            if (boolRes == null)
+            {
+                if (!String.IsNullOrEmpty(resultLine)) 
+                {
+                    resultLine += ". ";
+                }
+                resultLine += "Boolean expression expected";
+                boolRes = false;
+            }
+
+            return boolRes.Value;
+        }
+
 
         public Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, 
                         out IEnvironment qualifiedIdentifierContext, out String qualifiedIdentifierName, out String identifierName, out INametableItem item)
@@ -1146,6 +1221,20 @@ namespace PhysicalCalculator
             return FuncEval != null;
         }
 
+        public ICommandsEvaluator ParseCommandBlockDeclaration(ref String commandLine, ref String resultLine)
+        {
+            ICommandsEvaluator CommandsEval = null;
+            CommandsEval = PhysicalCalculator.CommandBlock.PhysicalCommandBlock.ParseCommandBlockDeclaration(CurrentContext, ref commandLine, ref resultLine);
+            if (CommandsEval != null)
+            {
+                CurrentContext.CommandBlockToParseInfo = null;
+                CurrentContext.ParseState = CommandParserState.ExecuteCommandLine;
+            }
+
+            return CommandsEval;
+        }
+
+
         public Boolean CheckForCalculatorSetting(IEnvironment identifierContext, String variableName, ref String commandLine, ref String resultLine)
         {
             Boolean SettingFound = false;
@@ -1269,7 +1358,20 @@ namespace PhysicalCalculator
 
         public Boolean VariableGet(IEnvironment context, String variableName, out IPhysicalQuantity variableValue, ref String resultLine)
         {
-            return context.VariableGet(variableName, out variableValue, ref resultLine);
+            if (variableName == AccumulatorName)
+            {
+                variableValue = Accumulator;
+                return true;
+            }
+            else
+            {
+                if (context == null)
+                {
+                    context = CurrentContext;
+                }
+                Debug.Assert(context != null);
+                return context.VariableGet(variableName, out variableValue, ref resultLine);
+            }
         }
 
         #endregion  Variables access
@@ -1295,6 +1397,28 @@ namespace PhysicalCalculator
         {
             return context.FunctionFind(functionName, out functionevaluator);
         }
+
+        public Boolean CommandsBlockEvaluate(String CommandBlockName, ICommandsEvaluator commandsEvaluator, out IPhysicalQuantity commandsResult, ref String resultLine)
+        {
+            Boolean OK = false;
+            commandsResult = null;
+
+            if (commandsEvaluator != null)
+            {
+                CalculatorEnvironment LocalContext = new CalculatorEnvironment(CurrentContext, "Commands " + CommandBlockName, EnvironmentKind.FunctionEnv);
+                //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+                LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
+
+                CurrentContext = LocalContext;
+
+                OK = commandsEvaluator.Evaluate(LocalContext, out commandsResult, ref resultLine);
+                CurrentContext = LocalContext.OuterContext;
+                LocalContext.OuterContext = null;
+            }
+
+            return OK;
+        }
+
 
         public Boolean FunctionEvaluate(String FunctionName, IFunctionEvaluator functionevaluator, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {

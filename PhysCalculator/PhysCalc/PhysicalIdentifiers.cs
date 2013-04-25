@@ -11,6 +11,7 @@ using CommandParser;
 
 using PhysicalMeasure;
 using PhysicalCalculator.Expression;
+using PhysicalCalculator.CommandBlock;
 using PhysicalCalculator.Function;
 using System.Runtime.Serialization;
 
@@ -36,6 +37,30 @@ namespace PhysicalCalculator.Identifiers
         void WriteToTextFile(String name, System.IO.StreamWriter file);
     }
 
+
+    public interface IEvaluator
+    {
+        //String ToListString(String name);
+        //void WriteToTextFile(String name, System.IO.StreamWriter file);
+
+        Boolean Evaluate(CalculatorEnvironment localContext, out IPhysicalQuantity result, ref String resultLine);
+    }
+
+    public interface ICommands
+    {
+        List<String> Commands { get; set; }
+    }
+
+    public interface ICommandsEvaluator : ICommands, IEvaluator
+    {
+    }
+
+    /*
+    public interface ICommandBlockEvaluator :  ICommandsEvaluator
+    {
+        
+    }
+    */
     public interface IFunctionEvaluator : INametableItem
     {
         List<PhysicalQuantityFunctionParam> Parameterlist { get; }
@@ -47,9 +72,14 @@ namespace PhysicalCalculator.Identifiers
         Boolean Evaluate(CalculatorEnvironment localContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine);
     }
 
+    /*
     public interface ICommandsEvaluator : IFunctionEvaluator
     {
         List<String> Commands { get; set; }
+    }
+    */
+    public interface IFunctionCommandsEvaluator : IFunctionEvaluator, ICommands
+    {
     }
 
     public abstract class NametableItem : INametableItem
@@ -238,6 +268,18 @@ namespace PhysicalCalculator.Identifiers
         public virtual IdentifierKind Identifierkind { get { return IdentifierKind.Variable; } }
 
         public IEnvironment Environment = null;
+        public CultureInfo CultureInfo 
+        {
+            get
+            {
+                CultureInfo cultureInfo = null;
+                if (Environment != null)
+                {
+                    cultureInfo = Environment.CurrentCultureInfo;
+                }
+                return cultureInfo;           
+            }
+        }
 
         public NamedVariable(IPhysicalQuantity somephysicalquantity, IEnvironment environment = null)
             : base(somephysicalquantity)
@@ -247,12 +289,7 @@ namespace PhysicalCalculator.Identifiers
 
         public virtual String ToListString(String name)
         {
-            CultureInfo cultureInfo = null;
-            if (Environment != null)
-            {
-                cultureInfo = Environment.CurrentCultureInfo;
-            }
-            return String.Format("var {0} = {1}", name, this.ToString(null, cultureInfo));
+            return String.Format("var {0} = {1}", name, this.ToString(null, CultureInfo));
         }
 
         public void WriteToTextFile(String name, System.IO.StreamWriter file)
@@ -260,6 +297,22 @@ namespace PhysicalCalculator.Identifiers
             file.WriteLine(ToListString(name));
         }
     }
+
+    class NamedConstant : NamedVariable
+    {
+        public override IdentifierKind Identifierkind { get { return IdentifierKind.Constant; } }
+
+        public NamedConstant(IPhysicalQuantity somephysicalquantity, IEnvironment environment = null)
+            : base(somephysicalquantity, environment)
+        {
+        }
+
+        public override String ToListString(String name)
+        {
+            return String.Format("constant {0} = {1}", name, this.ToString(null, CultureInfo));
+        }
+    }
+
 
     public enum EnvironmentKind
     {
@@ -272,22 +325,27 @@ namespace PhysicalCalculator.Identifiers
     {
         Unknown = 0,
         Environment = 1,
-        Variable = 2,
-        Function = 3,
-        UnisSystem = 4,
-        Unit = 5
+        Constant = 2,
+        Variable = 3,
+        Function = 4,
+        UnisSystem = 5,
+        Unit = 6
     }
 
     public enum CommandParserState
     {
         Unknown = 0,
         ExecuteCommandLine = 1,
+
         ReadFunctionParameterList = 2,
         ReadFunctionParameters = 3,
         ReadFunctionParameter = 4,
         ReadFunctionParametersOptional = 5,
         ReadFunctionBlock = 6,
-        ReadFunctionBody = 7  
+        ReadFunctionBody = 7,
+
+        ReadCommandBlock = 8,  
+        ReadCommands = 9  
     }
     
     public enum VariableDeclarationEnvironment
@@ -404,9 +462,22 @@ namespace PhysicalCalculator.Identifiers
 
     public class CalculatorEnvironment : NametableItem, IEnvironment
     {
+        public class CommandBlockParseInfo
+        {
+            public ICommandsEvaluator CommandBlock = null;
+            public int InnerBlockCount = 0;
+
+            public CommandBlockParseInfo()
+            {
+                this.CommandBlock = new PhysicalQuantityCommandsBlock();
+            }
+
+            //CurrentContext.ParseState = CommandParserState.ReadFunctionParameterList;
+        }
+
         public class FunctionParseInfo
         {
-            public ICommandsEvaluator Function = null;
+            public IFunctionCommandsEvaluator Function = null;
             public String FunctionName = null;
             //public IEnvironment Environment = null;
             public INametableItem RedefineItem = null; 
@@ -467,6 +538,7 @@ namespace PhysicalCalculator.Identifiers
 
         public CommandParserState ParseState = CommandParserState.ExecuteCommandLine;
         public FunctionParseInfo FunctionToParseInfo = null;
+        public CommandBlockParseInfo CommandBlockToParseInfo = null;
 
         private TraceLevels _OutputTracelevel = TraceLevels.Normal;
         public TraceLevels OutputTracelevel { get { return _OutputTracelevel; } set { _OutputTracelevel = value; } }
@@ -511,6 +583,18 @@ namespace PhysicalCalculator.Identifiers
         }
 
         public void EndParsingFunction()
+        {
+            FunctionToParseInfo = null;
+            ParseState = CommandParserState.ExecuteCommandLine;
+        }
+
+        public void BeginParsingCommandBlock()
+        {
+            CommandBlockToParseInfo = new CommandBlockParseInfo();
+            ParseState = CommandParserState.ReadCommandBlock;
+        }
+
+        public void EndParsingCommandBlock()
         {
             FunctionToParseInfo = null;
             ParseState = CommandParserState.ExecuteCommandLine;
@@ -811,8 +895,8 @@ namespace PhysicalCalculator.Identifiers
             IEnvironment context;
             INametableItem Item;
             Boolean Found = FindIdentifier(variableName, out context, out Item);
-            if (Found && Item.Identifierkind == IdentifierKind.Variable)
-            {   // Identifier is a variable in some context; Get it
+            if (Found && ((Item.Identifierkind == IdentifierKind.Variable) || (Item.Identifierkind == IdentifierKind.Constant)))
+            {   // Identifier is a variable or constant in some context; Get it
                 variableValue = Item as IPhysicalQuantity;
                 return true;
             }
