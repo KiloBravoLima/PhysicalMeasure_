@@ -212,7 +212,7 @@ namespace PhysicalCalculator.Function
     }
     */
 
-    class PhysicalQuantityCommandsFunction : PhysicalQuantityFunction, ICommandsEvaluator 
+    class PhysicalQuantityCommandsFunction : PhysicalQuantityFunction, IFunctionCommandsEvaluator 
     {
         //override public IdentifierKind Identifierkind { get { return IdentifierKind.Function; } }
 
@@ -247,6 +247,11 @@ namespace PhysicalCalculator.Function
         private List<String> _commands;
 
         public List<String> Commands { get { return _commands; } set { _commands = value; } }
+
+        public Boolean Evaluate(CalculatorEnvironment localContext, out IPhysicalQuantity functionResult, ref String resultLine)
+        {
+            return Evaluate(localContext, null, out functionResult, ref resultLine);
+        }
 
         override public Boolean Evaluate(CalculatorEnvironment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {

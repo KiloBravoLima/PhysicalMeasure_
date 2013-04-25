@@ -210,6 +210,17 @@ namespace PhysicalCalculator.Expression
             return pqList;
         }
 
+
+        public static Nullable<Boolean> ParseBooleanExpression(ref String commandLine, ref String resultLine)
+        {
+            IPhysicalQuantity pq = ParseExpression(ref commandLine, ref resultLine);
+            if (pq != null)
+            {
+                return !pq.Equals(PQ_False);
+            }
+            return null;
+        }
+
         public static IPhysicalQuantity ParseConvertedExpression(ref String commandLine, ref String resultLine)
         {
             IPhysicalQuantity pq;
@@ -541,7 +552,21 @@ namespace PhysicalCalculator.Expression
                     }
                     else
                     {
-                        OperatorKind NewOperator = OperatorKindExtensions.OperatorKindFromChar(c);
+                        OperatorKind NewOperator = OperatorKind.none;
+
+                        if (Pos + 1 < InputString.Length && InputString[Pos + 1] == '=')
+                        {
+                            NewOperator = OperatorKindExtensions.OperatorKindFromChar1Equal(c);
+                            if (NewOperator != OperatorKind.none)
+                            {
+                                Pos++; // Shift to next char
+                            }
+                        }
+
+                        if (NewOperator == OperatorKind.none)
+                        {
+                            NewOperator = OperatorKindExtensions.OperatorKindFromChar(c);
+                        }
 
                         if (NewOperator != OperatorKind.none)
                         {
@@ -741,6 +766,8 @@ namespace PhysicalCalculator.Expression
                 return null;
             }
         }
+        public static readonly IPhysicalQuantity PQ_False = new PhysicalMeasure.PhysicalQuantity(0);
+        public static readonly IPhysicalQuantity PQ_True = new PhysicalMeasure.PhysicalQuantity(1);
 
         public static IPhysicalQuantity ParseExpression(ref String commandLine, ref String resultLine)
         {
@@ -774,6 +801,22 @@ namespace PhysicalCalculator.Expression
                         IPhysicalQuantity pqTop = Operands.Pop();
                         // Invert sign of pq
                         Operands.Push(pqTop.Multiply(-1));
+                    }
+                    else if (Token.Operator == OperatorKind.not)
+                    {
+                        Debug.Assert(Operands.Count >= 1);
+
+                        IPhysicalQuantity pqTop = Operands.Pop();
+                        // Invert pqTop as boolean
+                        if (!pqTop.Equals(PQ_False))
+                        {
+                            pqTop = PQ_False;
+                        }
+                        else
+                        {
+                            pqTop = PQ_True;
+                        }
+                        Operands.Push(pqTop);
                     }
                     else
                     {
@@ -833,6 +876,55 @@ namespace PhysicalCalculator.Expression
                             {
                                 // Combine pq and exponent to the new PhysicalQuantity pq^(1/expo)
                                 Operands.Push(pqFirst.Rot(Exponent));
+                            }
+                        }
+                        else if (Token.Operator == OperatorKind.equals)
+                        {
+                            // Save pqFirst == pqSecond
+                            //Operands.Push(pqFirst.Equals(pqSecond));
+
+                            if (pqFirst.Equals(pqSecond))
+                            {
+                                Operands.Push(PQ_True);
+                            }
+                            else
+                            {
+                                Operands.Push(PQ_False);
+                            }
+                        }
+                        else if (Token.Operator == OperatorKind.differs)
+                        {
+                            // Save pqFirst != pqSecond
+                            //Operands.Push(!pqFirst.Equals(pqSecond));
+                            if (!pqFirst.Equals(pqSecond))
+                            {
+                                Operands.Push(PQ_True);
+                            }
+                            else
+                            {
+                                Operands.Push(PQ_False);
+                            }
+
+                        }
+                        else if (   Token.Operator == OperatorKind.lessthan
+                                 || Token.Operator == OperatorKind.lessorequals
+                                 || Token.Operator == OperatorKind.largerthan
+                                 || Token.Operator == OperatorKind.largerorequals
+                                )
+                        {
+                            int res = pqFirst.CompareTo(pqSecond);
+
+                            if (   ((Token.Operator == OperatorKind.lessthan)       && (res <  0))
+                                || ((Token.Operator == OperatorKind.lessorequals)   && (res <= 0))
+                                || ((Token.Operator == OperatorKind.largerthan)     && (res >  0))                               
+                                || ((Token.Operator == OperatorKind.largerorequals) && (res >= 0))                               
+                                )
+                            {
+                                Operands.Push(PQ_True);
+                            }
+                            else
+                            {
+                                Operands.Push(PQ_False);
                             }
                         }
                         else
@@ -901,7 +993,7 @@ namespace PhysicalCalculator.Expression
 
             if (IdentifierFound)
             {
-                if (identifierkind == IdentifierKind.Variable)
+                if ((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant))
                 {
                     VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
                 }
@@ -1240,20 +1332,33 @@ namespace PhysicalCalculator.Expression
             parenend = 2,
 
             // Precediens == 3
-            add = 3,
-            sub = 4,
+            equals = 3,
+            differs = 4,
 
             // Precediens == 5
-            mult = 5,
-            div = 6,
-
-            // Precediens == 7
-            pow = 7,
-            root = 8,
+            lessthan = 5,
+            largerthan = 6,
+            lessorequals = 7,
+            largerorequals = 8,
 
             // Precediens == 9
-            unaryplus = 9,
-            unaryminus = 10
+            not = 9,
+
+            // Precediens == 11
+            add = 11,
+            sub = 12,
+
+            // Precediens == 13
+            mult = 13,
+            div = 14,
+
+            // Precediens == 15
+            pow = 15,
+            root = 16,
+
+            // Precediens == 17
+            unaryplus = 17,
+            unaryminus = 18
         }
 
     public static class OperatorKindExtensions
@@ -1266,18 +1371,28 @@ namespace PhysicalCalculator.Expression
                 case OperatorKind.parenbegin: // "("
                 case OperatorKind.parenend: // ")":
                     return OperatorKind.parenbegin; // 1;
+                case OperatorKind.equals: // "=="
+                case OperatorKind.differs: // "!=":
+                    return OperatorKind.equals; // 3;
+                case OperatorKind.lessthan: // "<"
+                case OperatorKind.largerthan: // ">":
+                case OperatorKind.lessorequals: // "<="
+                case OperatorKind.largerorequals: // ">=":
+                    return OperatorKind.lessthan; // 3;
+                case OperatorKind.not: // "!"
+                    return OperatorKind.not; // 5;
                 case OperatorKind.add: // "+"
                 case OperatorKind.sub: // "-":
-                     return OperatorKind.add; // 3;
+                     return OperatorKind.add; // 7;
                 case OperatorKind.mult: // "*":
                 case OperatorKind.div: // "/":
-                     return OperatorKind.mult; // 5;
+                     return OperatorKind.mult; // 9;
                 case OperatorKind.pow: // "^":
                 case OperatorKind.root: // "!":
-                     return OperatorKind.pow; // 7;
+                     return OperatorKind.pow; // 11;
                 case OperatorKind.unaryplus: // unaryplus:
                 case OperatorKind.unaryminus: // UnaryMinus:
-                     return OperatorKind.unaryplus; // 9;
+                     return OperatorKind.unaryplus; // 13;
             }
 
             return OperatorKind.none;
@@ -1291,6 +1406,16 @@ namespace PhysicalCalculator.Expression
                     return OperatorKind.parenbegin; // 1;
                 case ')':
                     return OperatorKind.parenend; // 2;
+                //case '!':
+                //      return OperatorKind.not; // 5;
+
+                case '!':
+                    return OperatorKind.not; // 1;
+                case '<':
+                    return OperatorKind.lessthan; // 1;
+                case '>':
+                    return OperatorKind.largerthan; // 1;
+
                 case '+':
                     return OperatorKind.add; // 3;
                 case '-':
@@ -1310,6 +1435,23 @@ namespace PhysicalCalculator.Expression
                 case '-': // UnaryMinus:
                      return OperatorKind.unaryminus; // 10;
                  */
+            }
+
+            return OperatorKind.none;
+        }
+
+        public static OperatorKind OperatorKindFromChar1Equal(Char c)
+        {
+            switch (c)
+            {
+                case '=':
+                    return OperatorKind.equals; // 1;
+                case '!':
+                    return OperatorKind.differs; // 1;
+                case '<':
+                    return OperatorKind.lessorequals; // 1;
+                case '>':
+                    return OperatorKind.largerorequals; // 1;
             }
 
             return OperatorKind.none;
