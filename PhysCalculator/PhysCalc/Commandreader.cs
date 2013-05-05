@@ -272,6 +272,7 @@ namespace PhysicalCalculator
 
         override public string GetCommandLine(ref String ResultLine)
         {
+            const string DefaultCalculatorScriptsSubdir = "Calculator Scripts";
             string S = null;
             if (FileReader == null && !String.IsNullOrWhiteSpace(FileNameStr))
             {
@@ -279,6 +280,12 @@ namespace PhysicalCalculator
                     && !Path.HasExtension(FileNameStr))
                 {
                     FileNameStr += ".cal";
+                }
+                if (!File.Exists(FileNameStr)
+                    && String.Compare(Path.GetPathRoot(FileNameStr), DefaultCalculatorScriptsSubdir, true) != 0
+                    && Directory.Exists(DefaultCalculatorScriptsSubdir))
+                {
+                    FileNameStr = DefaultCalculatorScriptsSubdir + FileNameStr;
                 }
                 try
                 {
