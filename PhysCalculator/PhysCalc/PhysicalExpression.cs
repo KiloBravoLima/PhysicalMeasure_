@@ -652,9 +652,19 @@ namespace PhysicalCalculator.Expression
 
                             IPhysicalQuantity pq;
 
-                            Boolean IdentifierFound = ParseQualifiedIdentifier(ref CommandLine, ref ResultLine, out IdentifierName, out pq);
+                            Boolean PrimaryIdentifierFound = ParseQualifiedIdentifier(ref CommandLine, ref ResultLine, out IdentifierName, out pq);
                             Pos += OldLen - CommandLine.Length;
-                            if (!IdentifierFound)
+                            if (PrimaryIdentifierFound)
+                            {
+                                // Check if any inner identifier was found
+                                Boolean InnerIdentifierFound = (pq != null);
+                                if (!InnerIdentifierFound)
+                                {
+                                    LastReadToken = TokenKind.Operand;
+                                    return new token(null);
+                                }
+                            }
+                            else
                             {
                                 if (!String.IsNullOrEmpty(IdentifierName) && !String.IsNullOrEmpty(CommandLine) && CommandLine[0] == '(')
                                 {
@@ -663,8 +673,8 @@ namespace PhysicalCalculator.Expression
                                     string line2 = CommandLine.Substring(1).TrimStart();
                                     if (!String.IsNullOrEmpty(line2) && line2[0] == ')')
                                     {   // Undefined function without parameters? Maybe it is a .cal file name? 
-                                        IdentifierFound = File.Exists(IdentifierName + ".cal");
-                                        if (IdentifierFound)
+                                        PrimaryIdentifierFound = File.Exists(IdentifierName + ".cal");
+                                        if (PrimaryIdentifierFound)
                                         {
                                             TokenString.ParseChar('(', ref CommandLine, ref ResultLine);
                                             CommandLine = CommandLine.TrimStart();
@@ -782,6 +792,9 @@ namespace PhysicalCalculator.Expression
             token Token = Tokenizer.GetToken();
             while (Token != null)
             {
+                // OperatorKind.parenbegin indicates error in Tokenizer.GetToken();
+                Debug.Assert(Token.TokenKind != TokenKind.Operand || Token.Operator != OperatorKind.parenbegin);
+
                 if (Token.TokenKind == TokenKind.Operand)
                 {
                     // Stack PhysicalQuantity operand
@@ -818,7 +831,7 @@ namespace PhysicalCalculator.Expression
                         }
                         Operands.Push(pqTop);
                     }
-                    else
+                    else if (Operands.Count >= 2)
                     {
                         Debug.Assert(Operands.Count >= 2);
 
@@ -845,7 +858,7 @@ namespace PhysicalCalculator.Expression
                             // Combine pq1 and pq2 to the new PhysicalQuantity pq1/pq2
                             Operands.Push(pqFirst.Divide(pqSecond));
                         }
-                        else if (   (Token.Operator == OperatorKind.pow) 
+                        else if (   (Token.Operator == OperatorKind.pow)
                                  || (Token.Operator == OperatorKind.root))
                         {
                             SByte Exponent;
@@ -855,7 +868,7 @@ namespace PhysicalCalculator.Expression
                             }
                             else
                             {   // Invert operator and Exponent
-                                Exponent = (SByte)(1/pqSecond.Value);
+                                Exponent = (SByte)(1 / pqSecond.Value);
 
                                 if (Token.Operator == OperatorKind.pow)
                                 {
@@ -914,10 +927,10 @@ namespace PhysicalCalculator.Expression
                         {
                             int res = pqFirst.CompareTo(pqSecond);
 
-                            if (   ((Token.Operator == OperatorKind.lessthan)       && (res <  0))
-                                || ((Token.Operator == OperatorKind.lessorequals)   && (res <= 0))
-                                || ((Token.Operator == OperatorKind.largerthan)     && (res >  0))                               
-                                || ((Token.Operator == OperatorKind.largerorequals) && (res >= 0))                               
+                            if (   ((Token.Operator == OperatorKind.lessthan) && (res < 0))
+                                || ((Token.Operator == OperatorKind.lessorequals) && (res <= 0))
+                                || ((Token.Operator == OperatorKind.largerthan) && (res > 0))
+                                || ((Token.Operator == OperatorKind.largerorequals) && (res >= 0))
                                 )
                             {
                                 Operands.Push(PQ_True);
@@ -931,6 +944,15 @@ namespace PhysicalCalculator.Expression
                         {
                             Debug.Assert(false);
                         }
+                    }
+                    else
+                    {   // Error: Unexpected token or missing operands (Operands.Count < 2).
+                        Debug.Assert(Token.TokenKind == TokenKind.Operand);
+                        // OperatorKind.parenbegin indicates error in Tokenizer.GetToken();
+                        Debug.Assert(Token.Operator  != OperatorKind.parenbegin);
+
+                        Debug.Assert(Operands.Count >= 2);
+                        Debug.Assert(false);
                     }
                 }
 
@@ -950,9 +972,7 @@ namespace PhysicalCalculator.Expression
         {
             identifierValue = null;
 
-            String QualifiedIdentifierName;
             IEnvironment PrimaryContext;
-            IEnvironment QualifiedIdentifierContext;
             IdentifierKind identifierkind;
 
             commandLine = commandLine.ReadIdentifier(out identifierName);
@@ -960,65 +980,69 @@ namespace PhysicalCalculator.Expression
 
             Boolean PrimaryIdentifierFound = IdentifierContextLookup(identifierName, out PrimaryContext, out identifierkind, ref resultLine);
 
-            Boolean IdentifierFound = PrimaryIdentifierFound;
-
-            QualifiedIdentifierContext = PrimaryContext;
-            QualifiedIdentifierName = identifierName;
-
-            while (IdentifierFound && !String.IsNullOrEmpty(commandLine) && commandLine[0] == '.')
+            if (PrimaryIdentifierFound)
             {
-                TokenString.ParseChar('.', ref commandLine, ref resultLine);
-                commandLine = commandLine.TrimStart();
+                Boolean IdentifierFound = PrimaryIdentifierFound;
 
-                commandLine = commandLine.ReadIdentifier(out identifierName);
-                Debug.Assert(identifierName != null);
-                commandLine = commandLine.TrimStart();
+                IEnvironment QualifiedIdentifierContext = null; 
+                String QualifiedIdentifierName = identifierName;
 
-                IEnvironment FoundInContext;
-                IdentifierKind FoundIdentifierkind;
+                QualifiedIdentifierContext = PrimaryContext;
 
-                IdentifierFound = QualifiedIdentifierContextLookup(QualifiedIdentifierContext, identifierName, out FoundInContext, out FoundIdentifierkind, ref resultLine);
-                if (IdentifierFound)
+                while (IdentifierFound && !String.IsNullOrEmpty(commandLine) && commandLine[0] == '.')
                 {
-                    QualifiedIdentifierContext = FoundInContext;
-                    identifierkind = FoundIdentifierkind;
-
-                    QualifiedIdentifierName += "." + identifierName;
-                }
-                else
-                {
-                    resultLine = QualifiedIdentifierName + " don't have a field named '" + identifierName + "'";
-                }
-            }
-
-            if (IdentifierFound)
-            {
-                if ((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant))
-                {
-                    VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
-                }
-                else if (identifierkind == IdentifierKind.Function)
-                {
-                    TokenString.ParseChar('(', ref commandLine, ref resultLine);
+                    TokenString.ParseChar('.', ref commandLine, ref resultLine);
                     commandLine = commandLine.TrimStart();
-                    List<IPhysicalQuantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine);
-                    Boolean OK = parameterlist != null;
-                    if (OK)
+
+                    commandLine = commandLine.ReadIdentifier(out identifierName);
+                    Debug.Assert(identifierName != null);
+                    commandLine = commandLine.TrimStart();
+
+                    IEnvironment FoundInContext;
+                    IdentifierKind FoundIdentifierkind;
+
+                    IdentifierFound = QualifiedIdentifierContextLookup(QualifiedIdentifierContext, identifierName, out FoundInContext, out FoundIdentifierkind, ref resultLine);
+                    if (IdentifierFound)
                     {
-                        TokenString.ParseChar(')', ref commandLine, ref resultLine);
+                        QualifiedIdentifierContext = FoundInContext;
+                        identifierkind = FoundIdentifierkind;
 
-                        FunctionGet(QualifiedIdentifierContext, identifierName, parameterlist, out identifierValue, ref resultLine);
-
-                        commandLine = commandLine.TrimStart();
+                        QualifiedIdentifierName += "." + identifierName;
                     }
                     else
                     {
-                        // Error in result line
-                        Debug.Assert(!String.IsNullOrEmpty(resultLine));
+                        resultLine = QualifiedIdentifierName + " don't have a field named '" + identifierName + "'";
+                    }
+                }
+
+                if (IdentifierFound)
+                {
+                    if ((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant))
+                    {
+                        VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
+                    }
+                    else if (identifierkind == IdentifierKind.Function)
+                    {
+                        TokenString.ParseChar('(', ref commandLine, ref resultLine);
+                        commandLine = commandLine.TrimStart();
+                        List<IPhysicalQuantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine);
+                        Boolean OK = parameterlist != null;
+                        if (OK)
+                        {
+                            TokenString.ParseChar(')', ref commandLine, ref resultLine);
+
+                            FunctionGet(QualifiedIdentifierContext, identifierName, parameterlist, out identifierValue, ref resultLine);
+
+                            commandLine = commandLine.TrimStart();
+                        }
+                        else
+                        {
+                            // Error in result line
+                            Debug.Assert(!String.IsNullOrEmpty(resultLine));
+                        }
                     }
                 }
             }
-
             return PrimaryIdentifierFound;
         }
 

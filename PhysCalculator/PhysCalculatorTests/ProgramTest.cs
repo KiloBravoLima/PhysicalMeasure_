@@ -76,14 +76,30 @@ namespace PhysCalculatorTests
 
         /// <summary>
         ///A test for Main
+        /// Code coverage enlarger
         ///</summary>
         [TestMethod()]
+        // [DeploymentItem("*.cal")]
+        [DeploymentItem("AllTestFiles.cal")]
+        [DeploymentItem("Expression.cal")]
+        [DeploymentItem("Valuta.cal")]
+        [DeploymentItem("SecInYear.cal")]
+        [DeploymentItem("TestFunc.cal")]
+        [DeploymentItem("EPotFunc.cal")]
         [DeploymentItem("PhysCalc.exe")]
         public void MainTest()
         {
-            string[] args = {"read test"};
-            Program_Accessor.Main(args);
-            //Assert.Inconclusive("A method that does not return a value cannot be verified.");
+            string[] args = {"read AllTestFiles"};
+            try
+            {
+                Program_Accessor.Main(args);
+                //Assert.Inconclusive("A method that does not return a value cannot be verified.");
+            }
+            catch 
+            {
+                // Must not throw any (unhandled) exceptions
+                Assert.Fail();
+            }
         }
     }
 }

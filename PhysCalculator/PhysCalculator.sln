@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasure", "..\PhysM
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{023D025A-0D6F-464C-AFC2-A61EE955F6C8}"
 	ProjectSection(SolutionItems) = preProject
+		AssemblyDependencies1.dgml = AssemblyDependencies1.dgml
 		Local.testsettings = Local.testsettings
 		PhysCalculator.vsmdi = PhysCalculator.vsmdi
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings

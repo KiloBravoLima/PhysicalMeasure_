@@ -1113,36 +1113,9 @@ namespace PhysicalCalculator
             }
             else
             {   // Look for Global system settings and predefined symbols
-                IdentifierFound = identifierName.Equals("Global", StringComparison.OrdinalIgnoreCase);
-                if (IdentifierFound)
-                {
-                    //PrimaryContext = GlobalContext.OuterContext;
-                    PrimaryContext = GlobalContext;
-                    identifierkind = IdentifierKind.Environment;
-                }
-                else
-                {
-                    IdentifierFound = identifierName.Equals("Outer", StringComparison.OrdinalIgnoreCase);
-                    if (IdentifierFound)
-                    {
-                        PrimaryContext = CurrentContext.OuterContext;
-                        identifierkind = IdentifierKind.Environment;
-                    }
-                    else
-                    {
-                        IdentifierFound = identifierName.Equals("Local", StringComparison.OrdinalIgnoreCase);
-                        if (IdentifierFound)
-                        {
-                            PrimaryContext = CurrentContext;
-                            identifierkind = IdentifierKind.Environment;
-                        }
-                        else
-                        {
-                            PrimaryContext = CurrentContext;
-                            identifierkind = IdentifierKind.Unknown;
-                        }
-                    }
-                }
+
+                IdentifierFound = PredefinedContextIdentifierLookup(identifierName, out PrimaryContext, out identifierkind);
+
             }
 
             qualifiedIdentifierContext = PrimaryContext;
@@ -1528,7 +1501,7 @@ namespace PhysicalCalculator
             Boolean IdentifierFound = IdentifierName.Equals("Global", StringComparison.OrdinalIgnoreCase);
             if (IdentifierFound)
             {
-                FoundInContext = GlobalContext.OuterContext;
+               FoundInContext = GlobalContext;
                 identifierkind = IdentifierKind.Environment;
             }
             else
@@ -1557,43 +1530,7 @@ namespace PhysicalCalculator
 
             return IdentifierFound;
         }
-        /**
-        public Boolean PredefinedFunctionIdentifierLookup(String identifierName, out IEnvironment foundInContext, out IdentifierKind Identifierkind)
-        {
-            // Look for Global system settings and predefined symbols
-            Boolean IdentifierFound = identifierName.Equals("Global", StringComparison.OrdinalIgnoreCase);
-            if (IdentifierFound)
-            {
-                foundInContext = GlobalContext.OuterContext;
-                Identifierkind = IdentifierKind.Function;
-            }
-            else
-            {
-                IdentifierFound = identifierName.Equals("Outer", StringComparison.OrdinalIgnoreCase);
-                if (IdentifierFound)
-                {
-                    foundInContext = CurrentContext.OuterContext;
-                    Identifierkind = IdentifierKind.Function;
-                }
-                else
-                {
-                    IdentifierFound = identifierName.Equals("Local", StringComparison.OrdinalIgnoreCase);
-                    if (IdentifierFound)
-                    {
-                        foundInContext = CurrentContext;
-                        Identifierkind = IdentifierKind.Function;
-                    }
-                    else
-                    {
-                        foundInContext = null;
-                        Identifierkind = IdentifierKind.Unknown;
-                    }
-                }
-            }
 
-            return IdentifierFound;
-        }
-        **/
 
         public Boolean IdentifierContextLookup(String IdentifierName, out IEnvironment FoundInContext, out IdentifierKind identifierkind)
         {

@@ -34,5 +34,6 @@ Func V_from_M_and_H(M [Kg], H [m])
 set Global.M = 60 Kg
 set Global.H = 100 Km
 Set Global.V = V_from_M_and_H(M, H) 
+if (Global.V == 1401.4278433083882 m/s) { set Global.OK=1 } else { set Global.OK=0 }
 
 list
