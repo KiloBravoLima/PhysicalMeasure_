@@ -319,6 +319,27 @@ namespace PhysCalculatorTests
             Assert.AreEqual(expected, actual, "for result");
         }
 
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint2Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "1 m/s * 60 s/min * 60 min/h";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = (3600).ToString() + " m/h";
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
+            Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
+            Assert.AreEqual(expected, actual, "for result");
+        }
+
+
         /// <summary>
         ///A test for CommandPrint
         ///</summary>
