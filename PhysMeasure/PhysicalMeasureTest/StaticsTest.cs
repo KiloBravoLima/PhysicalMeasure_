@@ -76,6 +76,91 @@ namespace PhysicalMeasureTest
             Assert.AreEqual((int)MeasureKind.LuminousIntensity, 6);
         }
 
+        /// <summary>
+        ///A test for UnitFromSymbol
+        ///</summary>
+        [TestMethod()]
+        public void ExponentsValues()
+        {
+            IUnit unit0= (IUnit)(Physics.SI_Units.BaseUnits[0]);
+            SByte[] expected0 = new SByte[7] { 1, 0, 0, 0, 0, 0, 0 };
+            SByte[] actual0 = unit0.Exponents;
+            Assert.AreEqual(actual0[0], expected0[0]);
+
+            IUnit unit1 = (IUnit)(Physics.SI_Units.BaseUnits[1]);
+            SByte[] expected1 = new SByte[7] { 0, 1, 0, 0, 0, 0, 0 };
+            SByte[] actual1 = unit1.Exponents;
+            Assert.AreEqual(actual1[1], expected1[1]);
+
+            IUnit unit2 = (IUnit)(Physics.SI_Units.BaseUnits[2]);
+            SByte[] expected2 = new SByte[7] { 0, 0, 1, 0, 0, 0, 0 };
+            SByte[] actual2 = unit2.Exponents;
+            Assert.AreEqual(actual2[2], expected2[2]);
+
+            IUnit unit3 = (IUnit)(Physics.SI_Units.BaseUnits[3]);
+            SByte[] expected3 = new SByte[7] { 0, 0, 0, 1, 0, 0, 0 };
+            SByte[] actual3 = unit3.Exponents;
+            Assert.AreEqual(actual3[3], expected3[3]);
+
+            IUnit unit4 = (IUnit)(Physics.SI_Units.BaseUnits[4]);
+            SByte[] expected4 = new SByte[7] { 0, 0, 0, 0, 1, 0, 0 };
+            SByte[] actual4 = unit4.Exponents;
+            Assert.AreEqual(actual4[4], expected4[4]);
+
+            IUnit unit5 = (IUnit)(Physics.SI_Units.BaseUnits[5]);
+            SByte[] expected5 = new SByte[7] { 0, 0, 0, 0, 0, 1, 0 };
+            SByte[] actual5 = unit5.Exponents;
+            Assert.AreEqual(actual5[5], expected5[5]);
+
+            IUnit unit6 = (IUnit)(Physics.SI_Units.BaseUnits[6]);
+            SByte[] expected6 = new SByte[7] { 0, 0, 0, 0, 0, 0, 1 };
+            SByte[] actual6 = unit6.Exponents;
+            Assert.AreEqual(actual6[6], expected6[6]);
+
+        }
+
+
+        /// <summary>
+        ///A test for UnitFromSymbol
+        ///</summary>
+        [TestMethod()]
+        public void UnsignedExponentsValues()
+        {
+            IUnit unit0 = (IUnit)(Physics.SI_Units.BaseUnits[0]);
+            Byte[] expected0 = new Byte[7] { 1, 0, 0, 0, 0, 0, 0 };
+            Byte[] actual0 = unit0.UnsignedExponents;
+            Assert.AreEqual(actual0[0], expected0[0]);
+
+            IUnit unit1 = (IUnit)(Physics.SI_Units.BaseUnits[1]);
+            Byte[] expected1 = new Byte[7] { 0, 1, 0, 0, 0, 0, 0 };
+            Byte[] actual1 = unit1.UnsignedExponents;
+            Assert.AreEqual(actual1[1], expected1[1]);
+
+            IUnit unit2 = (IUnit)(Physics.SI_Units.BaseUnits[2]);
+            Byte[] expected2 = new Byte[7] { 0, 0, 1, 0, 0, 0, 0 };
+            Byte[] actual2 = unit2.UnsignedExponents;
+            Assert.AreEqual(actual2[2], expected2[2]);
+
+            IUnit unit3 = (IUnit)(Physics.SI_Units.BaseUnits[3]);
+            Byte[] expected3 = new Byte[7] { 0, 0, 0, 1, 0, 0, 0 };
+            Byte[] actual3 = unit3.UnsignedExponents;
+            Assert.AreEqual(actual3[3], expected3[3]);
+
+            IUnit unit4 = (IUnit)(Physics.SI_Units.BaseUnits[4]);
+            Byte[] expected4 = new Byte[7] { 0, 0, 0, 0, 1, 0, 0 };
+            Byte[] actual4 = unit4.UnsignedExponents;
+            Assert.AreEqual(actual4[4], expected4[4]);
+
+            IUnit unit5 = (IUnit)(Physics.SI_Units.BaseUnits[5]);
+            Byte[] expected5 = new Byte[7] { 0, 0, 0, 0, 0, 1, 0 };
+            Byte[] actual5 = unit5.UnsignedExponents;
+            Assert.AreEqual(actual5[5], expected5[5]);
+
+            IUnit unit6 = (IUnit)(Physics.SI_Units.BaseUnits[6]);
+            Byte[] expected6 = new Byte[7] { 0, 0, 0, 0, 0, 0, 1 };
+            Byte[] actual6 = unit6.UnsignedExponents;
+            Assert.AreEqual(actual6[6], expected6[6]);
+        }
 
         #region SI Unit Prefix symbols test
 

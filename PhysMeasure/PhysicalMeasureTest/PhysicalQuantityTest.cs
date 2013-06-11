@@ -320,7 +320,6 @@ namespace PhysicalMeasureTest
             Assert.AreEqual(expected, E_2);
         }
 
-
         #endregion PhysicalUnit math tests
 
         #region PhysicalUnit Convert tests
