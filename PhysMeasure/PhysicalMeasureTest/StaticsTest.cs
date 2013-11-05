@@ -227,45 +227,45 @@ namespace PhysicalMeasureTest
         public void UnitsMustDifferTestKilogramGram()
         {
             IUnit MassUnit = (IUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]);
-            IUnit CelciusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
+            IUnit CelsiusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
 
-            Assert.AreNotEqual(MassUnit, CelciusTemperatureUnit);
+            Assert.AreNotEqual(MassUnit, CelsiusTemperatureUnit);
         }
 
         /// <summary>
         ///A test for UnitFromSymbol
         ///</summary>
         [TestMethod()]
-        public void UnitsMustDifferTestMassCelcius()
+        public void UnitsMustDifferTestMassCelsius()
         {
             IUnit MassUnit = (IUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]);
-            IUnit CelciusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
+            IUnit CelsiusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
 
-            Assert.AreNotEqual(MassUnit, CelciusTemperatureUnit);
+            Assert.AreNotEqual(MassUnit, CelsiusTemperatureUnit);
         }
 
         /// <summary>
         ///A test for Equal
         ///</summary>
         [TestMethod()]
-        public void UnitsMustDifferTestCoulombCelcius()
+        public void UnitsMustDifferTestCoulombCelsius()
         {
             IUnit Coulomb = (IUnit)(Physics.SI_Units.NamedDerivedUnits[7]);
-            IUnit CelciusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[0]);
+            IUnit CelsiusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[0]);
 
-            Assert.AreNotEqual(Coulomb, CelciusTemperatureUnit);
+            Assert.AreNotEqual(Coulomb, CelsiusTemperatureUnit);
         }
 
         /// <summary>
         ///A test for Equal
         ///</summary>
         [TestMethod()]
-        public void UnitsMustDifferTestKelvinCelcius()
+        public void UnitsMustDifferTestKelvinCelsius()
         {
             IUnit KelvinUnit = (IUnit)(Physics.SI_Units.NamedDerivedUnits[5]);
-            IUnit CelciusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
+            IUnit CelsiusTemperatureUnit = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
 
-            Assert.AreNotEqual(KelvinUnit, CelciusTemperatureUnit);
+            Assert.AreNotEqual(KelvinUnit, CelsiusTemperatureUnit);
         }
 
         #endregion Units must differ test
@@ -348,7 +348,7 @@ namespace PhysicalMeasureTest
         ///A test for UnitFromSymbol
         ///</summary>
         [TestMethod()]
-        public void UnitFromSymbolTestCelcius()
+        public void UnitFromSymbolTestCelsius()
         {
             String SymbolStr = "°C";
             IUnit expected = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
@@ -456,7 +456,7 @@ namespace PhysicalMeasureTest
         ///A test for UnitFromName on ConvertibleUnit
         ///</summary>
         [TestMethod()]
-        public void UnitFromNameTestCelcius()
+        public void UnitFromNameTestCelsius()
         {
             String NameStr = "Celsius";
             IUnit expected = (IUnit)(Physics.SI_Units.ConvertibleUnits[1]);
@@ -514,6 +514,7 @@ namespace PhysicalMeasureTest
             Assert.AreEqual(expected, actual);
         }
 
+
         #endregion ScaledUnitFromSymbol test
 
 
@@ -540,10 +541,10 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void ConvertibleUnitTestCelsiusEqualsKelvin()
         {
-            IPhysicalQuantity InCelcius = new PhysicalQuantity(-173, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[1])); // °C
+            IPhysicalQuantity InCelsius = new PhysicalQuantity(-173, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[1])); // °C
             IPhysicalQuantity InKelvin = new PhysicalQuantity(100.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)])); // K
 
-            Assert.AreEqual(InCelcius, InKelvin);
+            Assert.AreEqual(InCelsius, InKelvin);
         }
 
         /// <summary>
@@ -563,6 +564,23 @@ namespace PhysicalMeasureTest
 
 
         /// <summary>
+        ///A test for convertible unit liter
+        ///</summary>
+        [TestMethod()]
+        public void ConvertibleUnitTestMilliLiterParseString()
+        {
+            String ConvertibleUnitQuantityStr = "1234 ml";
+
+            IPhysicalQuantity expected = new PhysicalQuantity(1.234, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[3]));
+
+            IPhysicalQuantity actual = PhysicalQuantity.Parse(ConvertibleUnitQuantityStr);
+
+            Assert.AreEqual(expected, actual);
+        }
+
+
+
+        /// <summary>
         ///A test for convertible unit gram
         ///</summary>
         [TestMethod()]
@@ -572,6 +590,33 @@ namespace PhysicalMeasureTest
             IPhysicalQuantity InKilogram = new PhysicalQuantity(0.123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)]));
 
             Assert.AreEqual(InGram, InKilogram);
+        }
+
+
+        /// <summary>
+        ///A test for convertible unit liter
+        ///</summary>
+        [TestMethod()]
+        public void ConvertibleUnitTestLitreEqualsCubicMeter()
+        {
+            IPhysicalQuantity InLitre = new PhysicalQuantity(123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[3]));
+            IPhysicalQuantity InCubicMeter = new PhysicalQuantity(0.123, (PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Length)].Pow(3)));
+
+            Assert.AreEqual(InLitre, InCubicMeter);
+        }
+
+
+
+        /// <summary>
+        ///A test for convertible unit liter
+        ///</summary>
+        [TestMethod()]
+        public void ConvertibleUnitTestSomeLitreNotEqualsAnyCubicMeter()
+        {
+            IPhysicalQuantity InLitre = new PhysicalQuantity(123, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.ConvertibleUnits[3]));
+            IPhysicalQuantity InCubicMeter = new PhysicalQuantity(0.1234, (PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Length)].Pow(3)));
+
+            Assert.AreNotEqual(InLitre, InCubicMeter);
         }
 
 

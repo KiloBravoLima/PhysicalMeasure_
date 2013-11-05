@@ -572,8 +572,13 @@ namespace PhysicalMeasureTest
             Assert.AreEqual(expected, actual);
         }
 
+        #endregion PhysicalQuantity.Parse test
+
+
+        #region PhysicalQuantity.Equal test
+
         /// <summary>
-        ///A test for Parse
+        ///A test for equal
         ///</summary>
         [TestMethod()]
         public void TestMilligramEqualKilogram()
@@ -589,18 +594,115 @@ namespace PhysicalMeasureTest
         ///A test for equal
         ///</summary>
         [TestMethod()]
-        public void TestMilliKelvinEqualKiloCelcius()
+        public void TestMilliKelvinEqualKiloCelsiusSpecificConvertion()
+        {
+            //String s = "594.15 mK";
+            //String s = "3.21 K°C";
+            /*
+            IPhysicalQuantity InMilliKelvin = (IPhysicalQuantity)(new PhysicalQuantity(321273.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)]))); // In Kelvin
+            IPhysicalQuantity InKiloCelsius = (IPhysicalQuantity)(new PhysicalQuantity(321, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("°C"), 1))))); // In Kilo Celsius
+            */
+            IPhysicalQuantity InMilliKelvin = (IPhysicalQuantity)(new PhysicalQuantity(321273.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)]))); // In Kelvin
+            IPhysicalQuantity InKiloCelsius = (IPhysicalQuantity)(new PhysicalQuantity(321, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("°C"), 1))))); // In Kilo Celsius
+
+            Assert.AreEqual(InMilliKelvin, InKiloCelsius);
+        }
+
+        /// <summary>
+        ///A test for conversion between temperatures
+        ///</summary>
+        [TestMethod()]
+        public void TestAdd2KelvinWithCelsiusSpecificConvertion2()
         {
             //String s = "594.15 mK";
             //String s = "3.21 K°C";
             IPhysicalQuantity InMilliKelvin = (IPhysicalQuantity)(new PhysicalQuantity(321273.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)]))); // In Kelvin
-            IPhysicalQuantity InKiloCelcius = (IPhysicalQuantity)(new PhysicalQuantity(321, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("°C"), 1))))); // In Kilo Celsius
+            IPhysicalQuantity InKiloCelsius = (IPhysicalQuantity)(new PhysicalQuantity(321, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("°C"), 1))))); // In Kilo Celsius
 
-            Assert.AreEqual(InMilliKelvin, InKiloCelcius);
+            Assert.AreEqual(InMilliKelvin, InKiloCelsius);
         }
 
 
-        #endregion PhysicalQuantity.Parse test
+        /// <summary>
+        ///A test for conversion of temperatures from Celsius to Kelvin and back using CombineUnit
+        ///</summary>
+        [TestMethod()]
+        public void TestKelvinPerSecondConvertedToCe_per_s()
+        {
+            // 2013-09-05  From CodePlex User JuricaGrcic
+
+            // Define Celsius per second - °C/s
+            IPhysicalUnit Ce_per_s = SI.Ce.CombineDivide(SI.s);
+
+            // Define Kelvin per second - K/s
+            IPhysicalUnit Kelvin_per_s = SI.K.CombineDivide(SI.s);
+
+            // Create value in units °C/s
+            PhysicalQuantity valueOfCelsiusPerSecond = new PhysicalQuantity(2, Ce_per_s);
+            //Console.WriteLine("Base value : {0}", valueOfCelsiusPerSecond); 
+            // prints 2 °C/s
+            string valueOfCelsiusPerSecond_str = valueOfCelsiusPerSecond.ToString();
+            string valueOfCelsiusPerSecond_str_expected = "2 °C/s";  
+            
+            // Convert °C/s to K/s
+            IPhysicalQuantity valueOfKelvinPerSecond = valueOfCelsiusPerSecond.ConvertTo(Kelvin_per_s);
+            //Console.WriteLine("Base value converted to {0} : {1}", Ce_per_s, valueOfKelvinPerSecond);
+            // prints 275.15 K/s - correct conversion or not??
+            // 2013-10-29  Corrected to print 2 K/s
+            string valueOfKelvinPerSecond_str = valueOfKelvinPerSecond.ToString();
+            string valueOfKelvinPerSecond_str_expected = "2 K/s";
+
+            // Convert K/s back to °C/s 
+            IPhysicalQuantity valueOfKelvinPerSecondConvertedToCe_per_s = valueOfKelvinPerSecond.ConvertTo(Ce_per_s);
+
+            //Console.WriteLine("{0} converted back to {1}: {2}", Kelvin_per_s, Ce_per_s, valueOfKelvinPerSecond.ConvertTo(Ce_per_s));
+            // prints 1.0036476381543 °C/s - should print 2 °C/s - incorrect conversion
+            string valueOfKelvinPerSecondConvertedToCe_per_s_str = valueOfKelvinPerSecondConvertedToCe_per_s.ToString();
+            string valueOfKelvinPerSecondConvertedToCe_per_s_str_expected = "2 °C/s";
+
+            Assert.AreEqual(valueOfCelsiusPerSecond, valueOfKelvinPerSecondConvertedToCe_per_s);
+
+            Assert.AreEqual(valueOfCelsiusPerSecond_str, valueOfCelsiusPerSecond_str_expected);
+            Assert.AreEqual(valueOfKelvinPerSecond_str, valueOfKelvinPerSecond_str_expected);
+            Assert.AreEqual(valueOfKelvinPerSecondConvertedToCe_per_s_str, valueOfKelvinPerSecondConvertedToCe_per_s_str_expected);
+        }
+
+        /// <summary>
+        ///A test for conversion of temperatures from Celsius to Kelvin and back using CombineUnit
+        ///</summary>
+        [TestMethod()]
+        public void TestMeterKelvinPerSecondConvertedToCe_per_s()
+        {
+            // 2013-09-05  From CodePlex User JuricaGrcic but modified to not have °C as first element in denominators
+
+            // Define Celsius per second - m·°C/s
+            IPhysicalUnit meter_Ce_per_s = SI.m.CombineMultiply(SI.Ce).CombineDivide(SI.s);
+
+            // Define Kelvin per second - m·K/s
+            IPhysicalUnit meter_Kelvin_per_s = SI.m.CombineMultiply(SI.K).CombineDivide(SI.s);
+
+            // Create value in units m·°C/s
+            PhysicalQuantity valueOfmeterCelsiusPerSecond = new PhysicalQuantity(2, meter_Ce_per_s);
+            //Console.WriteLine("Base value : {0}", valueOfmeterCelsiusPerSecond); 
+            // prints 2 m·°C/s
+
+            // Convert m·°C/s to m·K/s
+            IPhysicalQuantity valueOfmeterKelvinPerSecond = valueOfmeterCelsiusPerSecond.ConvertTo(meter_Kelvin_per_s);
+            //Console.WriteLine("Base value converted to {0} : {1}", meter_Ce_per_s, valueOfmeterKelvinPerSecond);
+            // prints 548.3 m·K/s - correct conversion ??
+
+            // Convert m·K/s back to m·°C/s 
+            IPhysicalQuantity valueOfmeter_KelvinPerSecondConvertedToMeter_Ce_per_s = valueOfmeterKelvinPerSecond.ConvertTo(meter_Ce_per_s);
+
+            //Console.WriteLine("{0} converted back to {1}: {2}", meter_Kelvin_per_s, meter_Ce_per_s, valueOfmeterKelvinPerSecond.ConvertTo(meter_Ce_per_s));
+            // prints 1.0036476381543 m·°C/s - should print 2 m·°C/s - incorrect conversion ??
+
+            Assert.AreEqual(valueOfmeterCelsiusPerSecond, valueOfmeter_KelvinPerSecondConvertedToMeter_Ce_per_s);
+        }
+
+
+
+        #endregion PhysicalQuantity.Equal test
 
 
         #region PhysicalQuantity ConvertTo test
@@ -645,7 +747,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void PhysicalQuantityOfConvertibleUnitBasedOnConvertibleUnitConvertToDerivedUnit()
         {
-            /* It is NOT encuraged to do like this. Just for test */
+            /* It is NOT encouraged to do like this. Just for test */
             PhysicalUnit Wh = (PhysicalUnit)new ConvertibleUnit("WattHour", "Wh", SI.J, new ScaledValueConversion(1.0 / 3600)); /* [Wh] = 1/3600 * [J] */
             PhysicalUnit kWh = (PhysicalUnit)new ConvertibleUnit("kiloWattHour", "kWh", Wh, new ScaledValueConversion(1.0 / 1000)); /* [kWh] = 1/1000 * [Wh] */
             PhysicalUnit MWh = (PhysicalUnit)new ConvertibleUnit("MegaWattHour", "MWh", kWh, new ScaledValueConversion(1.0 / 1000)); /* [MWh] = 1/1000 * [kWh] */
