@@ -22,14 +22,14 @@ namespace PhysicalCalculator
                 CommandLineReader.ReadFromConsoleWhenEmpty = true;
                 if (CommandLineReader == null)
                 {
-                    ResultLineWriter.WriteLine(String.Format("PhysCalculator Commandreader failed to load with {0} arguments: \"{1}\" ", 1, txtExpression));
+                    ResultLineWriter.WriteErrorLine(String.Format("PhysCalculator Commandreader failed to load with {0} arguments: \"{1}\" ", 1, txtExpression));
                 }
                 else
                 {
                     PhysCalculator Calculator = new PhysCalculator(CommandLineReader, ResultLineWriter);
                     if (Calculator == null)
                     {
-                        ResultLineWriter.WriteLine(String.Format("PhysCalculator failed to load with {0} arguments: \"{1}\" ", 1, txtExpression));
+                        ResultLineWriter.WriteErrorLine(String.Format("PhysCalculator failed to load with {0} arguments: \"{1}\" ", 1, txtExpression));
                     }
                     else
                     {
@@ -132,19 +132,23 @@ namespace PhysicalCalculator
 #endif 
             if (CommandLineReader == null)
             {
-                ResultLineWriter.WriteLine(String.Format("PhysCalculator Commandreader failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
+                ResultLineWriter.WriteErrorLine(String.Format("PhysCalculator Commandreader failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
             }
             else
             {
                 PhysCalculator Calculator = new PhysCalculator(CommandLineReader, ResultLineWriter);
                 if (Calculator == null)
                 {
-                    ResultLineWriter.WriteLine(String.Format("PhysCalculator failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
+                    ResultLineWriter.WriteErrorLine(String.Format("PhysCalculator failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
                 }
                 else
                 {
+                    ResultLineWriter.ForegroundColor = ConsoleColor.Blue;
                     ResultLineWriter.WriteLine("PhysCalculator ready");
+                    ResultLineWriter.ResetColor();
+
                     Calculator.Run();
+                    ResultLineWriter.ForegroundColor = ConsoleColor.Blue;
                     ResultLineWriter.WriteLine("PhysCalculator finished");
                 }
             }

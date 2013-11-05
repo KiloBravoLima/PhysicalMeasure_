@@ -110,14 +110,16 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Calculator Scripts\AllTestFiles.cal">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Calculator Scripts\EpotFunc.cal">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Calculator Scripts\Expression.cal">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Calculator Scripts\SecInYear.cal">
@@ -126,9 +128,7 @@
     <None Include="Calculator Scripts\TestFunc.cal">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Calculator Scripts\Valuta.cal">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="Calculator Scripts\Valuta.cal" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\PhysMeasure\PhysicalMeasure\PhysicalMeasure.csproj">
