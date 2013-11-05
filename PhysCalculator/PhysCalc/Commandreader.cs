@@ -347,6 +347,113 @@ namespace PhysicalCalculator
 
         public int LinesWritten = 0;
 
+        private ConsoleColor backgroundColor = Console.BackgroundColor;
+        private ConsoleColor foregroundColor = Console.ForegroundColor;
+
+        public ConsoleColor BackgroundColor { 
+            get { return backgroundColor; }
+            set { if (backgroundColor != value) { SetBackgroundColor(value); } } 
+        }
+
+        public ConsoleColor ForegroundColor { 
+            get { return foregroundColor; }
+            set { if (foregroundColor != value) { SetForegroundColor(value); } } 
+        }
+
+        private void SetBackgroundColor(ConsoleColor color)
+        {
+            // this.CheckFile(ref ResultLine);
+
+            this.backgroundColor = color; 
+
+            if (FileStreamWriter != null)
+            {
+                string SetColorCommand = "\0background color=" + backgroundColor.ToString();
+                FileStreamWriter.WriteLine(SetColorCommand);
+            }
+            else if (ResultLines != null)
+            {
+                string SetColorCommand = "\0background color=" + backgroundColor.ToString();
+                ResultLines.Add(SetColorCommand);
+            }
+            else
+            {
+                Console.ForegroundColor = backgroundColor;
+            }
+        }
+
+        private void SetForegroundColor(ConsoleColor color)
+        {
+            // this.CheckFile(ref ResultLine);
+
+            this.foregroundColor = color; 
+
+            if (FileStreamWriter != null)
+            {
+                string SetColorCommand = "\0foreground color=" + foregroundColor.ToString();
+                FileStreamWriter.WriteLine(SetColorCommand);
+            }
+            else if (ResultLines != null)
+            {
+                string SetColorCommand = "\0foreground color=" + foregroundColor.ToString();
+                ResultLines.Add(SetColorCommand);
+            }
+            else
+            {
+                Console.ForegroundColor = foregroundColor;
+            }
+        }
+
+        public void ResetColor()
+        {
+            // this.CheckFile(ref ResultLine);
+
+            if (FileStreamWriter != null)
+            {
+                string SetColorCommand = "\0ResetColor";
+                FileStreamWriter.WriteLine(SetColorCommand);
+            }
+            else if (ResultLines != null)
+            {
+                string SetColorCommand = "\0ResetColor";
+                ResultLines.Add(SetColorCommand);
+            }
+            else
+            {
+                Console.ResetColor();
+            }
+
+            backgroundColor = Console.BackgroundColor;
+            foregroundColor = Console.ForegroundColor;
+        }
+
+        public enum textMode 
+        {
+            Normal = 0,
+            Highlight = 1,
+            Warning = 2,
+            Error = 3
+        }
+
+        public void SetTextMode(textMode tm)
+        {
+            if (tm == textMode.Error)
+            {
+                if (ForegroundColor != ConsoleColor.Red)
+                { 
+                    SetForegroundColor(ConsoleColor.Red);
+                }
+            }
+            else
+            {
+                //if (ForegroundColor != ConsoleColor.Gray)
+                if (ForegroundColor == ConsoleColor.Red)
+                {
+                    ResetColor();
+                }
+            }
+        }
+
         public ResultWriter()
             : this(null)
         {
@@ -424,6 +531,14 @@ namespace PhysicalCalculator
             {
                 Console.Write(ResultText);
             }
+        }
+
+
+        public void WriteErrorLine(String ResultLine)
+        {
+            SetTextMode(textMode.Error);
+            WriteLine(ResultLine);
+            SetTextMode(textMode.Normal);
         }
 
         public void Close()
@@ -505,7 +620,8 @@ namespace PhysicalCalculator
         }
 
         public TraceLevels OutputTracelevel { 
-            get {
+            get 
+            {
                 if (CommandAccessors != null)
                 {
                     return CommandAccessors.OutputTracelevel;
@@ -516,7 +632,8 @@ namespace PhysicalCalculator
                 }
             } 
 
-            set {
+            set 
+            {
                 if (CommandAccessors != null)
                 {
                     CommandAccessors.OutputTracelevel = value;

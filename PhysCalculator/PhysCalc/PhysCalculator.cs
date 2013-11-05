@@ -214,7 +214,9 @@ namespace PhysicalCalculator
 
                                 if (!String.IsNullOrWhiteSpace(ResultLine))
                                 {
+                                    resultLineWriter.ForegroundColor = ConsoleColor.White;
                                     resultLineWriter.WriteLine(ResultLine);
+                                    resultLineWriter.ResetColor();
                                 }
                                 else
                                 {
@@ -223,7 +225,9 @@ namespace PhysicalCalculator
 
                                     if (ShowEmptyResultLine)
                                     {
+                                        resultLineWriter.ForegroundColor = ConsoleColor.Yellow;
                                         resultLineWriter.WriteLine("?");
+                                        resultLineWriter.ResetColor();
                                     }
                                 }
                             }
@@ -243,7 +247,7 @@ namespace PhysicalCalculator
                       
                     **/
                     String Message = String.Format("{0} Exception Source: {1} - {2}", e.GetType().ToString(), e.Source, e.ToString());
-                    resultLineWriter.WriteLine(Message);
+                    resultLineWriter.WriteErrorLine(Message);
                     LoopExit = false;
                 }
             } while ((CommandLineFromAccessor || !CommandLineEmpty || !ResultLineEmpty) && !LoopExit);
@@ -1280,7 +1284,33 @@ namespace PhysicalCalculator
                     resultLine = "Current FormatProvider set to " + formatProviderValuestr;
                 }
             }
+            else if (variableName.IsKeyword("System") || variableName.IsKeyword("Default_System"))
+            {
+                SettingFound = true;
+                String systemvaluestr;
+                commandLine = commandLine.ReadToken(out systemvaluestr);
 
+                IUnitSystem us = Physics. UnitSystemFromName(systemvaluestr);
+                if (us == null)
+                {   // Not a unit system from PhysicalMeasure; Try look for a user defined unit system.
+                    // TODO: Look for a user defined unit system with specified name.
+                }
+                if (us != null)
+                {
+                    if (Physics.Default_UnitSystem_Use(us))
+                    {
+                        resultLine = "System set to " + us.Name;
+                    }
+                    else
+                    {
+                        resultLine = "System already set to " + us.Name;
+                    }
+                }
+                else
+                {
+                    resultLine = "System " + systemvaluestr + " was not found; Current system is " + Physics.Default_UnitSystem;
+                }
+            }
             return SettingFound;
         }
 

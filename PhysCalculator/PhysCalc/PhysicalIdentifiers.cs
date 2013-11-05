@@ -114,7 +114,7 @@ namespace PhysicalCalculator.Identifiers
             UnitSystem NewUnitSystem = new UnitSystem(name, null);
 
             UnitSystem = NewUnitSystem;
-            Physics.Default_UnitSystem_Stack.Push(NewUnitSystem);
+            // Physics.Default_UnitSystem_Stack.Push(NewUnitSystem);
         }
 
         public override String ToListString(String name)
@@ -773,6 +773,7 @@ namespace PhysicalCalculator.Identifiers
             // Either is identifier a system in some context; set it to specified value
             // or identifier not found; No local identifier with that name, Declare local system
             systemItem = new NamedSystem(systemName);
+            PhysicalMeasure.Physics.Default_UnitSystem_Use((systemItem as NamedSystem).UnitSystem);  
             return context.SetLocalIdentifier(systemName, systemItem);
         }
 
