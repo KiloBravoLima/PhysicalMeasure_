@@ -404,7 +404,7 @@ namespace PhysicalMeasure
             SByte MinNoOfBaseUnits = (SByte)Math.Min(exponents1.Length, exponents2.Length);
             SByte MaxNoOfBaseUnits = (SByte)Math.Max(exponents1.Length, exponents2.Length);
 
-            Debug.Assert(MaxNoOfBaseUnits <= Physics.NoOfMeasures, "Not to many base units");
+            Debug.Assert(MaxNoOfBaseUnits <= Physics.NoOfMeasures, "Too many base units:" + MaxNoOfBaseUnits.ToString() + ". No more than " + Physics.NoOfMeasures + " expected.");
 
             do
             {   // Compare exponents where defined in both arrays
@@ -437,7 +437,7 @@ namespace PhysicalMeasure
             Debug.Assert(exponents != null, "Parameter needed");
 
             SByte NoOfBaseUnits = (SByte)exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures, "Not to many base units");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + Physics.NoOfMeasures + " expected.");
 
             bool isDimensionless = true;
             SByte i = 0;
@@ -5576,9 +5576,7 @@ namespace PhysicalMeasure
                                                                                             new NamedDerivedUnit(SI_Units, "gray",      "Gy",   new SByte[] { 2, 0, -2, 0, 0, 0, 0 }),
                                                                                             new NamedDerivedUnit(SI_Units, "katal",     "kat",  new SByte[] { 0, 0, -1, 0, 0, 1, 0 }) },
                                                                  new ConvertibleUnit[] { new ConvertibleUnit("gram", "g", SI_BaseUnits[(int)MeasureKind.Mass], new ScaledValueConversion(1000)),  /* [g] = 1000 * [Kg] */
-                                                                                         //
                                                                                          new ConvertibleUnit("Celsius", "°C" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ , SI_BaseUnits[(int)MeasureKind.ThermodynamicTemperature], new LinearValueConversion(-273.15, 1)),    /* [°C] = 1 * [K] - 273.15 */
-                                                                                         //new ConvertibleUnit("Celsius", "@C", SI_BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)], new LinearValueConversion(-273.15, 1)),    /* [°C] = 1 * [K] - 273.15 */
                                                                                          new ConvertibleUnit("hour", "h", SI_BaseUnits[(int)MeasureKind.Time], new ScaledValueConversion(1.0/3600)), /* [h] = 1/3600 * [s] */
                                                                                          new ConvertibleUnit("litre", "l", SI_BaseUnits[(int)MeasureKind.Length].Pow(3).Unit, new ScaledValueConversion(1000) ) }) ; /* [l] = 1000 * [m3] */   
         public static readonly PhysicalUnit dimensionless = new DerivedUnit(SI_Units, new SByte[] { 0, 0, 0, 0, 0, 0, 0 });
@@ -5992,34 +5990,6 @@ namespace PhysicalMeasure
 
     public static partial class Prefix
     {
-
-        
-        //public static readonly UnitPrefixTable UnitPrefixes = new UnitPrefixTable(new UnitPrefix[] {new UnitPrefix("yotta", 'Y', 24),
-        //                                                                                            new UnitPrefix("zetta", 'Z', 21),
-        //                                                                                            new UnitPrefix("exa",   'E', 18),
-        //                                                                                            new UnitPrefix("peta",  'P', 15),
-        //                                                                                            new UnitPrefix("tera",  'T', 12),
-        //                                                                                            new UnitPrefix("giga",  'G', 9),
-        //                                                                                            new UnitPrefix("mega",  'M', 6),
-        //                                                                                            new UnitPrefix("kilo",  'K', 3),   /* k */
-        //                                                                                            new UnitPrefix("kilo",  'k', 3),   /* k */
-        //                                                                                            new UnitPrefix("hecto", 'H', 2),   /* h */
-        //                                                                                            new UnitPrefix("hecto", 'h', 2),   /* h */
-        //                                                                                            new UnitPrefix("deca",  'D', 1),   /* da */
-        //                                                                                            new UnitPrefix("deci",  'd', -1), 
-        //                                                                                            new UnitPrefix("centi", 'c', -2), 
-        //                                                                                            new UnitPrefix("milli", 'm', -3), 
-        //                                                                                            //new UnitPrefix("micro", 'μ', -6), // '\0x03BC' (char)956  
-        //                                                                                            new UnitPrefix("micro", 'µ', -6),  // Ansi '\0x00B5' (char)181   
-        //                                                                                            new UnitPrefix("nano",  'n', -9), 
-        //                                                                                            new UnitPrefix("pico",  'p', -12), 
-        //                                                                                            new UnitPrefix("femto", 'f', -15), 
-        //                                                                                            new UnitPrefix("atto",  'a', -18), 
-        //                                                                                            new UnitPrefix("zepto", 'z', -21), 
-        //                                                                                            new UnitPrefix("yocto", 'y', -24) });
-
-        
-
         /* SI unit prefixes */
         public static readonly UnitPrefix Y = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[0];
         public static readonly UnitPrefix Z = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[1];
