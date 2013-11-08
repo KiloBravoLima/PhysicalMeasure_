@@ -614,12 +614,18 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void TestAdd2KelvinWithCelsiusSpecificConvertion2()
         {
-            //String s = "594.15 mK";
-            //String s = "3.21 K°C";
-            IPhysicalQuantity InMilliKelvin = (IPhysicalQuantity)(new PhysicalQuantity(321273.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)]))); // In Kelvin
+
+            IPhysicalQuantity InMilliKelvin = (IPhysicalQuantity)(new PhysicalQuantity(321273150, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(-3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("K"), 1))))); // In miliKelvin
+            IPhysicalQuantity InKelvin      = (IPhysicalQuantity)(new PhysicalQuantity(321273.15, (IPhysicalUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)]))); // In Kelvin
             IPhysicalQuantity InKiloCelsius = (IPhysicalQuantity)(new PhysicalQuantity(321, (IPhysicalUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("°C"), 1))))); // In Kilo Celsius
 
+            // Check all quantities in all combinations as first and second:
+            Assert.AreEqual(InMilliKelvin, InKelvin);
+            Assert.AreEqual(InKelvin, InMilliKelvin);
+            Assert.AreEqual(InKelvin, InKiloCelsius);
+            Assert.AreEqual(InKiloCelsius, InKelvin);
             Assert.AreEqual(InMilliKelvin, InKiloCelsius);
+            Assert.AreEqual(InKiloCelsius, InMilliKelvin);
         }
 
 
