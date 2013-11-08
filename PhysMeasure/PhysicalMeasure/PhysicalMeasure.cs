@@ -314,6 +314,9 @@ namespace PhysicalMeasure
         PrefixedUnitExponentList Denominators { get; }
 
         IUnitSystem SomeSystem { get; }
+
+        // Specific conversion
+        IPhysicalQuantity ConvertFrom(IPhysicalQuantity physicalQuantity);  
     }
 
     public interface IPhysicalQuantityMath : IComparable, IEquatable<double>, IEquatable<IPhysicalQuantity>, IEquatable<IPhysicalUnit>, IPhysicalItemMath
@@ -3170,6 +3173,41 @@ namespace PhysicalMeasure
             return pq.Multiply(quantity);
         }
 
+        public IPhysicalQuantity ConvertFrom(IPhysicalQuantity physicalQuantity)
+        {
+
+            IPhysicalQuantity pq_unit = physicalQuantity;
+            //////////////////////
+            if (Numerators.Count == 1 && Denominators.Count == 0)
+            {
+                IPrefixedUnitExponent pue = Numerators[0];
+
+                Debug.Assert(pue.Exponent == 1);
+
+                pq_unit = pq_unit.ConvertTo(pue.Unit);
+                
+                Debug.Assert(pq_unit != null);
+
+                if (pq_unit != null)
+                {
+                    if (pue.PrefixExponent != 0)
+                    {
+                        pq_unit = pq_unit.Multiply(Math.Pow(10, -pue.PrefixExponent));
+                    }
+
+                    pq_unit = new PhysicalQuantity(pq_unit.Value, this);
+                }
+            }
+            else
+            {
+                // Not implemented yet
+                Debug.Assert(false);
+            }
+            ///////////////////////
+
+            return pq_unit;
+        }
+
         #region IPhysicalUnitMath Members
 
         public override IPhysicalUnit Dimensionless { get { return new CombinedUnit(); } }
@@ -4341,6 +4379,21 @@ namespace PhysicalMeasure
                         pq = pq.ConvertTo(convertToUnit);
                         return pq;
                     }
+                    else if (physicalQuantity.Unit.Kind == UnitKind.CombinedUnit)
+                    {
+                        ICombinedUnit icu = (ICombinedUnit)physicalQuantity.Unit;
+                        double d = physicalQuantity.Value;
+                        IPhysicalQuantity pq = icu.ConvertToSystemUnit(ref d);
+                        Debug.Assert(pq != null);
+                        pq = pq.ConvertTo(convertToUnit);
+                        return pq;
+                    }
+                    else if (physicalQuantity.Unit.Kind == UnitKind.ConvertibleUnit)
+                    {
+                        IConvertibleUnit icu = (IConvertibleUnit)physicalQuantity.Unit;
+                        IPhysicalQuantity prim_pq = icu.ConvertToPrimaryUnit(physicalQuantity.Value);
+                        return ConvertTo(prim_pq, convertToUnit);
+                    }
                     else if (convertToUnit.Kind == UnitKind.MixedUnit)
                     {
                         IMixedUnit imu = (IMixedUnit)convertToUnit;
@@ -4352,19 +4405,13 @@ namespace PhysicalMeasure
                         }
                         return pq;
                     }
-                    else if (physicalQuantity.Unit.Kind == UnitKind.CombinedUnit)
-                    {
-                        ICombinedUnit icu = (ICombinedUnit)physicalQuantity.Unit;
-                        double d = physicalQuantity.Value;
-                        IPhysicalQuantity pq = icu.ConvertToSystemUnit(ref d);
-                        Debug.Assert(pq != null);
-                        pq = pq.ConvertTo(convertToUnit);
-                        return pq;
-                    }
                     else if (convertToUnit.Kind == UnitKind.CombinedUnit)
                     {
                         ICombinedUnit icu = (ICombinedUnit)convertToUnit;
+                        /*
                         IPhysicalQuantity ToUnit_SystemUnit_pq = icu.ConvertToSystemUnit();
+                        IPhysicalQuantity ToUnit_BaseUnit_pq = icu.ConvertToBaseUnit();
+
                         Debug.Assert(ToUnit_SystemUnit_pq != null);
 
                         IPhysicalQuantity pq_ToSystemUnit = physicalQuantity.ConvertTo(ToUnit_SystemUnit_pq.Unit);
@@ -4376,12 +4423,9 @@ namespace PhysicalMeasure
                         {
                             return null;
                         }
-                    }
-                    else if (physicalQuantity.Unit.Kind == UnitKind.ConvertibleUnit)
-                    {
-                        IConvertibleUnit icu = (IConvertibleUnit)physicalQuantity.Unit;
-                        IPhysicalQuantity prim_pq = icu.ConvertToPrimaryUnit(physicalQuantity.Value);
-                        return ConvertTo(prim_pq, convertToUnit);
+                         */
+                        IPhysicalQuantity pq = icu.ConvertFrom(physicalQuantity);
+                        return pq;
                     }
                     else if (convertToUnit.Kind == UnitKind.ConvertibleUnit)
                     {
