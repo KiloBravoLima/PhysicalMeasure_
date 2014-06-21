@@ -344,6 +344,27 @@ namespace PhysCalculatorTests
         ///A test for CommandPrint
         ///</summary>
         [TestMethod()]
+        public void CommandPrint_GWh_pr_TWh_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            //string CommandLine = "set Var4 = 3451776 GW·h / 20200 TWh";
+            string CommandLine = "3451776 GW·h / 20200 TWh";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = "0,17088";
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
+            Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
+            Assert.AreEqual(expected, actual, "for result");
+        }
+
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
         public void CommandPrint_HPlusMinPlusS_Test()
         {
             PhysCalculator target = new PhysCalculator();
@@ -454,6 +475,78 @@ namespace PhysCalculatorTests
             string ResultLine = string.Empty;
             string ResultLineExpected = (1.2 * 3.4 * 0.56 * 1000/100).ToString() + " Hl";
 
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_GWd_ConvertTo_GWh_Test()
+        {
+
+            /*
+// Saved 2014-05-19 13:35:00 to ShortenFractions.cal
+// 
+
+
+set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
+// 3451776 GW·h
+
+// set Var2 = 1010 GW * 0,4 * 356 d * 24 h/d [TWh]
+// // 3451,776 TW·h
+// set Var3 = 1010 GW * 0,4 * 356 d * 24 h/d / 20200 TWh
+// // 170,88 GW/TW
+              
+            */
+            PhysCalculator target = new PhysCalculator();
+            //string CommandLine = "1010 GW * 0,4 * 356 d * 24 h/d";
+            string CommandLine = "2 GW * 3 d * 4 h/d";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            //string ResultLineExpected = (1010 * 0.4 * 356 * 24).ToString() + " GW·h";
+            string ResultLineExpected = (2 * 3 * 4).ToString() + " GW·h";
+
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_GWd_ConvertTo_GWh_full_Test()
+        {
+
+            /*
+// Saved 2014-05-19 13:35:00 to ShortenFractions.cal
+// 
+
+
+set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
+// 3451776 GW·h
+
+// set Var2 = 1010 GW * 0,4 * 356 d * 24 h/d [TWh]
+// // 3451,776 TW·h
+// set Var3 = 1010 GW * 0,4 * 356 d * 24 h/d / 20200 TWh
+// // 170,88 GW/TW
+              
+            */
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "1010 GW * 0,4 * 356 d * 24 h/d";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = (1010 * 0.4 * 356 * 24).ToString() + " GW·h";
+            
             bool expected = true;
             bool actual;
             actual = target.CommandPrint(ref CommandLine, ref ResultLine);
