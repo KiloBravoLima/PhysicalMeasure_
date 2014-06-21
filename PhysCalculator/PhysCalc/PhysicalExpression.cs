@@ -854,23 +854,23 @@ namespace PhysicalCalculator.Expression
                         else if (Token.Operator == OperatorKind.sub)
                         {
                             // Combine pq1 and pq2 to the new PhysicalQuantity pq1/pq2
-                            IPhysicalQuantity pqRestult = pqFirst.Subtract(pqSecond);
-                            Debug.Assert(pqRestult != null);
-                            Operands.Push(pqRestult);
+                            IPhysicalQuantity pqResult = pqFirst.Subtract(pqSecond);
+                            Debug.Assert(pqResult != null);
+                            Operands.Push(pqResult);
                         }
                         else if (Token.Operator == OperatorKind.mult)
                         {
                             // Combine pq1 and pq2 to the new PhysicalQuantity pq1*pq2   
-                            IPhysicalQuantity pqRestult = pqFirst.Multiply(pqSecond);
-                            Debug.Assert(pqRestult != null);
-                            Operands.Push(pqRestult);
+                            IPhysicalQuantity pqResult = pqFirst.Multiply(pqSecond);
+                            Debug.Assert(pqResult != null);
+                            Operands.Push(pqResult);
                         }
                         else if (Token.Operator == OperatorKind.div)
                         {
                             // Combine pq1 and pq2 to the new PhysicalQuantity pq1/pq2
-                            IPhysicalQuantity pqRestult = pqFirst.Divide(pqSecond);
-                            Debug.Assert(pqRestult != null);
-                            Operands.Push(pqRestult);
+                            IPhysicalQuantity pqResult = pqFirst.Divide(pqSecond);
+                            Debug.Assert(pqResult != null);
+                            Operands.Push(pqResult);
                         }
                         else if (   (Token.Operator == OperatorKind.pow)
                                  || (Token.Operator == OperatorKind.root))
@@ -897,16 +897,16 @@ namespace PhysicalCalculator.Expression
                             if (Token.Operator == OperatorKind.pow)
                             {
                                 // Combine pq and exponent to the new PhysicalQuantity pq^expo
-                                IPhysicalQuantity pqRestult = pqFirst.Pow(Exponent);
-                                Debug.Assert(pqRestult != null);
-                                Operands.Push(pqRestult);
+                                IPhysicalQuantity pqResult = pqFirst.Pow(Exponent);
+                                Debug.Assert(pqResult != null);
+                                Operands.Push(pqResult);
                             }
                             else
                             {
                                 // Combine pq and exponent to the new PhysicalQuantity pq^(1/expo)
-                                IPhysicalQuantity pqRestult = pqFirst.Rot(Exponent);
-                                Debug.Assert(pqRestult != null);
-                                Operands.Push(pqRestult);
+                                IPhysicalQuantity pqResult = pqFirst.Rot(Exponent);
+                                Debug.Assert(pqResult != null);
+                                Operands.Push(pqResult);
                             }
                         }
                         else if (Token.Operator == OperatorKind.equals)

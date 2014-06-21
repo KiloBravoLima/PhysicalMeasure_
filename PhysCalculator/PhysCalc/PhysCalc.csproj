@@ -125,6 +125,7 @@
     <None Include="Calculator Scripts\SecInYear.cal">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Calculator Scripts\ShortenFractions.cal" />
     <None Include="Calculator Scripts\TestFunc.cal">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
