@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using PhysicalMeasure;
 using CommandParser;
 using PhysicalCalculator;
-
+using PhysicalCalculator.Identifiers;
 
 namespace PhysCalculatorTests
 {
@@ -555,6 +555,113 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.AreEqual(expected, actual);
         }
 
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_number_MultTo_MWh_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "982 * 1000 MWh";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = (982 * 1000).ToString() + " MW·h";
+            
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_MWh_MultTo_h_par_d_MultTo_d_per_x_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "1000 MW * 24 h/d * 356 d/x";
+            string CommandLineExpected = "x"; 
+
+            string ResultLine = string.Empty;
+            string ResultLineExpected = "The string argument is not in a valid physical expression format. Operand expected 'x' at position 25\n"
+                                         + (1000 * 24 * 356).ToString() + " MW·h";
+
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_MWh_MultTo_h_par_x_MultTo_d_per_z_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "1000 MW * 24 h/xx * 356 d/z";
+            string CommandLineExpected = "xx * 356 d/z";
+            string ResultLine = string.Empty;
+
+            string ResultLineExpected = "The string argument is not in a valid physical expression format. Operand expected 'xx * 356 d/z' at position 15\n"
+                                        + (1000 * 24 ).ToString() + " MW·h";
+
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_MWh_MultTo_h_par_d_MultTo_d_per_year_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "1000 MW * 24 h/d * 356 d/year";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = (1000 * 24 * 356).ToString() + " MW·h/year";
+
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for CommandPrint
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_number_MultTo_MWh_MultTo_ms_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "982 * 1000 MWh * 123 ms";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = (982 * 1000 * 123).ToString() + " MW·h·ms";
+
+            bool expected = true;
+            bool actual;
+            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine);
+            Assert.AreEqual(ResultLineExpected, ResultLine);
+            Assert.AreEqual(expected, actual);
+        }
+
+
         /// <summary>
         ///A test for CommandReadFromFile
         ///</summary>
@@ -685,7 +792,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             actual = target.CommandSet(ref CommandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, CommandLine, "commandLine not as expected");
             Assert.AreEqual(ResultLineExpected, ResultLine, "ResultLine not as expected");
-            Assert.AreEqual(expected, actual, "CommandSet() retur value not as expected");
+            Assert.AreEqual(expected, actual, "CommandSet() return value not as expected");
         }
 
         /// <summary>
@@ -743,6 +850,113 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         }
 
 
+        /// <summary>
+        ///A test for Command "unit USD; 1500 USD /0.23 KWh"
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_Combined_user_defined_unit_and_physical_unit_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            target.Setup();
+            string[] CommandLines = { "unit USD", "1500 USD /0.23 KWh" };
+            List<String> ResultLines = new List<string>();
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = "\0ResetColor";
+
+            //bool expected = true;
+            //bool actual;
+
+            CalculatorEnvironment localContext = new CalculatorEnvironment() ;
+            ResultWriter resultLineWriter = new ResultWriter(ResultLines);
+            Commandreader commandLineReader = new Commandreader(CommandLines, resultLineWriter) ;
+            target.ExecuteCommands(localContext, commandLineReader, resultLineWriter);
+
+            IPhysicalQuantity AccumulatorActual;
+            // actual = target.Command(ref CommandLine, out ResultLine);
+            string AccumulatorAccessResultLineExpected = "";
+
+            PhysicalCalculator.Expression.IEnvironment context;
+            INametableItem USDItem;
+
+            Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("USD", out context, out USDItem), "for accumulator access");
+            ICombinedUnit ExpectedUnit = new CombinedUnit();
+            Assert.AreEqual(USDItem.Identifierkind, IdentifierKind.Unit, "For USD unit item");
+            ExpectedUnit = ExpectedUnit.CombinedUnitMultiply(((NamedUnit)USDItem).pu);
+
+            ICombinedUnit Wh_Unit = new CombinedUnit();
+            Wh_Unit = Wh_Unit.CombinedUnitMultiply(SI.W);
+            Wh_Unit = Wh_Unit.CombinedUnitMultiply(SI.h);
+
+            IPrefixedUnitExponent prefixedUnitExponent = new PrefixedUnitExponent(3, Wh_Unit, 1);
+            ExpectedUnit = ExpectedUnit.CombinedUnitDivide(prefixedUnitExponent);
+
+            // IPhysicalUnit ExpectedUnit;
+            IPhysicalQuantity AccumulatorExpected = new PhysicalQuantity(6521.73913043478, ExpectedUnit);  // {6521,73913043478 USD/KW·h}
+            Assert.AreEqual(AccumulatorExpected, AccumulatorActual, "For accumulator");
+
+            ResultLine = ResultLines[ResultLines.Count - 1]; 
+            Assert.AreEqual(ResultLineExpected, ResultLine, "For ResultLine");
+
+
+            // Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
+            //Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
+            // Assert.AreEqual(expected, actual, "for result");
+
+            // Clean up global info for default unit system
+            PhysicalMeasure.Physics.Default_UnitSystem_Reset();
+        }
+
+        /// <summary>
+        ///A test for Command "unit USD; 1500 USD /0.23 KWh"
+        ///</summary>
+        [TestMethod()]
+        public void CommandPrint_Combined_user_defined_unit_and_physical_unit_Test_2()
+        {
+            PhysCalculator target = new PhysCalculator();
+            target.Setup();
+            string[] CommandLines = { "unit DKR", "unit Øre = 0.01 DKR", "set EnergyUnitPrice = 241.75 Øre /1.0 KWh", "set EnergiConsumed = 1234.56 kWh", "set PriceEnergiConsumed = EnergiConsumed * EnergyUnitPrice", "print PriceEnergiConsumed [DKR]", "set PriceDKREnergiConsumed=PriceEnergiConsumed [DKR]" };
+            List<String> ResultLines = new List<string>();
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = "\0ResetColor";
+
+            CalculatorEnvironment localContext = new CalculatorEnvironment();
+            ResultWriter resultLineWriter = new ResultWriter(ResultLines);
+            Commandreader commandLineReader = new Commandreader(CommandLines, resultLineWriter);
+            target.ExecuteCommands(localContext, commandLineReader, resultLineWriter);
+
+            IPhysicalQuantity AccumulatorActual;
+            // actual = target.Command(ref CommandLine, out ResultLine);
+            string AccumulatorAccessResultLineExpected = "";
+
+            PhysicalCalculator.Expression.IEnvironment context;
+            INametableItem DKRItem;
+            INametableItem OereItem;
+            INametableItem PriceDKREnergiConsumedItem;
+
+            Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("DKR", out context, out DKRItem), "for DKR access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("Øre", out context, out OereItem), "for Øre access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("PriceDKREnergiConsumed", out context, out PriceDKREnergiConsumedItem), "for PriceDKREnergiConsumedItem access");
+
+            Assert.AreEqual(DKRItem.Identifierkind, IdentifierKind.Unit, " for DKR unit item");
+            Assert.AreEqual(OereItem.Identifierkind, IdentifierKind.Unit, " for Øre unit item");
+            Assert.AreEqual(PriceDKREnergiConsumedItem.Identifierkind, IdentifierKind.Variable, " for PriceDKREnergiConsumed variable item");
+
+            IPhysicalQuantity AccumulatorExpected = new PhysicalQuantity(2.4175 * 1234.56, ((NamedUnit)DKRItem).pu);
+            Assert.AreEqual(AccumulatorExpected, AccumulatorActual, "for accumulator");
+
+            ResultLine = ResultLines[ResultLines.Count - 1];
+            Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
+
+            // Clean up global info for default unit system
+            PhysicalMeasure.Physics.Default_UnitSystem_Reset();
+        }
+
+
+        
 
         /*****************
         /// <summary>

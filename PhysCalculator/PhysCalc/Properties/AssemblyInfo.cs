@@ -9,9 +9,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Physical quantity calculator")]
 [assembly: AssemblyConfiguration("")]
 
-[assembly: AssemblyCompany("Klaus Bo Larsen")]
+[assembly: AssemblyCompany("Kilo Bravo Lima")]
 [assembly: AssemblyProduct("PhysCalc")]
-[assembly: AssemblyCopyright("Copyright © Klaus Bo Larsen 2010-2013")]
+[assembly: AssemblyCopyright("Copyright © Kilo Bravo 2010-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

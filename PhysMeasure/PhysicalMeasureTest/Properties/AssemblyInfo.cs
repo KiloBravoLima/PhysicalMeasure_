@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PhysicalMeasureTest")]
-[assembly: AssemblyCopyright("Copyright ©  2010-2013")]
+[assembly: AssemblyCopyright("Copyright ©  2010-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

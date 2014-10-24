@@ -67,6 +67,23 @@ namespace TokenParser
             return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
         }
 
+
+        public static int PeekChar(this String commandLine, out Char ch)
+        {
+            int i = commandLine.Length;
+            if (i > 0)
+            {
+                ch = commandLine[0];
+                i = 1;
+            }
+            else
+            {
+                ch = '\0';
+            }
+            return i;
+        }
+
+
         public static Boolean IsKeyword(this String commandLine, String keyword)
         {
             return commandLine.Equals(keyword, StringComparison.OrdinalIgnoreCase);
@@ -92,6 +109,17 @@ namespace TokenParser
         public static int PeekToken(this String commandLine, out String token)
         {
             int i = commandLine.IndexOf(" ");
+            if (i < 0)
+            {
+                i = commandLine.Length;
+            }
+            token = commandLine.Substring(0, i);
+            return i;
+        }
+
+        public static int PeekIdentifier(this String commandLine, out String token)
+        {
+            int i = commandLine.TakeWhile(c => Char.IsLetterOrDigit(c) || Char.Equals(c, '_')).Count();
             if (i < 0)
             {
                 i = commandLine.Length;

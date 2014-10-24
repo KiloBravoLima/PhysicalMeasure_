@@ -9,9 +9,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("PhysicalMeasure")]
 [assembly: AssemblyDescription("Physical Unit System Framework")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Klaus Bo Larsen")]
+[assembly: AssemblyCompany("Kilo Bravo Lima")]
 [assembly: AssemblyProduct("PhysicalMeasure")]
-[assembly: AssemblyCopyright("Copyright © Klaus Bo Larsen 2010-2013")]
+[assembly: AssemblyCopyright("Copyright © Kilo Bravo 2010-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

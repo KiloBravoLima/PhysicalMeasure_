@@ -120,9 +120,7 @@ namespace PhysicalCalculator
 
         public void Setup()
         {
-            // Setup Lookup callback delegert static globals
-
-            // Delegert static globals
+            // Setup Lookup callback delegate static globals
             PhysicalExpression.IdentifierItemLookupCallback = IdentifierItemLookup;
             PhysicalExpression.IdentifierContextLookupCallback = IdentifierContextLookup;
             PhysicalExpression.QualifiedIdentifierContextLookupCallback = QualifiedIdentifierCalculatorContextLookup;
@@ -155,6 +153,7 @@ namespace PhysicalCalculator
 
             do
             {
+                String FullCommandLine;
                 String CommandLine;
                 String ResultLine;
 
@@ -166,8 +165,8 @@ namespace PhysicalCalculator
                     ResultLine = "";
 
                     CommandLineFromAccessor = commandLineReader.HasAccessor();
-                    commandLineReader.ReadCommand(ref ResultLine, out CommandLine);
-                    CommandLineEmpty = String.IsNullOrWhiteSpace(CommandLine);
+                    commandLineReader.ReadCommand(ref ResultLine, out FullCommandLine);
+                    CommandLineEmpty = String.IsNullOrWhiteSpace(FullCommandLine);
                     ResultLineEmpty = String.IsNullOrWhiteSpace(ResultLine);
                     if (!ResultLineEmpty)
                     {
@@ -180,7 +179,7 @@ namespace PhysicalCalculator
                     {
                         do
                         {
-                            CommandLine = CommandLine.Trim();
+                            CommandLine = FullCommandLine.Trim();
 
                             if (localContext.FunctionToParseInfo != null)
                             {
@@ -647,7 +646,10 @@ namespace PhysicalCalculator
                     {
                         TryParseToken("=", ref commandLine);
 
-                        IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine);
+                        List<string> ExpectedFollow = new List<string>();
+                        ExpectedFollow.Add(";");
+
+                        IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                         if (!ALocalIdentifier || pq != null)
                         {
@@ -709,7 +711,10 @@ namespace PhysicalCalculator
                         Boolean IsCalculatorSetting = CheckForCalculatorSetting(IdentifierContext, VariableName, ref commandLine, ref resultLine);
                         if (!IsCalculatorSetting)
                         {
-                            IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine);
+                            List<string> ExpectedFollow = new List<string>();
+                            ExpectedFollow.Add(";");
+
+                            IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                             if (pq != null)
                             {
@@ -813,7 +818,10 @@ namespace PhysicalCalculator
                     {
                         TryParseToken("=", ref commandLine);
 
-                        IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine);
+                        List<string> ExpectedFollow = new List<string>();
+                        ExpectedFollow.Add(";");
+
+                        IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                         if ((pq != null) && pq.IsDimensionless)
                         {
@@ -949,9 +957,14 @@ namespace PhysicalCalculator
         public Boolean CommandPrint(ref String commandLine, ref String resultLine)
         {
             resultLine = "";
+
+            List<string> ExpectedFollow = new List<string>();
+            ExpectedFollow.Add(";");
+            ExpectedFollow.Add(",");
+
             do
             {
-                IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine);
+                IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                 if (pq != null)
                 {
@@ -973,15 +986,22 @@ namespace PhysicalCalculator
 
         public Boolean IdentifierAssumed(ref String commandLine, ref String resultLine)
         {
+            /*
             string token;
             int len = commandLine.PeekToken(out token);
+            
+            if (token.IsIdentifier())
+            */
 
-            if (token.IsIdentifier() )
+            string identifier;
+            int len = commandLine.PeekIdentifier(out identifier);
+
+            if (len > 0)
             {
-                string token2;
-                int len2 = commandLine.Substring(len).TrimStart().PeekToken(out token2);
+                Char token2;
+                int len2 = commandLine.Substring(len).TrimStart().PeekChar(out token2);
 
-                if (token2 == "=")
+                if (token2 == '=')
                 {
                     // Assume a set Command
                     return CommandSet(ref commandLine, ref resultLine);
@@ -1030,7 +1050,7 @@ namespace PhysicalCalculator
                 }
                 else
                 {
-                    resultLine = "'" + FunctionName + "' is already definded as a " + Item.Identifierkind.ToString();
+                    resultLine = "'" + FunctionName + "' is already defined as a " + Item.Identifierkind.ToString();
                 }
             }
             return true;
@@ -1039,7 +1059,11 @@ namespace PhysicalCalculator
         public Boolean CommandIf(ref String commandLine, ref String resultLine)
         {
             resultLine = "";
-            Boolean testResult = GetBoolean(ref commandLine, ref resultLine);
+            List<string> ExpectedFollow = new List<string>();
+            // ExpectedFollow.Add("//");
+            ExpectedFollow.Add("{");
+
+            Boolean testResult = GetBoolean(ref commandLine, ref resultLine, ExpectedFollow);
             CurrentContext.BeginParsingCommandBlock();
             ICommandsEvaluator thenBlock = ParseCommandBlockDeclaration(ref commandLine, ref resultLine);
             if (thenBlock != null && testResult)
@@ -1066,9 +1090,9 @@ namespace PhysicalCalculator
 
         #region Command helpers
 
-        public IPhysicalQuantity GetPhysicalQuantity(ref String commandLine, ref String resultLine)
+        public IPhysicalQuantity GetPhysicalQuantity(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
-            IPhysicalQuantity pq = PhysicalCalculator.Expression.PhysicalExpression.ParseConvertedExpression(ref commandLine, ref resultLine);
+            IPhysicalQuantity pq = PhysicalCalculator.Expression.PhysicalExpression.ParseConvertedExpression(ref commandLine, ref resultLine, ExpectedFollow);
 
             if (pq == null)
             {
@@ -1082,9 +1106,9 @@ namespace PhysicalCalculator
             return pq;
         }
 
-        public Boolean GetBoolean(ref String commandLine, ref String resultLine)
+        public Boolean GetBoolean(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
-            Nullable<Boolean> boolRes = PhysicalCalculator.Expression.PhysicalExpression.ParseBooleanExpression(ref commandLine, ref resultLine);
+            Nullable<Boolean> boolRes = PhysicalCalculator.Expression.PhysicalExpression.ParseBooleanExpression(ref commandLine, ref resultLine, ExpectedFollow);
 
             if (boolRes == null)
             {

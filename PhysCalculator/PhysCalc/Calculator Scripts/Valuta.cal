@@ -15,3 +15,14 @@ set Price2 = 321 USD
 
 set Price2InDKR = Price2 [DKR]
 set Price2InEUR = Price2 [EUR]
+
+
+unit Øre = 0.01 DKR
+
+set EnergyUnitPrice = 241.75 Øre /1.0 KWh
+
+
+set EnergiConsumed = 1234.56 kWh
+set PriceEnergiConsumed = EnergiConsumed * EnergyUnitPrice
+
+print PriceEnergiConsumed [DKR]

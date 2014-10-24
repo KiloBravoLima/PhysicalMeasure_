@@ -1,7 +1,9 @@
 ﻿﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Drawing; 
 
+using ConsolAnyColor;
 using CommandParser;
 
 
@@ -114,8 +116,10 @@ namespace PhysicalCalculator
 
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
+            ConsolAnyColorClass.SetColor(ConsoleColor.Blue, Color.FromArgb(50, 50, 255));  // Slightliy light blue
+
             ResultWriter ResultLineWriter = new ResultWriter();
 
             //  ShowStartLines(ResultLineWriter);
@@ -124,7 +128,7 @@ namespace PhysicalCalculator
             CommandLineReader.ReadFromConsoleWhenEmpty = true;
 #if DEBUG // Unit tests only included in debug build 
             if (System.Reflection.Assembly.GetEntryAssembly() == null)    
-            {
+            { 
                 // Do some setup to avoid error    
                 // We want the test to run only the commands in the args
                 CommandLineReader.ReadFromConsoleWhenEmpty = false;
