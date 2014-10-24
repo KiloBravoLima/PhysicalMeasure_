@@ -187,15 +187,21 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static List<IPhysicalQuantity> ParseExpressionList(ref String commandLine, ref String resultLine)
+        public static List<IPhysicalQuantity> ParseExpressionList(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
             List<IPhysicalQuantity> pqList = new List<IPhysicalQuantity>();
             Boolean MoreToParse = false;
             Boolean OK = true;
+            List<String> TempExpectedFollow = ExpectedFollow;
+            if (!TempExpectedFollow.Contains(","))
+            {
+                TempExpectedFollow = new List<string>(ExpectedFollow);
+                TempExpectedFollow.Add(","); 
+            }
             do
             {
                 IPhysicalQuantity pq = null;
-                pq = ParseConvertedExpression(ref commandLine, ref resultLine);
+                pq = ParseConvertedExpression(ref commandLine, ref resultLine, TempExpectedFollow);
                 OK = pq != null;
                 if (OK)
                 {
@@ -211,9 +217,9 @@ namespace PhysicalCalculator.Expression
         }
 
 
-        public static Nullable<Boolean> ParseBooleanExpression(ref String commandLine, ref String resultLine)
+        public static Nullable<Boolean> ParseBooleanExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
-            IPhysicalQuantity pq = ParseExpression(ref commandLine, ref resultLine);
+            IPhysicalQuantity pq = ParseExpression(ref commandLine, ref resultLine, ExpectedFollow);
             if (pq != null)
             {
                 return !pq.Equals(PQ_False);
@@ -221,11 +227,17 @@ namespace PhysicalCalculator.Expression
             return null;
         }
 
-        public static IPhysicalQuantity ParseConvertedExpression(ref String commandLine, ref String resultLine)
+        public static IPhysicalQuantity ParseConvertedExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
             IPhysicalQuantity pq;
 
-            pq = ParseExpression(ref commandLine, ref resultLine);
+            List<String> TempExpectedFollow = ExpectedFollow;
+            if (!TempExpectedFollow.Contains("["))
+            {
+                TempExpectedFollow = new List<string>(ExpectedFollow);
+                TempExpectedFollow.Add("[");
+            }
+            pq = ParseExpression(ref commandLine, ref resultLine, TempExpectedFollow);
             if (pq != null)
             {
                 pq = ParseOptionalConvertedExpression(pq, ref commandLine, ref resultLine);
@@ -253,6 +265,7 @@ namespace PhysicalCalculator.Expression
                 }
             }
 
+            // No unit specified to convert to; Check if pq can shown as a NamedDerivedUnit
             pqRes = CheckForNamedDerivedUnit(pqRes);
 
             return pqRes;
@@ -263,8 +276,8 @@ namespace PhysicalCalculator.Expression
             IPhysicalQuantity pqRes = pq;
             if (pqRes != null)
             {   
-                IUnitSystem unitSystem = pqRes.Unit.System;
-                if (unitSystem != null)
+                IUnitSystem unitSystem = pqRes.Unit.SimpleSystem;
+                if (unitSystem != null && !unitSystem.IsCombinedUnitSystem)
                 {
                     IPhysicalUnit namedDerivedUnit = unitSystem.NamedDerivedUnitFromUnit(pqRes.Unit);
                     if (namedDerivedUnit != null)
@@ -281,7 +294,7 @@ namespace PhysicalCalculator.Expression
         {
             IPhysicalUnit pu = null;
             if (TokenString.TryParseToken("[", ref commandLine))
-            { // "Convert to unit" square paranteses
+            { // "Convert to unit" square parentheses
 
                 int UnitStringLen = commandLine.IndexOf(']');
                 if (UnitStringLen == 0)
@@ -347,10 +360,16 @@ namespace PhysicalCalculator.Expression
         {
             public String InputString;
             public String ResultString;
+            
             public int Pos = 0;
-            public Boolean InputRecognized = true;
+            
             public IPhysicalUnit dimensionless = Physics.dimensionless;
+            public List<String> ExpectedFollow = new List<String>(); // The list of words and symbols which will terminate parsing the InputString without signaling an error.
+
             public Boolean ThrowExceptionOnInvalidInput = false;
+
+            private Boolean inputrecognized = true;
+            //private String errormessage;
 
             private Stack<OperatorKind> Operators = new Stack<OperatorKind>();
             private List<token> Tokens = new List<token>();
@@ -369,10 +388,18 @@ namespace PhysicalCalculator.Expression
                 this.InputString = InputString;
             }
 
+            public string RemainingInput { get { return InputString.Substring(Pos); }  } 
+
+            /*
             public string GetRemainingInput()
             {
                 return InputString.Substring(Pos);
             }
+            */
+
+            public Boolean InputRecognized { get { return inputrecognized; } } 
+
+            // public string ErrorMessage { get { return errormessage; } } 
 
             private Boolean PushNewOperator(OperatorKind newOperator)
             {
@@ -531,9 +558,8 @@ namespace PhysicalCalculator.Expression
                         }
                         else
                         {
-                            //return null;
                             // End of recognized input; Stop reading and return operator tokens from stack.
-                            InputRecognized = false;
+                            inputrecognized = false;
                         }
                     }
                     else if (c == ')')
@@ -545,9 +571,8 @@ namespace PhysicalCalculator.Expression
                         }
                         else
                         {
-                            //return null;
                             // End of recognized input; Stop reading and return operator tokens from stack.
-                            InputRecognized = false;
+                            inputrecognized = false;
                         }
                     }
                     else
@@ -576,31 +601,32 @@ namespace PhysicalCalculator.Expression
                             }
                             else
                             {
-                                //return null;
                                 // End of recognized input; Stop reading and return operator tokens from stack.
-                                InputRecognized = false;
+                                // Error signaling already done in PushNewOperator
+                                /*
+                                inputrecognized = false;
+                                ResultString = "Internal Error: Handling operator '" + NewOperator.ToString() + "' failed at '" + c + "' at pos " + Pos.ToString();
+                                */ 
                             }
                         }
                         else if (Char.IsDigit(c))
                         {
                             if (LastReadToken == TokenKind.Operand)
                             {
+                                // End of recognized input; Stop reading and return operator tokens from stack.
+                                inputrecognized = false;
+                                ResultString = "The string argument is not in a valid physical unit format. An operator must follow a operand. Invalid operand at '" + c + "' at pos " + Pos.ToString();
+
                                 if (ThrowExceptionOnInvalidInput)
                                 {
-                                    throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. An operator must follow a operand. Invalid operand at '" + c + "' at pos " + Pos.ToString());
-                                }
-                                else
-                                {
-                                    //return null;
-                                    // End of recognized input; Stop reading and return operator tokens from stack.
-                                    InputRecognized = false;
+                                    throw new PhysicalUnitFormatException(ResultString);
                                 }
                             }
                             else
                             {
                                 Double D;
 
-                                String CommandLine = GetRemainingInput();
+                                String CommandLine = RemainingInput;
                                 int OldLen = CommandLine.Length;
                                 String ResultLine = "";
                                 Boolean OK = ParseDouble(ref CommandLine, ref ResultLine, out D);
@@ -630,15 +656,17 @@ namespace PhysicalCalculator.Expression
                                     return new token(pq);
                                 }
 
+                                // End of recognized input; Stop reading and return operator tokens from stack.
+                                inputrecognized = false;
+                                ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operand after '" + c + "' at position " + Pos.ToString();
+
                                 if (ThrowExceptionOnInvalidInput)
                                 {
-                                    throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid or missing operand after '" + c + "' at position " + Pos.ToString());
+                                    throw new PhysicalUnitFormatException(ResultString);
                                 }
                                 else
                                 {
                                     //return null;
-                                    // End of recognized input; Stop reading and return operator tokens from stack.
-                                    InputRecognized = false;
                                 }
                             }
                         }
@@ -646,16 +674,20 @@ namespace PhysicalCalculator.Expression
                         {
                             String IdentifierName;
 
-                            String CommandLine = GetRemainingInput();
+                            String CommandLine = RemainingInput;
                             int OldLen = CommandLine.Length;
                             String ResultLine = "";
 
                             IPhysicalQuantity pq;
 
                             Boolean PrimaryIdentifierFound = ParseQualifiedIdentifier(ref CommandLine, ref ResultLine, out IdentifierName, out pq);
-                            Pos += OldLen - CommandLine.Length;
+                            // 2014-09-09 Moved to only be done when PrimaryIdentifierFound or call of .cal file as function : Pos += OldLen - CommandLine.Length;
+                            int newPos = Pos + OldLen - CommandLine.Length;
                             if (PrimaryIdentifierFound)
                             {
+                                // Increment read pos; mark IdentifierName as read
+                                Pos = newPos;
+
                                 // Check if any inner identifier was found
                                 Boolean InnerIdentifierFound = (pq != null);
                                 if (!InnerIdentifierFound)
@@ -681,7 +713,7 @@ namespace PhysicalCalculator.Expression
                                             TokenString.ParseChar(')', ref CommandLine, ref ResultLine);
 
                                             FileFunctionGet(IdentifierName, out pq, ref ResultLine);
-                                            Pos += OldLen - CommandLine.Length;
+                                            Pos = newPos + OldLen - CommandLine.Length;
                                         }
                                     }
                                 }
@@ -700,29 +732,35 @@ namespace PhysicalCalculator.Expression
                                 return new token(pq);
                             }
 
+                            // End of recognized input; Stop reading and return operator tokens from stack.
+                            inputrecognized = false;
+                            ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operand at '" + c + "' at position " + Pos.ToString();
+
                             if (ThrowExceptionOnInvalidInput)
                             {
-                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid or missing operand at '" + c + "' at position " + Pos.ToString());
+                                throw new PhysicalUnitFormatException(ResultString);
                             }
                             else
                             {
                                 //return null;
-                                // End of recognized input; Stop reading and return operator tokens from stack.
-                                InputRecognized = false;
                             }
-
                         }
                         else
                         {
-                            if (ThrowExceptionOnInvalidInput)
+                            // End of recognized input; Stop reading and return operator tokens from stack.
+                            inputrecognized = false;
+
+                            if (!ExpectedFollow.Contains(new String(c,1)))
                             {
-                                throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Invalid input '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
-                            }
-                            else
-                            {
-                                //return null;
-                                // End of recognized input; Stop reading and return operator tokens from stack.
-                                InputRecognized = false;
+                                ResultString = "The string argument is not in a valid physical expression format. Invalid input '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
+                                if (ThrowExceptionOnInvalidInput)
+                                {
+                                    throw new PhysicalUnitFormatException(ResultString);
+                                }
+                                else
+                                {
+                                    //return null;
+                                }
                             }
                         }
                     }
@@ -731,35 +769,37 @@ namespace PhysicalCalculator.Expression
                     {   // return first operator from post fix operators
                         return RemoveFirstToken();
                     }
-
                 };
 
                 // Expression cannot end with operator
                 if (LastReadToken == TokenKind.Operator)
                 {
+                    // End of recognized input; Stop reading and return operator tokens from stack.
+                    inputrecognized = false;
+                    ResultString = "The string argument is not in a valid physical expression format. Operand expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
+
                     if (ThrowExceptionOnInvalidInput)
                     {
-                        throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Operand expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
+                        throw new PhysicalUnitFormatException(ResultString);
                     }
                     else
                     {
                         //return null;
-                        // End of recognized input; Stop reading and return operator tokens from stack.
-                        InputRecognized = false;                    
                     }
                 }
                 // Check for balanced parentheses
                 if (ParenCount > 0)
                 {
+                    // End of recognized input; Stop reading and return operator tokens from stack.
+                    inputrecognized = false;
+                    ResultString = "The string argument is not in a valid physical expression format. Closing parenthesis expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
                     if (ThrowExceptionOnInvalidInput)
                     {
-                        throw new PhysicalUnitFormatException("The string argument is not in a valid physical expression format. Closing parenthesis expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
+                        throw new PhysicalUnitFormatException(ResultString);
                     } 
                     else
                     {
                         //return null;
-                        // End of recognized input; Stop reading and return operator tokens from stack.
-                        InputRecognized = false;
                     }
                 }
                 // Retrieve remaining operators from stack
@@ -776,16 +816,18 @@ namespace PhysicalCalculator.Expression
                 return null;
             }
         }
+
         public static readonly IPhysicalQuantity PQ_False = new PhysicalMeasure.PhysicalQuantity(0);
         public static readonly IPhysicalQuantity PQ_True = new PhysicalMeasure.PhysicalQuantity(1);
 
-        public static IPhysicalQuantity ParseExpression(ref String commandLine, ref String resultLine)
+        public static IPhysicalQuantity ParseExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow ) // = null)
         {
             //public static readonly 
             PhysicalUnit dimensionless = new CombinedUnit();
 
             expressiontokenizer Tokenizer = new expressiontokenizer(dimensionless, commandLine);
 
+            Tokenizer.ExpectedFollow = ExpectedFollow;
             Tokenizer.ThrowExceptionOnInvalidInput = false;
             Stack<IPhysicalQuantity> Operands = new Stack<IPhysicalQuantity>();
 
@@ -806,7 +848,7 @@ namespace PhysicalCalculator.Expression
 
                     if (Token.Operator == OperatorKind.unaryplus)
                     {
-                        // Notthing to do
+                        // Nothing to do
                     }
                     else if (Token.Operator == OperatorKind.unaryminus)
                     {
@@ -964,6 +1006,7 @@ namespace PhysicalCalculator.Expression
                         }
                     }
                     else
+                    if (Tokenizer.InputRecognized)
                     {   // Error: Unexpected token or missing operands (Operands.Count < 2).
                         Debug.Assert(Token.TokenKind == TokenKind.Operand);
                         // OperatorKind.parenbegin indicates error in Tokenizer.GetToken();
@@ -977,8 +1020,29 @@ namespace PhysicalCalculator.Expression
                 Token = Tokenizer.GetToken();
             }
 
-            commandLine = Tokenizer.GetRemainingInput(); // Remaining of input string
+            commandLine = Tokenizer.RemainingInput; // Remaining of input string
             resultLine = Tokenizer.ResultString;
+            if (!String.IsNullOrEmpty(resultLine))
+            {
+                resultLine += '\n';
+            }
+
+            /*
+            if (!Tokenizer.InputRecognized)
+            {
+                if (!String.IsNullOrEmpty(resultLine))
+                {
+                    resultLine += ". "; 
+                }
+                resultLine += Tokenizer.ErrorMessage + '\n'; // 
+            }
+            */ 
+            /*
+            if (!String.IsNullOrEmpty(commandLine)) 
+            {
+                // resultLine += "Physical quantity expected"  + '\n'; // ;
+            }
+            */
 
             Debug.Assert(Operands.Count <= 1);  // 0 or 1
 
@@ -1043,7 +1107,10 @@ namespace PhysicalCalculator.Expression
                     {
                         TokenString.ParseChar('(', ref commandLine, ref resultLine);
                         commandLine = commandLine.TrimStart();
-                        List<IPhysicalQuantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine);
+
+                        List<string> ExpectedFollow = new List<string>();
+                        ExpectedFollow.Add(")");
+                        List<IPhysicalQuantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow);
                         Boolean OK = parameterlist != null;
                         if (OK)
                         {

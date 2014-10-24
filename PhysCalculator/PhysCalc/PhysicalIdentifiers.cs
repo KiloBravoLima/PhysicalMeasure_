@@ -111,7 +111,8 @@ namespace PhysicalCalculator.Identifiers
 
         public NamedSystem(String name)
         {
-            UnitSystem NewUnitSystem = new UnitSystem(name, null);
+            //UnitSystem NewUnitSystem = new UnitSystem(name, null);
+            UnitSystem NewUnitSystem = new UnitSystem(name, true);
 
             UnitSystem = NewUnitSystem;
             // Physics.Default_UnitSystem_Stack.Push(NewUnitSystem);
@@ -151,7 +152,7 @@ namespace PhysicalCalculator.Identifiers
             {
                 if ((unitSystem == null) && (physicalQuantity.Unit != null))
                 {
-                    unitSystem = physicalQuantity.Unit.System;
+                    unitSystem = physicalQuantity.Unit.ExponentsSystem;
                 }
 
                 if (physicalQuantity.Value != 0 && physicalQuantity.Value != 1)
@@ -193,7 +194,7 @@ namespace PhysicalCalculator.Identifiers
                 {
                     unitSystem.BaseUnits.CopyTo(baseunitarray, 0);
                 }
-                baseunitarray[NoOfBaseUnits] = new BaseUnit(0, name, name);
+                baseunitarray[NoOfBaseUnits] = new BaseUnit(unitSystem, (sbyte)(NoOfBaseUnits), name, name);
                 UnitSystem uso = unitSystem as UnitSystem;
                 uso.BaseUnits = baseunitarray;
                 return baseunitarray[NoOfBaseUnits];
@@ -799,7 +800,7 @@ namespace PhysicalCalculator.Identifiers
             {
                 if (unitValue != null && unitValue.Unit != null)
                 {   // Is same system as values unit
-                    unitSystem = unitValue.Unit.System;
+                    unitSystem = unitValue.Unit.ExponentsSystem;
                 }
 
                 if (unitSystem == null)

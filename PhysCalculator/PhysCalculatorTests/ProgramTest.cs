@@ -92,7 +92,11 @@ namespace PhysCalculatorTests
             string[] args = {"read AllTestFiles"};
             try
             {
-                Program_Accessor.Main(args);
+                var pt_program = new PrivateType(typeof(Program));
+
+                // 
+                Program.Main(args);
+                // pt_program.InvokeStatic( "Main", args);
                 //Assert.Inconclusive("A method that does not return a value cannot be verified.");
             }
             catch 

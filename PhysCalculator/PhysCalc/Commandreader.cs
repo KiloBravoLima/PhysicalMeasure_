@@ -350,6 +350,26 @@ namespace PhysicalCalculator
         private ConsoleColor backgroundColor = Console.BackgroundColor;
         private ConsoleColor foregroundColor = Console.ForegroundColor;
 
+
+        public ResultWriter()
+            : this((String)null)
+        {
+        }
+
+        public ResultWriter(String FileNameStr)
+        {
+            this.FileNameStr = FileNameStr;
+            this.FileStreamWriter = null;
+            this.ResultLines = null;
+        }
+
+
+        public ResultWriter(List<String> ResultLines)
+            : this((String)null)
+        {
+            this.ResultLines = ResultLines;
+        }
+
         public ConsoleColor BackgroundColor { 
             get { return backgroundColor; }
             set { if (backgroundColor != value) { SetBackgroundColor(value); } } 
@@ -452,18 +472,6 @@ namespace PhysicalCalculator
                     ResetColor();
                 }
             }
-        }
-
-        public ResultWriter()
-            : this(null)
-        {
-        }
-
-        public ResultWriter(String FileNameStr)
-        {
-            this.FileNameStr = FileNameStr;
-            this.FileStreamWriter = null;
-            this.ResultLines = null;
         }
 
         public void CheckFile(ref string ResultText)

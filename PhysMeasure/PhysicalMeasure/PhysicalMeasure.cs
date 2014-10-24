@@ -70,7 +70,12 @@ namespace PhysicalMeasure
         public const int NoOfMeasures = 7;
     }
 
-    public enum MeasureKind
+    public static partial class Valutas
+    {
+        public const int NoOfMeasures = 1;
+    }
+
+    public enum PhysicsMeasureKind
     {
         Length,
         Mass,
@@ -79,6 +84,11 @@ namespace PhysicalMeasure
         ThermodynamicTemperature,
         AmountOfSubstance,
         LuminousIntensity
+    }
+
+    public enum ValutasMeasureKind
+    {
+        Currency // Monetary unit
     }
 
     public enum UnitKind 
@@ -106,7 +116,14 @@ namespace PhysicalMeasure
 
     public interface ISystemItem
     {
-        IUnitSystem System { get; }
+
+        /** Returns the unit system that this item is defined as a part of. 
+         *  Must be a single simple unit system (not a combined unit system). 
+         *  Can be null if and only if a combined unit combines sub units from different single in-convertible unit systems.
+         **/
+        IUnitSystem SimpleSystem { get; } 
+
+
     }
 
     public interface INamedSymbolSystemItem : ISystemItem, INamedSymbol
@@ -116,6 +133,14 @@ namespace PhysicalMeasure
     public interface IUnit
     {
         UnitKind Kind { get; }
+
+        /** Returns the same unit system as property ISystemItem.SimpleSystem if all sub units are from that same system. 
+         *  Can be a combined unit system if sub units reference different unit systems which are not convertible to each other (neither directly or indirectly). 
+         *  Can not be null.
+         **/
+        IUnitSystem ExponentsSystem { get; }
+
+
         SByte[] Exponents { get; }
 
         Byte[] UnsignedExponents { get; }
@@ -139,6 +164,7 @@ namespace PhysicalMeasure
 
     public interface ISystemUnit : ISystemItem, IUnit
     {
+
     }
 
     public interface IMixedUnit : ISystemUnit
@@ -253,8 +279,10 @@ namespace PhysicalMeasure
         IPhysicalQuantity ConvertTo(IPhysicalUnit convertToUnit);
         IPhysicalQuantity ConvertTo(IUnitSystem convertToUnitSystem);
 
-        IPhysicalQuantity ConvertToSystemUnit();
-        IPhysicalQuantity ConvertToBaseUnit();
+        IPhysicalQuantity ConvertToSystemUnit();   /// Unique defined simple unit system this unit is part of
+        IPhysicalQuantity ConvertToBaseUnit();     /// Unique defined simple unit system this unit is part of
+        IPhysicalQuantity ConvertToBaseUnit(IUnitSystem convertToUnitSystem);   // Added 2014-09-12
+
 
         // Specific/absolute quantity unit conversion (e.g. specific temperature)
         IPhysicalQuantity ConvertTo(ref double quantity, IPhysicalUnit convertToUnit);
@@ -264,6 +292,10 @@ namespace PhysicalMeasure
 
         IPhysicalQuantity ConvertToBaseUnit(double quantity);
         IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity);
+
+        IPhysicalQuantity ConvertToBaseUnit(double quantity, IUnitSystem convertToUnitSystem); // Added 2014-09-12
+        IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity, IUnitSystem convertToUnitSystem); // Added 2014-09-12
+
     }
 
     public interface IPhysicalUnit : ISystemUnit, IPhysicalUnitMath, IPhysicalUnitCombine, IPhysicalUnitConvertible /*  : <BaseUnit | DerivedUnit | ConvertibleUnit>  */
@@ -325,10 +357,24 @@ namespace PhysicalMeasure
         PrefixedUnitExponentList Numerators { get; }
         PrefixedUnitExponentList Denominators { get; }
 
-        IUnitSystem SomeSystem { get; }
+
+        /** Returns the same unit system as property SimpleSystem if all sub units are from that same system. 
+         *  Can be a combined unit system if sub units reference different unit systems which are not convertible to each other (neither directly or indirectly). 
+         *  Can not be null.
+        IUnitSystem ExponentsSystem { get; }
+         **/
+
+
+        /** Returns the same unit system as property System if all sub units are from that same system. 
+         *  Can be a combined unit system if sub units reference different unit systems. 
+         *  Can not be null.
+         **/
+        IUnitSystem SomeSimpleSystem { get; }
+
+        ICombinedUnit OnlySingleSystemUnits(IUnitSystem us);
 
         // Specific conversion
-        IPhysicalQuantity ConvertFrom(IPhysicalQuantity physicalQuantity);  
+        IPhysicalQuantity ConvertFrom(IPhysicalQuantity physicalQuantity);
 
         ICombinedUnit CombinedUnitMultiply(IPhysicalUnit physicalUnit);
         ICombinedUnit CombinedUnitDivide(IPhysicalUnit physicalUnit);
@@ -338,6 +384,9 @@ namespace PhysicalMeasure
 
         ICombinedUnit CombinedUnitMultiply(IPrefixedUnitExponent prefixedUnitExponent);
         ICombinedUnit CombinedUnitDivide(IPrefixedUnitExponent prefixedUnitExponent);
+
+        //ICombinedUnit CombinedUnitMultiply(SByte prefixExponent);
+        //ICombinedUnit CombinedUnitDivide(SByte prefixExponent);
 
         ICombinedUnit CombinedUnitPow(SByte exponent);
         ICombinedUnit CombinedUnitRot(SByte exponent);
@@ -354,6 +403,9 @@ namespace PhysicalMeasure
 
     public interface IUnitSystem : INamed
     {
+        bool IsIsolatedUnitSystem { get; }
+        bool IsCombinedUnitSystem { get; }
+
         IUnitPrefixTable UnitPrefixes { get; }
         IBaseUnit[] BaseUnits { get; }
         INamedDerivedUnit[] NamedDerivedUnits { get; }
@@ -379,6 +431,19 @@ namespace PhysicalMeasure
         IPhysicalQuantity SpecificConvertTo(IPhysicalQuantity physicalQuantity, IPhysicalUnit convertToUnit);
     }
 
+
+    public interface ICombinedUnitSystem : IUnitSystem, IEquatable<ICombinedUnitSystem>
+    
+    {
+        SByte[] UnitExponents(ICombinedUnit cu);
+        IPhysicalQuantity ConvertToBaseUnit(ICombinedUnit cu);
+
+        IUnitSystem[] UnitSystemes { get; }
+        Boolean ContainsSubUnitSystem(IUnitSystem unitsystem);
+        Boolean ContainsSubUnitSystems(IEnumerable<IUnitSystem> unitsystems);
+    }
+
+
     public interface IUnitPrefix : INamed
     {
         char PrefixChar { get; }
@@ -396,7 +461,7 @@ namespace PhysicalMeasure
 
     #endregion Physical Measure Interfaces
 
-    #region Dimension Exponets Classes
+    #region Dimension Exponents Classes
 
     public class DimensionExponents   : IEquatable<DimensionExponents>
     {
@@ -459,7 +524,7 @@ namespace PhysicalMeasure
             SByte MinNoOfBaseUnits = (SByte)Math.Min(exponents1.Length, exponents2.Length);
             SByte MaxNoOfBaseUnits = (SByte)Math.Max(exponents1.Length, exponents2.Length);
 
-            Debug.Assert(MaxNoOfBaseUnits <= Physics.NoOfMeasures, "Too many base units:" + MaxNoOfBaseUnits.ToString() + ". No more than " + Physics.NoOfMeasures + " expected.");
+            Debug.Assert(MaxNoOfBaseUnits <= Physics.NoOfMeasures + 1, "Too many base units:" + MaxNoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfMeasures+1) + " expected.");
 
             do
             {   // Compare exponents where defined in both arrays
@@ -492,7 +557,7 @@ namespace PhysicalMeasure
             Debug.Assert(exponents != null, "Parameter needed");
 
             SByte NoOfBaseUnits = (SByte)exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + Physics.NoOfMeasures + " expected.");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfMeasures + 1) + " expected.");
 
             bool isDimensionless = true;
             SByte i = 0;
@@ -511,7 +576,7 @@ namespace PhysicalMeasure
             Debug.Assert(exponents != null, "Parameter needed");
 
             SByte NoOfBaseUnits = (SByte)exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + Physics.NoOfMeasures + " expected.");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfMeasures + 1) + " expected.");
 
             SByte noOfDimensions = 0;
             SByte i = 0;
@@ -576,7 +641,7 @@ namespace PhysicalMeasure
             Debug.Assert(exponent != 0, "Parameter needed");
 
             SByte NoOfBaseUnits = (SByte)exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + Physics.NoOfMeasures + " expected.");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfMeasures + 1) + " expected.");
 
             SByte[] NewExponents = new SByte[NoOfBaseUnits];
             SByte i = 0;
@@ -597,7 +662,7 @@ namespace PhysicalMeasure
             Debug.Assert(exponent != 0, "Parameter needed");
 
             SByte NoOfBaseUnits = (SByte)exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + Physics.NoOfMeasures + " expected.");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfMeasures + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfMeasures + 1) + " expected.");
 
             SByte[] NewExponents = new SByte[NoOfBaseUnits];
             SByte i = 0;
@@ -623,25 +688,48 @@ namespace PhysicalMeasure
 
         static public Byte[] UnsignedExponents(SByte[] exponents)
         {
-            Byte[] resExponents = new Byte[exponents.Length];
-            foreach (Byte i in Enumerable.Range(0, exponents.Length))
+            int len = exponents.Length;
+            Byte[] resExponents = new Byte[len];
+            foreach (Byte i in Enumerable.Range(0, len))
             {
                 resExponents[i] = (Byte)exponents[i];
             }
-            Debug.Assert(resExponents[exponents.Length - 1] == (Byte)exponents[exponents.Length - 1], "Just last element");
+            Debug.Assert(resExponents[len - 1] == (Byte)exponents[len - 1], "Just last element");
  
             return resExponents;
         }
 
         static public SByte[] Exponents(Byte[] unsignedExponents)
         {
-            SByte[] resExponents = new SByte[unsignedExponents.Length];
-            foreach (int i in Enumerable.Range(0, unsignedExponents.Length))
+            int len = unsignedExponents.Length;
+            SByte[] resExponents = new SByte[len];
+            foreach (int i in Enumerable.Range(0, len))
             {
                 resExponents[i] = (SByte)unsignedExponents[i];
             }
             return resExponents;
         }
+
+        static public SByte[] AllExponents(SByte[] Exponents, SByte length)
+        {
+            SByte[] resExponents;
+            if (Exponents.Length < length)
+            {
+                resExponents = new SByte[length];
+                foreach (int i in Enumerable.Range(0, length))
+                {
+                    resExponents[i] = Exponents[i];
+                }
+            }
+            else
+            {
+                Debug.Assert(Exponents.Length == length);
+                resExponents = Exponents;
+            }
+
+            return resExponents;
+        }
+
     }
 
     #endregion Dimension Exponets Classes
@@ -667,11 +755,11 @@ namespace PhysicalMeasure
 
     public class UnitPrefixTable : IUnitPrefixTable
     {
-        private UnitPrefix[] _unitPrefixes;
+        private IUnitPrefix[] _unitPrefixes;
 
         public IUnitPrefix[] UnitPrefixes { get { return _unitPrefixes; } }
 
-        public UnitPrefixTable(UnitPrefix[] anUnitPrefixes)
+        public UnitPrefixTable(IUnitPrefix[] anUnitPrefixes)
         {
             this._unitPrefixes = anUnitPrefixes;
         }
@@ -974,7 +1062,8 @@ namespace PhysicalMeasure
             return res_unit;
         }
 
-        public abstract IUnitSystem System { get; set; }
+        public abstract IUnitSystem SimpleSystem { get; set; }
+        public abstract IUnitSystem ExponentsSystem { get; }
 
         public abstract UnitKind Kind { get; }
         public abstract SByte[] Exponents { get; }
@@ -991,13 +1080,19 @@ namespace PhysicalMeasure
         { 
             get 
             {
+                SByte[] exponents = Exponents;
+                if (Exponents == null)
+                {
+                    Debug.Assert(Exponents != null, "Exponents must be found"); // 2014-09-10 Check if this actually happens
+                    return false; // Maybe combined unit with Assume 
+                }
                 return DimensionExponents.IsDimensionless(Exponents);
             } 
         }
 
         public override int GetHashCode()
         {
-            return this.System.GetHashCode() + this.Exponents.GetHashCode();
+            return this.ExponentsSystem.GetHashCode() + this.Exponents.GetHashCode();
         }
 
         #region Unit Expression parser methods
@@ -1315,7 +1410,7 @@ namespace PhysicalMeasure
                         Pos++;
                     }
                     else if (   c == '*'
-                             || c == '·') // centre dot  '\0x0B7' (char)183 U+00B7
+                             || c == '·') // center dot  '\0x0B7' (char)183 U+00B7
                     {
                         HandleNewOperator(OperatorKind.Mult);
                     }
@@ -1416,7 +1511,7 @@ namespace PhysicalMeasure
                             int maxlen = Math.Min(1 + 3, InputString.Length - Pos); // Max length of scale and symbols to look for
 
                             String tempstr = InputString.Substring(Pos, maxlen);
-                            maxlen = tempstr.IndexOfAny(new char[] { ' ', '*', '·', '/', '^', '+', '-', '(', ')' });  // '·'  centre dot '\0x0B7' (char)183 U+00B7
+                            maxlen = tempstr.IndexOfAny(new char[] { ' ', '*', '·', '/', '^', '+', '-', '(', ')' });  // '·'  center dot '\0x0B7' (char)183 U+00B7
                             if (maxlen < 0)
                             {
                                 maxlen = tempstr.Length;
@@ -1569,6 +1664,7 @@ namespace PhysicalMeasure
 
         #endregion Unit Expression parser methods
 
+        #region Unit print string methods
         /// <summary>
         /// String with PrefixedUnitExponent formatted symbol (without system name prefixed).
         /// </summary>
@@ -1590,7 +1686,7 @@ namespace PhysicalMeasure
         }
 
         /// <summary>
-        /// String formatted by use of named derivated unit symbols when possible(without system name prefixed).
+        /// String formatted by use of named derived unit symbols when possible(without system name prefixed).
         /// without debug asserts.
         /// </summary>
         public virtual String ReducedUnitString()
@@ -1605,12 +1701,18 @@ namespace PhysicalMeasure
         public override String ToString()
         {
             String UnitName = this.UnitString();
-            IUnitSystem system = this.System;
+            IUnitSystem system = this.ExponentsSystem; // this.SimpleSystem;
             if (   (!String.IsNullOrEmpty(UnitName)) 
                 && (system != null)
-                && (system != Physics.Default_UnitSystem))
+                && (system != Physics.Default_UnitSystem)
+                /*
+                && (!(    Physics.SI_Units == Physics.Default_UnitSystem 
+                       && system.IsCombinedUnitSystem 
+                       && ((ICombinedUnitSystem)system).ContainsSubUnitSystem(Physics.Default_UnitSystem) ))
+                 */ 
+                 )
             {
-                UnitName = this.System.Name + "." + UnitName;
+                UnitName = system.Name + "." + UnitName;
             }
 
             return UnitName;
@@ -1629,7 +1731,7 @@ namespace PhysicalMeasure
             }
             else
             {
-                IUnitSystem system = this.System;
+                IUnitSystem system = this.ExponentsSystem; // this.SimpleSystem;
                 if (   (system != null) 
                     && (system != Physics.Default_UnitSystem))
                 {
@@ -1663,9 +1765,11 @@ namespace PhysicalMeasure
         //public abstract IPhysicalUnit PureUnit { get; }
         public abstract IUnit PureUnit { get; }
         */
+
         public virtual double FactorValue { get { return 1; } }
         public virtual IUnit PureUnit { get { return this; } }
 
+        #endregion Unit print string methods
 
         #region Unit conversion methods
 
@@ -1682,7 +1786,7 @@ namespace PhysicalMeasure
             IPhysicalQuantity pq_systemUnit = this.ConvertToSystemUnit();
             if (pq_systemUnit != null)
             {
-                IPhysicalQuantity pq_toUnit = pq_systemUnit.Unit.System.ConvertTo(pq_systemUnit.Unit, convertToUnit);
+                IPhysicalQuantity pq_toUnit = pq_systemUnit.Unit.SimpleSystem.ConvertTo(pq_systemUnit.Unit, convertToUnit);
                 if (pq_toUnit != null)
                 {
                     pq = pq_toUnit.Multiply(pq_systemUnit.Value);
@@ -1700,10 +1804,10 @@ namespace PhysicalMeasure
             IPhysicalQuantity pq_systemUnit = this.ConvertToSystemUnit();
             if (pq_systemUnit != null)
             {
-                IPhysicalQuantity pq_toUnit = pq_systemUnit.Unit.System.ConvertTo(pq_systemUnit.Unit, convertToUnitSystem);
-                if (pq_toUnit != null)
+                pq = pq_systemUnit.Unit.SimpleSystem.ConvertTo(pq_systemUnit.Unit, convertToUnitSystem);
+                if (pq != null && pq_systemUnit.Value != 1)
                 {
-                    pq = pq_toUnit.Multiply(pq_systemUnit.Value);
+                    pq = pq.Multiply(pq_systemUnit.Value);
                 }
             }
             return pq;
@@ -1722,7 +1826,7 @@ namespace PhysicalMeasure
             IPhysicalQuantity pq_systemUnit = this.ConvertToSystemUnit(ref quantity);
             if (pq_systemUnit != null)
             {
-                pq = pq_systemUnit.Unit.System.ConvertTo(pq_systemUnit, convertToUnit);
+                pq = pq_systemUnit.Unit.SimpleSystem.ConvertTo(pq_systemUnit, convertToUnit);
             }
             //// Mark quantity as used now
             quantity = 1;
@@ -1738,7 +1842,7 @@ namespace PhysicalMeasure
             IPhysicalQuantity pq_systemUnit = this.ConvertToSystemUnit(ref quantity);
             if (pq_systemUnit != null)
             {
-                pq = pq_systemUnit.Unit.System.ConvertTo(pq_systemUnit, convertToUnitSystem);
+                pq = pq_systemUnit.Unit.SimpleSystem.ConvertTo(pq_systemUnit, convertToUnitSystem);
             }
             //// Mark quantity as used now
             quantity = 1;
@@ -1747,7 +1851,8 @@ namespace PhysicalMeasure
 
         public virtual IPhysicalQuantity ConvertToSystemUnit(ref double quantity)
         {
-            // Conversion value is specified. Must assume Specific conversion e.g. specific temperature.
+            // TODO : Conversion value is specified. Must assume Specific conversion e.g. specific temperature.
+            Debug.Assert(false);  //
             IPhysicalQuantity pq = this.ConvertToSystemUnit().Multiply(quantity);
             //// Mark quantity as used now
             quantity = 1;
@@ -1759,15 +1864,197 @@ namespace PhysicalMeasure
         public abstract IPhysicalQuantity ConvertToBaseUnit(double quantity);
 
         public abstract IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity);
-        
+
+
+
+        /*
+        public abstract IPhysicalQuantity ConvertToBaseUnit(IUnitSystem convertToUnitSystem);
+
+        public abstract IPhysicalQuantity ConvertToBaseUnit(double quantity, IUnitSystem convertToUnitSystem);
+
+        public abstract IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity, IUnitSystem convertToUnitSystem);
+        */
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public /* virtual */ IPhysicalQuantity ConvertToBaseUnit(IUnitSystem convertToUnitSystem)
+        {
+            // return this.ConvertTo(convertToUnitSystem).pq.ConvertToBaseUnit();
+            IPhysicalQuantity pq = this.ConvertTo(convertToUnitSystem);
+            if (pq != null)
+            {
+                pq = pq.ConvertToBaseUnit();
+            }
+            return pq;
+        }
+
+        /// <summary>
+        /// 
+        public /* virtual */ IPhysicalQuantity ConvertToBaseUnit(double quantity, IUnitSystem convertToUnitSystem)
+        {
+            // return new PhysicalQuantity(quantity, this).ConvertTo(convertToUnitSystem).ConvertToBaseUnit();
+            IPhysicalQuantity pq = new PhysicalQuantity(quantity, this).ConvertTo(convertToUnitSystem);
+            if (pq != null)
+            {
+                pq = pq.ConvertToBaseUnit();
+            }
+            return pq;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public /* virtual */ IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity, IUnitSystem convertToUnitSystem)
+        {
+            //return physicalQuantity.ConvertTo(this).ConvertTo(convertToUnitSystem).ConvertToBaseUnit();
+            IPhysicalQuantity pq = physicalQuantity.ConvertTo(this);
+            if (pq != null)
+            {
+                pq = pq.ConvertTo(convertToUnitSystem);
+
+                if (pq != null)
+                {
+                    pq = pq.ConvertToBaseUnit();
+                }
+            }
+            return pq;
+        }
+
+
         public virtual bool Equals(IPhysicalUnit other)
         {
+            /*
+             * This will not all ways be true
             Debug.Assert(other != null, "The 'other' parameter must be specified");
+            */
 
-            if (this.System != other.System)
+            if ((Object)other == null)
+            {
+                return false;
+            }
+
+
+            /*
+             * This will make recursive call to this function
+            if (this == other)
+            {
+                return true;
+            }
+             */
+
+            IPhysicalQuantity pq1;
+            IPhysicalQuantity pq2;
+
+            if (this.ExponentsSystem != other.ExponentsSystem)
             {   // Must be same unit system
-                return new PhysicalQuantity(1, this) == other.ConvertTo(this.System);
-            } 
+
+
+                if (this.ExponentsSystem == null || other.ExponentsSystem == null) 
+                {
+                    if (this.IsDimensionless && other.IsDimensionless)
+                    {
+                        // Any dimensionless can be converted to any systems dimensionless
+                        return this.FactorValue == other.FactorValue;
+                    }
+                }
+
+                if (this.ExponentsSystem.IsCombinedUnitSystem || other.ExponentsSystem.IsCombinedUnitSystem)
+                {
+                    if (this.ExponentsSystem.IsCombinedUnitSystem && other.ExponentsSystem.IsCombinedUnitSystem)
+                    { 
+                        // Check for same sub systems
+                        CombinedUnitSystem cus_this = (CombinedUnitSystem)this.ExponentsSystem;
+                        CombinedUnitSystem cus_other = (CombinedUnitSystem)other.ExponentsSystem;
+                        if (cus_this.Equals(cus_other))
+                        {
+                            Debug.Assert(false); // Missing check for scale factors and converted units
+                            if (!DimensionExponents.Equals(this.Exponents, other.Exponents))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                pq2 = other.ConvertTo(this.ExponentsSystem);
+                if (Object.ReferenceEquals(null, pq2))
+                {
+                    return false;
+                }
+
+                // return new PhysicalQuantity(1, this) == other_pq;
+                pq1 = new PhysicalQuantity(1, this);
+                return pq1.Equals(pq2);
+            }
+
+
+            if (this.Kind == UnitKind.MixedUnit)
+            {
+                IMixedUnit this_imu = (IMixedUnit)this;
+                return this_imu.MainUnit.Equals(other);
+            }
+            else if (other.Kind == UnitKind.MixedUnit)
+            {
+                IMixedUnit other_imu = (IMixedUnit)other;
+                return this.Equals(other_imu.MainUnit);
+            }
+            else if (this.Kind == UnitKind.ConvertibleUnit)
+            {
+                IConvertibleUnit this_icu = (IConvertibleUnit)this;
+                if (!this_icu.IsLinearConvertable())
+                {
+                    return false;
+                }
+                pq1 = this_icu.ConvertToPrimaryUnit();
+                pq2 = other.ConvertTo(this_icu.PrimaryUnit);
+                return pq2 != null && pq1.Equals(pq2); 
+            }
+            else if (other.Kind == UnitKind.ConvertibleUnit)
+            {
+                IConvertibleUnit other_icu = (IConvertibleUnit)other;
+
+                if (!other_icu.IsLinearConvertable())
+                {
+                    return false;
+                }
+                pq2 = other_icu.ConvertToPrimaryUnit();
+                pq1 = this.ConvertTo(pq2.Unit);
+                return pq1 != null && pq1.Equals(pq2);
+            }
+            else if (this.Kind == UnitKind.CombinedUnit)
+            {
+                ICombinedUnit this_icu = (ICombinedUnit)this;
+                if (!this_icu.IsLinearConvertable())
+                {
+                    return false;
+                }
+                pq2 = other.ConvertToBaseUnit();
+                IPhysicalQuantity pq_this = this_icu.ConvertToBaseUnit();
+                pq1 = pq_this.ConvertTo(pq2.Unit);
+                return pq1 != null && pq1.Equals(pq2);
+            }
+            else if (other.Kind == UnitKind.CombinedUnit)
+            {
+                ICombinedUnit other_icu = (ICombinedUnit)other;
+                if (!other_icu.IsLinearConvertable())
+                {
+                    return false;
+                }
+                pq1 = this.ConvertToBaseUnit();
+                IPhysicalQuantity pq_other = other_icu.ConvertToBaseUnit();
+                pq2 = pq_other.ConvertTo(pq1.Unit);
+                return pq2 != null && pq1.Equals(pq2);
+            }
+
+            Debug.Assert(this.Kind == UnitKind.BaseUnit || this.Kind == UnitKind.DerivedUnit);
+
+            return DimensionExponents.Equals(this.Exponents, other.Exponents);
+
+
+            /**
             if (   (this.Kind != UnitKind.ConvertibleUnit)
                 && (other.Kind != UnitKind.ConvertibleUnit)
                 && (this.Kind != UnitKind.MixedUnit)
@@ -1776,10 +2063,11 @@ namespace PhysicalMeasure
                 return DimensionExponents.Equals(this.Exponents, other.Exponents);
             }
 
-            IPhysicalQuantity pq1 = this.ConvertToSystemUnit();
-            IPhysicalQuantity pq2 = other.ConvertToSystemUnit();
+            pq1 = this.ConvertToSystemUnit();
+            pq2 = other.ConvertToSystemUnit();
 
             return pq1.Equals(pq2);
+            **/
         }
 
         public override bool Equals(Object obj)
@@ -1822,11 +2110,29 @@ namespace PhysicalMeasure
 
         internal static PhysicalQuantity CombineUnits(IPhysicalUnit u1, IPhysicalUnit u2, CombineExponentsFunc cef, CombineQuantitiesFunc cqf)
         {
+            /*
             IPhysicalQuantity u1_pq = u1.ConvertToSystemUnit().ConvertToBaseUnit();
-            IPhysicalQuantity u2_pq = u2.ConvertToSystemUnit().ConvertToBaseUnit(); 
-            if (u2_pq.Unit.System != u1_pq.Unit.System)
+            IPhysicalQuantity u2_pq = u2.ConvertToSystemUnit().ConvertToBaseUnit();
+            if (u2_pq.Unit.ExponentsSystem != u1_pq.Unit.ExponentsSystem)
             {
-                u2_pq = u1_pq.Unit.System.ConvertTo(u2_pq, u1_pq.Unit.System).ConvertToBaseUnit(); 
+                u2_pq = u1_pq.Unit.ExponentsSystem.ConvertTo(u2_pq, u1_pq.Unit.ExponentsSystem);
+                if (u2_pq == null)
+                {   // Found no conversion from u1_pq.Unit.System to u2_pq.Unit.System
+                    return null; 
+                }
+
+                u2_pq = u2_pq.ConvertToBaseUnit();
+            }
+            */
+
+            IUnitSystem us = u1.ExponentsSystem;
+            IPhysicalQuantity u1_pq = u1.ConvertToBaseUnit(us);
+            IPhysicalQuantity u2_pq = u2.ConvertToBaseUnit(us);
+
+            if (u1_pq == null || u2_pq == null)
+            {
+                // Found no conversion from u1_pq.Unit.System to u2_pq.Unit.System
+                return null; 
             }
 
             SByte[] u1Exponents = u1_pq.Unit.Exponents;
@@ -1852,8 +2158,8 @@ namespace PhysicalMeasure
                 }
                 combinedExponents[i] = cef(u1Exponent, u2Exponent);
             }
-            Debug.Assert(u1.System != null, "The 'u1.System' must be specified");
-            PhysicalUnit pu = new DerivedUnit(u1.System, combinedExponents);
+            Debug.Assert(u1.ExponentsSystem != null, "The 'u1.ExponentsSystem' must be specified");
+            PhysicalUnit pu = new DerivedUnit(u1.ExponentsSystem, combinedExponents);
             return new PhysicalQuantity(cqf(u1_pq.Value, u2_pq.Value), pu);
         }
 
@@ -1871,7 +2177,7 @@ namespace PhysicalMeasure
             }
 
             // Not valid during SI system initialization: Debug.Assert(u.System != null);
-            PhysicalUnit pu = new DerivedUnit(u.System, someExponents);
+            PhysicalUnit pu = new DerivedUnit(u.ExponentsSystem, someExponents);
             return pu;
         }
 
@@ -1992,12 +2298,32 @@ namespace PhysicalMeasure
 
         public virtual IPhysicalQuantity Multiply(IPhysicalUnit physicalUnit)
         {
-            return CombineUnits(this, physicalUnit, (SByte e1, SByte e2) => (SByte)(e1 + e2), (Double e1, Double e2) => (Double)(e1 * e2));
+            IPhysicalQuantity res = CombineUnits(this, physicalUnit, (SByte e1, SByte e2) => (SByte)(e1 + e2), (Double e1, Double e2) => (Double)(e1 * e2));
+            if (res == null)
+            {   // Found no conversion from this.System to physicalUnit.System
+                // return result as combined unit
+                PrefixedUnitExponentList numerators = new PrefixedUnitExponentList();
+                PrefixedUnitExponentList denominators = new PrefixedUnitExponentList();
+                numerators.Add(new PrefixedUnitExponent(this));
+                numerators.Add(new PrefixedUnitExponent(physicalUnit));
+                res = new PhysicalQuantity(1, new CombinedUnit(numerators, denominators));
+            }
+            return res;
         }
 
         public virtual IPhysicalQuantity Divide(IPhysicalUnit physicalUnit)
         {
-            return CombineUnits(this, physicalUnit, (SByte e1, SByte e2) => (SByte)(e1 - e2), (Double e1, Double e2) => (Double)(e1 / e2));
+            IPhysicalQuantity res = CombineUnits(this, physicalUnit, (SByte e1, SByte e2) => (SByte)(e1 - e2), (Double e1, Double e2) => (Double)(e1 / e2));
+            if (res == null)
+            {   // Found no conversion from this.System to physicalUnit.System
+                // return result as combined unit
+                PrefixedUnitExponentList numerators = new PrefixedUnitExponentList();
+                PrefixedUnitExponentList denominators = new PrefixedUnitExponentList();
+                numerators.Add(new PrefixedUnitExponent(this));
+                denominators.Add(new PrefixedUnitExponent(physicalUnit));
+                res = new PhysicalQuantity(1, new CombinedUnit(numerators, denominators));
+            }
+            return res;
         }
 
         public virtual IPhysicalQuantity Multiply(double quantity, IPhysicalQuantity physicalQuantity)
@@ -2134,7 +2460,8 @@ namespace PhysicalMeasure
         private IUnitSystem _system;
 
         // property override get
-        public override IUnitSystem System { get { return _system; } set { _system = value; } }
+        public override IUnitSystem SimpleSystem { get { return _system; } set { _system = value; } }
+        public override IUnitSystem ExponentsSystem { get { return _system; } }
 
         protected SystemUnit(IUnitSystem someSystem = null)
         {
@@ -2154,6 +2481,32 @@ namespace PhysicalMeasure
             IPhysicalQuantity pq = new PhysicalQuantity(1, this);
             return pq;
         }
+
+        /*
+        /// <summary>
+        /// 
+        /// </summary>
+        public override IPhysicalQuantity ConvertToBaseUnit(IUnitSystem convertToUnitSystem)
+        {
+            return this.ConvertTo(convertToUnitSystem).ConvertToBaseUnit();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override IPhysicalQuantity ConvertToBaseUnit(double quantity, IUnitSystem convertToUnitSystem)
+        {
+            return new PhysicalQuantity(quantity, this).ConvertTo(convertToUnitSystem).ConvertToBaseUnit();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity, IUnitSystem convertToUnitSystem)
+        {
+            return physicalQuantity.ConvertTo(this).ConvertTo(convertToUnitSystem).ConvertToBaseUnit();
+        }
+        **/
     }
 
     public class BaseUnit : SystemUnit, INamedSymbol, IBaseUnit
@@ -2172,10 +2525,15 @@ namespace PhysicalMeasure
         { 
             get 
             {
-                int NoOfBaseUnits = _baseunitnumber + 1;
-                if (System != null && System.BaseUnits != null)
+                if (_baseunitnumber < 0)
                 {
-                    NoOfBaseUnits = System.BaseUnits.Length;
+                    Debug.Assert(_baseunitnumber >= 0);
+                }
+
+                int NoOfBaseUnits = _baseunitnumber + 1;
+                if (SimpleSystem != null && SimpleSystem.BaseUnits != null)
+                {
+                    NoOfBaseUnits = SimpleSystem.BaseUnits.Length;
                 }
 
                 SByte[] tempExponents = new SByte[NoOfBaseUnits]; 
@@ -2187,6 +2545,10 @@ namespace PhysicalMeasure
         public BaseUnit(IUnitSystem someUnitSystem, SByte someBaseUnitNumber, NamedSymbol someNamedSymbol)
             : base(someUnitSystem)
         {
+            if (someBaseUnitNumber < 0)
+            { 
+                Debug.Assert(someBaseUnitNumber >= 0);
+            }
             this._baseunitnumber = someBaseUnitNumber;
             this.NamedSymbol = someNamedSymbol;
         }
@@ -2241,6 +2603,32 @@ namespace PhysicalMeasure
         {
             return physicalQuantity.ConvertTo(this); 
         }
+
+        /*
+        /// <summary>
+        /// 
+        /// </summary>
+        public override IPhysicalQuantity ConvertToBaseUnit(IUnitSystem convertToUnitSystem)
+        {
+            return new PhysicalQuantity(1, this).ConvertTo(convertToUnitSystem);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override IPhysicalQuantity ConvertToBaseUnit(double quantity, IUnitSystem convertToUnitSystem)
+        {
+            return new PhysicalQuantity(quantity, this).ConvertTo(convertToUnitSystem);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity, IUnitSystem convertToUnitSystem)
+        {
+            return physicalQuantity.ConvertTo(this).ConvertTo(convertToUnitSystem);
+        }
+        */
     }
 
     public class DerivedUnit : SystemUnit, IDerivedUnit
@@ -2280,11 +2668,12 @@ namespace PhysicalMeasure
                 {
                     if (!String.IsNullOrEmpty(ExponentsStr))
                     {
-                        ExponentsStr += '·'; // centre dot '\0x0B7' (char)183 U+00B7
+                        ExponentsStr += '·'; // center dot '\0x0B7' (char)183 U+00B7
                     }
-                    if (this.System != null)
+                    IUnitSystem  thisExponentsSystem = this.ExponentsSystem;
+                    if (thisExponentsSystem != null)
                     {
-                        ExponentsStr += this.System.BaseUnits[index].Symbol;
+                        ExponentsStr += thisExponentsSystem.BaseUnits[index].Symbol;
                     }
                     else
                     {
@@ -2376,7 +2765,7 @@ namespace PhysicalMeasure
         }
 
         /// <summary>
-        /// String formatted by use of named derivated unit symbols when possible(without system name prefixed).
+        /// String formatted by use of named derived unit symbols when possible(without system name prefixed).
         /// without debug asserts.
         /// </summary>
         public override String ReducedUnitString()
@@ -2400,7 +2789,9 @@ namespace PhysicalMeasure
         /// </summary>
         public override IPhysicalQuantity ConvertToBaseUnit(double quantity)
         {
-            return new PhysicalQuantity(quantity, new DerivedUnit(this.System, this.Exponents));
+            IUnitSystem system = this.SimpleSystem;
+            Debug.Assert(system != null, "The 'System' must be valid for this unit");
+            return new PhysicalQuantity(quantity, new DerivedUnit(system, this.Exponents));
         }
 
         /// <summary>
@@ -2429,7 +2820,7 @@ namespace PhysicalMeasure
         public IValueConversion Conversion { get { return _conversion; } }
 
         public ConvertibleUnit(NamedSymbol someNamedSymbol, IPhysicalUnit somePrimaryUnit = null, ValueConversion someConversion = null)
-            : base(somePrimaryUnit != null ? somePrimaryUnit.System : null)
+            : base(somePrimaryUnit != null ? somePrimaryUnit.SimpleSystem : null)
         {
             this._NamedSymbol = someNamedSymbol;
             _primaryunit = somePrimaryUnit;
@@ -2483,7 +2874,7 @@ namespace PhysicalMeasure
         }
 
         /// <summary>
-        /// String with formatted by use of named derivated unit symbols when possible(without system name prefixed).
+        /// String with formatted by use of named derived unit symbols when possible(without system name prefixed).
         /// without debug asserts.
         /// </summary>
         public override String ReducedUnitString()
@@ -2583,12 +2974,14 @@ namespace PhysicalMeasure
 
         public override PhysicalQuantity Power(SByte exponent)
         {
-            return new PhysicalQuantity(this.ConvertToSystemUnit().Pow(exponent));
+            // return new PhysicalQuantity(this.ConvertToSystemUnit().Pow(exponent));
+            return new PhysicalQuantity(this.ConvertToPrimaryUnit().ConvertToSystemUnit().Pow(exponent));
         }
 
         public override PhysicalQuantity Root(SByte exponent)
         {
-            return new PhysicalQuantity(this.ConvertToSystemUnit().Rot(exponent));
+            // return new PhysicalQuantity(this.ConvertToSystemUnit().Rot(exponent));
+            return new PhysicalQuantity(this.ConvertToPrimaryUnit().ConvertToSystemUnit().Rot(exponent));
         }
     }
 
@@ -2642,9 +3035,9 @@ namespace PhysicalMeasure
             }
             else
             {
-                pue_pq = new PhysicalQuantity();
+                pue_pq = new PhysicalQuantity(unitSystem.Dimensionless);
             }
-            if (_PrefixExponent != 0)
+            if (pue_pq != null && _PrefixExponent != 0)
             {
                 double dd = 1;
                 dd *= Math.Pow(10.0, _PrefixExponent);
@@ -2787,7 +3180,7 @@ namespace PhysicalMeasure
             Debug.Assert(unitSystem != null, "UnitSystem must be specified");
 
             IPhysicalQuantity pue_pq = base.PhysicalQuantity(unitSystem);
-            if (_Exponent != 1)
+            if (pue_pq != null && _Exponent != 1)
             {
                 pue_pq = pue_pq.Pow(_Exponent);
             }
@@ -2845,6 +3238,17 @@ namespace PhysicalMeasure
 
     public class PrefixedUnitExponentList : List<IPrefixedUnitExponent>
     {
+        public PrefixedUnitExponentList()
+        {
+        }
+
+        public PrefixedUnitExponentList(IEnumerable<IPrefixedUnitExponent> elements)
+            : base(elements)
+        {
+        }
+
+        
+
         /// <summary>
         /// IFormattable.ToString implementation.
         /// </summary>
@@ -2857,7 +3261,7 @@ namespace PhysicalMeasure
                 Debug.Assert(ue.Exponent != 0, "ue.Exponent must be <> 0");
                 if (!String.IsNullOrEmpty(Str))
                 {
-                    Str += '·';  // centre dot '\0x0B7' (char)183 U+00B7
+                    Str += '·';  // center dot '\0x0B7' (char)183 U+00B7
                 }
 
                 Str += ue.CombinedUnitString(mayUseSlash, invertExponents);
@@ -2870,10 +3274,15 @@ namespace PhysicalMeasure
             PrefixedUnitExponentList Result = new PrefixedUnitExponentList();
             foreach (IPrefixedUnitExponent pue in this)
             {
-                Debug.Assert(pue.PrefixExponent == 0, "pue.PrefixExponent must be 0");
+                if (pue.PrefixExponent != 0)
+                {
+                    Debug.Assert((pue.PrefixExponent == 0) || (exponent == 1) || (exponent == -1), "Power: pue.PrefixExponent must be 0. " + pue.CombinedUnitString() + "^" + exponent);
+                    //double value = Math.Pow(10, pue.PrefixExponent);
+                }
+                SByte NewPrefixExponent =  pue.PrefixExponent;
                 SByte NewExponent = (SByte)(pue.Exponent * exponent);
 
-                PrefixedUnitExponent result_pue = new PrefixedUnitExponent(pue.PrefixExponent, pue.Unit, NewExponent);
+                PrefixedUnitExponent result_pue = new PrefixedUnitExponent(NewPrefixExponent, pue.Unit, NewExponent);
 
                 Result.Add(result_pue);
             }
@@ -2886,7 +3295,11 @@ namespace PhysicalMeasure
             PrefixedUnitExponentList Result = new PrefixedUnitExponentList();
             foreach (IPrefixedUnitExponent pue in this)
             {
-                Debug.Assert(pue.PrefixExponent == 0, "pue.PrefixExponent must be 0");
+                if (pue.PrefixExponent != 0)
+                {
+                    Debug.Assert((pue.PrefixExponent == 0) || (exponent == 1) || (exponent == -1), "Root: pue.PrefixExponent must be 0. " + pue.CombinedUnitString() + "^(1/" + exponent + ")");
+                    //double value = Math.Pow(10, pue.PrefixExponent);
+                }
 
                 int Remainder;
                 int NewExponent = Math.DivRem(pue.Exponent, exponent, out Remainder);
@@ -2922,6 +3335,12 @@ namespace PhysicalMeasure
 
         public CombinedUnit(PrefixedUnitExponentList someNumerators, PrefixedUnitExponentList someDenominators)
         {
+            if ( (someNumerators == null || someNumerators.Count == 0) && (someDenominators != null && someDenominators.Count > 0))
+            {
+                someNumerators = new PrefixedUnitExponentList( someDenominators.Select(pue => new PrefixedUnitExponent(pue.PrefixExponent, pue.Unit, (sbyte)(-pue.Exponent))));
+                someDenominators = null;
+            }
+
             this._Numerators = someNumerators != null ? someNumerators : new PrefixedUnitExponentList();
             this._Denominators = someDenominators != null ? someDenominators : new PrefixedUnitExponentList();
         }
@@ -2939,32 +3358,139 @@ namespace PhysicalMeasure
 
         public override UnitKind Kind { get { return UnitKind.CombinedUnit; } }
 
-        public override IUnitSystem System 
+        public override IUnitSystem SimpleSystem 
         { 
             get 
             {
                 IUnitSystem system = null; // No unit system
                 foreach (IPrefixedUnitExponent pue in Numerators.Union(Denominators))
                 {
-                    if (system == null)
+                    if (pue.Unit == null)
                     {
-                        if (pue.Unit != null)
+                        // This could be at prefix only
+                        // Just ignore this pue; it can't affect unit system info
+                        // return null;
+                    }
+                    else
+                    {
+                        IUnitSystem subsystem = pue.Unit.SimpleSystem;
+
+                        if (system == null)
                         {
-                            system = pue.Unit.System;
+                            system = subsystem;
+                        }
+                        else
+                        {
+                            if (system != subsystem)
+                            {
+                                // Multiple unit systems
+                                return null;
+                            }
                         }
                     }
-                    else if (system != pue.Unit.System)
-                    {
-                        // Multiple unit systems
-                        return null;
-                    }
                 }
-                return system;
+
+                return system;  // The one and only system for all sub units
             } 
-            set {  /* Just do nothing */ }
+            set {  /* Just do nothing */ throw new NotImplementedException(); }
         }
 
-        public IUnitSystem SomeSystem
+        public override IUnitSystem ExponentsSystem
+        {
+            get 
+            {
+                IUnitSystem system = null; // No unit system
+                List<IUnitSystem> SubUnitSystems = null;
+                foreach (IPrefixedUnitExponent pue in Numerators.Union(Denominators))
+                {
+                    if (pue.Unit != null)
+                    {
+                        if (system == null)
+                        {
+                            system = pue.Unit.ExponentsSystem;
+                        }
+                        else
+                        {
+                            IUnitSystem pue_system = pue.Unit.ExponentsSystem; // pue.Unit.SomeSimpleSystem;
+                            if (system != pue_system
+                                && (   (!system.IsCombinedUnitSystem && !pue_system.IsCombinedUnitSystem)
+                                    || (   system.IsCombinedUnitSystem
+                                        && !pue_system.IsCombinedUnitSystem
+                                        && !((CombinedUnitSystem)system).ContainsSubUnitSystem(pue_system))
+                                /*
+                                    We must still include pue_system sub unit systems
+                                    || (   !system.IsCombinedUnitSystem
+                                        && pue_system.IsCombinedUnitSystem
+                                        && !((CombinedUnitSystem)pue_system).ContainsSubUnitSystem(system))
+                                */
+                                    || (   system.IsCombinedUnitSystem
+                                        && pue_system.IsCombinedUnitSystem
+                                        && !((CombinedUnitSystem)system).ContainsSubUnitSystems(((CombinedUnitSystem)pue_system).UnitSystemes))
+                                   )
+                                )
+                            {
+                                // Multiple unit systems and some could be an isolated unit system 
+                                if (SubUnitSystems == null)
+                                {   // First time we have found a second system. Add system as first system in list of systems
+                                    SubUnitSystems = new List<IUnitSystem>();
+                                    if (!system.IsCombinedUnitSystem)
+                                    {
+                                        SubUnitSystems.Add(system);
+                                    }
+                                    else
+                                    {
+                                        CombinedUnitSystem cus = (CombinedUnitSystem)system;
+                                        SubUnitSystems.AddRange(cus.UnitSystemes);
+                                    }
+                                }
+
+                                {   // Add pue_system to list of systems
+                                    if (!pue_system.IsCombinedUnitSystem)
+                                    {
+                                        SubUnitSystems.Add(pue_system);
+                                    }
+                                    else
+                                    {
+                                        CombinedUnitSystem cus = (CombinedUnitSystem)pue_system;
+                                        SubUnitSystems.AddRange(cus.UnitSystemes);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (SubUnitSystems != null)
+                {
+                    if (SubUnitSystems.Any(us => us.IsIsolatedUnitSystem))
+                    {   // Must combine the unit systems into one unit system
+                        system = CombinedUnitSystem.GetCombinedUnitSystem(SubUnitSystems.Distinct().ToArray());
+                    }
+                    else
+                    {
+                        if (SubUnitSystems.Contains(Physics.Default_UnitSystem))
+                        {
+                            system = Physics.Default_UnitSystem;
+                        }
+                        else
+                        {
+                            // system = SubUnitSystems.First(us => !us.IsIsolatedUnitSystem);
+                            system = SubUnitSystems.First();
+                        }
+                    }
+                }
+                if (system == null)
+                {
+                    system = Physics.Default_UnitSystem;
+                }
+
+                Debug.Assert(system != null, "CombinedUnit.ExponentsSystem is null");
+                return system;
+            } 
+        }
+            
+
+        public IUnitSystem SomeSimpleSystem
         {
             get
             {
@@ -2973,7 +3499,7 @@ namespace PhysicalMeasure
                     if (pue.Unit != null)
                     {
                         IPhysicalUnit pu = pue.Unit;
-                        IUnitSystem somesystem = pu.System;
+                        IUnitSystem somesystem = pu.SimpleSystem;
                         if (somesystem != null)
                         {
                             return somesystem;
@@ -2981,7 +3507,7 @@ namespace PhysicalMeasure
                         else if (pu.Kind == UnitKind.CombinedUnit)
                         {
                             ICombinedUnit cu = (ICombinedUnit)pu;
-                            somesystem = cu.SomeSystem;
+                            somesystem = cu.SomeSimpleSystem;
                             if (somesystem != null)
                             {
                                 return somesystem;
@@ -3008,14 +3534,22 @@ namespace PhysicalMeasure
                 }
                 else
                 {
-                    IUnitSystem anySystem = this.System;
+                    IUnitSystem anySystem = this.ExponentsSystem;
                     if (anySystem == null)
                     {
-                        anySystem = this.SomeSystem;
-                    }
-                    if (anySystem == null)
-                    {
-                        anySystem = Physics.SI_Units;
+#if DEBUG // Error traces only included in debug build
+                        Debug.WriteLine("CombinedUnit.Exponents() missing ExponentsSystem");
+                        Debug.Assert(false, "CombinedUnit.Exponents() missing ExponentsSystem");
+#endif
+                        anySystem = this.SomeSimpleSystem;
+                        if (anySystem == null)
+                        {
+#if DEBUG // Error traces only included in debug build
+                            Debug.WriteLine("CombinedUnit.Exponents() missing also SomeSystem");
+                            Debug.Assert(false, "CombinedUnit.Exponents() missing also SomeSystem");
+#endif
+                            anySystem = Physics.SI_Units;
+                        }
                     }
                     if (anySystem != null)
                     {
@@ -3027,23 +3561,42 @@ namespace PhysicalMeasure
                             // exponents = this.ConvertToBaseUnit().Unit.Exponents;
 
                             baseUnit_pq = this.ConvertToBaseUnit();
-                            baseUnit_pu = baseUnit_pq.Unit;
-                            if (baseUnit_pu != null)
+                            if (baseUnit_pq != null)
                             {
-                                exponents = baseUnit_pu.Exponents;
+                                baseUnit_pu = baseUnit_pq.Unit;
+                                if (baseUnit_pu != null)
+                                {
+                                    IUnitSystem system = this.ExponentsSystem;
+                                    Debug.Assert(system != null);
+
+                                    if (system.IsCombinedUnitSystem)
+                                    {
+                                        ICombinedUnitSystem cus = system as ICombinedUnitSystem;
+
+                                        exponents = cus.UnitExponents(this);
+                                    }
+                                    else
+                                    {
+
+                                        exponents = baseUnit_pu.Exponents;
+                                    }
+                                }
                             }
 #if DEBUG // Error traces only included in debug build
-                            else
+                            if (exponents == null)
                             {
-                                Debug.WriteLine("CombinedUnit.ConvertToBaseUnit() are missing unit and exponents");
-                                Debug.Assert(false, "CombinedUnit.ConvertToBaseUnit() are missing unit and exponents");
+                                baseUnit_pq = this.ConvertToBaseUnit(); // Just for extra change to debug
+
+                                Debug.WriteLine("CombinedUnit.ConvertToBaseUnit() are missing base unit and exponents");
+                                Debug.Assert(false, "CombinedUnit.ConvertToBaseUnit() are missing base unit and exponents");
                             }
 #endif                  
                         }
                         catch
                         {
 #if DEBUG // Error traces only included in debug build
-                            baseUnit_pq = this.ConvertToBaseUnit();
+                            baseUnit_pq = this.ConvertToBaseUnit(); // Just for extra change to debug
+
                             Debug.WriteLine("CombinedUnit.ConvertToBaseUnit() failed and unit are missing exponents");
                             Debug.Assert(false, "CombinedUnit.ConvertToBaseUnit() failed and unit are missing exponents");
 #endif
@@ -3052,13 +3605,41 @@ namespace PhysicalMeasure
                     else
                     {
 #if DEBUG // Error traces only included in debug build
-                        Debug.WriteLine("Unit missing exponents");
-                        Debug.Assert(false, "Unit missing exponents");
+                        Debug.WriteLine("CombinedUnit.ConvertToBaseUnit() missing exponents");
+                        Debug.Assert(false, "CombinedUnit.ConvertToBaseUnit() missing exponents");
 #endif
                     }
                 }
                 return exponents;
             }
+        }
+
+        public ICombinedUnit OnlySingleSystemUnits(IUnitSystem us)
+        {
+            PrefixedUnitExponentList TempNumerators = new PrefixedUnitExponentList();
+            PrefixedUnitExponentList TempDenominators = new PrefixedUnitExponentList();
+
+            foreach (IPrefixedUnitExponent pue in Numerators)
+            {
+                if (   ((pue.Unit != null) && (pue.Unit.SimpleSystem == us))
+                    || ((pue.Unit == null) && (us == null)))
+                {
+                    // pue has the specified system; Include in result
+                    TempNumerators.Add(pue);
+                }
+            }
+
+            foreach (IPrefixedUnitExponent pue in Denominators)
+            {
+                if (   ((pue.Unit != null) && (pue.Unit.SimpleSystem == us))
+                    || ((pue.Unit == null) && (us == null)))
+                {
+                    // pue has the specified system; Include in result
+                    TempDenominators.Add(pue);
+                }
+            }
+            CombinedUnit cu = new CombinedUnit(TempNumerators, TempDenominators);
+            return cu;
         }
 
 
@@ -3121,15 +3702,24 @@ namespace PhysicalMeasure
         }
 
         // Relative conversion
+
         public override IPhysicalQuantity ConvertToSystemUnit()
         {
-            IUnitSystem system = this.System;
+            IUnitSystem system = this.SimpleSystem;
             if (system == null)
             {
-                system = Physics.Default_UnitSystem;
+                system = this.SomeSimpleSystem;
+                if (system == null)
+                {
+                    system = this.ExponentsSystem;
+                }
                 Debug.Assert(system != null);
                 IPhysicalQuantity pq = this.ConvertTo(system);
-                Debug.Assert(pq.Unit.System == system);
+                if (pq == null)
+                {
+                    //Debug.Assert(pq == null || pq.Unit.SimpleSystem == system);
+                    Debug.Assert(pq != null); 
+                }
                 return pq;
             }
             return new PhysicalQuantity(1 , this);
@@ -3138,24 +3728,49 @@ namespace PhysicalMeasure
         // Absolute conversion
         public override IPhysicalQuantity ConvertToSystemUnit(ref double quantity)
         {
-            IUnitSystem system = this.System;
+            IUnitSystem system = this.SimpleSystem;
             if (system == null)
             {
                 system = Physics.Default_UnitSystem;
             }
             Debug.Assert(system != null);
             IPhysicalQuantity pq = this.ConvertTo(ref quantity, system);
-            Debug.Assert(pq.Unit.System != null);
+            Debug.Assert(pq == null || pq.Unit.SimpleSystem != null);
             return pq;
         }
 
+
         public override IPhysicalQuantity ConvertToBaseUnit()
         {
-            IUnitSystem system = this.System;
+            /****
+            IUnitSystem system = this.ExponentsSystem;
+            ****/
+            
+            IUnitSystem system = this.SimpleSystem;
             if (system == null)
             {
-                return this.ConvertToSystemUnit().ConvertToBaseUnit();
+                system = this.ExponentsSystem;
+                Debug.Assert(system != null);
+
+                if (system.IsCombinedUnitSystem)
+                {
+                    ICombinedUnitSystem cus = system as ICombinedUnitSystem;
+
+                    return cus.ConvertToBaseUnit(this);
+                }
+
+                // This happens for combined unit with sub units of different but convertible systems Debug.Assert(false);
+
+                // Combined unit with sub units of of different but convertible systems 
+                IPhysicalQuantity pq = this.ConvertToSystemUnit();
+
+                if (pq != null)
+                {
+                    pq = pq.ConvertToBaseUnit();
+                }
+                return pq;
             }
+            
             Debug.Assert(system != null);
 
             double value = 1;
@@ -3164,26 +3779,30 @@ namespace PhysicalMeasure
             foreach (IPrefixedUnitExponent pue in Numerators)
             {
                 IPhysicalQuantity pue_pq = pue.PhysicalQuantity();
-                IPhysicalQuantity pq_baseunit = pue_pq.Unit.ConvertToBaseUnit();
-                IPhysicalUnit baseunit = (IPhysicalUnit)(pq_baseunit.Unit);
-
-                value *= pue_pq.Value * pq_baseunit.Value;
-
-                if (unit == null)
+                IPhysicalUnit pue_pq_Unit = pue_pq.Unit;
+                if (pue_pq_Unit != null)
                 {
-                    unit = baseunit;
-                }
-                else
-                {
-                    IPhysicalQuantity pq = unit.Multiply(baseunit);
-                    if (PhysicalQuantity.IsPureUnit(pq))
+                    IPhysicalQuantity pq_baseunit = pue_pq_Unit.ConvertToBaseUnit();
+                    IPhysicalUnit baseunit = (IPhysicalUnit)(pq_baseunit.Unit);
+
+                    value *= pue_pq.Value * pq_baseunit.Value;
+
+                    if (unit == null)
                     {
-                        unit = PhysicalQuantity.PureUnit(pq); 
+                        unit = baseunit;
                     }
                     else
                     {
-                        value *= pq.Value; 
-                        unit = pq.Unit;
+                        IPhysicalQuantity pq = unit.Multiply(baseunit);
+                        if (PhysicalQuantity.IsPureUnit(pq))
+                        {
+                            unit = PhysicalQuantity.PureUnit(pq);
+                        }
+                        else
+                        {
+                            value *= pq.Value;
+                            unit = pq.Unit;
+                        }
                     }
                 }
             }
@@ -3191,26 +3810,31 @@ namespace PhysicalMeasure
             foreach (IPrefixedUnitExponent pue in Denominators)
             {
                 IPhysicalQuantity pue_pq = pue.PhysicalQuantity();
-                IPhysicalQuantity pq_baseunit = pue_pq.Unit.ConvertToBaseUnit();
-                IPhysicalUnit baseunit = (IPhysicalUnit)(pq_baseunit.Unit);
-
-                value /= pue_pq.Value * pq_baseunit.Value;
-
-                if (unit == null)
+                IPhysicalUnit pue_pq_Unit = pue_pq.Unit;
+                if (pue_pq_Unit != null)
                 {
-                    unit = baseunit.CombinePow(-1);
-                }
-                else
-                {
-                    IPhysicalQuantity pq = unit.Divide(baseunit);
-                    if (PhysicalQuantity.IsPureUnit(pq))
+
+                    IPhysicalQuantity pq_baseunit = pue_pq_Unit.ConvertToBaseUnit();
+                    IPhysicalUnit baseunit = (IPhysicalUnit)(pq_baseunit.Unit);
+
+                    value /= pue_pq.Value * pq_baseunit.Value;
+
+                    if (unit == null)
                     {
-                        unit = PhysicalQuantity.PureUnit(pq); 
+                        unit = baseunit.CombinePow(-1);
                     }
                     else
                     {
-                        value *= pq.Value;
-                        unit = pq.Unit;
+                        IPhysicalQuantity pq = unit.Divide(baseunit);
+                        if (PhysicalQuantity.IsPureUnit(pq))
+                        {
+                            unit = PhysicalQuantity.PureUnit(pq);
+                        }
+                        else
+                        {
+                            value *= pq.Value;
+                            unit = pq.Unit;
+                        }
                     }
                 }
             }
@@ -3221,7 +3845,7 @@ namespace PhysicalMeasure
 
         public override IPhysicalQuantity ConvertToBaseUnit(double quantity)
         {
-            IUnitSystem system = this.System;
+            IUnitSystem system = this.SimpleSystem;
             if (system == null)
             {
                 return this.ConvertToSystemUnit(ref quantity).ConvertToBaseUnit();
@@ -3252,89 +3876,47 @@ namespace PhysicalMeasure
             return physicalQuantity.ConvertTo(this).ConvertToBaseUnit();
         }
 
-        public IPhysicalQuantity ConvertToCombinedBaseUnit(double quantity)
-        {
-            IUnitSystem system = this.System;
-            if (system == null)
-            {
-                return this.ConvertToSystemUnit(ref quantity).ConvertToBaseUnit();
-            }
-            Debug.Assert(system != null);
-            //ConvertToBaseUnit();
-
-            double value = quantity;
-            IPhysicalUnit unit = null;
-
-            foreach (IPrefixedUnitExponent pue in Numerators)
-            {
-                IPhysicalQuantity pue_pq = pue.PhysicalQuantity().ConvertToBaseUnit();
-                
-                value *= pue_pq.Value;
-
-                if (unit == null)
-                {
-                    unit = pue_pq.Unit;
-                }
-                else
-                {
-                    unit = unit.CombineMultiply(pue_pq.Unit);
-                }
-            }
-
-            foreach (IPrefixedUnitExponent pue in Denominators)
-            {
-                IPhysicalQuantity pue_pq = pue.PhysicalQuantity().ConvertToBaseUnit();
-
-                value /= pue_pq.Value;
-
-                if (unit == null)
-                {
-                    unit = pue_pq.Unit.CombinePow(-1);
-                }
-                else
-                {
-                    unit = unit.CombineDivide(pue_pq.Unit);
-                }
-            }
-
-            return new PhysicalQuantity(value, unit);
-        }
-
 
         public override IPhysicalQuantity ConvertTo(IPhysicalUnit convertToUnit)
         {
             Debug.Assert(convertToUnit != null);
 
-            IUnitSystem system = this.System;
-            IUnitSystem convertToSystem = convertToUnit.System;
+            IUnitSystem system = this.SimpleSystem;
+            IUnitSystem convertToSystem = convertToUnit.SimpleSystem;
             if (system == null || system != convertToSystem)
             {
-                if (convertToSystem != null)
-                {
-                    return this.ConvertTo(convertToSystem).ConvertTo(convertToUnit);
-                }
-                else
+                if (convertToSystem == null)
                 {
                     if (convertToUnit.Kind == UnitKind.CombinedUnit)
                     {
                         ICombinedUnit cu = convertToUnit as ICombinedUnit;
-                        convertToSystem = cu.SomeSystem;
-                        if (convertToSystem != system)
-                        {
-                            return this.ConvertTo(convertToSystem).ConvertTo(convertToUnit);
-                        }
-                    }
-                    else
-                    {
-                        Debug.Assert(false);
-
-                        return null;
+                        convertToSystem = cu.ExponentsSystem;
                     }
                 }
+
+                if (convertToSystem != null)
+                {
+                    IPhysicalQuantity this_as_ToSystemUnit = this.ConvertTo(convertToSystem);
+                    if (this_as_ToSystemUnit != null)
+                    {
+                        if (   this_as_ToSystemUnit.Unit != null 
+                            && this_as_ToSystemUnit.Unit.ExponentsSystem != convertToSystem 
+                            && (!convertToSystem.IsCombinedUnitSystem || !((ICombinedUnitSystem)convertToSystem).ContainsSubUnitSystem(this_as_ToSystemUnit.Unit.ExponentsSystem)))
+                        {
+                            Debug.Assert(this_as_ToSystemUnit.Unit == null || this_as_ToSystemUnit.Unit.ExponentsSystem == convertToSystem || (convertToSystem.IsCombinedUnitSystem && ((ICombinedUnitSystem)convertToSystem).ContainsSubUnitSystem(this_as_ToSystemUnit.Unit.ExponentsSystem)), "PRE this_as_ToSystemUnit.Unit.ExponentsSystem != convertToSystem");
+                        }
+                        Debug.Assert(this_as_ToSystemUnit.Unit == null || this_as_ToSystemUnit.Unit.ExponentsSystem == convertToSystem || (convertToSystem.IsCombinedUnitSystem && ((ICombinedUnitSystem)convertToSystem).ContainsSubUnitSystem(this_as_ToSystemUnit.Unit.ExponentsSystem)), "this_as_ToSystemUnit.Unit.ExponentsSystem != convertToSystem");
+                        return this_as_ToSystemUnit.ConvertTo(convertToUnit);
+                    }
+                    return null;
+                }
+                Debug.Assert(false);
+                return null;
             }
             Debug.Assert(system != null && system == convertToSystem);
 
             IPhysicalQuantity pq_baseunit = this.ConvertToBaseUnit();
+            Debug.Assert(pq_baseunit.Unit != this); // Some reduction must be performed; else infinite recursive calls
             IPhysicalQuantity pq_tounit = pq_baseunit.Unit.ConvertTo(convertToUnit);
             if (pq_tounit != null)
             {
@@ -3355,6 +3937,10 @@ namespace PhysicalMeasure
             foreach (IPrefixedUnitExponent pue in Numerators)
             {
                 IPhysicalQuantity pue_pq = pue.PhysicalQuantity(convertToUnitSystem);
+                if (pue_pq == null)
+                {
+                    return null;
+                }
 
                 value *= pue_pq.Value;
 
@@ -3371,6 +3957,10 @@ namespace PhysicalMeasure
             foreach (IPrefixedUnitExponent pue in Denominators)
             {
                 IPhysicalQuantity pue_pq = pue.PhysicalQuantity(convertToUnitSystem);
+                if (pue_pq == null)
+                {
+                    return null;
+                }
 
                 value /= pue_pq.Value;
 
@@ -3384,6 +3974,10 @@ namespace PhysicalMeasure
                 }
             }
 
+            if (unit == null)
+            { // dimension less unit
+                unit = convertToUnitSystem.Dimensionless;
+            }
             return new PhysicalQuantity(value, unit);
         }
 
@@ -3451,20 +4045,15 @@ namespace PhysicalMeasure
 
             if (prefixedUnitExponent.Unit.Kind == UnitKind.CombinedUnit)
             {
-                Double value = 1.0;
+                ICombinedUnit cue = ((ICombinedUnit)(prefixedUnitExponent.Unit));
                 if (prefixedUnitExponent.PrefixExponent != 0)
                 {
-                    value = Math.Pow(10, prefixedUnitExponent.PrefixExponent); 
-                    
-                    if (prefixedUnitExponent.Exponent != 1)
-                    {
-                        value = Math.Pow(value, prefixedUnitExponent.Exponent);
-                    }
+                    PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.PrefixExponent, null, 1);
+                    cue = cue.CombinedUnitMultiply(temp_pue);
                 }
-
-                ICombinedUnit cue =  ((ICombinedUnit)(prefixedUnitExponent.Unit)).CombinedUnitPow(prefixedUnitExponent.Exponent);
+                cue = cue.CombinedUnitPow(prefixedUnitExponent.Exponent);
                 ICombinedUnit unit = this.CombinedUnitMultiply(cue);
-                return new PhysicalQuantity(value, unit);
+                return new PhysicalQuantity(1, unit);
             }
 
             SByte multExponent = prefixedUnitExponent.Exponent;
@@ -3496,7 +4085,7 @@ namespace PhysicalMeasure
                         PrimaryUnitFound = true;
 
                         if (!prefixExponent.Equals(ue.PrefixExponent))
-                        {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move differnce in scaling to prefixedUnitExponentScaleing
+                        {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move difference in scaling to prefixedUnitExponentScaleing
                             prefixedUnitExponentScaleing = (SByte)((ue.PrefixExponent - prefixExponent) * multExponent);
                             prefixExponent = ue.PrefixExponent;
                         }
@@ -3529,7 +4118,7 @@ namespace PhysicalMeasure
                         PrimaryUnitFound = true;
 
                         if (!prefixExponent.Equals(ue.PrefixExponent))
-                        {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move differnce in scaling to prefixedUnitExponentScaleing
+                        {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move difference in scaling to prefixedUnitExponentScaleing
                             prefixedUnitExponentScaleing = (SByte)((ue.PrefixExponent - prefixExponent) * multExponent);
                             prefixExponent = ue.PrefixExponent;
                         }
@@ -3671,8 +4260,8 @@ namespace PhysicalMeasure
                 if (NewExponents != null)
                 {
                     NewExponents = DimensionExponents.Root(NewExponents, exponent);
-                    Debug.Assert(this.System != null);
-                    DerivedUnit du = new DerivedUnit(this.System, NewExponents);
+                    Debug.Assert(this.ExponentsSystem != null);
+                    DerivedUnit du = new DerivedUnit(this.ExponentsSystem, NewExponents);
                     PhysicalQuantity pq = new PhysicalQuantity(1, du);
                     return pq;
                 }
@@ -3693,53 +4282,14 @@ namespace PhysicalMeasure
 
         public override IPhysicalUnit CombineMultiply(IPhysicalUnit physicalUnit)
         {
-            return CombinedUnitMultiply(physicalUnit);
-        }
-
-        public ICombinedUnit CombinedUnitMultiply(IPhysicalUnit physicalUnit)
-        {
-            if (physicalUnit.Kind == UnitKind.CombinedUnit)
-            {
-                CombinedUnit cu = physicalUnit as CombinedUnit;
-                Debug.Assert(cu != null);
-                return this.CombinedUnitMultiply(cu);
-            }
-
-            /*
-            if (physicalUnit.IsDimensionless && physicalUnit.IsDimensionless == 1) // == One ))
-            {
-                return this;
-            }
-            else
-             */
-            {
-                return this.CombinedUnitMultiply(new PrefixedUnitExponent(0, physicalUnit, 1));
-            }
+            return this.CombinedUnitMultiply(physicalUnit);
         }
 
         public override IPhysicalUnit CombineDivide(IPhysicalUnit physicalUnit)
         {
-            return CombinedUnitDivide(physicalUnit);
+            return this.CombinedUnitDivide(physicalUnit);
         }
 
-        public ICombinedUnit CombinedUnitDivide(IPhysicalUnit physicalUnit)
-        {
-            if (physicalUnit.Kind == UnitKind.CombinedUnit)
-            {
-                return this.CombinedUnitDivide((ICombinedUnit)physicalUnit);
-            }
-
-            /*
-            if (physicalUnit.IsDimensionless && physicalUnit.IsDimensionless == 1) // == One ))
-            {
-                return this;
-            }
-            else
-             */
-            {
-                return this.CombinedUnitDivide(new PrefixedUnitExponent(0, physicalUnit, 1));
-            }
-        }
 
         public override IPhysicalUnit CombinePow(SByte exponent)
         {
@@ -3760,15 +4310,31 @@ namespace PhysicalMeasure
                 foreach (IPrefixedUnitExponent ue in Numerators)
                 {
                     SByte NewExponent = (SByte)(ue.Exponent * exponent);
-                    PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
-                    TempNumerators.Add(temp_pue);
+                    if (NewExponent > 0)
+                    {
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
+                        TempNumerators.Add(temp_pue);
+                    }
+                    if (NewExponent < 0)
+                    {
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, (sbyte)(-NewExponent));
+                        TempDenominators.Add(temp_pue);
+                    }
                 }
 
                 foreach (IPrefixedUnitExponent ue in Denominators)
                 {
                     SByte NewExponent = (SByte)(ue.Exponent * exponent);
-                    PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
-                    TempDenominators.Add(temp_pue);
+                    if (NewExponent > 0)
+                    {
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, NewExponent);
+                        TempDenominators.Add(temp_pue);
+                    }
+                    if (NewExponent < 0)
+                    {
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.PrefixExponent, ue.Unit, (sbyte)(-NewExponent));
+                        TempNumerators.Add(temp_pue);
+                    }
                 }
 
                 CombinedUnit cu = new CombinedUnit(TempNumerators, TempDenominators);
@@ -3820,10 +4386,33 @@ namespace PhysicalMeasure
         {
             Debug.Assert(prefixedUnitExponent != null);
 
+            /*
+             Not valid. Even if  unit is dimension less; the factor can differ from 1
+            if (this.IsDimensionless) 
+            {
+                CombinedUnit cu2 = new CombinedUnit(prefixedUnitExponent);
+                return cu2;
+            }
+            */
+
+            if (prefixedUnitExponent.Unit != null && prefixedUnitExponent.Unit.Kind == UnitKind.CombinedUnit)
+            {
+                ICombinedUnit cue = ((ICombinedUnit)(prefixedUnitExponent.Unit));
+                if (prefixedUnitExponent.PrefixExponent != 0)
+                {
+                    PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.PrefixExponent, null, 1);
+                    cue = cue.CombinedUnitMultiply(temp_pue);
+                }
+                cue = cue.CombinedUnitPow(prefixedUnitExponent.Exponent);
+                ICombinedUnit unit = this.CombinedUnitMultiply(cue);
+                return unit;
+            }
+
+
             SByte multPrefixExponent = 0; // 10^0 = 1
             SByte multExponent = 1;
 
-            SByte scaleingPrefixExponent = 0;  // 10^0 = 1
+            SByte scalingPrefixExponent = 0;  // 10^0 = 1
             SByte scaleingExponent = 1;  
 
             PrefixedUnitExponentList TempNumerators = new PrefixedUnitExponentList();
@@ -3843,8 +4432,8 @@ namespace PhysicalMeasure
                     SByte NewExponent = (SByte)(ue.Exponent - prefixedUnitExponent.Exponent);
 
                     if (!prefixedUnitExponent.PrefixExponent.Equals(ue.PrefixExponent))
-                    {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move differnce in scaling to prefixedUnitExponentScaleing
-                        scaleingPrefixExponent = (SByte)(prefixedUnitExponent.PrefixExponent - ue.PrefixExponent);
+                    {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move difference in scaling to prefixedUnitExponentScaleing
+                        scalingPrefixExponent = (SByte)(prefixedUnitExponent.PrefixExponent - ue.PrefixExponent);
                         scaleingExponent = prefixedUnitExponent.Exponent;
                     }
 
@@ -3876,8 +4465,8 @@ namespace PhysicalMeasure
                     PrimaryUnitFound = true;
 
                     if (!prefixedUnitExponent.PrefixExponent.Equals(ue.PrefixExponent))
-                    {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move differnce in scaling to prefixedUnitExponentScaleing
-                        scaleingPrefixExponent = (SByte)(prefixedUnitExponent.PrefixExponent - ue.PrefixExponent);
+                    {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move difference in scaling to prefixedUnitExponentScaleing
+                        scalingPrefixExponent = (SByte)(prefixedUnitExponent.PrefixExponent - ue.PrefixExponent);
                         scaleingExponent = prefixedUnitExponent.Exponent;
                     }
 
@@ -3908,6 +4497,7 @@ namespace PhysicalMeasure
             {
                 if (!PrimaryUnitFound)
                 {
+                    multPrefixExponent = prefixedUnitExponent.PrefixExponent;
                     multExponent = prefixedUnitExponent.Exponent;
                 }
 
@@ -3925,12 +4515,12 @@ namespace PhysicalMeasure
             }
 
 
-            if (scaleingPrefixExponent != 0 && scaleingExponent != 0)
+            if (scalingPrefixExponent != 0 && scaleingExponent != 0)
             {   // Add scaling factor without unit
-                sbyte exp = (sbyte)(scaleingPrefixExponent * scaleingExponent);
+                sbyte exp = (sbyte)(scalingPrefixExponent * scaleingExponent);
 
                 if (TempNumerators.Count > 0 && TempNumerators[0].Unit == null && TempNumerators[0].Exponent == 1)
-                {   // Allready has a scaling factor; Adjust it
+                {   // Already has a scaling factor; Adjust it
                     exp += TempNumerators[0].PrefixExponent;
 
                     if (exp != 0)
@@ -3969,38 +4559,64 @@ namespace PhysicalMeasure
             return this.CombinedUnitMultiply(temp_pue);
         }
 
-        public IPhysicalUnit CombineMultiply(CombinedUnit cu2)
+        public ICombinedUnit CombinedUnitMultiply(IPhysicalUnit physicalUnit)
         {
-            return CombinedUnitMultiply(cu2);
+            if (physicalUnit.Kind == UnitKind.CombinedUnit)
+            {
+                ICombinedUnit cu = physicalUnit as ICombinedUnit;
+                Debug.Assert(cu != null);
+                return this.CombinedUnitMultiply(cu);
+            }
+
+            return this.CombinedUnitMultiply(new PrefixedUnitExponent(0, physicalUnit, 1));
         }
 
-        public ICombinedUnit CombinedUnitMultiply(CombinedUnit cu2)
+        public ICombinedUnit CombinedUnitDivide(IPhysicalUnit physicalUnit)
         {
+            if (physicalUnit.Kind == UnitKind.CombinedUnit)
+            {
+                ICombinedUnit cu = physicalUnit as ICombinedUnit;
+                Debug.Assert(cu != null);
+                return this.CombinedUnitDivide(cu);
+            }
+            return this.CombinedUnitDivide(new PrefixedUnitExponent(0, physicalUnit, 1));
+        }
+
+
+        public ICombinedUnit CombinedUnitMultiply(ICombinedUnit cu2)
+        {
+
+            if (this.IsDimensionless)
+            {
+                return cu2;
+            }
+
             ICombinedUnit cu1 = this;
 
             foreach (IPrefixedUnitExponent pue in cu2.Numerators)
             {
+                /*
                 IPrefixedUnitExponent pue_n = new PrefixedUnitExponent(pue);
 
                 cu1 = cu1.CombinedUnitMultiply(pue_n);
+                */
+                cu1 = cu1.CombinedUnitMultiply(pue);
             }
 
             foreach (IPrefixedUnitExponent pue in cu2.Denominators)
             {
+                /*
                 IPrefixedUnitExponent pue_d = new PrefixedUnitExponent(pue);
 
                 cu1 = cu1.CombinedUnitDivide(pue_d);
+                */
+                cu1 = cu1.CombinedUnitDivide(pue);
             }
 
             return cu1;
         }
 
-        public IPhysicalUnit CombineDivide(CombinedUnit cu2)
-        {
-            return CombinedUnitDivide(cu2);
-        }
-
-        public ICombinedUnit CombinedUnitDivide(CombinedUnit cu2)
+        public ICombinedUnit CombinedUnitDivide(ICombinedUnit cu2)
         {
             ICombinedUnit cu1 = this;
 
@@ -4044,6 +4660,7 @@ namespace PhysicalMeasure
             return this.Equals(otherIPU);
         }
 
+        /**
         public override bool Equals(IPhysicalUnit other)
         {
             if (other == null)
@@ -4060,6 +4677,7 @@ namespace PhysicalMeasure
 
             return temp.Equals(other);
         }
+        **/
 
         #endregion IEquatable<IPhysicalUnit> Members
 
@@ -4097,7 +4715,7 @@ namespace PhysicalMeasure
                 {
                     if (!String.IsNullOrWhiteSpace(UnitName))
                     {
-                        // centre dot '\0x0B7' (char)183 U+00B7
+                        // center dot '\0x0B7' (char)183 U+00B7
                         UnitName += '·' + Denominators.CombinedUnitString(false, !invertExponents);
                     }
                     else
@@ -4169,19 +4787,29 @@ namespace PhysicalMeasure
 
         public override UnitKind Kind { get { return UnitKind.MixedUnit; } }
 
-        public override IUnitSystem System 
+        public override IUnitSystem SimpleSystem 
         { 
             get 
             {
                 Debug.Assert(_MainUnit != null);
-                return MainUnit.System;
+                return MainUnit.SimpleSystem;
             } 
             set 
             {
                 Debug.Assert(_MainUnit != null);
                 /* Just do nothing */ 
                 //MainUnit.System = value; 
-                Debug.Assert(MainUnit.System == value); 
+                Debug.Assert(MainUnit.SimpleSystem == value); 
+
+            }
+        }
+
+        public override IUnitSystem ExponentsSystem
+        {
+            get
+            {
+                Debug.Assert(_MainUnit != null);
+                return MainUnit.ExponentsSystem;
             }
         }
 
@@ -4283,117 +4911,30 @@ namespace PhysicalMeasure
 
     #region Physical Unit System Classes
 
-    public class UnitSystem : NamedObject, IUnitSystem
+    public abstract class UnitSystemBase : NamedObject, IUnitSystem
     {
-        private /* readonly */ UnitPrefixTable _unitprefixes;
-        private /* readonly */ BaseUnit[] _baseunits;
-        private /* readonly */ NamedDerivedUnit[] _namedderivedunits;
-        private /* readonly */ ConvertibleUnit[] _convertibleunits;
 
-        public IUnitPrefixTable UnitPrefixes { get { return _unitprefixes; } }
-        public IBaseUnit[] BaseUnits { get { return _baseunits; } set { _baseunits = (BaseUnit[])value; CheckBaseUnitSystem();  }  }
-        public INamedDerivedUnit[] NamedDerivedUnits { get { return _namedderivedunits; } set { _namedderivedunits = (NamedDerivedUnit[])value; CheckNamedDerivedUnitSystem(); } }
-        public IConvertibleUnit[] ConvertibleUnits { get { return _convertibleunits; } set { _convertibleunits = (ConvertibleUnit[])value; CheckConvertibleUnitSystem(); }  }
+        public abstract IUnitPrefixTable UnitPrefixes { get; }
+        public abstract IBaseUnit[] BaseUnits { get; /* */ set; /* */ }
+        public abstract INamedDerivedUnit[] NamedDerivedUnits { get; /* */ set; /* */ }
+        public abstract IConvertibleUnit[] ConvertibleUnits { get; /* */ set; /* */ }
 
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes)
+        public abstract Boolean IsIsolatedUnitSystem { get; }
+        public abstract Boolean IsCombinedUnitSystem { get; }
+
+        public virtual IPhysicalUnit Dimensionless { get { return Physics.dimensionless; } }
+
+        public UnitSystemBase(String someName)
             : base(someName)
         {
-            this._unitprefixes = someUnitPrefixes;
         }
-
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit[] baseUnits)
-            : this(someName, someUnitPrefixes)
-        {
-            this._baseunits = baseUnits;
-
-            CheckBaseUnitSystem();
-        }
-
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit[] baseUnits, NamedDerivedUnit[] someNamedDerivedUnits)
-            : this(someName, someUnitPrefixes, baseUnits)
-        {
-            this._namedderivedunits = someNamedDerivedUnits;
-
-            CheckNamedDerivedUnitSystem();
-        }
-
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit[] baseUnits, NamedDerivedUnit[] someNamedDerivedUnits, ConvertibleUnit[] someConvertibleUnits)
-            : this(someName, someUnitPrefixes, baseUnits, someNamedDerivedUnits)
-        {
-            this._convertibleunits = someConvertibleUnits;
-
-            CheckConvertibleUnitSystem();
-        }
-
-        private void CheckBaseUnitSystem()
-        {
-            Debug.Assert(this._baseunits != null);
-            
-            foreach (BaseUnit baseunit in this._baseunits)
-            {
-                Debug.Assert(baseunit.Kind == UnitKind.BaseUnit);
-                if (baseunit.Kind != UnitKind.BaseUnit)
-                {
-                    throw new ArgumentException("Must only contain units with Kind = UnitKind.BaseUnit", "BaseUnits");
-                }
-                if (baseunit.System != this)
-                {
-                    Debug.Assert(baseunit.System == null);
-                    baseunit.System = this;
-                }
-            }
-        }
-
-        private void CheckNamedDerivedUnitSystem()
-        {
-            if (this._namedderivedunits != null)
-            {
-                foreach (NamedDerivedUnit namedderivedunit in this._namedderivedunits)
-                {
-                    Debug.Assert(namedderivedunit.Kind == UnitKind.DerivedUnit);
-                    if (namedderivedunit.Kind != UnitKind.DerivedUnit)
-                    {
-                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someNamedDerivedUnits");
-                    }
-                    if (namedderivedunit.System != this)
-                    {
-                        namedderivedunit.System = this;
-                    }
-                }
-            }
-        }
-
-        private void CheckConvertibleUnitSystem()
-        {
-            if (this._convertibleunits != null)
-            {
-                foreach (ConvertibleUnit convertibleunit in this._convertibleunits)
-                {
-                    Debug.Assert(convertibleunit.Kind == UnitKind.ConvertibleUnit);
-                    if (convertibleunit.Kind != UnitKind.ConvertibleUnit)
-                    {
-                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someConvertibleUnits");
-                    }
-                    if (convertibleunit.System != this)
-                    {
-                        convertibleunit.System = this;
-                    }
-                    if (convertibleunit.PrimaryUnit.System == null)
-                    {
-                        (convertibleunit.PrimaryUnit as PhysicalUnit).System = this;
-                    }
-                }
-            }
-        }
-
-        public IPhysicalUnit Dimensionless { get { return Physics.dimensionless; } }
 
         public override String ToString()
         {
             return this.Name;
         }
 
-        private static INamedSymbolUnit UnitFromName(INamedSymbolUnit[] units, String unitname)
+        protected static INamedSymbolUnit UnitFromName(INamedSymbolUnit[] units, String unitname)
         {
             if (units != null)
             {
@@ -4408,7 +4949,7 @@ namespace PhysicalMeasure
             return null;
         }
 
-        private static INamedSymbolUnit UnitFromSymbol(INamedSymbolUnit[] units, String unitsymbol)
+        protected static INamedSymbolUnit UnitFromSymbol(INamedSymbolUnit[] units, String unitsymbol)
         {
             if (units != null)
             {
@@ -4468,7 +5009,7 @@ namespace PhysicalMeasure
         {
             IPhysicalUnit unit = UnitFromSymbol(scaledUnitSymbol);
             if (scaledUnitSymbol.Length > 1)
-            {   /* Check for prefixed unit */
+            {   // Check for prefixed unit 
                 char prefixchar = scaledUnitSymbol[0];
                 SByte scaleExponent = 0;
                 if (UnitPrefixes.GetExponentFromPrefixChar(prefixchar, out scaleExponent))
@@ -4476,20 +5017,20 @@ namespace PhysicalMeasure
                     IPhysicalUnit unit2 = UnitFromSymbol(scaledUnitSymbol.Substring(1));
                     if (unit2 != null)
                     {   // Found both a prefix and an unit; Must be the right unit. 
-                        // Overwrite unit even if set by un-prefixed unit (first call to UnitFromSymbol())
+                        // Overwrite unit even if set by non-prefixed unit (first call to UnitFromSymbol())
                         if (unit != null)
                         {
-                            // SI.Kg <-> SI_prefix.K·SI.g           Prefer (un-prefixed) unit
+                            // SI.Kg <-> SI_prefix.K·SI.g           Prefer (non-prefixed) unit
                             // SI.K (Kelvin) <-> SI_prefix.K·...    Prefer (prefixed) unit2
 
-                            if (unit == SI.Kg && prefixchar == 'K' && unit2 == SI.g)  // SI.Kg <-> SI_prefix.K·SI.g       Prefer (un-prefixed) unit
-                            {   
-                                // Prefer (un-prefixed) unit  
+                            if (unit == SI.Kg && prefixchar == 'K' && unit2 == SI.g)  // SI.Kg <-> SI_prefix.K·SI.g       Prefer (non-prefixed) unit
+                            {
+                                // Prefer (non-prefixed) unit  
                                 //Debug.Assert(unit == null); // For debug. Manually check if overwritten unit is a better choice.
                                 return unit;
                             }
                             // Prefer unit2
-                            // Overwrite unit even if set by un-prefixed unit (first call to UnitFromSymbol())
+                            // Overwrite unit even if set by non-prefixed unit (first call to UnitFromSymbol())
                             Debug.Assert(unit == null); // For debug. Manually check if overwritten unit is a better choice.
                         }
 
@@ -4540,18 +5081,18 @@ namespace PhysicalMeasure
 
             if ((NoOfNonZeroExponents == 1) && (NoOfNonOneExponents == 0))
             {
-                /* BaseUnit */
+                // BaseUnit 
                 unit = (IPhysicalUnit)BaseUnits[FirstNonZeroExponent];
             }
             else
-            {   
-                /* Check if it is a NamedDerivedUnit */
+            {
+                // Check if it is a NamedDerivedUnit 
                 unit = null;
                 if (NamedDerivedUnits != null)
                 {
                     int namedderivedunitsindex = 0;
 
-                    while (   (namedderivedunitsindex < NamedDerivedUnits.Length) 
+                    while ((namedderivedunitsindex < NamedDerivedUnits.Length)
                            && !DimensionExponents.Equals(NamedDerivedUnits[namedderivedunitsindex].Exponents, exponents))
                     {
                         namedderivedunitsindex++;
@@ -4559,13 +5100,13 @@ namespace PhysicalMeasure
 
                     if (namedderivedunitsindex < NamedDerivedUnits.Length)
                     {
-                        /* NamedDerivedUnit */
+                        // NamedDerivedUnit 
                         unit = (IPhysicalUnit)NamedDerivedUnits[namedderivedunitsindex];
                     }
                 }
                 if (unit == null)
-                {  
-                    /* DerivedUnit */
+                {
+                    // DerivedUnit 
                     unit = new DerivedUnit(this, exponents);
                 }
             }
@@ -4580,11 +5121,11 @@ namespace PhysicalMeasure
             if (PhysicalQuantity.IsPureUnit(pq))
             {
                 IPhysicalUnit derunit = PhysicalQuantity.PureUnit(pq);
-                SByte [] Exponents = derunit.Exponents;
+                SByte[] Exponents = derunit.Exponents;
                 int NoOfDimensions = DimensionExponents.NoOfDimensions(Exponents);
                 if (NoOfDimensions > 1)
                 {
-                    foreach (NamedDerivedUnit namedderivedunit in this._namedderivedunits)
+                    foreach (NamedDerivedUnit namedderivedunit in this.NamedDerivedUnits)
                     {
                         if (DimensionExponents.Equals(Exponents, namedderivedunit.Exponents))
                         {
@@ -4596,6 +5137,7 @@ namespace PhysicalMeasure
 
             return null;
         }
+
 
         public IPhysicalQuantity ConvertTo(IPhysicalUnit convertFromUnit, IPhysicalUnit convertToUnit)
         {
@@ -4633,28 +5175,6 @@ namespace PhysicalMeasure
                     IPhysicalQuantity pq = ConvertTo(convertFromUnit, imu.MainUnit);
                     return new PhysicalQuantity(pq.Value, convertToUnit);
                 }
-                else if (convertToUnit.Kind == UnitKind.CombinedUnit)
-                {
-                    ICombinedUnit icu = (ICombinedUnit)convertToUnit;
-                    IPhysicalQuantity pqToUnit; 
-                    pqToUnit= icu.ConvertTo(convertFromUnit);
-                    if (pqToUnit != null)
-                    {
-                        IPhysicalQuantity pq = convertFromUnit.Divide(pqToUnit.Unit);
-                        if (pq.Unit == null || DimensionExponents.IsDimensionless(pq.Unit.Exponents))
-                        {
-                            return new PhysicalQuantity(pq.Value / pqToUnit.Value, convertToUnit);
-                        }
-                    }
-
-                    return null;
-                }
-                else if (convertFromUnit.Kind == UnitKind.CombinedUnit)
-                {
-                    ICombinedUnit icu = (ICombinedUnit)convertFromUnit;
-                    IPhysicalQuantity pq = icu.ConvertTo(convertToUnit);
-                    return pq;
-                }
                 else if (convertFromUnit.Kind == UnitKind.ConvertibleUnit)
                 {
                     IConvertibleUnit icu = (IConvertibleUnit)convertFromUnit;
@@ -4665,7 +5185,7 @@ namespace PhysicalMeasure
                         pq = pq.Multiply(pq_prim.Value);
                     }
                     return pq;
-                } 
+                }
                 else if (convertToUnit.Kind == UnitKind.ConvertibleUnit)
                 {
                     IConvertibleUnit icu = (IConvertibleUnit)convertToUnit;
@@ -4677,11 +5197,33 @@ namespace PhysicalMeasure
 
                     return converted_fromunit;
                 }
+                else if (convertFromUnit.Kind == UnitKind.CombinedUnit)
+                {
+                    ICombinedUnit icu = (ICombinedUnit)convertFromUnit;
+                    IPhysicalQuantity pq = icu.ConvertTo(convertToUnit);
+                    return pq;
+                }
+                else if (convertToUnit.Kind == UnitKind.CombinedUnit)
+                {
+                    ICombinedUnit icu = (ICombinedUnit)convertToUnit;
+                    IPhysicalQuantity pqToUnit;
+                    pqToUnit = icu.ConvertTo(convertFromUnit);
+                    if (pqToUnit != null)
+                    {
+                        IPhysicalQuantity pq = convertFromUnit.Divide(pqToUnit.Unit);
+                        if (pq.Unit == null || DimensionExponents.IsDimensionless(pq.Unit.Exponents))
+                        {
+                            return new PhysicalQuantity(pq.Value / pqToUnit.Value, convertToUnit);
+                        }
+                    }
 
-                if ((convertFromUnit.System == this) && (convertToUnit.System == this))
-                {   /* Intra unit system conversion */
+                    return null;
+                }
+
+                if ((convertFromUnit.SimpleSystem == this) && (convertToUnit.SimpleSystem == this))
+                {   // Intra unit system conversion 
                     Debug.Assert((convertFromUnit.Kind == UnitKind.BaseUnit) || (convertFromUnit.Kind == UnitKind.DerivedUnit));
-                    Debug.Assert((convertToUnit.Kind == UnitKind.BaseUnit) || (convertToUnit.Kind == UnitKind.DerivedUnit) );
+                    Debug.Assert((convertToUnit.Kind == UnitKind.BaseUnit) || (convertToUnit.Kind == UnitKind.DerivedUnit));
 
                     if (!((convertFromUnit.Kind == UnitKind.BaseUnit) || (convertFromUnit.Kind == UnitKind.DerivedUnit)))
                     {
@@ -4699,8 +5241,8 @@ namespace PhysicalMeasure
                     }
                 }
                 else
-                {   /* Inter unit system conversion */
-                    UnitSystemConversion usc = Physics.GetUnitSystemConversion(convertFromUnit.System, convertToUnit.System);
+                {   // Inter unit system conversion 
+                    UnitSystemConversion usc = Physics.GetUnitSystemConversion(convertFromUnit.SimpleSystem, convertToUnit.SimpleSystem);
                     if (usc != null)
                     {
                         return usc.ConvertTo(convertFromUnit, convertToUnit);
@@ -4712,26 +5254,36 @@ namespace PhysicalMeasure
         }
 
 
-        public IPhysicalQuantity ConvertTo(IPhysicalUnit convertFromUnit, IUnitSystem convertToUnitSystem)
+        public virtual IPhysicalQuantity ConvertTo(IPhysicalUnit convertFromUnit, IUnitSystem convertToUnitSystem)
         {
             Debug.Assert(convertFromUnit != null);
             Debug.Assert(convertToUnitSystem != null);
 
-            if (convertFromUnit.System == convertToUnitSystem)
+            IUnitSystem convertFromUnitSystem = convertFromUnit.SimpleSystem;
+
+            if (   convertFromUnitSystem == convertToUnitSystem 
+                || (convertToUnitSystem.IsCombinedUnitSystem && ((CombinedUnitSystem)convertToUnitSystem).ContainsSubUnitSystem(convertFromUnitSystem)))
             {
                 return new PhysicalQuantity(1, convertFromUnit);
             }
 
-            {   /* Inter unit system conversion */
-                UnitSystemConversion usc = Physics.GetUnitSystemConversion(convertFromUnit.System, convertToUnitSystem);
+
+            {   // Inter unit system conversion 
+                UnitSystemConversion usc = Physics.GetUnitSystemConversion(convertFromUnitSystem, convertToUnitSystem);
                 if (usc != null)
                 {
                     return usc.ConvertTo(convertFromUnit.ConvertToBaseUnit(), convertToUnitSystem);
                 }
 
+                if (convertFromUnitSystem.IsIsolatedUnitSystem || convertToUnitSystem.IsIsolatedUnitSystem)
+                {
+                    // Unit system declared to be isolated (user defined) without conversion to other (physical) unit systems.
+                    return null;
+                }
+
                 /* Missing unit system conversion from physicalquantity.Unit.System to ToUnitSystem */
                 /* TO DO Find intermediate systems with conversions between physicalquantity.Unit.System and convertToUnitSystem */
-                Debug.Assert(false);
+                Debug.Assert(false, "Missing unit system conversion from " + convertFromUnitSystem.Name + " to " + convertToUnitSystem.Name);
 
                 return null;
             }
@@ -4779,14 +5331,14 @@ namespace PhysicalMeasure
                 return physicalQuantity;
             }
 
-            if (physicalQuantity.Unit.System != null && physicalQuantity.Unit.System != this)
+            if (physicalQuantity.Unit.SimpleSystem != null && physicalQuantity.Unit.SimpleSystem != this)
             {
-                return physicalQuantity.Unit.System.SpecificConvertTo(physicalQuantity, convertToUnit);
+                return physicalQuantity.Unit.SimpleSystem.SpecificConvertTo(physicalQuantity, convertToUnit);
             }
             else
             {
-                IUnitSystem convertfromunitsystem = physicalQuantity.Unit.System;
-                IUnitSystem converttounitsystem = convertToUnit.System;
+                IUnitSystem convertfromunitsystem = physicalQuantity.Unit.SimpleSystem;
+                IUnitSystem converttounitsystem = convertToUnit.SimpleSystem;
 
                 if (convertfromunitsystem == null)
                 {
@@ -4801,7 +5353,7 @@ namespace PhysicalMeasure
                         ICombinedUnit icu = (ICombinedUnit)physicalQuantity.Unit;
                         Debug.Assert(icu != null);
 
-                        tempconverttounitsystem = icu.SomeSystem;
+                        tempconverttounitsystem = icu.SomeSimpleSystem;
                     }
                     if (tempconverttounitsystem != null)
                     {
@@ -4809,7 +5361,7 @@ namespace PhysicalMeasure
 
                         if (physicalQuantity != null)
                         {
-                            convertfromunitsystem = physicalQuantity.Unit.System;
+                            convertfromunitsystem = physicalQuantity.Unit.SimpleSystem;
                         }
                         else
                         {
@@ -4836,7 +5388,7 @@ namespace PhysicalMeasure
                     Debug.Assert(icu != null);
 
                     IUnitSystem tempconverttounitsystem;
-                    tempconverttounitsystem = icu.SomeSystem;
+                    tempconverttounitsystem = icu.SomeSimpleSystem;
                     Debug.Assert(tempconverttounitsystem != null);
 
                     // ?? What TO DO here ??
@@ -4844,7 +5396,7 @@ namespace PhysicalMeasure
                 }
 
                 if (converttounitsystem != null && convertfromunitsystem != converttounitsystem)
-                {   /* Inter unit system conversion */
+                {   // Inter unit system conversion 
 
                     if (physicalQuantity.Unit.Kind == UnitKind.ConvertibleUnit)
                     {
@@ -4857,7 +5409,7 @@ namespace PhysicalMeasure
                     if (pq != null)
                     {
                         physicalQuantity = pq;
-                        convertfromunitsystem = physicalQuantity.Unit.System;
+                        convertfromunitsystem = physicalQuantity.Unit.SimpleSystem;
                     }
                     else
                     {
@@ -4866,7 +5418,7 @@ namespace PhysicalMeasure
                 }
 
                 if (convertfromunitsystem != null && convertfromunitsystem == converttounitsystem)
-                {   /* Intra unit system conversion */
+                {   // Intra unit system conversion 
 
                     if (physicalQuantity.Unit.Kind == UnitKind.MixedUnit)
                     {
@@ -4961,26 +5513,465 @@ namespace PhysicalMeasure
 
         public IPhysicalQuantity ConvertTo(IPhysicalQuantity physicalQuantity, IUnitSystem convertToUnitSystem)
         {
-            if (physicalQuantity.Unit.System == convertToUnitSystem)
+            IUnitSystem convertFromUnitSystem = physicalQuantity.Unit.SimpleSystem;
+            if (convertFromUnitSystem == convertToUnitSystem)
             {
                 return physicalQuantity;
             }
 
-            {   /* Inter unit system conversion */
-                UnitSystemConversion usc = Physics.GetUnitSystemConversion(physicalQuantity.Unit.System, convertToUnitSystem);
+            if (convertFromUnitSystem.IsIsolatedUnitSystem || convertToUnitSystem.IsIsolatedUnitSystem)
+            {
+                // Unit system declared to be isolated (user defined) without conversion to other (physical) unit systems.
+                return null;
+            }
+            else
+            {   // Inter unit system conversion 
+                UnitSystemConversion usc = Physics.GetUnitSystemConversion(convertFromUnitSystem, convertToUnitSystem);
                 if (usc != null)
                 {
                     return usc.ConvertTo(physicalQuantity.ConvertToBaseUnit(), convertToUnitSystem);
                 }
 
                 /* Missing unit system conversion from  physicalquantity.Unit.System to ToUnitSystem */
-                /* TO DO Find intermediate systems with conversions between physicalquantity.Unit.System and convertToUnitSystem */ 
+                /* TO DO Find intermediate systems with conversions between physicalquantity.Unit.System and convertToUnitSystem */
                 Debug.Assert(false);
 
                 return null;
             }
         }
+
+
     }
+
+    public class UnitSystem : UnitSystemBase
+    {
+        private /* readonly */ UnitPrefixTable _unitprefixes;
+        private /* readonly */ BaseUnit[] _baseunits;
+        private /* readonly */ NamedDerivedUnit[] _namedderivedunits;
+        private /* readonly */ ConvertibleUnit[] _convertibleunits;
+
+        private /* readonly */ Boolean _isIsolated;
+
+        public override IUnitPrefixTable UnitPrefixes {  get { return _unitprefixes; } }
+        public override IBaseUnit[] BaseUnits { get { return _baseunits; } /* */ set { _baseunits = (BaseUnit[])value; CheckBaseUnitSystem(); } /* */ }
+        public override INamedDerivedUnit[] NamedDerivedUnits { get { return _namedderivedunits; } /* */ set { _namedderivedunits = (NamedDerivedUnit[])value; CheckNamedDerivedUnitSystem(); } /* */  }
+        public override IConvertibleUnit[] ConvertibleUnits { get { return _convertibleunits; } /* */ set { _convertibleunits = (ConvertibleUnit[])value; CheckConvertibleUnitSystem(); } /* */  }
+
+        public override Boolean IsIsolatedUnitSystem { get { return _isIsolated; } }
+        public override Boolean IsCombinedUnitSystem { get { return false; } }
+
+        public UnitSystem(String someName, Boolean isIsolated)
+            : base(someName)
+        {
+            this._isIsolated = isIsolated;
+        }
+
+        public UnitSystem(String someName)
+            : this(someName, true)
+        {
+        }
+
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes)
+            : this(someName, false)
+        {
+            this._unitprefixes = someUnitPrefixes;
+        }
+
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit[] baseUnits)
+            : this(someName, someUnitPrefixes)
+        {
+            this._baseunits = baseUnits;
+
+            CheckBaseUnitSystem();
+        }
+
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit[] baseUnits, NamedDerivedUnit[] someNamedDerivedUnits)
+            : this(someName, someUnitPrefixes, baseUnits)
+        {
+            this._namedderivedunits = someNamedDerivedUnits;
+
+            CheckNamedDerivedUnitSystem();
+        }
+
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit[] baseUnits, NamedDerivedUnit[] someNamedDerivedUnits, ConvertibleUnit[] someConvertibleUnits)
+            : this(someName, someUnitPrefixes, baseUnits, someNamedDerivedUnits)
+        {
+            this._convertibleunits = someConvertibleUnits;
+
+            CheckConvertibleUnitSystem();
+        }
+
+        private void CheckBaseUnitSystem()
+        {
+            Debug.Assert(this._baseunits != null);
+            
+            foreach (BaseUnit baseunit in this._baseunits)
+            {
+                Debug.Assert(baseunit.Kind == UnitKind.BaseUnit);
+                if (baseunit.Kind != UnitKind.BaseUnit)
+                {
+                    throw new ArgumentException("Must only contain units with Kind = UnitKind.BaseUnit", "BaseUnits");
+                }
+                if (baseunit.SimpleSystem != this)
+                {
+                    Debug.Assert(baseunit.SimpleSystem == null);
+                    baseunit.SimpleSystem = this;
+                }
+            }
+        }
+
+        private void CheckNamedDerivedUnitSystem()
+        {
+            if (this._namedderivedunits != null)
+            {
+                foreach (NamedDerivedUnit namedderivedunit in this._namedderivedunits)
+                {
+                    Debug.Assert(namedderivedunit.Kind == UnitKind.DerivedUnit);
+                    if (namedderivedunit.Kind != UnitKind.DerivedUnit)
+                    {
+                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someNamedDerivedUnits");
+                    }
+                    if (namedderivedunit.SimpleSystem != this)
+                    {
+                        namedderivedunit.SimpleSystem = this;
+                    }
+                }
+            }
+        }
+
+        private void CheckConvertibleUnitSystem()
+        {
+            if (this._convertibleunits != null)
+            {
+                foreach (ConvertibleUnit convertibleunit in this._convertibleunits)
+                {
+                    Debug.Assert(convertibleunit.Kind == UnitKind.ConvertibleUnit);
+                    if (convertibleunit.Kind != UnitKind.ConvertibleUnit)
+                    {
+                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someConvertibleUnits");
+                    }
+                    if (convertibleunit.SimpleSystem != this)
+                    {
+                        convertibleunit.SimpleSystem = this;
+                    }
+                    if (convertibleunit.PrimaryUnit.SimpleSystem == null)
+                    {
+                        (convertibleunit.PrimaryUnit as PhysicalUnit).SimpleSystem = this;
+                    }
+                }
+            }
+        }
+
+  
+    }
+
+    public static class ArrayExtension
+    {
+        public static T[] Concat<T>(T[] a1, T[] a2)
+        {
+            if (a1 != null && a2 != null)
+            {
+                return a1.Concat(a2).ToArray();
+            }
+            else
+            if (a2 != null)
+            {
+                return a2;
+            }
+            return a1;
+        }
+    }
+
+
+
+    public class CombinedUnitSystem : UnitSystemBase, ICombinedUnitSystem
+    {
+        private /* readonly */ IUnitSystem[] _unitSystemes;
+
+        private /* readonly */ IUnitPrefixTable _unitprefixes;
+        private /* readonly */ IBaseUnit[] _baseunits;
+        private /* readonly */ INamedDerivedUnit[] _namedderivedunits;
+        private /* readonly */ IConvertibleUnit[] _convertibleunits;
+
+
+        public IUnitSystem[] UnitSystemes { get { return _unitSystemes; }  /*  set { throw new NotImplementedException(); }  */ }
+
+        public override IUnitPrefixTable UnitPrefixes { get { return _unitprefixes; } }
+        /**
+        public override IBaseUnit[] BaseUnits { get { return UnitSystemes[0].BaseUnits.Concat( UnitSystemes[1].BaseUnits).ToArray(); }  /* * / set { throw new NotImplementedException(); } /* * / }
+        public override INamedDerivedUnit[] NamedDerivedUnits { get { return UnitSystemes[0].NamedDerivedUnits.Concat(UnitSystemes[1].NamedDerivedUnits).ToArray(); } /* * / set { throw new NotImplementedException(); } /* * / }
+        public override IConvertibleUnit[] ConvertibleUnits { get { return UnitSystemes[0].ConvertibleUnits.Concat(UnitSystemes[1].ConvertibleUnits).ToArray(); } /* * / set { throw new NotImplementedException(); } /* * / }
+        **/
+
+        public override IBaseUnit[] BaseUnits { get { return _baseunits; }  /* */ set { throw new NotImplementedException(); } /* */ }
+
+        public override INamedDerivedUnit[] NamedDerivedUnits { get { return _namedderivedunits; } /* */ set { throw new NotImplementedException(); } /* */ }
+        public override IConvertibleUnit[] ConvertibleUnits { get { return _convertibleunits; } /* */ set { throw new NotImplementedException(); } /* */ }
+
+
+        public override IPhysicalUnit Dimensionless { get { return UnitSystemes[0].Dimensionless; } }
+
+        public override Boolean IsIsolatedUnitSystem { get { return UnitSystemes.All(us => us.IsIsolatedUnitSystem); } }
+        public override Boolean IsCombinedUnitSystem { get { return true; } }
+
+        public Boolean ContainsSubUnitSystem(IUnitSystem unitsystem)
+        {
+            // return !UnitSystemes.All(us => unitsystem != us); 
+            return UnitSystemes.Contains(unitsystem); 
+        }
+
+        public Boolean ContainsSubUnitSystems(IEnumerable<IUnitSystem> unitsystems)
+        {
+            // return !UnitSystemes.All(us => unitsystem != us); 
+            //return UnitSystemes.Contains(unitsystem);
+            return UnitSystemes.Union(unitsystems).Count() == UnitSystemes.Count();
+        }
+
+        private static List<ICombinedUnitSystem> CombinedUnitSystems = new List<ICombinedUnitSystem>();
+
+        public static ICombinedUnitSystem GetCombinedUnitSystem(IUnitSystem[] subUnitSystems)
+        {
+            Debug.Assert(!subUnitSystems.Any(us => us.IsCombinedUnitSystem));
+            IUnitSystem[] sortedSubUnitSystems = subUnitSystems.OrderByDescending(us => us.BaseUnits.Length).ToArray();
+            ICombinedUnitSystem cus = null;
+
+            if (CombinedUnitSystems.Count() > 0)
+            {
+                IEnumerable<ICombinedUnitSystem> tempUnitSystems = CombinedUnitSystems.Where(us => us.UnitSystemes.SequenceEqual(sortedSubUnitSystems));
+                if (tempUnitSystems.Count() >= 1)
+                {
+                    Debug.Assert(tempUnitSystems.Count() == 1);
+                    cus = tempUnitSystems.First();
+                }
+            }
+            if (cus == null)
+            {
+                lock (CombinedUnitSystems)
+                {
+                    IEnumerable<ICombinedUnitSystem> tempUnitSystems = CombinedUnitSystems.Where(us => us.UnitSystemes.SequenceEqual(sortedSubUnitSystems));
+                    if (tempUnitSystems.Count() >= 1)
+                    {
+                        cus = tempUnitSystems.First();
+                    }
+                    else
+                    {
+                        cus = new CombinedUnitSystem(null, sortedSubUnitSystems);
+                        CombinedUnitSystems.Add(cus);
+                        /*
+                        if (CombinedUnitSystems.Count() > 1)
+                        {
+                            Debug.Assert(CombinedUnitSystems.Count() == 1, "GetCombinedUnitSystem found several combined unit systems ");
+                        }
+                        */
+                    }
+                }
+            }
+
+
+            return cus;
+        }
+
+        public CombinedUnitSystem(String someName, IUnitSystem us1 , IUnitSystem us2)
+            : this(someName, new IUnitSystem[] { us1, us2 } )
+        {
+
+        }
+
+        public CombinedUnitSystem(String someName, IUnitSystem[] subUnitSystems)
+            : base(someName != null ? someName : "<" + subUnitSystems.Aggregate("", ((str, us) => String.IsNullOrWhiteSpace(str) ? us.Name : str + ", " + us.Name)) + ">" )
+        {
+            SetupCombinedUnitSystem(subUnitSystems.OrderByDescending(us => us.BaseUnits.Length).ToArray());
+        }
+
+        public void SetupCombinedUnitSystem(IUnitSystem[] subUnitSystems)
+        {
+            /**
+            IUnitSystem[] tailSubSystems = new IUnitSystem[subUnitSystems.Length - 1];
+            tailSubSystems[0] = new CombinedUnitSystem(subUnitSystems[0].Name + ", " + subUnitSystems[1].Name, subUnitSystems[0], subUnitSystems[1]);
+
+            Array.Copy(subUnitSystems, 2, tailSubSystems, 1, subUnitSystems.Length -2);
+            SetupCombinedUnitSystem(tailSubSystems);
+            **/
+
+            _unitSystemes = subUnitSystems;
+
+            IUnitPrefix[] tempUnitprefixes = null;
+            IBaseUnit[] tempBaseUnits = null;
+            INamedDerivedUnit[] tempNamedDerivedUnits = null;
+            IConvertibleUnit[] tempConvertibleUnits = null;
+
+            foreach (IUnitSystem us in UnitSystemes)
+            {
+
+#if FrameworkVersion_4_5_3 
+                // CSharp_6 
+                tempUnitprefixes = ArrayExtension.Concat<IBaseUnit>(tempUnitprefixes, us.UnitPrefixes?.UnitPrefixes);
+#else
+#if FrameworkVersion_4_5_2 || FrameworkVersion_4_5_1 || FrameworkVersion_4_5
+                // CSharp_5 
+                if (us.UnitPrefixes != null)
+                {
+                    tempUnitprefixes = ArrayExtension.Concat<IUnitPrefix>(tempUnitprefixes, us.UnitPrefixes.UnitPrefixes);
+                }
+#endif
+#endif
+                tempBaseUnits = ArrayExtension.Concat<IBaseUnit>(tempBaseUnits, us.BaseUnits);
+                tempNamedDerivedUnits = ArrayExtension.Concat<INamedDerivedUnit>(tempNamedDerivedUnits, us.NamedDerivedUnits);
+                tempConvertibleUnits = ArrayExtension.Concat<IConvertibleUnit>(tempConvertibleUnits, us.ConvertibleUnits);
+            }
+
+            _unitprefixes = new UnitPrefixTable(tempUnitprefixes);
+
+            _baseunits = tempBaseUnits;
+            _namedderivedunits = tempNamedDerivedUnits;
+            _convertibleunits = tempConvertibleUnits;
+        }
+
+
+        public SByte[] UnitExponents(ICombinedUnit cu)
+        {
+            int noOfSubUnitSystems = UnitSystemes.Length;
+            SByte[] UnitSystemExponentsLength = new sbyte[noOfSubUnitSystems];
+            SByte[] UnitSystemExponentsOffsets = new sbyte[noOfSubUnitSystems];
+
+            SByte noOfDimensions = 0;
+            SByte index = 0;
+            foreach (IUnitSystem us in UnitSystemes)
+            {
+                UnitSystemExponentsOffsets[index] = noOfDimensions;
+                UnitSystemExponentsLength[index] = (sbyte)us.BaseUnits.Length;
+                noOfDimensions += UnitSystemExponentsLength[index];
+
+            }
+
+            SByte[] resExponents = new sbyte[0];
+
+            // Split cu in to parts for each sub unit system in UnitSystemes
+            ICombinedUnit[] subUnitParts = new ICombinedUnit[noOfSubUnitSystems];
+
+            // Split into subUnitParts
+            for (int i = 0; i < noOfSubUnitSystems; i++)
+            {
+                subUnitParts[i] = cu.OnlySingleSystemUnits(UnitSystemes[i]);
+                SByte[] us_exponents = subUnitParts[i].Exponents;
+                if (us_exponents.Length < UnitSystemExponentsLength[index])
+                {
+                    us_exponents = DimensionExponents.AllExponents(us_exponents, UnitSystemExponentsLength[index]);
+                }
+                resExponents = resExponents.Concat(us_exponents).ToArray();
+            }
+
+            return resExponents;
+        }
+
+        /*******
+        public IPhysicalQuantity ConvertToBaseUnit(ICombinedUnit cu)
+        {
+            // Split cu in to parts for each sub unit system in UnitSystemes
+            int noOfSubUnitSystems = UnitSystemes.Length;
+            ICombinedUnit[] subUnitParts = new ICombinedUnit[noOfSubUnitSystems];
+
+            // Split into subUnitParts
+            for (int i = 0; i < noOfSubUnitSystems; i++)
+            {
+                subUnitParts[i] = cu.OnlySingleSystemUnits(UnitSystemes[i]);
+            }
+
+            // 
+            Double resValue = 1;
+            ICombinedUnit resBaseUnit = new CombinedUnit();
+            // foreach (ICombinedUnit subCombinedUnit in subUnitParts)
+            for (int i = 0; i < noOfSubUnitSystems; i++)
+            {
+                ICombinedUnit subCombinedUnit = subUnitParts[i];
+                if (subCombinedUnit != null)
+                {
+                    IPhysicalQuantity pq = subCombinedUnit.ConvertToBaseUnit(UnitSystemes[i]);
+                    resValue *= pq.Value;
+                    resBaseUnit = resBaseUnit.CombinedUnitMultiply(pq.Unit);
+                }
+            }
+
+            return new PhysicalQuantity(resValue, resBaseUnit);
+        }
+        *******/
+
+        public IPhysicalQuantity ConvertToBaseUnit(ICombinedUnit cu)
+        {
+            int noOfSubUnitSystems = UnitSystemes.Length;
+            SByte[] UnitSystemExponentsLength = new sbyte[noOfSubUnitSystems];
+            SByte[] UnitSystemExponentsOffsets = new sbyte[noOfSubUnitSystems];
+
+            SByte noOfDimensions = 0;
+            SByte index = 0;
+            foreach (IUnitSystem us in UnitSystemes)
+            {
+                UnitSystemExponentsOffsets[index] = noOfDimensions;
+                UnitSystemExponentsLength[index] = (sbyte)us.BaseUnits.Length;
+                noOfDimensions += UnitSystemExponentsLength[index];
+                index++;
+            }
+
+            SByte[] resExponents = new sbyte[0];
+
+            // Split cu in to parts for each sub unit system in UnitSystemes
+            ICombinedUnit[] subUnitParts = new ICombinedUnit[noOfSubUnitSystems+1];
+
+            // Split into subUnitParts
+            Double resValue = 1;
+
+            for (int i = 0; i < noOfSubUnitSystems; i++)
+            {
+                subUnitParts[i] = cu.OnlySingleSystemUnits(UnitSystemes[i]);
+
+                IPhysicalQuantity pq = subUnitParts[i].ConvertToBaseUnit(UnitSystemes[i]);
+                resValue *= pq.Value;
+                Debug.Assert(pq.Unit != null);
+                SByte[] us_exponents = pq.Unit.Exponents;
+                if (us_exponents.Length < UnitSystemExponentsLength[i])
+                {
+                    us_exponents = DimensionExponents.AllExponents(us_exponents, UnitSystemExponentsLength[i]);
+                }
+                resExponents = resExponents.Concat(us_exponents).ToArray();
+            }
+
+            // Handle part of cu without (sub-)unitsystem
+            subUnitParts[noOfSubUnitSystems] = cu.OnlySingleSystemUnits(null); // no unit system
+
+            IPhysicalQuantity pq2 = subUnitParts[noOfSubUnitSystems].ConvertToBaseUnit();
+            resValue *= pq2.Value;
+
+            IPhysicalUnit derivatedUnit = new DerivedUnit(this, resExponents);
+            return new PhysicalQuantity(resValue, derivatedUnit);
+        }
+
+        public override int GetHashCode()
+        {
+            if (_unitSystemes == null)
+            {
+                return base.GetHashCode();
+            }
+            return _unitSystemes.GetHashCode();
+        }
+
+        public override bool Equals(Object obj)
+        {
+            if (obj == null)
+                return false;
+
+            ICombinedUnitSystem ICombinedUnitSystemObj = obj as ICombinedUnitSystem;
+            if (ICombinedUnitSystemObj == null)
+                return false;
+            else
+                return Equals(ICombinedUnitSystemObj);
+        }
+
+        public bool Equals(ICombinedUnitSystem other)
+        {
+            return Equals(this.UnitSystemes, other.UnitSystemes);
+        }
+    }
+
 
     #endregion Physical Unit System Classes
 
@@ -5093,12 +6084,12 @@ namespace PhysicalMeasure
         {
             Debug.Assert(convertFromUnit != null);
 
-            if ((convertFromUnit.System == BaseUnitSystem) && (convertToUnitSystem == ConvertedUnitSystem))
+            if ((convertFromUnit.SimpleSystem == BaseUnitSystem) && (convertToUnitSystem == ConvertedUnitSystem))
             {
                 return this.ConvertFromBaseUnitSystem(convertFromUnit);
             }
             else
-                if ((convertFromUnit.System == ConvertedUnitSystem) && (convertToUnitSystem == BaseUnitSystem))
+                if ((convertFromUnit.SimpleSystem == ConvertedUnitSystem) && (convertToUnitSystem == BaseUnitSystem))
             {
                 return this.ConvertToBaseUnitSystem(convertFromUnit);
             }
@@ -5110,12 +6101,12 @@ namespace PhysicalMeasure
         {
             Debug.Assert(physicalQuantity != null);
 
-            if ((physicalQuantity.Unit.System == BaseUnitSystem) && (convertToUnitSystem == ConvertedUnitSystem))
+            if ((physicalQuantity.Unit.SimpleSystem == BaseUnitSystem) && (convertToUnitSystem == ConvertedUnitSystem))
             {
                 return this.ConvertFromBaseUnitSystem(physicalQuantity);
             }
             else
-                if ((physicalQuantity.Unit.System == ConvertedUnitSystem) && (convertToUnitSystem == BaseUnitSystem))
+                if ((physicalQuantity.Unit.SimpleSystem == ConvertedUnitSystem) && (convertToUnitSystem == BaseUnitSystem))
                 {
                     return this.ConvertToBaseUnitSystem(physicalQuantity);
                 }
@@ -5127,7 +6118,7 @@ namespace PhysicalMeasure
         {
             Debug.Assert(convertToUnit != null);
 
-            IPhysicalQuantity pq = this.ConvertTo(convertFromUnit, convertToUnit.System);
+            IPhysicalQuantity pq = this.ConvertTo(convertFromUnit, convertToUnit.SimpleSystem);
             if (pq != null)
             {
                 pq = pq.ConvertTo(convertToUnit);
@@ -5139,7 +6130,7 @@ namespace PhysicalMeasure
         {
             Debug.Assert(convertToUnit != null);
 
-            IPhysicalQuantity pq = this.ConvertTo(physicalQuantity, convertToUnit.System);
+            IPhysicalQuantity pq = this.ConvertTo(physicalQuantity, convertToUnit.SimpleSystem);
             if (pq != null)
             {
                 pq = pq.ConvertTo(convertToUnit);
@@ -5358,7 +6349,7 @@ namespace PhysicalMeasure
             TO DO: IsSystemUnit() is not implemented yet
             if (this.Unit.IsSystemUnit())
             */
-            if (this.Unit.System != null)
+            if (this.Unit.SimpleSystem != null)
             {
                 return this;
             }
@@ -5374,6 +6365,7 @@ namespace PhysicalMeasure
             return pq;
         }
 
+        /**
         public IUnitSystem UnitSystem()
         {
             Debug.Assert(this.Unit != null);
@@ -5386,28 +6378,28 @@ namespace PhysicalMeasure
 
             return this.Unit.System;
         }
-
+        **/
 
         // Auto detecting if specific or relative unit conversion 
         public IPhysicalQuantity ConvertTo(IPhysicalUnit convertToUnit)
         {
-            if (this.Unit == convertToUnit)
+            //if (this.Unit == convertToUnit)
+            if (Object.ReferenceEquals(this.Unit, convertToUnit))
             {
+                // Convert to its own unit; No conversion needed
                 return this;
             }
-
+            
             if (this.Unit == null)
             {
                 if (convertToUnit == null || (convertToUnit.IsDimensionless )) // || convertToUnit == 1)) // One ))
                 {   // Any dimensionless can be converted to any systems dimensionless
                     Debug.Assert(convertToUnit != null);
-                    IPhysicalQuantity quantity = new PhysicalQuantity(this.Value, convertToUnit);
+                    IPhysicalQuantity quantity = new PhysicalQuantity(this.Value * 1 / convertToUnit.FactorValue, convertToUnit);
                     return quantity;
                 }
                 else
-                {
-                    // Debug.Assert(convertToUnit != null);
-                    // throw new InvalidOperationException("Must have a unit to convert it");
+                {   // No dimensionless can be converted to or from any non dimensionless.
                     return null;
                 }
             }
@@ -5420,23 +6412,40 @@ namespace PhysicalMeasure
                 throw new ArgumentNullException("convertToUnit");
             }
 
-            bool thisIsDimensionless = this.Unit.IsDimensionless;
-            bool toIsDimensionless = convertToUnit.IsDimensionless;
-            if (thisIsDimensionless != toIsDimensionless)
-            {   // No dimensionless can be converted to or from any non dimensionless.
-                return null;
-            }
-            if (thisIsDimensionless && toIsDimensionless)
+            if (this.Unit.Kind != UnitKind.CombinedUnit && convertToUnit.Kind != UnitKind.CombinedUnit)
             {
-                // Any dimensionless can be converted to any systems dimensionless
+                bool thisIsDimensionless = this.Unit.IsDimensionless;
+                bool toIsDimensionless = convertToUnit.IsDimensionless;
+                if (thisIsDimensionless != toIsDimensionless)
+                {   // No dimensionless can be converted to or from any non-dimensionless.
+                    return null;
+                }
+                if (thisIsDimensionless && toIsDimensionless)
+                {
+                    // Any dimensionless can be converted to any systems dimensionless
+                    IPhysicalQuantity quantity = new PhysicalQuantity(this.Value * this.Unit.FactorValue / convertToUnit.FactorValue, convertToUnit);
+                    return quantity;
+                }
+            }
+
+            if (this.Unit.Equals(convertToUnit))
+            {
+                // Equal units must have same value 
                 IPhysicalQuantity quantity = new PhysicalQuantity(this.Value, convertToUnit);
                 return quantity;
             }
 
-            IUnitSystem convertToUnitsystem = convertToUnit.System;
+            IUnitSystem convertToUnitsystem = convertToUnit.SimpleSystem;
             if (convertToUnitsystem == null)
             {
-                convertToUnitsystem = this.Unit.System;
+                convertToUnitsystem = convertToUnit.ExponentsSystem;
+                Debug.WriteLine("convertToUnitsystem assigned from convertToUnit.ExpresionsSystem");
+            }
+
+            Debug.Assert(convertToUnitsystem != null);
+            if (convertToUnitsystem == null)
+            {
+                convertToUnitsystem = this.Unit.SimpleSystem;
                 Debug.WriteLine("convertToUnitsystem assigned from this.Unit.System");
             }
             if (convertToUnitsystem == null)
@@ -5462,7 +6471,9 @@ namespace PhysicalMeasure
 
         public IPhysicalQuantity ConvertTo(IUnitSystem convertToUnitSystem)
         {
-            if (this.Unit.System == convertToUnitSystem)
+            IUnitSystem convertFromUnitsystem = this.Unit.SimpleSystem;
+
+            if (convertFromUnitsystem == convertToUnitSystem)
             {
                 return this;
             }
@@ -5480,10 +6491,10 @@ namespace PhysicalMeasure
                 throw new ArgumentNullException("convertToUnitSystem");
             }
 
-            if (this.Unit.System != null)
+            if (convertFromUnitsystem != null)
             {
                 // Let unit's unit system do auto detecting of specific or relative unit conversion 
-                IPhysicalQuantity quantity = this.Unit.System.ConvertTo(this as IPhysicalQuantity, convertToUnitSystem);
+                IPhysicalQuantity quantity = convertFromUnitsystem.ConvertTo(this as IPhysicalQuantity, convertToUnitSystem);
                 return quantity;
             }
 
@@ -5493,10 +6504,11 @@ namespace PhysicalMeasure
         // Unspecific/relative non-quantity unit conversion (e.g. temperature interval)1
         public IPhysicalQuantity RelativeConvertTo(IPhysicalUnit convertToUnit)
         {
-            if (this.Unit.System != null)
+            IUnitSystem convertFromUnitsystem = this.Unit.SimpleSystem;
+            if (convertFromUnitsystem != null)
             {
                 // Let unit's unit system do auto detecting of specific or relative unit conversion 
-                IPhysicalQuantity quantity = this.Unit.System.ConvertTo(this.Unit, convertToUnit).Multiply(this.Value);
+                IPhysicalQuantity quantity = convertFromUnitsystem.ConvertTo(this.Unit, convertToUnit).Multiply(this.Value);
                 return quantity;
             }
             return null;
@@ -5504,10 +6516,11 @@ namespace PhysicalMeasure
 
         public IPhysicalQuantity RelativeConvertTo(IUnitSystem convertToUnitSystem)
         {
-            if (this.Unit.System != null)
+            IUnitSystem convertFromUnitsystem = this.Unit.SimpleSystem;
+            if (convertFromUnitsystem != null)
             {
                 // Let unit's unit system do auto detecting of specific or relative unit conversion 
-                IPhysicalQuantity quantity = this.Unit.System.ConvertTo(this.Unit, convertToUnitSystem).Multiply(this.Value);
+                IPhysicalQuantity quantity = convertFromUnitsystem.ConvertTo(this.Unit, convertToUnitSystem).Multiply(this.Value);
                 return quantity;
             }
             return null;
@@ -5516,10 +6529,11 @@ namespace PhysicalMeasure
         // Specific/absolute quantity unit conversion (e.g. specific temperature)
         public IPhysicalQuantity SpecificConvertTo(IPhysicalUnit convertToUnit)
         {
-            if (this.Unit.System != null)
+            IUnitSystem convertFromUnitsystem = this.Unit.SimpleSystem;
+            if (convertFromUnitsystem != null)
             {
                 // Let unit's unit system do auto detecting of specific or relative unit conversion 
-                IPhysicalQuantity quantity = this.Unit.System.ConvertTo(this as IPhysicalQuantity, convertToUnit);
+                IPhysicalQuantity quantity = convertFromUnitsystem.ConvertTo(this as IPhysicalQuantity, convertToUnit);
                 return quantity;
             }
             return null;
@@ -5527,10 +6541,11 @@ namespace PhysicalMeasure
 
         public IPhysicalQuantity SpecificConvertTo(IUnitSystem convertToUnitSystem)
         {
-            if (this.Unit.System != null)
+            IUnitSystem convertFromUnitsystem = this.Unit.SimpleSystem;
+            if (convertFromUnitsystem != null)
             {
                 // Let unit's unit system do auto detecting of specific or relative unit conversion 
-                IPhysicalQuantity quantity = this.Unit.System.ConvertTo(this as IPhysicalQuantity, convertToUnitSystem);
+                IPhysicalQuantity quantity = convertFromUnitsystem.ConvertTo(this as IPhysicalQuantity, convertToUnitSystem);
                 return quantity;
             }
             return null;
@@ -5593,16 +6608,17 @@ namespace PhysicalMeasure
             Debug.Assert(this.Unit != null);
             Debug.Assert(other.Unit != null);
 
-            if (this.Unit != other.Unit)
+            if (Object.ReferenceEquals(null, other))
             {
-                other = other.ConvertTo(this.Unit);
-                if (other == null)
-                {
-                    return false;
-                }
+                return false;
             }
-            // return double.Equals(this.Value, other.Value);
-            return this.ValueCompare(other.Value) == 0;
+
+            IPhysicalQuantity other2 = other.ConvertTo(this.Unit);
+            if (Object.ReferenceEquals(null, other2))
+            {
+                return false;
+            }
+            return this.ValueCompare(other2.Value) == 0;
         }
 
         public bool Equals(IPhysicalUnit other)
@@ -5730,9 +6746,11 @@ namespace PhysicalMeasure
                 pq2 = pq2.ConvertTo(pg2_unit.PrimaryUnit);
             }
 
-            if (pq2.Unit.System != pq1.Unit.System)
+            IUnitSystem pq2UnitSystem = pq2.Unit.SimpleSystem;
+            IUnitSystem pq1UnitSystem = pq1.Unit.SimpleSystem;
+            if (pq2UnitSystem != pq1UnitSystem)
             {   // Must be same unit system
-                pq2 = pq2.ConvertTo(pq1.Unit.System);
+                pq2 = pq2.ConvertTo(pq1UnitSystem);
             }
 
             SByte MinNoOfBaseUnits = (SByte)Math.Min(pq1.Unit.Exponents.Length, pq2.Unit.Exponents.Length);
@@ -5758,8 +6776,8 @@ namespace PhysicalMeasure
                 }
             }
 
-            Debug.Assert(pq1.Unit.System != null);
-            PhysicalUnit pu = new DerivedUnit(pq1.Unit.System, someexponents);
+            Debug.Assert(pq1.Unit.ExponentsSystem != null);
+            PhysicalUnit pu = new DerivedUnit(pq1.Unit.ExponentsSystem, someexponents);
             return new PhysicalQuantity(cvf(pq1.Value, pq2.Value), pu);
         }
 
@@ -6062,13 +7080,13 @@ namespace PhysicalMeasure
          
         */
 
-        public static readonly BaseUnit[] SI_BaseUnits = new BaseUnit[] {  new BaseUnit(null, (SByte)MeasureKind.Length, "meter", "m"), 
-                                                                    new BaseUnit(null, (SByte)MeasureKind.Mass, "kilogram", "Kg"), /* kg */
-                                                                    new BaseUnit(null, (SByte)MeasureKind.Time, "second", "s"), 
-                                                                    new BaseUnit(null, (SByte)MeasureKind.ElectricCurrent, "ampere", "A"), 
-                                                                    new BaseUnit(null, (SByte)MeasureKind.ThermodynamicTemperature, "kelvin", "K"), 
-                                                                    new BaseUnit(null, (SByte)MeasureKind.AmountOfSubstance, "mol", "mol"), 
-                                                                    new BaseUnit(null, (SByte)MeasureKind.LuminousIntensity, "candela", "cd") };
+        public static readonly BaseUnit[] SI_BaseUnits = new BaseUnit[] {  new BaseUnit(null, (SByte)PhysicsMeasureKind.Length, "meter", "m"), 
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.Mass, "kilogram", "Kg"), /* kg */
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.Time, "second", "s"), 
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.ElectricCurrent, "ampere", "A"), 
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.ThermodynamicTemperature, "kelvin", "K"), 
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.AmountOfSubstance, "mol", "mol"), 
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.LuminousIntensity, "candela", "cd") };
 
         public static readonly UnitSystem SI_Units = new UnitSystem("SI", UnitPrefixes,
                                                                  SI_BaseUnits,
@@ -6092,52 +7110,51 @@ namespace PhysicalMeasure
                                                                                             new NamedDerivedUnit(SI_Units, "becquerel", "Bq",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
                                                                                             new NamedDerivedUnit(SI_Units, "gray",      "Gy",   new SByte[] { 2, 0, -2, 0, 0, 0, 0 }),
                                                                                             new NamedDerivedUnit(SI_Units, "katal",     "kat",  new SByte[] { 0, 0, -1, 0, 0, 1, 0 }) },
-                                                                 new ConvertibleUnit[] { new ConvertibleUnit("gram", "g", SI_BaseUnits[(int)MeasureKind.Mass], new ScaledValueConversion(1000)),  /* [g] = 1000 * [Kg] */
-                                                                                         new ConvertibleUnit("Celsius", "°C" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ , SI_BaseUnits[(int)MeasureKind.ThermodynamicTemperature], new LinearValueConversion(-273.15, 1)),    /* [°C] = 1 * [K] - 273.15 */
-                                                                                         new ConvertibleUnit("hour", "h", SI_BaseUnits[(int)MeasureKind.Time], new ScaledValueConversion(1.0/3600)), /* [h] = 1/3600 * [s] */
-                                                                                         new ConvertibleUnit("litre", "l", SI_BaseUnits[(int)MeasureKind.Length].Pow(3).Unit, new ScaledValueConversion(1000) ) }) ; /* [l] = 1000 * [m3] */   
+                                                                 new ConvertibleUnit[] { new ConvertibleUnit("gram", "g", SI_BaseUnits[(int)PhysicsMeasureKind.Mass], new ScaledValueConversion(1000)),  /* [g] = 1000 * [Kg] */
+                                                                                         new ConvertibleUnit("Celsius", "°C" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ , SI_BaseUnits[(int)PhysicsMeasureKind.ThermodynamicTemperature], new LinearValueConversion(-273.15, 1)),    /* [°C] = 1 * [K] - 273.15 */
+                                                                                         new ConvertibleUnit("hour", "h", SI_BaseUnits[(int)PhysicsMeasureKind.Time], new ScaledValueConversion(1.0/3600)), /* [h] = 1/3600 * [s] */
+                                                                                         new ConvertibleUnit("liter", "l", SI_BaseUnits[(int)PhysicsMeasureKind.Length].Pow(3).Unit, new ScaledValueConversion(1000) ) }) ; /* [l] = 1000 * [m3] */   
         public static readonly PhysicalUnit dimensionless = new DerivedUnit(SI_Units, new SByte[] { 0, 0, 0, 0, 0, 0, 0 });
 
         public static readonly UnitSystem CGS_Units = new UnitSystem("CGS", UnitPrefixes,
-                                                                  new BaseUnit[] {  new BaseUnit(CGS_Units, (SByte)MeasureKind.Length, "centimeter", "cm"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)MeasureKind.Mass, "gram", "g"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)MeasureKind.Time, "second", "s"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)MeasureKind.ElectricCurrent, "ampere", "A"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)MeasureKind.ThermodynamicTemperature, "kelvin", "K"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)MeasureKind.AmountOfSubstance, "mol", "mol"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)MeasureKind.LuminousIntensity, "candela", "cd")});
+                                                                  new BaseUnit[] {  new BaseUnit(CGS_Units, (SByte)PhysicsMeasureKind.Length, "centimeter", "cm"), 
+                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicsMeasureKind.Mass, "gram", "g"), 
+                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicsMeasureKind.Time, "second", "s"), 
+                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicsMeasureKind.ElectricCurrent, "ampere", "A"), 
+                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicsMeasureKind.ThermodynamicTemperature, "kelvin", "K"), 
+                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicsMeasureKind.AmountOfSubstance, "mol", "mol"), 
+                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicsMeasureKind.LuminousIntensity, "candela", "cd")});
 
-        public static readonly BaseUnit[] MGD_BaseUnits = new BaseUnit[] {  new BaseUnit(null, (SByte)MeasureKind.Length, "meter", "m"), 
-                                                                    new BaseUnit(null, (SByte)MeasureKind.Mass, "kilogram", "Kg"), /* kg */
-                                                                    /* new BaseUnit(null, (SByte)MeasureKind.Time, "second", "s"), */
-                                                                    new BaseUnit(null, (SByte)MeasureKind.Time, "day", "d"),
-                                                                    /*  new BaseUnit(MGD_Units, "moment", "ø"), */
-                                                                    new BaseUnit(null, (SByte)MeasureKind.ElectricCurrent, "ampere", "A"), 
-                                                                    new BaseUnit(null, (SByte)MeasureKind.ThermodynamicTemperature, "kelvin", "K"), 
-                                                                    new BaseUnit(null, (SByte)MeasureKind.AmountOfSubstance, "mol", "mol"), 
-                                                                    new BaseUnit(null, (SByte)MeasureKind.LuminousIntensity, "candela", "cd") };
+        public static readonly BaseUnit[] MGD_BaseUnits = new BaseUnit[] {  new BaseUnit(null, (SByte)PhysicsMeasureKind.Length, "meter", "m"), 
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.Mass, "kilogram", "Kg"), /* kg */
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.Time, "day", "d"),
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.ElectricCurrent, "ampere", "A"), 
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.ThermodynamicTemperature, "kelvin", "K"), 
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.AmountOfSubstance, "mol", "mol"), 
+                                                                    new BaseUnit(null, (SByte)PhysicsMeasureKind.LuminousIntensity, "candela", "cd") };
 
         public static readonly UnitSystem MGD_Units = new UnitSystem("MGD", UnitPrefixes,
                                                                   MGD_BaseUnits, 
                                                                  null,
-                                                                 new ConvertibleUnit[] { new ConvertibleUnit("second", "sec", MGD_BaseUnits[(int)MeasureKind.Time], new ScaledValueConversion(24 * 60 * 60)),  /* [sec]  = 24 * 60 * 60 * [d] */
-                                                                                         new ConvertibleUnit("minute", "min", MGD_BaseUnits[(int)MeasureKind.Time], new ScaledValueConversion(24 * 60)),       /* [min]  = 24 * 60 * [d] */
-                                                                                         new ConvertibleUnit("hour", "hour", MGD_BaseUnits[(int)MeasureKind.Time], new ScaledValueConversion(24)),             /* [hour] = 24 * [d] */
-                                                                                         new ConvertibleUnit("day", "day", MGD_BaseUnits[(int)MeasureKind.Time], new IdentityValueConversion()),               /* [day]  = 1 * [d] */
-                                                                                         new ConvertibleUnit("year", "year", MGD_BaseUnits[(int)MeasureKind.Time], new ScaledValueConversion(1.0/365)) });     /* [year] = 1/365 * [d] */
+                                                                 new ConvertibleUnit[] { new ConvertibleUnit("second", "sec", MGD_BaseUnits[(int)PhysicsMeasureKind.Time], new ScaledValueConversion(24 * 60 * 60)),  /* [sec]  = 24 * 60 * 60 * [d] */
+                                                                                         new ConvertibleUnit("minute", "min", MGD_BaseUnits[(int)PhysicsMeasureKind.Time], new ScaledValueConversion(24 * 60)),       /* [min]  = 24 * 60 * [d] */
+                                                                                         new ConvertibleUnit("hour", "hour", MGD_BaseUnits[(int)PhysicsMeasureKind.Time], new ScaledValueConversion(24)),             /* [hour] = 24 * [d] */
+                                                                                         new ConvertibleUnit("day", "day", MGD_BaseUnits[(int)PhysicsMeasureKind.Time], new IdentityValueConversion()),               /* [day]  = 1 * [d] */
+                                                                                         new ConvertibleUnit("year", "year", MGD_BaseUnits[(int)PhysicsMeasureKind.Time], new ScaledValueConversion(1.0/36.25)),      /* [year] = 1/365.25 * [d] */
+                                                                                         new ConvertibleUnit("year", "y", MGD_BaseUnits[(int)PhysicsMeasureKind.Time], new ScaledValueConversion(1.0/365.25)) });     /* [y]    = 1/365.25 * [d] */
 
         public static readonly UnitSystem MGM_Units = new UnitSystem("MGM", UnitPrefixes,
-                                                                  new BaseUnit[] {  new BaseUnit(MGM_Units, (SByte)MeasureKind.Length, "meter", "m"), 
-                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.Mass, "kilogram", "Kg"), 
+                                                                  new BaseUnit[] {  new BaseUnit(MGM_Units, (SByte)PhysicsMeasureKind.Length, "meter", "m"), 
+                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicsMeasureKind.Mass, "kilogram", "Kg"), 
 
                                                                                 /*  new BaseUnit(MGM_Units, (SByte)MeasureKind.Time, "second", "s"), */
                                                                                 /*  new BaseUnit(MGM_Units, (SByte)MeasureKind.Time, "day", "d"), */
-                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.Time, "moment", "ø"), 
+                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicsMeasureKind.Time, "moment", "ø"), 
 
-                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.ElectricCurrent, "ampere", "A"), 
-                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.ThermodynamicTemperature, "kelvin", "K"), 
-                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.AmountOfSubstance, "mol", "mol"), 
-                                                                                    new BaseUnit(MGM_Units, (SByte)MeasureKind.LuminousIntensity, "candela", "cd") });
+                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicsMeasureKind.ElectricCurrent, "ampere", "A"), 
+                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicsMeasureKind.ThermodynamicTemperature, "kelvin", "K"), 
+                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicsMeasureKind.AmountOfSubstance, "mol", "mol"), 
+                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicsMeasureKind.LuminousIntensity, "candela", "cd") });
 
         public static UnitSystem[] UnitSystems = new UnitSystem[] { SI_Units, CGS_Units, MGD_Units, MGM_Units };
 
