@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PhysicalCalculator</RootNamespace>
     <AssemblyName>PhysCalc</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -136,13 +136,13 @@
     <None Include="Calculator Scripts\Valuta.cal" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="PhysicalMeasure.ico" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\PhysMeasure\PhysicalMeasure\PhysicalMeasure.csproj">
       <Project>{4a1384ac-58aa-4758-822f-25ccc6123f51}</Project>
       <Name>PhysicalMeasure</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="PhysicalMeasure.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PhysicalMeasure</RootNamespace>
     <AssemblyName>PhysicalMeasure</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
@@ -64,6 +64,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="PhysicalMeasure.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Interface Code Maps\Interfaces_CodeMap.dgml" />
+    <None Include="Interface Code Maps\Interfaces_CodeMap_20150308.dgml" />
+    <None Include="Interface Code Maps\Interfaces_CodeMap_20150309.dgml" />
+    <None Include="Interface Code Maps\Interfaces_CodeMap_20150310.dgml" />
+    <None Include="Interface Code Maps\Interfaces_CodeMap_20150311.dgml" />
+    <None Include="Interface Code Maps\Interfaces_CodeMap_20150525 - Kopi.xps" />
+    <None Include="Interface Code Maps\Interfaces_CodeMap_20150525.xps" />
+    <None Include="Interface Code Maps\Interfaces_CodeMap_VS2015_20150525.dgml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

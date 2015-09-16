@@ -76,6 +76,12 @@ namespace CommandParser
             return TokenString.TryParseToken(Token, ref CommandLine);
         }
 
+        public Boolean TryParseTokenPrefix(String Token, ref String CommandLine)
+        {
+            return TokenString.TryParseTokenPrefix(Token, ref CommandLine);
+        }
+
+
         // static 
         public String ReadToken(String CommandLine, out String Token)
         {

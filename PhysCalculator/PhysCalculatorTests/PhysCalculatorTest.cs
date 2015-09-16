@@ -238,13 +238,20 @@ namespace PhysCalculatorTests
 
             List<String> ResultLineExpected = new List<String>();
             ResultLineExpected.Add("Include <filename>");
-            ResultLineExpected.Add("Save <filename>");
+            ResultLineExpected.Add("Save [ items | commands ] <filename>");
+            ResultLineExpected.Add("Files [ -sort=create | write | access ] [ [-path=] <folderpath> ]");
+            ResultLineExpected.Add("Using [ universal | electromagnetic | atomic ]");
+            ResultLineExpected.Add("Var [ <contextname> . ] <varname> [ = <expression> ] [, <var> ]*");
             ResultLineExpected.Add("Set <varname> [ = ] <expression> [, <varname> [ = ] <expression> ]*");
+            ResultLineExpected.Add("System <systemname>");
+            ResultLineExpected.Add("Unit [ <systemname> . ] <unitname> [ [ = ] <expression> ]");
             ResultLineExpected.Add("[ Print ] <expression> [, <expression> ]*");
-            ResultLineExpected.Add("List");
+            ResultLineExpected.Add("List [ items ] [ settings ] [ commands ] ");
             ResultLineExpected.Add("Store <varname>");
-            ResultLineExpected.Add("Remove <varname>");
-            ResultLineExpected.Add("Clear");
+            ResultLineExpected.Add("Remove <varname> [, <varname> ]*");
+            ResultLineExpected.Add("Clear [ items | commands ]");
+            ResultLineExpected.Add("Func <functionname> ( <paramlist> )  { <commands> }");
+            ResultLineExpected.Add("Help [ expression | parameter | commands | setting | all ]");
 
             bool expected = true; 
             bool actual;
@@ -254,7 +261,7 @@ namespace PhysCalculatorTests
 
             for (int i = 0; i < ResultLineExpected.Count; i++)
             {
-                Assert.IsTrue(ResultLine.Contains(ResultLineExpected[i]), "ResultLine expected to contain " + ResultLineExpected[i] + ", but contains \"" + ResultLine + "\"");
+                Assert.IsTrue(ResultLine.Contains(ResultLineExpected[i]), "ResultLine expected to contain \"" + ResultLineExpected[i] + "\", but contains \"" + ResultLine + "\"");
             }
 
         }
@@ -766,14 +773,14 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             PhysCalculator target = new PhysCalculator(); 
             string CommandLine = "savetest.cal"; 
             string CommandLineExpected = string.Empty; 
-            string ResultLine = string.Empty; 
-            string ResultLineExpected = string.Empty; 
+            string ResultLine = string.Empty;
+            string ResultLineExpected = "Saved "; 
             bool expected = true; 
             bool actual;
             actual = target.CommandSaveToFile(ref CommandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, CommandLine);
-            Assert.AreEqual(ResultLineExpected, ResultLine);
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(CommandLineExpected, CommandLine, "for CommandLine");
+            Assert.AreEqual(ResultLineExpected, ResultLine.Substring(0, ResultLineExpected.Length), "for ResultLine");
+            Assert.AreEqual(expected, actual, "for actual");
         }
 
         /// <summary>
@@ -883,14 +890,10 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.AreEqual(true, target.IdentifierItemLookup("USD", out context, out USDItem), "for accumulator access");
             ICombinedUnit ExpectedUnit = new CombinedUnit();
             Assert.AreEqual(USDItem.Identifierkind, IdentifierKind.Unit, "For USD unit item");
-            ExpectedUnit = ExpectedUnit.CombinedUnitMultiply(((NamedUnit)USDItem).pu);
+            ExpectedUnit = ExpectedUnit.CombineMultiply(((NamedUnit)USDItem).pu);
 
-            ICombinedUnit Wh_Unit = new CombinedUnit();
-            Wh_Unit = Wh_Unit.CombinedUnitMultiply(SI.W);
-            Wh_Unit = Wh_Unit.CombinedUnitMultiply(SI.h);
-
-            IPrefixedUnitExponent prefixedUnitExponent = new PrefixedUnitExponent(3, Wh_Unit, 1);
-            ExpectedUnit = ExpectedUnit.CombinedUnitDivide(prefixedUnitExponent);
+            ICombinedUnit kWh_Unit = SI.W.CombineMultiply(Prefix.k).CombineMultiply(SI.h);
+            ExpectedUnit = ExpectedUnit.CombineDivide(kWh_Unit);
 
             // IPhysicalUnit ExpectedUnit;
             IPhysicalQuantity AccumulatorExpected = new PhysicalQuantity(6521.73913043478, ExpectedUnit);  // {6521,73913043478 USD/KW·h}
@@ -905,7 +908,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             // Assert.AreEqual(expected, actual, "for result");
 
             // Clean up global info for default unit system
-            PhysicalMeasure.Physics.Default_UnitSystem_Reset();
+            PhysicalMeasure.Physics.CurrentUnitSystems.Reset();
         }
 
         /// <summary>
@@ -916,7 +919,15 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         {
             PhysCalculator target = new PhysCalculator();
             target.Setup();
-            string[] CommandLines = { "unit DKR", "unit Øre = 0.01 DKR", "set EnergyUnitPrice = 241.75 Øre /1.0 KWh", "set EnergiConsumed = 1234.56 kWh", "set PriceEnergiConsumed = EnergiConsumed * EnergyUnitPrice", "print PriceEnergiConsumed [DKR]", "set PriceDKREnergiConsumed=PriceEnergiConsumed [DKR]" };
+            string[] CommandLines = 
+              { "unit DKR",
+                "unit Øre = 0.01 DKR",
+                "set EnergyUnitPrice = 241.75 Øre /1.0 KWh",
+                "set EnergiConsumed = 1234.56 kWh",
+                "set PriceEnergiConsumed = EnergiConsumed * EnergyUnitPrice",
+                "print PriceEnergiConsumed [DKR]",
+                "set PriceDKREnergiConsumed=PriceEnergiConsumed [DKR]"
+              };
             List<String> ResultLines = new List<string>();
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
@@ -934,25 +945,56 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             PhysicalCalculator.Expression.IEnvironment context;
             INametableItem DKRItem;
             INametableItem OereItem;
+            INametableItem EnergyUnitPriceItem;
+            INametableItem EnergiConsumedItem;
+            INametableItem PriceEnergiConsumedItem;
             INametableItem PriceDKREnergiConsumedItem;
 
             Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
             Assert.AreEqual(true, target.IdentifierItemLookup("DKR", out context, out DKRItem), "for DKR access");
             Assert.AreEqual(true, target.IdentifierItemLookup("Øre", out context, out OereItem), "for Øre access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("EnergyUnitPrice", out context, out EnergyUnitPriceItem), "for EnergyUnitPrice access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("EnergiConsumed", out context, out EnergiConsumedItem), "for EnergiConsumed access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("PriceEnergiConsumed", out context, out PriceEnergiConsumedItem), "for PriceEnergiConsumed access");
             Assert.AreEqual(true, target.IdentifierItemLookup("PriceDKREnergiConsumed", out context, out PriceDKREnergiConsumedItem), "for PriceDKREnergiConsumedItem access");
 
-            Assert.AreEqual(DKRItem.Identifierkind, IdentifierKind.Unit, " for DKR unit item");
-            Assert.AreEqual(OereItem.Identifierkind, IdentifierKind.Unit, " for Øre unit item");
-            Assert.AreEqual(PriceDKREnergiConsumedItem.Identifierkind, IdentifierKind.Variable, " for PriceDKREnergiConsumed variable item");
+            Assert.AreEqual(IdentifierKind.Unit, DKRItem.Identifierkind, " for DKR unit item");
+            Assert.AreEqual(IdentifierKind.Unit, OereItem.Identifierkind, " for Øre unit item");
+            Assert.AreEqual(IdentifierKind.Variable, EnergyUnitPriceItem.Identifierkind, " for EnergyUnitPrice variable item");
+            Assert.AreEqual(IdentifierKind.Variable, EnergiConsumedItem.Identifierkind, " for EnergiConsumed variable item");
+            Assert.AreEqual(IdentifierKind.Variable, PriceEnergiConsumedItem.Identifierkind, " for PriceEnergiConsumed variable item");
+            Assert.AreEqual(IdentifierKind.Variable, PriceDKREnergiConsumedItem.Identifierkind, " for PriceDKREnergiConsumed variable item");
 
+            IPhysicalQuantity EnergyUnitPriceExpected = new PhysicalQuantity(241.75, ((NamedUnit)OereItem).pu.Divide( SI.W * Prefix.k * SI.h));
+            IPhysicalQuantity EnergiConsumedExpected = new PhysicalQuantity( 1234.56, SI.W * Prefix.k * SI.h);
+            IPhysicalQuantity PriceEnergiConsumedExpected = new PhysicalQuantity(298454.88, ((NamedUnit)OereItem).pu);
+            IPhysicalQuantity PriceDKREnergiConsumedExpected = new PhysicalQuantity(2984.5488, ((NamedUnit)DKRItem).pu);
             IPhysicalQuantity AccumulatorExpected = new PhysicalQuantity(2.4175 * 1234.56, ((NamedUnit)DKRItem).pu);
+
+            IPhysicalQuantity pq = PriceEnergiConsumedItem as IPhysicalQuantity;
+            IPhysicalUnit pu = pq.Unit;
+            UnitKind uk = pu.Kind;
+
+            ICombinedUnit cu = pu as ICombinedUnit;
+            int noOfNumerators = cu.Numerators.Count;
+            int noOfDenominators = cu.Denominators.Count;
+            IUnitSystem SSus = cu.SomeSimpleSystem;
+
+            IUnitSystem Eus = cu.ExponentsSystem;
+
+            SByte[] esponents = cu.Exponents;
+
+            Assert.AreEqual(EnergyUnitPriceExpected, EnergyUnitPriceItem as PhysicalQuantity, "for EnergyUnitPrice");
+            Assert.AreEqual(EnergiConsumedExpected, EnergiConsumedItem as PhysicalQuantity, "for EnergiConsumed");
+            Assert.AreEqual(PriceEnergiConsumedExpected, PriceEnergiConsumedItem as PhysicalQuantity, "for PriceEnergiConsumed");
+            Assert.AreEqual(PriceDKREnergiConsumedExpected, PriceDKREnergiConsumedItem as PhysicalQuantity, "for PriceDKREnergiConsumed");
             Assert.AreEqual(AccumulatorExpected, AccumulatorActual, "for accumulator");
 
             ResultLine = ResultLines[ResultLines.Count - 1];
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
 
             // Clean up global info for default unit system
-            PhysicalMeasure.Physics.Default_UnitSystem_Reset();
+            PhysicalMeasure.Physics.CurrentUnitSystems.Reset();
         }
 
 
@@ -1081,7 +1123,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.IsTrue(GetVarRes);
             Assert.AreEqual<IPhysicalQuantity>( VarValueExpected, VarValue);
       
-            VarValueExpected = new PhysicalQuantity(1224, new CombinedUnit() *  new PrefixedUnitExponent(Prefix.K.PrefixExponent, SI.m, 1) /SI.h);
+            VarValueExpected = new PhysicalQuantity(1224, new CombinedUnit() *  new PrefixedUnitExponent(Prefix.K, SI.m, 1) /SI.h);
             GetVarRes = target.VariableGet(target.CurrentContext, "SoundSpeedInKmPrHour", out VarValue, ref ResultLine);
             Assert.IsTrue(GetVarRes);
             Assert.AreEqual<IPhysicalQuantity>( VarValueExpected, VarValue);

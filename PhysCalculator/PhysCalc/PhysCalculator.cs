@@ -1,4 +1,4 @@
-﻿﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -77,6 +77,37 @@ namespace PhysicalCalculator
             // Physical quantity functions
             somePredefinedSystem.NamedItems.AddItem("Pow", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Pow(exp)));
             somePredefinedSystem.NamedItems.AddItem("Rot", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Rot(exp)));
+        }
+
+        private void UsingUniversalPhysicalConstants(CalculatorEnvironment someEnvironment)
+        {
+            // PhysicalMeasure.Constants  Table of universal constants
+            someEnvironment.NamedItems.AddItem("c", new NamedConstant(PhysicalMeasure.Constants.Constants.c));
+            someEnvironment.NamedItems.AddItem("G", new NamedConstant(PhysicalMeasure.Constants.Constants.G));
+            someEnvironment.NamedItems.AddItem("h", new NamedConstant(PhysicalMeasure.Constants.Constants.h));
+            someEnvironment.NamedItems.AddItem("h_bar", new NamedConstant(PhysicalMeasure.Constants.Constants.h_bar));
+        }
+
+        private void UsingElectromagneticPhysicalConstants(CalculatorEnvironment someEnvironment)
+        {
+            // PhysicalMeasure.Constants  Table of electromagnetic constants
+            someEnvironment.NamedItems.AddItem("my0", new NamedConstant(PhysicalMeasure.Constants.Constants.my0));
+            someEnvironment.NamedItems.AddItem("epsilon0", new NamedConstant(PhysicalMeasure.Constants.Constants.epsilon0));
+            someEnvironment.NamedItems.AddItem("Z0", new NamedConstant(PhysicalMeasure.Constants.Constants.Z0));
+            someEnvironment.NamedItems.AddItem("ke", new NamedConstant(PhysicalMeasure.Constants.Constants.ke));
+
+            someEnvironment.NamedItems.AddItem("e", new NamedConstant(PhysicalMeasure.Constants.Constants.e));
+            someEnvironment.NamedItems.AddItem("myB", new NamedConstant(PhysicalMeasure.Constants.Constants.myB));
+            someEnvironment.NamedItems.AddItem("G0", new NamedConstant(PhysicalMeasure.Constants.Constants.G0));
+            someEnvironment.NamedItems.AddItem("K_J", new NamedConstant(PhysicalMeasure.Constants.Constants.KJ));
+            someEnvironment.NamedItems.AddItem("phi0", new NamedConstant(PhysicalMeasure.Constants.Constants.phi0));
+            someEnvironment.NamedItems.AddItem("myN", new NamedConstant(PhysicalMeasure.Constants.Constants.myN));
+            someEnvironment.NamedItems.AddItem("RK", new NamedConstant(PhysicalMeasure.Constants.Constants.RK));
+        }
+
+        
+        private void UsingAtomicAndNuclearPhysicalConstants(CalculatorEnvironment someEnvironment)
+        {
         }
 
         private CalculatorEnvironment InitPredefinedSystemContext()
@@ -177,9 +208,10 @@ namespace PhysicalCalculator
 
                     if (!CommandLineEmpty)
                     {
+                        CommandLine = FullCommandLine.Trim();
                         do
                         {
-                            CommandLine = FullCommandLine.Trim();
+                            CommandLine = CommandLine.Trim();
 
                             if (localContext.FunctionToParseInfo != null)
                             {
@@ -196,7 +228,6 @@ namespace PhysicalCalculator
 
                             if (!LoopExit)
                             {
-
                                 if (!string.IsNullOrEmpty(CommandLine))
                                 {
                                     if (!TryParseToken(";", ref CommandLine))
@@ -300,6 +331,7 @@ namespace PhysicalCalculator
                                     || CheckForCommand("Include", CommandReadFromFile, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Save", CommandSaveToFile, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Files", CommandListFiles, ref commandLine, ref resultLine, ref CommandHandled)
+                                    || CheckForCommand("Using", CommandUsingConstants, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Var", CommandVar, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Set", CommandSet, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("System", CommandSystem, ref commandLine, ref resultLine, ref CommandHandled)
@@ -344,37 +376,43 @@ namespace PhysicalCalculator
         public Boolean CommandHelp(ref String commandLine, ref String resultLine)
         {
             CommandHelpParts HelpPart = CommandHelpParts.Command;
-            if (commandLine.StartsWithKeyword("Exp"))
+            if (commandLine.StartsWithKeywordPrefix("Expression") > 0)
                 HelpPart = CommandHelpParts.Expression;
-            else if (commandLine.StartsWithKeyword("Par"))
+            else if (commandLine.StartsWithKeywordPrefix("Parameter") > 0)
                 HelpPart = CommandHelpParts.Parameter;
-            else if (commandLine.StartsWithKeyword("com"))
+            else if (commandLine.StartsWithKeywordPrefix("Commands") > 0)
                 HelpPart = CommandHelpParts.Command;
-            else if (commandLine.StartsWithKeyword("Set"))
+            else if (commandLine.StartsWithKeywordPrefix("Setting") > 0)
                 HelpPart = CommandHelpParts.Setting;
-            else if (commandLine.StartsWithKeyword("All"))
+            else if (commandLine.StartsWithKeywordPrefix("All") > 0)
                 HelpPart = CommandHelpParts.all;
 
             resultLine = "";
             if (HelpPart == CommandHelpParts.Command || HelpPart == CommandHelpParts.all)
-            {
+            {   //            "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+                //            "         1         2         3         4         5         6         7         8         9        10        11        12        13        14"
                 resultLine += "Commands:\n"
                             + "    Include <filename>                                                       Reads commands from file\n"
-                            + "    Save <filename>                                                          Save variables and functions declarations to file\n"
-                            + "    Files [-sort=create|write|access] [ [-path=] <folderpath> ]              List files in folder\n"
+                            + "    Save [ items | commands ] <filename>                                     Save to file the current variables and functions\n"
+                            + "                                                                                 declarations, or the command history\n"
+                            + "                                                                                 when 'commands' is specified\n"
+                            + "    Files [ -sort=create | write | access ] [ [-path=] <folderpath> ]        List files in folder\n"
+                            + "    Using [ universal | electromagnetic | atomic ]                           Declare constants from specified predefined constant group\n"
+
                             + "    Var [ <contextname> . ] <varname> [ = <expression> ] [, <var> ]*         Declare new Variable (local or in specified context)\n"
-                            + "    Set <varname> [ = ] <expression> [, <varname> [ = ] <expression> ]*      Assign Variable (declare it locally if not already declared)\n"
+                            + "    Set <varname> [ = ] <expression> [, <varname> [ = ] <expression> ]*      Assign Variable or declare it locally if not already declared\n"
                             + "    System <systemname>                                                      Define new unit system\n"
-                            + "    Unit <unitname> [ [ = ] <expression> ]                                   Define new unit. Without an Expression it becomes a base unit,\n"
-                            + "                                                                                 else a converted (scaled) unit\n"
+                            + "    Unit [ <systemname> . ] <unitname> [ [ = ] <expression> ]                Define new unit. Without an Expression it becomes\n"
+                            + "                                                                                 a base unit, else a converted (scaled) unit\n"
                             + "    [ Print ] <expression> [, <expression> ]*                                Evaluate expressions and show values\n"
-                            + "    List [ items ] [ settings ]                                              Show All Variable values and functions declarations, \n"
-                            + "                                                                                 and settings as specified\n"
+                            + "    List [ items ] [ settings ] [ commands ]                                 Show All Variable values and functions declarations, \n"
+                            + "                                                                                 setting and commands as specified\n"
                             + "    Store <varname>                                                          Save last calculation's result to Variable\n"
                             + "    Remove <varname> [, <varname> ]*                                         Remove Variable\n"
-                            + "    Clear                                                                    Remove All variables\n"
+                            + "    Clear [ items | commands ]                                               Remove All variables or\n"
+                            + "                                                                                 the command history when 'commands' is specified \n"
                             + "    Func <functionname> ( <paramlist> )  { <commands> }                      Declare a function\n"
-                            + "    Help [expression|parameter|setting|all]                                  Help on topic\n"
+                            + "    Help [ expression | parameter | commands | setting | all ]               Help on topic\n"
                             + "    Version                                                                  Shows application version info\n"
                             + "    About                                                                    Shows application info";
             }
@@ -467,9 +505,18 @@ namespace PhysicalCalculator
         {
             String FilePathStr;
             resultLine = "";
-
-            FilePathStr = commandLine;
-            commandLine = "";
+            int statementSeparatorIndex = commandLine.IndexOf(';');
+            if (statementSeparatorIndex >= 0)
+            {   // To end of statement
+                FilePathStr = commandLine.Substring(0, statementSeparatorIndex);
+                commandLine = commandLine.Substring(statementSeparatorIndex);
+            }
+            else
+            {   // To end of line
+                FilePathStr = commandLine;
+                commandLine = "";
+            }
+            
 
             if ((CommandLineReader != null) && (!string.IsNullOrWhiteSpace(FilePathStr)))
             {
@@ -481,6 +528,17 @@ namespace PhysicalCalculator
 
         public Boolean CommandSaveToFile(ref String commandLine, ref String resultLine)
         {
+            bool SaveContext = true;
+
+            if (TryParseTokenPrefix("Context", ref commandLine))
+            {
+                SaveContext = true;
+            }
+            else if (TryParseTokenPrefix("Commands", ref commandLine))
+            {
+                SaveContext = false;
+            }
+
             String FileNameStr;
             FileNameStr = commandLine;
             commandLine = "";
@@ -493,16 +551,33 @@ namespace PhysicalCalculator
 
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(FileNameStr))
             {
-                file.WriteLine("// Saved {0} to {1}", DateTime.Now.ToSortString(), FileNameStr);
-
-                SaveContextToFile(CurrentContext, file);
-
-                if (Accumulator != null)
+                string ContentType = "";
+                if (SaveContext)
                 {
-                    file.WriteLine("set {0} = {1}", AccumulatorName, Accumulator.ToString());
+                    ContentType = "context";
                 }
-            }
+                else
+                {
+                    ContentType = "command history";
+                }
+                string headerLine = String.Format("Saved {0} {1} to {2}", DateTime.Now.ToSortString(), ContentType, FileNameStr);
+                file.WriteLine("// {0}", headerLine);
+                if (SaveContext)
+                {
+                    SaveContextToFile(CurrentContext, file);
 
+                    if (Accumulator != null)
+                    {
+                        file.WriteLine("set {0} = {1}", AccumulatorName, Accumulator.ToString());
+                    }
+                }
+                else
+                {
+                    SaveCommandHistoryToFile(CommandLineReader, file);
+                }
+
+                resultLine = headerLine;
+            }
             return true;
         }
 
@@ -520,6 +595,18 @@ namespace PhysicalCalculator
                 Item.Value.WriteToTextFile(Item.Key, file);
             }
         }
+
+
+        public void SaveCommandHistoryToFile(Commandreader CommandLineReader, System.IO.StreamWriter file)
+        {
+            //file.WriteLine("// {0}", CommandLineReader);
+
+            foreach (String CommandLine in CommandLineReader.CommandHistory)
+            {
+                file.WriteLine(CommandLine);
+            }
+        }
+
 
         public Boolean CommandListFiles(ref String commandLine, ref String resultLine)
         {
@@ -611,6 +698,46 @@ namespace PhysicalCalculator
             }
 
             resultLine = ListStringBuilder.ToString();
+            return true;
+        }
+
+
+        
+        public Boolean CommandUsingConstants(ref String commandLine, ref String resultLine)
+        {
+            String ConstantGroupName;
+            commandLine = commandLine.ReadIdentifier(out ConstantGroupName);
+            if (ConstantGroupName == null)
+            {
+                resultLine = "Constant group name expected";
+            }
+            else
+            {
+                Debug.Assert(ConstantGroupName != null);
+
+                if (ConstantGroupName.StartsWithKeywordPrefix("Universal") > 0)
+                {   // PhysicalMeasure.Constants  Table of universal constants
+                    UsingUniversalPhysicalConstants(CurrentContext);
+                    resultLine = "Using universal constants";
+                }
+                else if (ConstantGroupName.StartsWithKeywordPrefix("Electromagnetic") > 0)
+                {   // PhysicalMeasure.Constants  Table of electromagnetic constants
+                    UsingElectromagneticPhysicalConstants(CurrentContext);
+                    resultLine = "Using electromagnetic constants";
+                }
+                /*
+                else if (ConstantGroupName.StartsWithKeywordPrefix("Atomic")  > 0)
+                {   // PhysicalMeasure.Constants  Table of atomic and nuclear constants
+                    UsingAtomicAndNuclearPhysicalConstants(CurrentContext);
+                    resultLine = "Using atomic and nuclear constants";
+                }
+                 */
+                else 
+                {
+                    resultLine = "Unknown Constant group name";
+                }
+            }
+
             return true;
         }
 
@@ -835,13 +962,26 @@ namespace PhysicalCalculator
                             INametableItem SystemItem = null;
                             IEnvironment SystemContext;
                             Boolean SystemIdentifierFound = CurrentContext.FindIdentifier(QualifiedIdentifierName, out SystemContext, out SystemItem);
-                            if (SystemItem != null && SystemItem.Identifierkind == IdentifierKind.UnisSystem)
+                            if (SystemItem != null && SystemItem.Identifierkind == IdentifierKind.UnitSystem)
                             {
                                 UnitSys = ((NamedSystem)SystemItem).UnitSystem;
+                            }
+                            else
+                            {
+                                IUnitSystem Default_UnitSystem = Physics.CurrentUnitSystems.Default;
+                                if (Default_UnitSystem.IsIsolatedUnitSystem && !Default_UnitSystem.IsCombinedUnitSystem)
+                                {
+                                    UnitSys = Default_UnitSystem;
+                                }
                             }
                             OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, out Item);
                             if (OK)
                             {
+                                string SystemName = "";
+                                if (SystemItem != null)
+                                {
+                                    SystemName = ((NamedSystem)SystemItem).UnitSystem.Name + ".";
+                                }
                                 if (pq != null)
                                 {
                                     // Defined new local unit as scaled unit
@@ -869,7 +1009,7 @@ namespace PhysicalCalculator
         }
 
         public Boolean CommandStore(ref String commandLine, ref String resultLine)
-        {
+        {   // Store accumulator value to var
             Boolean OK = false;
             String VariableName;
             resultLine = "";
@@ -928,27 +1068,50 @@ namespace PhysicalCalculator
 
         public Boolean CommandClear(ref String commandLine, ref String resultLine)
         {
+            Boolean clearNamedItems = TryParseTokenPrefix("Items", ref commandLine);
+            Boolean clearCommands = TryParseTokenPrefix("Commands", ref commandLine);
+
+            Boolean result = true;
             resultLine = "";
 
-            Accumulator = null;
-            return IdentifiersClear();
+            if (clearNamedItems)
+            {
+                Accumulator = null;
+                result = IdentifiersClear();
+            }
+            if (clearCommands)
+            {
+                CommandLineReader.CommandHistory.Clear();
+            }
+
+            return result;
         }
 
         public Boolean CommandList(ref String commandLine, ref String resultLine)
         {
-            Boolean listNamedItems = TryParseToken("Items", ref commandLine);
-            Boolean listSettings = TryParseToken("Settings", ref commandLine);
-
-            if (!listNamedItems && !listSettings)
+            Boolean listNamedItems = TryParseTokenPrefix("Items", ref commandLine);
+            Boolean listSettings = TryParseTokenPrefix("Settings", ref commandLine);
+            Boolean listCommands = TryParseTokenPrefix("Commands", ref commandLine);
+            
+            if (!listNamedItems && !listSettings && !listCommands)
             {
                 listNamedItems = true;
             }
 
             StringBuilder ListStringBuilder = new StringBuilder();
-            
-            ListStringBuilder.AppendLine("Default unit system: " + Physics.Default_UnitSystem.Name);
-            ListStringBuilder.Append(CurrentContext.ListIdentifiers(false, listNamedItems, listSettings));
 
+            if (listNamedItems || listSettings)
+            {
+                ListStringBuilder.AppendLine("Default unit system: " + Physics.CurrentUnitSystems.Default.Name);
+                ListStringBuilder.Append(CurrentContext.ListIdentifiers(false, listNamedItems, listSettings));
+            }
+            else
+            {
+                foreach (String CommandLine in CommandLineReader.CommandHistory)
+                {
+                    ListStringBuilder.AppendLine(CommandLine);
+                }
+            }
             resultLine = ListStringBuilder.ToString();
 
             return true;
@@ -1150,7 +1313,7 @@ namespace PhysicalCalculator
             qualifiedIdentifierName = identifierName;
 
             while (IdentifierFound
-                && (identifierkind == IdentifierKind.Environment || identifierkind == IdentifierKind.UnisSystem) 
+                && (identifierkind == IdentifierKind.Environment || identifierkind == IdentifierKind.UnitSystem) 
                 && !String.IsNullOrEmpty(commandLine) 
                 && commandLine[0] == '.')
             {
@@ -1314,14 +1477,14 @@ namespace PhysicalCalculator
                 String systemvaluestr;
                 commandLine = commandLine.ReadToken(out systemvaluestr);
 
-                IUnitSystem us = Physics. UnitSystemFromName(systemvaluestr);
+                IUnitSystem us = Physics.UnitSystems.UnitSystemFromName(systemvaluestr);
                 if (us == null)
                 {   // Not a unit system from PhysicalMeasure; Try look for a user defined unit system.
                     // TODO: Look for a user defined unit system with specified name.
                 }
                 if (us != null)
                 {
-                    if (Physics.Default_UnitSystem_Use(us))
+                    if (Physics.CurrentUnitSystems.Use(us))
                     {
                         resultLine = "System set to " + us.Name;
                     }
@@ -1332,7 +1495,7 @@ namespace PhysicalCalculator
                 }
                 else
                 {
-                    resultLine = "System " + systemvaluestr + " was not found; Current system is " + Physics.Default_UnitSystem;
+                    resultLine = "System " + systemvaluestr + " was not found; Current system is " + Physics.CurrentUnitSystems.Default;
                 }
             }
             return SettingFound;
@@ -1403,7 +1566,7 @@ namespace PhysicalCalculator
 
         #endregion  Variables access
 
-        #region  Costum Unit access
+        #region  Custom Unit access
 
         public Boolean SystemSet(IEnvironment context, String systemName, IPhysicalQuantity unitValue, out INametableItem systemItem)
         {
@@ -1416,7 +1579,7 @@ namespace PhysicalCalculator
             return context.UnitSet(unitSystem, unitName, unitValue, out unitItem);
         }
 
-        #endregion  Costum Unit  access
+        #endregion  Custom Unit  access
 
         #region  Function access
 
@@ -1642,7 +1805,7 @@ namespace PhysicalCalculator
         }
     }
 
-    static class ExtensionList
+    static class AssemblyExtension
     {
         public static String AssemblyInfo(this System.Reflection.Assembly Asm)
         {

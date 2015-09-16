@@ -5,7 +5,7 @@ namespace TokenParser
 {
     public static class TokenString
     {
-        #region Static parse methodes
+        #region Static parse methods
 
         public static Boolean ParseChar(Char ch, ref String commandLine, ref string resultLine)
         {
@@ -57,9 +57,23 @@ namespace TokenParser
             return IsExpectedToken;
         }
 
+        public static Boolean TryParseTokenPrefix(String token, ref String commandLine)
+        {
+            int Tokenlen = commandLine.StartsWithKeywordPrefix(token);
+
+            Boolean IsExpectedToken = Tokenlen > 0;
+
+            if (IsExpectedToken)
+            {
+                commandLine = commandLine.SkipToken(token.Substring(0, Tokenlen));
+            }
+            return IsExpectedToken;
+        }
+
+
         #endregion Static parse methodes
 
-        #region Class extension parse methodes
+        #region Class extension parse methods
 
         public static Boolean IsHexDigit(this Char c)
         {
@@ -92,6 +106,20 @@ namespace TokenParser
         public static Boolean StartsWithKeyword(this String commandLine, String keyword)
         {
             return commandLine.StartsWith(keyword, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static int StartsWithKeywordPrefix(this String commandLine, String keyword)
+        {
+            int i = commandLine.TakeWhile(c => Char.IsLetterOrDigit(c) || Char.Equals(c, '_')).Count();
+            int compareLen = Math.Min(Math.Min(commandLine.Length, i), keyword.Length);
+            if (commandLine.StartsWith(keyword.Substring(0, compareLen), StringComparison.OrdinalIgnoreCase))
+            {
+                return compareLen;
+            }
+            else 
+            {
+                return 0;
+            }
         }
 
         public static String SkipToken(this String commandLine, String token)
