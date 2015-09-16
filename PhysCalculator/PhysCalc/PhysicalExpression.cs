@@ -84,7 +84,7 @@ namespace PhysicalCalculator.Expression
           
          **/
 
-        // Delegert types
+        // Delegate types
         // VariableLookup callback
         public delegate Boolean IdentifierItemLookupFunc(String identifierName, out IEnvironment foundInContext, out INametableItem item);
         public delegate Boolean IdentifierContextLookupFunc(String identifierName, out IEnvironment foundInContext, out IdentifierKind identifierKind);
@@ -94,8 +94,8 @@ namespace PhysicalCalculator.Expression
         public delegate Boolean FunctionLookupFunc(IEnvironment lookInContext, String functionName, out IFunctionEvaluator functionEvaluator);
         public delegate Boolean FunctionEvaluateFunc(String functionName, IFunctionEvaluator functionevaluator, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine);
         public delegate Boolean FunctionEvaluateFileReadFunc(String functionName, out IPhysicalQuantity functionResult, ref String resultLine);
-        
-        // Delegert static globals
+
+        // Delegate static globals
         public static IdentifierItemLookupFunc IdentifierItemLookupCallback;
         public static IdentifierContextLookupFunc IdentifierContextLookupCallback;
         public static QualifiedIdentifierContextLookupFunc QualifiedIdentifierContextLookupCallback;
@@ -259,7 +259,9 @@ namespace PhysicalCalculator.Expression
                     {
                         resultLine = "The unit " + pq.Unit.ToPrintString() + " can't be converted to " + pu.ToPrintString() + "\n";
                         //  pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit) }, new PrefixedUnitExponentList { new PrefixedUnitExponent(pu) }));
-                        pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit.Divide(pu).Unit) }, null));
+                        //  pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit.Divide(pu).Unit) }, null));
+                        ICombinedUnit newRelativeUnit = new PhysicalMeasure.CombinedUnit(pu).CombineMultiply(pq.Unit.Divide(pu));
+                        pqRes = pq.ConvertTo(newRelativeUnit);
                     }
                     return pqRes;
                 }
@@ -354,6 +356,11 @@ namespace PhysicalCalculator.Expression
                 this.TokenKind = TokenKind.Operator;
                 this.Operator = Operator;
             }
+
+            public override string ToString()
+            {
+                return TokenKind.ToString() + (TokenKind == TokenKind.None ? "" : " " + (TokenKind == TokenKind.Operand ? Operand.ToString() : Operator.ToString()));
+            }
         }
 
         class expressiontokenizer
@@ -368,8 +375,8 @@ namespace PhysicalCalculator.Expression
 
             public Boolean ThrowExceptionOnInvalidInput = false;
 
-            private Boolean inputrecognized = true;
-            //private String errormessage;
+            private Boolean inputRecognized = true;
+            //private String errorMessage;
 
             private Stack<OperatorKind> Operators = new Stack<OperatorKind>();
             private List<token> Tokens = new List<token>();
@@ -397,9 +404,9 @@ namespace PhysicalCalculator.Expression
             }
             */
 
-            public Boolean InputRecognized { get { return inputrecognized; } } 
+            public Boolean InputRecognized { get { return inputRecognized; } } 
 
-            // public string ErrorMessage { get { return errormessage; } } 
+            // public string ErrorMessage { get { return errorMessage; } } 
 
             private Boolean PushNewOperator(OperatorKind newOperator)
             {
@@ -559,7 +566,7 @@ namespace PhysicalCalculator.Expression
                         else
                         {
                             // End of recognized input; Stop reading and return operator tokens from stack.
-                            inputrecognized = false;
+                            inputRecognized = false;
                         }
                     }
                     else if (c == ')')
@@ -572,7 +579,7 @@ namespace PhysicalCalculator.Expression
                         else
                         {
                             // End of recognized input; Stop reading and return operator tokens from stack.
-                            inputrecognized = false;
+                            inputRecognized = false;
                         }
                     }
                     else
@@ -604,7 +611,7 @@ namespace PhysicalCalculator.Expression
                                 // End of recognized input; Stop reading and return operator tokens from stack.
                                 // Error signaling already done in PushNewOperator
                                 /*
-                                inputrecognized = false;
+                                inputRecognized = false;
                                 ResultString = "Internal Error: Handling operator '" + NewOperator.ToString() + "' failed at '" + c + "' at pos " + Pos.ToString();
                                 */ 
                             }
@@ -614,7 +621,7 @@ namespace PhysicalCalculator.Expression
                             if (LastReadToken == TokenKind.Operand)
                             {
                                 // End of recognized input; Stop reading and return operator tokens from stack.
-                                inputrecognized = false;
+                                inputRecognized = false;
                                 ResultString = "The string argument is not in a valid physical unit format. An operator must follow a operand. Invalid operand at '" + c + "' at pos " + Pos.ToString();
 
                                 if (ThrowExceptionOnInvalidInput)
@@ -657,7 +664,7 @@ namespace PhysicalCalculator.Expression
                                 }
 
                                 // End of recognized input; Stop reading and return operator tokens from stack.
-                                inputrecognized = false;
+                                inputRecognized = false;
                                 ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operand after '" + c + "' at position " + Pos.ToString();
 
                                 if (ThrowExceptionOnInvalidInput)
@@ -733,7 +740,7 @@ namespace PhysicalCalculator.Expression
                             }
 
                             // End of recognized input; Stop reading and return operator tokens from stack.
-                            inputrecognized = false;
+                            inputRecognized = false;
                             ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operand at '" + c + "' at position " + Pos.ToString();
 
                             if (ThrowExceptionOnInvalidInput)
@@ -748,7 +755,7 @@ namespace PhysicalCalculator.Expression
                         else
                         {
                             // End of recognized input; Stop reading and return operator tokens from stack.
-                            inputrecognized = false;
+                            inputRecognized = false;
 
                             if (!ExpectedFollow.Contains(new String(c,1)))
                             {
@@ -775,7 +782,7 @@ namespace PhysicalCalculator.Expression
                 if (LastReadToken == TokenKind.Operator)
                 {
                     // End of recognized input; Stop reading and return operator tokens from stack.
-                    inputrecognized = false;
+                    inputRecognized = false;
                     ResultString = "The string argument is not in a valid physical expression format. Operand expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
 
                     if (ThrowExceptionOnInvalidInput)
@@ -791,7 +798,7 @@ namespace PhysicalCalculator.Expression
                 if (ParenCount > 0)
                 {
                     // End of recognized input; Stop reading and return operator tokens from stack.
-                    inputrecognized = false;
+                    inputRecognized = false;
                     ResultString = "The string argument is not in a valid physical expression format. Closing parenthesis expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
                     if (ThrowExceptionOnInvalidInput)
                     {
@@ -1148,10 +1155,10 @@ namespace PhysicalCalculator.Expression
                 // 0x010203.040506 + 0x102030.405060
 
                 // Scan number
-                int numlen = 0;
-                int maxlen = commandLine.Length; // Max length of sign and digits to look for
+                int numLen = 0;
+                int maxLen = commandLine.Length; // Max length of sign and digits to look for
                 int numberBase = 10; // Decimal number expected
-                int exponentNumberBase = 10; // Decimal exponentnumber expected
+                int exponentNumberBase = 10; // Decimal exponent number expected
 
                 int numberSignPos = -1; // No number sign found
                 int hexNumberPos = -1; // No hex number prefix found
@@ -1162,121 +1169,121 @@ namespace PhysicalCalculator.Expression
 
                 if ((commandLine[0] == '-') || (commandLine[0] == '+'))
                 {
-                    numberSignPos = numlen;
-                    numlen = 1;
+                    numberSignPos = numLen;
+                    numLen = 1;
                 }
 
-                while (numlen < maxlen && Char.IsDigit(commandLine[numlen]))
+                while (numLen < maxLen && Char.IsDigit(commandLine[numLen]))
                 {
-                    numlen++;
+                    numLen++;
                 }
 
-                if (   (numlen < maxlen)
-                    && (commandLine[numlen] == 'x')
-                    && (numlen > 0)
-                    && (commandLine[numlen-1] == '0')
-                    && (   (numlen < 2)
-                        || (!Char.IsDigit(commandLine[numlen-2]))))
+                if (   (numLen < maxLen)
+                    && (commandLine[numLen] == 'x')
+                    && (numLen > 0)
+                    && (commandLine[numLen-1] == '0')
+                    && (   (numLen < 2)
+                        || (!Char.IsDigit(commandLine[numLen-2]))))
                 {
-                    numlen++;
-                    hexNumberPos = numlen;
+                    numLen++;
+                    hexNumberPos = numLen;
                     numberBase = 0x10; // Hexadecimal number expected
                 }
 
-                while ((numlen < maxlen)
-                       && (Char.IsDigit(commandLine[numlen])
+                while ((numLen < maxLen)
+                       && (Char.IsDigit(commandLine[numLen])
                            || ((numberBase == 0x10)
-                               && Char.IsLetter(commandLine[numlen])
+                               && Char.IsLetter(commandLine[numLen])
                     //&& Char.IsHexDigit(Char.ToLower(commandLine[numlen])))))
-                               && TokenString.IsHexDigit(Char.ToLower(commandLine[numlen])))))
+                               && TokenString.IsHexDigit(Char.ToLower(commandLine[numLen])))))
                 {
-                    numlen++;
+                    numLen++;
                 }
 
-                if ((numlen < maxlen)
-                    && ((commandLine[numlen] == '.')
-                        || (commandLine[numlen] == ',')))
+                if ((numLen < maxLen)
+                    && ((commandLine[numLen] == '.')
+                        || (commandLine[numLen] == ',')))
                 {
-                    DecimalCharPos = numlen;
-                    numlen++;
+                    DecimalCharPos = numLen;
+                    numLen++;
                 }
-                while (   (numlen < maxlen)
-                       && (   Char.IsDigit(commandLine[numlen]) 
+                while (   (numLen < maxLen)
+                       && (   Char.IsDigit(commandLine[numLen]) 
                            || (   (numberBase == 0x10) 
-                               && Char.IsLetter(commandLine[numlen])
+                               && Char.IsLetter(commandLine[numLen])
                                //&& Char.IsHexDigit(Char.ToLower(commandLine[numlen])))))
-                               && TokenString.IsHexDigit(Char.ToLower(commandLine[numlen])))))
+                               && TokenString.IsHexDigit(Char.ToLower(commandLine[numLen])))))
                 {
-                    numlen++;
+                    numLen++;
                 }
 
-                if ((numlen < maxlen)
-                    && ((commandLine[numlen] == 'E')
-                        || (commandLine[numlen] == 'e')
-                        || (commandLine[numlen] == 'H')
-                        || (commandLine[numlen] == 'h')))
+                if ((numLen < maxLen)
+                    && ((commandLine[numLen] == 'E')
+                        || (commandLine[numLen] == 'e')
+                        || (commandLine[numLen] == 'H')
+                        || (commandLine[numLen] == 'h')))
                 {
-                    exponentCharPos = numlen;
+                    exponentCharPos = numLen;
 
-                    numlen++;
-                    if ((numlen < maxlen)
-                        && ((commandLine[numlen] == '-')
-                            || (commandLine[numlen] == '+')))
+                    numLen++;
+                    if ((numLen < maxLen)
+                        && ((commandLine[numLen] == '-')
+                            || (commandLine[numLen] == '+')))
                     {
-                        exponentNumberSignPos = numlen;
-                        numlen++;
+                        exponentNumberSignPos = numLen;
+                        numLen++;
                     }
 
-                    while (numlen < maxlen && Char.IsDigit(commandLine[numlen]))
+                    while (numLen < maxLen && Char.IsDigit(commandLine[numLen]))
                     {
-                        numlen++;
+                        numLen++;
                     }
 
-                    if ((numlen < maxlen)
-                        && (commandLine[numlen] == 'x')
-                        && (numlen > 0)
-                        && (commandLine[numlen - 1] == '0')
-                        && ((numlen < 2)
-                            || (!Char.IsDigit(commandLine[numlen - 2]))))
+                    if ((numLen < maxLen)
+                        && (commandLine[numLen] == 'x')
+                        && (numLen > 0)
+                        && (commandLine[numLen - 1] == '0')
+                        && ((numLen < 2)
+                            || (!Char.IsDigit(commandLine[numLen - 2]))))
                     {
-                        numlen++;
-                        exponentHexNumberPos = numlen;
+                        numLen++;
+                        exponentHexNumberPos = numLen;
                         exponentNumberBase = 0x10; // Hexadecimal number expected
                     }
 
-                    while ((numlen < maxlen)
-                           && (Char.IsDigit(commandLine[numlen])
+                    while ((numLen < maxLen)
+                           && (Char.IsDigit(commandLine[numLen])
                                || ((exponentNumberBase == 0x10)
-                                   && Char.IsLetter(commandLine[numlen])
+                                   && Char.IsLetter(commandLine[numLen])
                         //&& Char.IsHexDigit(Char.ToLower(commandLine[numlen])))))
-                                   && TokenString.IsHexDigit(Char.ToLower(commandLine[numlen])))))
+                                   && TokenString.IsHexDigit(Char.ToLower(commandLine[numLen])))))
                     {
-                        numlen++;
+                        numLen++;
                     }
 
                 }
 
-                if (numlen > 0)
+                if (numLen > 0)
                 {
-                    //System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
+                    //System.Globalization.NumberStyles numberStyle = System.Globalization.NumberStyles.Float;
                      
                     if (numberBase == 0x10 || exponentNumberBase == 0x10)
                     {   // Hex number
                         //Double baseNumberD = 0;
-                        int baseNumberLen = numlen;
+                        int baseNumberLen = numLen;
                         if (exponentCharPos > 0)
                         {
                             baseNumberLen = exponentCharPos -1;
                         }
-                        //OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); 
+                        //OK = Double.TryParse(commandLine.Substring(0, numlen), numberStyle, NumberFormatInfo.InvariantInfo, out D); 
 
                         if (numberBase == 10)
                         {
-                            System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
-                            OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberstyle, null, out D);
+                            System.Globalization.NumberStyles numberStyle = System.Globalization.NumberStyles.Float;
+                            OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberStyle, null, out D);
                             if (!OK)
                             {
-                                OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out D);
+                                OK = Double.TryParse(commandLine.Substring(0, baseNumberLen), numberStyle, NumberFormatInfo.InvariantInfo, out D);
                             }
                         }
                         else
@@ -1311,17 +1318,17 @@ namespace PhysicalCalculator.Expression
                             if (numberBase == 10)
                             {
                                 System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
-                                OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, null, out exponentNumberD);
+                                OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numLen - (baseNumberLen + 1)), numberstyle, null, out exponentNumberD);
                                 if (!OK)
                                 {
-                                    OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numlen - (baseNumberLen + 1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumberD);
+                                    OK = Double.TryParse(commandLine.Substring(baseNumberLen + 1, numLen - (baseNumberLen + 1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumberD);
                                 }
                             }
                             else
                             {
                                 long exponentNumber = 0;
                                 System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.AllowHexSpecifier; // HexNumber
-                                OK = long.TryParse(commandLine.Substring(exponentHexNumberPos, numlen - (exponentHexNumberPos-1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumber);
+                                OK = long.TryParse(commandLine.Substring(exponentHexNumberPos, numLen - (exponentHexNumberPos-1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumber);
                                 exponentNumberD = exponentNumber;
 
                                 if (exponentNumberSignPos > 0 && commandLine[exponentNumberSignPos] == '-')
@@ -1349,20 +1356,20 @@ namespace PhysicalCalculator.Expression
                     else
                     {
                         System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.Float;
-                        OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, null, out D); // styles, provider
+                        OK = Double.TryParse(commandLine.Substring(0, numLen), numberstyle, null, out D); // styles, provider
                         if (!OK)
                         {
-                            OK = Double.TryParse(commandLine.Substring(0, numlen), numberstyle, NumberFormatInfo.InvariantInfo, out D); // styles, provider
+                            OK = Double.TryParse(commandLine.Substring(0, numLen), numberstyle, NumberFormatInfo.InvariantInfo, out D); // styles, provider
                         }
 
                     }
                     if (OK)
                     {
-                        commandLine = commandLine.Substring(numlen);
+                        commandLine = commandLine.Substring(numLen);
                     }
                     else
                     {
-                        resultLine = commandLine.Substring(0, numlen) + " is not a valid number";
+                        resultLine = commandLine.Substring(0, numLen) + " is not a valid number";
                     }
                 }
             }
@@ -1404,7 +1411,7 @@ namespace PhysicalCalculator.Expression
                 commandLine = commandLine.TrimStart();
                 if (!String.IsNullOrEmpty(commandLine) && (Char.IsLetter(commandLine[0])))
                 {
-                    int UnitStringLen = commandLine.IndexOfAny(new char[] { ' ' });  // ' '
+                    int UnitStringLen = commandLine.IndexOfAny(new Char[] { ' ' });  // ' '
                     if (UnitStringLen < 0 )
                     {
                         UnitStringLen = commandLine.Length;
@@ -1429,46 +1436,46 @@ namespace PhysicalCalculator.Expression
     }
 
 
-       // Operator kinds
-        // Precedence for a group of operators is same as first (lowest) enum in the group
-        public enum OperatorKind
-        {
-            // Precedence == 0
-            none = 0,
+    // Operator kinds
+    // Precedence for a group of operators is same as first (lowest) enum in the group
+    public enum OperatorKind
+    {
+        // Precedence == 0
+        none = 0,
 
-            //Precedence == 1
-            parenbegin = 1,
-            parenend = 2,
+        //Precedence == 1
+        parenbegin = 1,
+        parenend = 2,
 
-            //Precedence == 3
-            equals = 3,
-            differs = 4,
+        //Precedence == 3
+        equals = 3,
+        differs = 4,
 
-            //Precedence == 5
-            lessthan = 5,
-            largerthan = 6,
-            lessorequals = 7,
-            largerorequals = 8,
+        //Precedence == 5
+        lessthan = 5,
+        largerthan = 6,
+        lessorequals = 7,
+        largerorequals = 8,
 
-            //Precedence == 9
-            not = 9,
+        //Precedence == 9
+        not = 9,
 
-            //Precedence == 11
-            add = 11,
-            sub = 12,
+        //Precedence == 11
+        add = 11,
+        sub = 12,
 
-            //Precedence == 13
-            mult = 13,
-            div = 14,
+        //Precedence == 13
+        mult = 13,
+        div = 14,
 
-            //Precedence == 15
-            pow = 15,
-            root = 16,
+        //Precedence == 15
+        pow = 15,
+        root = 16,
 
-            //Precedence == 17
-            unaryplus = 17,
-            unaryminus = 18
-        }
+        //Precedence == 17
+        unaryplus = 17,
+        unaryminus = 18
+    }
 
     public static class OperatorKindExtensions
     {
@@ -1479,7 +1486,7 @@ namespace PhysicalCalculator.Expression
             {
                 case OperatorKind.parenbegin: // "("
                 case OperatorKind.parenend: // ")":
-                    return OperatorKind.parenbegin; // 1;
+                    return OperatorKind.parenbegin; //   1;
                 case OperatorKind.equals: // "=="
                 case OperatorKind.differs: // "!=":
                     return OperatorKind.equals; // 3;
@@ -1487,21 +1494,21 @@ namespace PhysicalCalculator.Expression
                 case OperatorKind.largerthan: // ">":
                 case OperatorKind.lessorequals: // "<="
                 case OperatorKind.largerorequals: // ">=":
-                    return OperatorKind.lessthan; // 3;
+                    return OperatorKind.lessthan; //   5;
                 case OperatorKind.not: // "!"
-                    return OperatorKind.not; // 5;
+                    return OperatorKind.not; //   9;
                 case OperatorKind.add: // "+"
                 case OperatorKind.sub: // "-":
-                     return OperatorKind.add; // 7;
+                     return OperatorKind.add; //   11;
                 case OperatorKind.mult: // "*":
                 case OperatorKind.div: // "/":
-                     return OperatorKind.mult; // 9;
+                     return OperatorKind.mult; //   13;
                 case OperatorKind.pow: // "^":
                 case OperatorKind.root: // "!":
-                     return OperatorKind.pow; // 11;
-                case OperatorKind.unaryplus: // unaryplus:
+                     return OperatorKind.pow; //   15;
+                case OperatorKind.unaryplus: // UnaryPlus:
                 case OperatorKind.unaryminus: // UnaryMinus:
-                     return OperatorKind.unaryplus; // 13;
+                     return OperatorKind.unaryplus; //   17;
             }
 
             return OperatorKind.none;
@@ -1512,16 +1519,15 @@ namespace PhysicalCalculator.Expression
             switch (c)
             {
                 case '(':
-                    return OperatorKind.parenbegin; // 1;
+                    return OperatorKind.parenbegin; //   1;
                 case ')':
-                    return OperatorKind.parenend; // 2;
-                //case '!':
-                //      return OperatorKind.not; // 5;
+                    return OperatorKind.parenend; //   2;
+
 
                 case '!':
-                    return OperatorKind.not; // 1;
+                    return OperatorKind.not; // 9;
                 case '<':
-                    return OperatorKind.lessthan; // 1;
+                    return OperatorKind.lessthan; // 5;
                 case '>':
                     return OperatorKind.largerthan; // 1;
 
@@ -1530,7 +1536,7 @@ namespace PhysicalCalculator.Expression
                 case '-':
                     return OperatorKind.sub; // 4;
                 case '*':
-                case '·':  // centre dot  '\0x0B7' (char)183 U+00B7
+                case '·':  // center dot  '\0x0B7' (Char)183 U+00B7
                     return OperatorKind.mult; // 5;
                 case '/':
                     return OperatorKind.div; // 6;
@@ -1539,7 +1545,7 @@ namespace PhysicalCalculator.Expression
                 // case '!':
                 //      return OperatorKind.Root; // 8;
                 /*
-                case '+': // unaryplus:
+                case '+': // UnaryPlus:
                      return OperatorKind.unaryplus; // 9;
                 case '-': // UnaryMinus:
                      return OperatorKind.unaryminus; // 10;
@@ -1549,18 +1555,18 @@ namespace PhysicalCalculator.Expression
             return OperatorKind.none;
         }
 
-        public static OperatorKind OperatorKindFromChar1Equal(Char c)
+        public static OperatorKind OperatorKindFromChar1Equal(Char c1)
         {
-            switch (c)
+            switch (c1)
             {
-                case '=':
-                    return OperatorKind.equals; // 1;
-                case '!':
-                    return OperatorKind.differs; // 1;
-                case '<':
-                    return OperatorKind.lessorequals; // 1;
-                case '>':
-                    return OperatorKind.largerorequals; // 1;
+                case '=':   // ==
+                    return OperatorKind.equals;
+                case '!':   // !=
+                    return OperatorKind.differs;
+                case '<':   // <=
+                    return OperatorKind.lessorequals;
+                case '>':   // >=
+                    return OperatorKind.largerorequals;
             }
 
             return OperatorKind.none;

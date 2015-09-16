@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Kilo Bravo Lima")]
 [assembly: AssemblyProduct("PhysicalMeasure")]
-[assembly: AssemblyCopyright("Copyright © Kilo Bravo 2010-2014")]
+[assembly: AssemblyCopyright("Copyright © Kilo Bravo Lima  2010-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -568,6 +568,8 @@ namespace PhysicalCalculator
         private TraceLevels GlobalOutputTracelevel = TraceLevels.Normal; //TraceLevels.All; // TraceLevels.Normal;
         private FormatProviderKind GlobalFormatProviderSource = FormatProviderKind.DefaultFormatProvider;
 
+        public List<String> CommandHistory = new List<string>();
+
         public Commandreader(ResultWriter ResultLineWriter = null)
         {
             this.ResultLineWriter = ResultLineWriter;
@@ -782,6 +784,7 @@ namespace PhysicalCalculator
                 Write("|>");
 
                 CommandLine = Console.ReadLine();
+                CommandHistory.Add(CommandLine);
             }
             else
             {

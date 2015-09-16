@@ -118,7 +118,7 @@ namespace PhysicalCalculator
 
         public static void Main(string[] args)
         {
-            ConsolAnyColorClass.SetColor(ConsoleColor.Blue, Color.FromArgb(50, 50, 255));  // Slightliy light blue
+            ConsolAnyColorClass.SetColor(ConsoleColor.Blue, Color.FromArgb(50, 50, 255));  // Slightly light blue
 
             ResultWriter ResultLineWriter = new ResultWriter();
 
@@ -152,6 +152,7 @@ namespace PhysicalCalculator
                     ResultLineWriter.ResetColor();
 
                     Calculator.Run();
+
                     ResultLineWriter.ForegroundColor = ConsoleColor.Blue;
                     ResultLineWriter.WriteLine("PhysCalculator finished");
                 }

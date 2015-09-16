@@ -89,7 +89,7 @@ namespace PhysCalculatorTests
         [DeploymentItem("PhysCalc.exe")]
         public void MainTest()
         {
-            string[] args = {"read AllTestFiles"};
+            string[] args = {"read AllTestFiles ; Exit"};
             try
             {
                 var pt_program = new PrivateType(typeof(Program));

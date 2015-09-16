@@ -105,7 +105,7 @@ namespace PhysicalCalculator.Identifiers
 
     class NamedSystem : NametableItem 
     {
-        public override IdentifierKind Identifierkind { get { return IdentifierKind.UnisSystem; } }
+        public override IdentifierKind Identifierkind { get { return IdentifierKind.UnitSystem; } }
 
         public IUnitSystem UnitSystem;
 
@@ -329,7 +329,7 @@ namespace PhysicalCalculator.Identifiers
         Constant = 2,
         Variable = 3,
         Function = 4,
-        UnisSystem = 5,
+        UnitSystem = 5,
         Unit = 6
     }
 
@@ -761,7 +761,7 @@ namespace PhysicalCalculator.Identifiers
             IEnvironment context;
             Boolean Found = FindIdentifier(systemName, out context, out systemItem);
 
-            if (Found && (context == this) && (systemItem.Identifierkind != IdentifierKind.UnisSystem))
+            if (Found && (context == this) && (systemItem.Identifierkind != IdentifierKind.UnitSystem))
             {   // Found locally but is not a system; Can't set as system
                 return false;
             }
@@ -771,10 +771,10 @@ namespace PhysicalCalculator.Identifiers
                 context = this;
             }
 
-            // Either is identifier a system in some context; set it to specified value
+            // Either identifier is a system in some context; set it to specified value
             // or identifier not found; No local identifier with that name, Declare local system
             systemItem = new NamedSystem(systemName);
-            PhysicalMeasure.Physics.Default_UnitSystem_Use((systemItem as NamedSystem).UnitSystem);  
+            PhysicalMeasure.Physics.CurrentUnitSystems.Use((systemItem as NamedSystem).UnitSystem);  
             return context.SetLocalIdentifier(systemName, systemItem);
         }
 
