@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Globalization;
 
 using System.Diagnostics;
 using System.IO;
 
-using TokenParser;
-
 using PhysicalMeasure;
 
+using TokenParser;
+
 using PhysicalCalculator.Identifiers;
-using PhysicalCalculator.Function;
-using PhysicalMeasure.Statics;
+
 
 namespace PhysicalCalculator.Expression
 {
@@ -259,9 +257,9 @@ namespace PhysicalCalculator.Expression
                     if (pqRes == null)
                     {
                         resultLine = "The unit " + pq.Unit.ToPrintString() + " can't be converted to " + pu.ToPrintString() + "\n";
-                        //  pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit) }, new PrefixedUnitExponentList { new PrefixedUnitExponent(pu) }));
-                        //  pqRes = pq.ConvertTo(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit.Divide(pu).Unit) }, null));
-                        ICombinedUnit newRelativeUnit = new PhysicalMeasure.CombinedUnit(pu).CombineMultiply(pq.Unit.Divide(pu));
+                        //  pqRes = pq.ConvertTo(new CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit) }, new PrefixedUnitExponentList { new PrefixedUnitExponent(pu) }));
+                        //  pqRes = pq.ConvertTo(new CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit.Divide(pu).Unit) }, null));
+                        ICombinedUnit newRelativeUnit = new CombinedUnit(pu).CombineMultiply(pq.Unit.Divide(pu));
                         pqRes = pq.ConvertTo(newRelativeUnit);
                     }
                     return pqRes;
@@ -825,8 +823,8 @@ namespace PhysicalCalculator.Expression
             }
         }
 
-        public static readonly IPhysicalQuantity PQ_False = new PhysicalMeasure.PhysicalQuantity(0);
-        public static readonly IPhysicalQuantity PQ_True = new PhysicalMeasure.PhysicalQuantity(1);
+        public static readonly IPhysicalQuantity PQ_False = new PhysicalQuantity(0);
+        public static readonly IPhysicalQuantity PQ_True = new PhysicalQuantity(1);
 
         public static IPhysicalQuantity ParseExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow ) // = null)
         {
@@ -962,30 +960,12 @@ namespace PhysicalCalculator.Expression
                         else if (Token.Operator == OperatorKind.equals)
                         {
                             // Save pqFirst == pqSecond
-                            //Operands.Push(pqFirst.Equals(pqSecond));
-
-                            if (pqFirst.Equals(pqSecond))
-                            {
-                                Operands.Push(PQ_True);
-                            }
-                            else
-                            {
-                                Operands.Push(PQ_False);
-                            }
+                            Operands.Push(pqFirst.Equals(pqSecond) ?  PQ_True : PQ_False);
                         }
                         else if (Token.Operator == OperatorKind.differs)
                         {
                             // Save pqFirst != pqSecond
-                            //Operands.Push(!pqFirst.Equals(pqSecond));
-                            if (!pqFirst.Equals(pqSecond))
-                            {
-                                Operands.Push(PQ_True);
-                            }
-                            else
-                            {
-                                Operands.Push(PQ_False);
-                            }
-
+                            Operands.Push(pqFirst.Equals(pqSecond) ? PQ_False : PQ_True);
                         }
                         else if (   Token.Operator == OperatorKind.lessthan
                                  || Token.Operator == OperatorKind.lessorequals
@@ -1195,7 +1175,7 @@ namespace PhysicalCalculator.Expression
                        && (Char.IsDigit(commandLine[numLen])
                            || ((numberBase == 0x10)
                                && Char.IsLetter(commandLine[numLen])
-                    //&& Char.IsHexDigit(Char.ToLower(commandLine[numlen])))))
+                    //&& Char.IsHexDigit(Char.ToLower(commandLine[numLen])))))
                                && TokenString.IsHexDigit(Char.ToLower(commandLine[numLen])))))
                 {
                     numLen++;
@@ -1212,7 +1192,7 @@ namespace PhysicalCalculator.Expression
                        && (   Char.IsDigit(commandLine[numLen]) 
                            || (   (numberBase == 0x10) 
                                && Char.IsLetter(commandLine[numLen])
-                               //&& Char.IsHexDigit(Char.ToLower(commandLine[numlen])))))
+                               //&& Char.IsHexDigit(Char.ToLower(commandLine[numLen])))))
                                && TokenString.IsHexDigit(Char.ToLower(commandLine[numLen])))))
                 {
                     numLen++;
@@ -1256,7 +1236,7 @@ namespace PhysicalCalculator.Expression
                            && (Char.IsDigit(commandLine[numLen])
                                || ((exponentNumberBase == 0x10)
                                    && Char.IsLetter(commandLine[numLen])
-                        //&& Char.IsHexDigit(Char.ToLower(commandLine[numlen])))))
+                        //&& Char.IsHexDigit(Char.ToLower(commandLine[numLen])))))
                                    && TokenString.IsHexDigit(Char.ToLower(commandLine[numLen])))))
                     {
                         numLen++;
@@ -1276,7 +1256,7 @@ namespace PhysicalCalculator.Expression
                         {
                             baseNumberLen = exponentCharPos -1;
                         }
-                        //OK = Double.TryParse(commandLine.Substring(0, numlen), numberStyle, NumberFormatInfo.InvariantInfo, out D); 
+                        //OK = Double.TryParse(commandLine.Substring(0, numLen), numberStyle, NumberFormatInfo.InvariantInfo, out D); 
 
                         if (numberBase == 10)
                         {
@@ -1404,7 +1384,7 @@ namespace PhysicalCalculator.Expression
                     }
                 }
             }
-            //if (!UnitIdentifierFound)
+
             if (pu == null)
             {   // Standard physical unit expressions
 

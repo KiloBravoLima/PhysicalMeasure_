@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+
 using PhysicalMeasure;
-using CommandParser;
+
 using PhysicalCalculator;
 using PhysicalCalculator.Identifiers;
-using PhysicalMeasure.Statics;
 
 namespace PhysCalculatorTests
 {

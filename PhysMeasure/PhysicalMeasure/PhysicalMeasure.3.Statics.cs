@@ -5,9 +5,11 @@
 
 using System;
 using System.Collections.Generic;
+//using PhysicalMeasure.Interfaces;
+//using PhysicalMeasure.Classes;
 
 
-namespace PhysicalMeasure.Statics
+namespace PhysicalMeasure
 {
     #region Physical Measure Static Classes
     public static /* partial */ class Physics
@@ -62,7 +64,7 @@ namespace PhysicalMeasure.Statics
                                                                                                     new UnitPrefix(UnitPrefixes, "centi", 'c', -2), 
                                                                                                     new UnitPrefix(UnitPrefixes, "milli", 'm', -3),
                                                                                                     // new UnitPrefix(UnitPrefixes, "micro", 'μ', -6), // '\0x03BC' (Char)956  
-                                                                                                    new UnitPrefix(UnitPrefixes, "micro", 'µ', -6),  // Ansi '\0x00B5' (Char)181   
+                                                                                                    new UnitPrefix(UnitPrefixes, "micro", 'µ', -6),  // ANSI '\0x00B5' (Char)181   
                                                                                                     new UnitPrefix(UnitPrefixes, "nano",  'n', -9), 
                                                                                                     new UnitPrefix(UnitPrefixes, "pico",  'p', -12), 
                                                                                                     new UnitPrefix(UnitPrefixes, "femto", 'f', -15), 
@@ -257,7 +259,6 @@ namespace PhysicalMeasure.Statics
         public static readonly UnitPrefix y = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[21];
     }
 
-#region Physical Unit System Static Classes
 
     public static partial class SI 
     {
@@ -299,7 +300,6 @@ namespace PhysicalMeasure.Statics
         public static readonly ConvertibleUnit l  = (ConvertibleUnit)Physics.SI_Units.ConvertibleUnits[3];
     }
 
-#endregion Physical Unit System Static Classes
 
 #endregion Physical Measure Static Classes
 

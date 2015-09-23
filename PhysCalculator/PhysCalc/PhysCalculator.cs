@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Globalization;
 using System.Diagnostics;
 using System.IO;
+
 
 using PhysicalMeasure;
 
@@ -15,7 +15,6 @@ using PhysicalCalculator.Identifiers;
 using PhysicalCalculator.CommandBlock;
 using PhysicalCalculator.Function;
 using PhysicalCalculator.Expression;
-using PhysicalMeasure.Statics;
 
 namespace PhysicalCalculator
 {
@@ -83,27 +82,27 @@ namespace PhysicalCalculator
         private void UsingUniversalPhysicalConstants(CalculatorEnvironment someEnvironment)
         {
             // PhysicalMeasure.Constants  Table of universal constants
-            someEnvironment.NamedItems.AddItem("c", new NamedConstant(PhysicalMeasure.Constants.Constants.c));
-            someEnvironment.NamedItems.AddItem("G", new NamedConstant(PhysicalMeasure.Constants.Constants.G));
-            someEnvironment.NamedItems.AddItem("h", new NamedConstant(PhysicalMeasure.Constants.Constants.h));
-            someEnvironment.NamedItems.AddItem("h_bar", new NamedConstant(PhysicalMeasure.Constants.Constants.h_bar));
+            someEnvironment.NamedItems.AddItem("c", new NamedConstant(PhysicalMeasure.Constants.c));
+            someEnvironment.NamedItems.AddItem("G", new NamedConstant(PhysicalMeasure.Constants.G));
+            someEnvironment.NamedItems.AddItem("h", new NamedConstant(PhysicalMeasure.Constants.h));
+            someEnvironment.NamedItems.AddItem("h_bar", new NamedConstant(PhysicalMeasure.Constants.h_bar));
         }
 
         private void UsingElectromagneticPhysicalConstants(CalculatorEnvironment someEnvironment)
         {
             // PhysicalMeasure.Constants  Table of electromagnetic constants
-            someEnvironment.NamedItems.AddItem("my0", new NamedConstant(PhysicalMeasure.Constants.Constants.my0));
-            someEnvironment.NamedItems.AddItem("epsilon0", new NamedConstant(PhysicalMeasure.Constants.Constants.epsilon0));
-            someEnvironment.NamedItems.AddItem("Z0", new NamedConstant(PhysicalMeasure.Constants.Constants.Z0));
-            someEnvironment.NamedItems.AddItem("ke", new NamedConstant(PhysicalMeasure.Constants.Constants.ke));
+            someEnvironment.NamedItems.AddItem("my0", new NamedConstant(PhysicalMeasure.Constants.my0));
+            someEnvironment.NamedItems.AddItem("epsilon0", new NamedConstant(PhysicalMeasure.Constants.epsilon0));
+            someEnvironment.NamedItems.AddItem("Z0", new NamedConstant(PhysicalMeasure.Constants.Z0));
+            someEnvironment.NamedItems.AddItem("ke", new NamedConstant(PhysicalMeasure.Constants.ke));
 
-            someEnvironment.NamedItems.AddItem("e", new NamedConstant(PhysicalMeasure.Constants.Constants.e));
-            someEnvironment.NamedItems.AddItem("myB", new NamedConstant(PhysicalMeasure.Constants.Constants.myB));
-            someEnvironment.NamedItems.AddItem("G0", new NamedConstant(PhysicalMeasure.Constants.Constants.G0));
-            someEnvironment.NamedItems.AddItem("K_J", new NamedConstant(PhysicalMeasure.Constants.Constants.KJ));
-            someEnvironment.NamedItems.AddItem("phi0", new NamedConstant(PhysicalMeasure.Constants.Constants.phi0));
-            someEnvironment.NamedItems.AddItem("myN", new NamedConstant(PhysicalMeasure.Constants.Constants.myN));
-            someEnvironment.NamedItems.AddItem("RK", new NamedConstant(PhysicalMeasure.Constants.Constants.RK));
+            someEnvironment.NamedItems.AddItem("e", new NamedConstant(PhysicalMeasure.Constants.e));
+            someEnvironment.NamedItems.AddItem("myB", new NamedConstant(PhysicalMeasure.Constants.myB));
+            someEnvironment.NamedItems.AddItem("G0", new NamedConstant(PhysicalMeasure.Constants.G0));
+            someEnvironment.NamedItems.AddItem("K_J", new NamedConstant(PhysicalMeasure.Constants.KJ));
+            someEnvironment.NamedItems.AddItem("phi0", new NamedConstant(PhysicalMeasure.Constants.phi0));
+            someEnvironment.NamedItems.AddItem("myN", new NamedConstant(PhysicalMeasure.Constants.myN));
+            someEnvironment.NamedItems.AddItem("RK", new NamedConstant(PhysicalMeasure.Constants.RK));
         }
 
         
@@ -471,7 +470,7 @@ namespace PhysicalCalculator
             System.Reflection.Assembly PhysCaclAsm = System.Reflection.Assembly.GetExecutingAssembly();
 
             //PhysicalMeasure
-            System.Reflection.Assembly PhysicalMeasureAsm = typeof(PhysicalMeasure.PhysicalQuantity).Assembly;
+            System.Reflection.Assembly PhysicalMeasureAsm = typeof(PhysicalQuantity).Assembly;
 
             resultLine = PhysCaclAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo();
 
@@ -485,7 +484,7 @@ namespace PhysicalCalculator
             System.Reflection.Assembly PhysCaclAsm = System.Reflection.Assembly.GetExecutingAssembly();
 
             //PhysicalMeasure
-            System.Reflection.Assembly PhysicalMeasureAsm = typeof(PhysicalMeasure.PhysicalQuantity).Assembly;
+            System.Reflection.Assembly PhysicalMeasureAsm = typeof(PhysicalQuantity).Assembly;
 
             resultLine = "PhysCalculator" + "\n";
             resultLine += PhysCaclAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo() + "\n";

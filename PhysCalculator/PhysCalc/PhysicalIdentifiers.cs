@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
-
 using System.Diagnostics;
-using System.IO;
-
-using TokenParser;
-using CommandParser;
 
 using PhysicalMeasure;
+
 using PhysicalCalculator.Expression;
 using PhysicalCalculator.CommandBlock;
 using PhysicalCalculator.Function;
 using System.Runtime.Serialization;
-using PhysicalMeasure.Statics;
+
 
 namespace PhysicalCalculator.Identifiers
 {

@@ -3,9 +3,7 @@
 /*   http://en.wikipedia.org/wiki/Physical_quantity               */
 /*   http://en.wikipedia.org/wiki/Physical_constant               */
 
-using PhysicalMeasure.Statics;
-
-namespace PhysicalMeasure.Constants
+namespace PhysicalMeasure
 {
     #region Physical Constants Statics
 
