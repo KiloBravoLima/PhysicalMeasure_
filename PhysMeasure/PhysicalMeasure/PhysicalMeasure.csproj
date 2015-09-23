@@ -60,9 +60,10 @@
   <ItemGroup>
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="PhysicalMeasure.Statics.cs" />
-    <Compile Include="PhysicalMeasure .Constants.cs" />
-    <Compile Include="PhysicalMeasure.cs" />
+    <Compile Include="PhysicalMeasure.1.Interfaces.cs" />
+    <Compile Include="PhysicalMeasure.3.Statics.cs" />
+    <Compile Include="PhysicalMeasure.4.Constants.cs" />
+    <Compile Include="PhysicalMeasure.2.Classes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

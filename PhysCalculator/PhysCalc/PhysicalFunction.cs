@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-
 using System.Text;
-using System.Globalization;
-
 using System.Diagnostics;
-using System.IO;
-
-using TokenParser;
-
-using CommandParser;
 
 using PhysicalMeasure;
+
+using TokenParser;
 using PhysicalCalculator.Identifiers;
-using PhysicalCalculator.Expression;
 
 namespace PhysicalCalculator.Function
 {

@@ -1,9 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Globalization;
+
+
 using PhysicalMeasure;
-using PhysicalMeasure.Constants;
-using PhysicalMeasure.Statics;
+
 
 namespace PhysicalMeasureTest
 {
