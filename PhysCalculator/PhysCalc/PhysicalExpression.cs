@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
@@ -12,6 +12,7 @@ using PhysicalMeasure;
 
 using PhysicalCalculator.Identifiers;
 using PhysicalCalculator.Function;
+using PhysicalMeasure.Statics;
 
 namespace PhysicalCalculator.Expression
 {

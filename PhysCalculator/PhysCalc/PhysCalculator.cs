@@ -15,6 +15,7 @@ using PhysicalCalculator.Identifiers;
 using PhysicalCalculator.CommandBlock;
 using PhysicalCalculator.Function;
 using PhysicalCalculator.Expression;
+using PhysicalMeasure.Statics;
 
 namespace PhysicalCalculator
 {
