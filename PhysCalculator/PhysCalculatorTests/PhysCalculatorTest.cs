@@ -5,6 +5,7 @@ using PhysicalMeasure;
 using CommandParser;
 using PhysicalCalculator;
 using PhysicalCalculator.Identifiers;
+using PhysicalMeasure.Statics;
 
 namespace PhysCalculatorTests
 {
@@ -908,7 +909,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             // Assert.AreEqual(expected, actual, "for result");
 
             // Clean up global info for default unit system
-            PhysicalMeasure.Physics.CurrentUnitSystems.Reset();
+            Physics.CurrentUnitSystems.Reset();
         }
 
         /// <summary>
@@ -994,7 +995,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
 
             // Clean up global info for default unit system
-            PhysicalMeasure.Physics.CurrentUnitSystems.Reset();
+            Physics.CurrentUnitSystems.Reset();
         }
 
 

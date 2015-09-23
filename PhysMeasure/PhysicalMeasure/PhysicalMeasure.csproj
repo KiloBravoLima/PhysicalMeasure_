@@ -59,6 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="PhysicalMeasure.Statics.cs" />
+    <Compile Include="PhysicalMeasure .Constants.cs" />
     <Compile Include="PhysicalMeasure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

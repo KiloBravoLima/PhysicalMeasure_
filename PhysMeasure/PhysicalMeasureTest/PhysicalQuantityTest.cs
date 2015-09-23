@@ -3,6 +3,7 @@ using System;
 using System.Globalization;
 using PhysicalMeasure;
 using PhysicalMeasure.Constants;
+using PhysicalMeasure.Statics;
 
 namespace PhysicalMeasureTest
 {
@@ -1097,7 +1098,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void BaseUnitPhysicalQuantityToStringTest()
         {
-            PhysicalQuantity pq = new PhysicalQuantity(123.4, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("Kg"));
+            PhysicalQuantity pq = new PhysicalQuantity(123.4, Physics.SI_Units.UnitFromSymbol("Kg"));
 
             //String expected = (123.4).ToString()+" SI.Kg";
             //String expected = (123.4).ToString(CultureInfo.InvariantCulture) + " Kg";
@@ -1114,7 +1115,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitPhysicalQuantityToStringTest()
         {
-            PhysicalQuantity pq = new PhysicalQuantity(0.001 * 9.81 * 10, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("J"));
+            PhysicalQuantity pq = new PhysicalQuantity(0.001 * 9.81 * 10, Physics.SI_Units.UnitFromSymbol("J"));
 
             //String expected = (0.0981).ToString()+" SI.J";
             //String expected = (0.0981).ToString(CultureInfo.InvariantCulture) + " J";
@@ -1131,7 +1132,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void DerivedUnitPhysicalQuantityToStringTest()
         {
-            PhysicalQuantity pq = new PhysicalQuantity(0.00987654321, new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 }));
+            PhysicalQuantity pq = new PhysicalQuantity(0.00987654321, new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 }));
 
             //String expected = (0.00987654321).ToString() + " SI.ms-2";
             //String expected = (0.00987654321).ToString(CultureInfo.InvariantCulture) + " m·s-2";

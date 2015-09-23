@@ -14,6 +14,7 @@ using PhysicalCalculator.Expression;
 using PhysicalCalculator.CommandBlock;
 using PhysicalCalculator.Function;
 using System.Runtime.Serialization;
+using PhysicalMeasure.Statics;
 
 namespace PhysicalCalculator.Identifiers
 {
@@ -774,7 +775,7 @@ namespace PhysicalCalculator.Identifiers
             // Either identifier is a system in some context; set it to specified value
             // or identifier not found; No local identifier with that name, Declare local system
             systemItem = new NamedSystem(systemName);
-            PhysicalMeasure.Physics.CurrentUnitSystems.Use((systemItem as NamedSystem).UnitSystem);  
+            Physics.CurrentUnitSystems.Use((systemItem as NamedSystem).UnitSystem);  
             return context.SetLocalIdentifier(systemName, systemItem);
         }
 
