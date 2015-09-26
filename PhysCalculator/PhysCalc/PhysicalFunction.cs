@@ -458,7 +458,7 @@ namespace PhysicalCalculator.Function
                                 {
                                     OK = TokenString.ParseToken("}", ref commandLine, ref resultLine);
                                     if (OK)
-                                    {   // Compleated function declaration parsing 
+                                    {   // Completed function declaration parsing 
                                         localContext.ParseState = CommandParserState.ExecuteCommandLine;
                                         return localContext.FunctionToParseInfo.Function;
                                     }

@@ -1197,13 +1197,13 @@ namespace PhysicalCalculator
 
                 IEnvironment NewFunctionDeclarationNamespace = GetDeclarationEnvironment();
 
-                Boolean ALocalIdentifier = IdentifierFound && IdentifierContext == NewFunctionDeclarationNamespace;
-                Boolean OK = !ALocalIdentifier || Item.Identifierkind == IdentifierKind.Function;
+                Boolean IsALocalIdentifier = IdentifierFound && IdentifierContext == NewFunctionDeclarationNamespace;
+                Boolean OK = !IsALocalIdentifier || Item.Identifierkind == IdentifierKind.Function;
                 if (OK)
                 {
                     CurrentContext.BeginParsingFunction(FunctionName);
 
-                    if (ALocalIdentifier)
+                    if (IsALocalIdentifier)
                     {
                         resultLine = "Function '" + FunctionName + "' is already declared";
                         CurrentContext.FunctionToParseInfo.RedefineItem = Item;
@@ -1291,23 +1291,33 @@ namespace PhysicalCalculator
                         out IEnvironment qualifiedIdentifierContext, out String qualifiedIdentifierName, out String identifierName, out INametableItem item)
         {
             IEnvironment PrimaryContext;
-            IdentifierKind identifierkind;
+            IdentifierKind identifierkind = IdentifierKind.Unknown;
 
             commandLine = commandLine.ReadIdentifier(out identifierName);
             Debug.Assert(identifierName != null);
 
+            /**
             Boolean IdentifierFound = CurrentContext.FindIdentifier(identifierName, out PrimaryContext, out item);
 
+            if (!IdentifierFound)
+            {
+                // Look for Global system settings and predefined symbols
+
+                // IdentifierFound = PredefinedContextIdentifierLookup(identifierName, out PrimaryContext, out identifierkind);
+
+                // IdentifierFound = PredefinedContextIdentifierItemLookup(identifierName, out PrimaryContext, out item);
+                CalculatorEnvironment tempPrimaryContext;
+                IdentifierFound = PredefinedContextIdentifierLookup(identifierName, out tempPrimaryContext);
+                PrimaryContext = tempPrimaryContext;
+            }
+            **/
+
+            Boolean IdentifierFound = IdentifierItemLookup(identifierName, out PrimaryContext, out item);
             if (IdentifierFound)
             {
                 identifierkind = item.Identifierkind;
             }
-            else
-            {   // Look for Global system settings and predefined symbols
 
-                IdentifierFound = PredefinedContextIdentifierLookup(identifierName, out PrimaryContext, out identifierkind);
-
-            }
 
             qualifiedIdentifierContext = PrimaryContext;
             qualifiedIdentifierName = identifierName;
@@ -1610,12 +1620,12 @@ namespace PhysicalCalculator
         }
 
 
-        public Boolean FunctionEvaluate(String FunctionName, IFunctionEvaluator functionevaluator, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
+        public Boolean FunctionEvaluate(String FunctionName, IFunctionEvaluator functionEvaluator, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {
             Boolean OK = false;
             functionResult = null;
 
-            if (functionevaluator != null)
+            if (functionEvaluator != null)
             {
                 CalculatorEnvironment LocalContext = new CalculatorEnvironment(CurrentContext, "Function " + FunctionName, EnvironmentKind.FunctionEnv);
                 //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
@@ -1623,12 +1633,12 @@ namespace PhysicalCalculator
 
                 CurrentContext = LocalContext;
 
-                OK = functionevaluator.Evaluate(LocalContext, parameterlist, out functionResult, ref resultLine);
+                OK = functionEvaluator.Evaluate(LocalContext, parameterlist, out functionResult, ref resultLine);
                 CurrentContext = LocalContext.OuterContext;
                 LocalContext.OuterContext = null;
             }
 
-           return OK;
+            return OK;
         }
 
         public Boolean FunctionEvaluateFileRead(String functionName, out IPhysicalQuantity functionResult, ref String resultLine)
@@ -1676,94 +1686,61 @@ namespace PhysicalCalculator
             Boolean IdentifierFound = CurrentContext.FindIdentifier(identifierName, out context, out item);
             if (!IdentifierFound)
             {   // Look for Global system settings and predefined symbols
-                IdentifierFound = identifierName.Equals("Global", StringComparison.OrdinalIgnoreCase);
-                if (IdentifierFound)
-                {
-                    context = GlobalContext;
-                    item = GlobalContext;
-                }
-                else
-                {
-                    IdentifierFound = identifierName.Equals("Outer", StringComparison.OrdinalIgnoreCase);
-                    if (IdentifierFound)
-                    {
-                        if (CurrentContext.OuterContext != null)
-                        {
-                            context = CurrentContext.OuterContext;
-                            item = CurrentContext.OuterContext;
-                        }
-                    }
-                    else
-                    {
-                        IdentifierFound = identifierName.Equals("Local", StringComparison.OrdinalIgnoreCase);
-                        if (IdentifierFound)
-                        {
-                            context = CurrentContext;
-                            item = CurrentContext;
-                        }
-                        else
-                        {
-                            item = null;
-                        }
-                    }
-                }
+                CalculatorEnvironment PrimaryContext;
+                IdentifierFound = PredefinedContextIdentifierLookup(identifierName, out PrimaryContext);
+                context = PrimaryContext;
+                item = PrimaryContext;
             }
 
             return IdentifierFound;
         }
 
-        public Boolean PredefinedContextIdentifierLookup(String IdentifierName, out IEnvironment FoundInContext, out IdentifierKind identifierkind)
+        public Boolean PredefinedContextIdentifierLookup(String IdentifierName, out CalculatorEnvironment PrimaryContext)
         {
             // Look for Global system settings and predefined symbols
             Boolean IdentifierFound = IdentifierName.Equals("Global", StringComparison.OrdinalIgnoreCase);
             if (IdentifierFound)
             {
-               FoundInContext = GlobalContext;
-                identifierkind = IdentifierKind.Environment;
+                PrimaryContext = GlobalContext;
             }
             else
             {
                 IdentifierFound = IdentifierName.Equals("Outer", StringComparison.OrdinalIgnoreCase);
                 if (IdentifierFound)
                 {
-                    FoundInContext = CurrentContext.OuterContext;
-                    identifierkind = IdentifierKind.Environment;
+                    PrimaryContext = CurrentContext.OuterContext;
                 }
                 else
                 {
                     IdentifierFound = IdentifierName.Equals("Local", StringComparison.OrdinalIgnoreCase);
                     if (IdentifierFound)
                     {
-                        FoundInContext = CurrentContext;
-                        identifierkind = IdentifierKind.Environment;
+                        PrimaryContext = CurrentContext;
                     }
                     else
                     {
-                        FoundInContext = null;
-                        identifierkind = IdentifierKind.Unknown;
+                        PrimaryContext = null;
                     }
                 }
             }
-
             return IdentifierFound;
         }
 
 
         public Boolean IdentifierContextLookup(String IdentifierName, out IEnvironment FoundInContext, out IdentifierKind identifierkind)
         {
-            INametableItem Item;
-
-            Boolean IdentifierFound = CurrentContext.FindIdentifier(IdentifierName, out FoundInContext, out Item);
-            if (IdentifierFound)
+            INametableItem item;
+            Boolean identifierFound = IdentifierItemLookup(IdentifierName, out FoundInContext, out item);
+            if (identifierFound)
             {
-                identifierkind = Item.Identifierkind;
+                identifierkind = item.Identifierkind;
             }
             else
-            {   // Look for Global system settings and predefined symbols
-                IdentifierFound = PredefinedContextIdentifierLookup(IdentifierName, out FoundInContext, out identifierkind);
+            {
+                identifierkind = IdentifierKind.Unknown;
             }
 
-            return IdentifierFound;
+            return identifierFound;
         }
 
         public Boolean QualifiedIdentifierCalculatorContextLookup(IEnvironment LookInContext, String IdentifierName, out IEnvironment FoundInContext, out IdentifierKind identifierkind)

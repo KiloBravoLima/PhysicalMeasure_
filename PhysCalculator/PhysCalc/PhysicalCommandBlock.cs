@@ -199,7 +199,7 @@ namespace PhysicalCalculator.CommandBlock
                                 }
                                 else
                                 {
-                                    // Compleated function declaration parsing 
+                                    // Completed function declaration parsing 
                                     localContext.ParseState = CommandParserState.ExecuteCommandLine;
                                     return localContext.CommandBlockToParseInfo.CommandBlock;
                                 }
