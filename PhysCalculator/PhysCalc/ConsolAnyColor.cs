@@ -85,6 +85,41 @@ namespace ConsolAnyColor
             internal COLORREF white;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY
+        {
+            internal int cbSize;
+            internal COORD dwSize;
+            internal COORD dwCursorPosition;
+            internal ushort wAttributes;
+            internal SMALL_RECT srWindow;
+            internal COORD dwMaximumWindowSize;
+            internal ushort wPopupAttributes;
+            internal bool bFullscreenSupported;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+            internal COLORREF[] colors;
+
+            /* 
+            internal COLORREF black;
+            internal COLORREF darkBlue;
+            internal COLORREF darkGreen;
+            internal COLORREF darkCyan;
+            internal COLORREF darkRed;
+            internal COLORREF darkMagenta;
+            internal COLORREF darkYellow;
+            internal COLORREF gray;
+            internal COLORREF darkGray;
+            internal COLORREF blue;
+            internal COLORREF green;
+            internal COLORREF cyan;
+            internal COLORREF red;
+            internal COLORREF magenta;
+            internal COLORREF yellow;
+            internal COLORREF white;    
+            */
+        }
+
+
         const int STD_OUTPUT_HANDLE = -11;                                        // per WinBase.h
         internal static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);    // per WinBase.h
 
@@ -92,22 +127,32 @@ namespace ConsolAnyColor
         private static extern IntPtr GetStdHandle(int nStdHandle);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool GetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX csbe);
+        // private static extern bool GetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX csbe);
+        private static extern bool GetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY csbe);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool SetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX csbe);
+        // private static extern bool SetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX csbe);
+        private static extern bool SetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY csbe);
 
         // Set a specific console color to an RGB color
         // The default console colors used are gray (foreground) and black (background)
         public static int SetColor(ConsoleColor colorToSet, Color targetColor)
         {
-            return SetColor(colorToSet, targetColor.R, targetColor.G, targetColor.B);
+            return SetColor(colorToSet, new COLORREF(targetColor));
         }
 
         public static int SetColor(ConsoleColor colorToSet, uint r, uint g, uint b)
         {
-            CONSOLE_SCREEN_BUFFER_INFO_EX csbe = new CONSOLE_SCREEN_BUFFER_INFO_EX();
+            return SetColor(colorToSet, new COLORREF(r, g, b));
+        }
+
+        public static int SetColor(ConsoleColor colorToSet, COLORREF targetColor)
+        {
+            // CONSOLE_SCREEN_BUFFER_INFO_EX csbe = new CONSOLE_SCREEN_BUFFER_INFO_EX();
+            CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY csbe = new CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY();
             csbe.cbSize = (int)Marshal.SizeOf(csbe);                    // 96 = 0x60
+
+
             IntPtr hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);    // 7
             if (hConsoleOutput == INVALID_HANDLE_VALUE)
             {
@@ -119,57 +164,61 @@ namespace ConsolAnyColor
                 return Marshal.GetLastWin32Error();
             }
 
+            csbe.colors[(int)colorToSet] = targetColor;
+            /*
             switch (colorToSet)
             {
                 case ConsoleColor.Black:
-                    csbe.black = new COLORREF(r, g, b);
+                    csbe.black = targetColor;
                     break;
                 case ConsoleColor.DarkBlue:
-                    csbe.darkBlue = new COLORREF(r, g, b);
+                    csbe.darkBlue = targetColor;
                     break;
                 case ConsoleColor.DarkGreen:
-                    csbe.darkGreen = new COLORREF(r, g, b);
+                    csbe.darkGreen = targetColor;
                     break;
                 case ConsoleColor.DarkCyan:
-                    csbe.darkCyan = new COLORREF(r, g, b);
+                    csbe.darkCyan = targetColor;
                     break;
                 case ConsoleColor.DarkRed:
-                    csbe.darkRed = new COLORREF(r, g, b);
+                    csbe.darkRed = targetColor;
                     break;
                 case ConsoleColor.DarkMagenta:
-                    csbe.darkMagenta = new COLORREF(r, g, b);
+                    csbe.darkMagenta = targetColor;
                     break;
                 case ConsoleColor.DarkYellow:
-                    csbe.darkYellow = new COLORREF(r, g, b);
+                    csbe.darkYellow = targetColor;
                     break;
                 case ConsoleColor.Gray:
-                    csbe.gray = new COLORREF(r, g, b);
+                    csbe.gray = targetColor;
                     break;
                 case ConsoleColor.DarkGray:
-                    csbe.darkGray = new COLORREF(r, g, b);
+                    csbe.darkGray = targetColor;
                     break;
                 case ConsoleColor.Blue:
-                    csbe.blue = new COLORREF(r, g, b);
+                    csbe.blue = targetColor;
                     break;
                 case ConsoleColor.Green:
-                    csbe.green = new COLORREF(r, g, b);
+                    csbe.green = targetColor;
                     break;
                 case ConsoleColor.Cyan:
-                    csbe.cyan = new COLORREF(r, g, b);
+                    csbe.cyan = targetColor;
                     break;
                 case ConsoleColor.Red:
-                    csbe.red = new COLORREF(r, g, b);
+                    csbe.red = targetColor;
                     break;
                 case ConsoleColor.Magenta:
-                    csbe.magenta = new COLORREF(r, g, b);
+                    csbe.magenta = targetColor;
                     break;
                 case ConsoleColor.Yellow:
-                    csbe.yellow = new COLORREF(r, g, b);
+                    csbe.yellow = targetColor;
                     break;
                 case ConsoleColor.White:
-                    csbe.white = new COLORREF(r, g, b);
+                    csbe.white = targetColor;
                     break;
             }
+            */ 
+
             ++csbe.srWindow.Bottom;
             ++csbe.srWindow.Right;
             brc = SetConsoleScreenBufferInfoEx(hConsoleOutput, ref csbe);
