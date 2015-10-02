@@ -988,84 +988,84 @@ namespace PhysicalMeasure
         {
             IPhysicalUnit pu = null;
             String resultLine = null;
-            pu = ParseUnit(ref unitString, ref resultLine, ThrowExceptionOnInvalidInput: true);
+            pu = ParseUnit(ref unitString, ref resultLine, throwExceptionOnInvalidInput: true);
             return pu;
         }
 
-        public static IPhysicalUnit ParseUnit(ref String unitString, ref String resultLine, Boolean ThrowExceptionOnInvalidInput = true)
+        public static IPhysicalUnit ParseUnit(ref String unitString, ref String resultLine, Boolean throwExceptionOnInvalidInput = true)
         {
             IPhysicalUnit pu = null;
 
             Char timeSeparator = ':';
             Char[] separators = { timeSeparator };
 
-            Char FractionUnitSeparator = '\0';
-            String FractionUnitSeparatorStr = null;
+            Char fractionUnitSeparator = '\0';
+            String fractionUnitSeparatorStr = null;
 
-            int UnitStrCount = 0;
-            int UnitStrStartCharIndex = 0;
-            int NextUnitStrStartCharIndex = 0;
-            Boolean ValidFractionalUnit = true;
-            int LastUnitFieldRemainingLen = 0;
+            int unitStrCount = 0;
+            int unitStrStartCharIndex = 0;
+            int nextUnitStrStartCharIndex = 0;
+            Boolean validFractionalUnit = true;
+            int lastUnitFieldRemainingLen = 0;
 
             Stack<Tuple<string, IPhysicalUnit>> FractionalUnits = new Stack<Tuple<string, IPhysicalUnit>>();
 
-            while (ValidFractionalUnit && (UnitStrStartCharIndex >= 0) && (UnitStrStartCharIndex < unitString.Length))
+            while (validFractionalUnit && (unitStrStartCharIndex >= 0) && (unitStrStartCharIndex < unitString.Length))
             {
-                int UnitStrLen;
+                int unitStrLen;
 
-                int UnitStrSeparatorCharIndex = unitString.IndexOfAny(separators, UnitStrStartCharIndex);
-                if (UnitStrSeparatorCharIndex == -1)
+                int unitStrSeparatorCharIndex = unitString.IndexOfAny(separators, unitStrStartCharIndex);
+                if (unitStrSeparatorCharIndex == -1)
                 {
-                    UnitStrLen = unitString.Length - UnitStrStartCharIndex;
+                    unitStrLen = unitString.Length - unitStrStartCharIndex;
 
-                    NextUnitStrStartCharIndex = unitString.Length;
+                    nextUnitStrStartCharIndex = unitString.Length;
                 }
                 else
                 {
-                    UnitStrLen = UnitStrSeparatorCharIndex - UnitStrStartCharIndex;
+                    unitStrLen = unitStrSeparatorCharIndex - unitStrStartCharIndex;
 
-                    NextUnitStrStartCharIndex = UnitStrSeparatorCharIndex + 1;
+                    nextUnitStrStartCharIndex = unitStrSeparatorCharIndex + 1;
                 }
 
-                if (UnitStrLen > 0)
+                if (unitStrLen > 0)
                 {
-                    UnitStrCount++;
-                    string UnitFieldString = unitString.Substring(UnitStrStartCharIndex, UnitStrLen).Trim();
+                    unitStrCount++;
+                    string unitFieldString = unitString.Substring(unitStrStartCharIndex, unitStrLen).Trim();
 
-                    IPhysicalUnit tempPU = ParseUnit(pu, ref UnitFieldString);
+                    IPhysicalUnit tempPU = ParseUnit(pu, ref unitFieldString);
 
                     if (tempPU == null)
                     {
-                        ValidFractionalUnit = false;
-                        resultLine = "'" + UnitFieldString + "' is not a valid unit.";
-                        if (ThrowExceptionOnInvalidInput)
+                        validFractionalUnit = false;
+                        resultLine = "'" + unitFieldString + "' is not a valid unit.";
+                        if (throwExceptionOnInvalidInput)
                         {
                             throw new PhysicalUnitFormatException("The string argument unitString is not in a valid physical unit format. " + resultLine);
                         }
                     }
                     else
                     {
-                        FractionUnitSeparatorStr = FractionUnitSeparator.ToString();
-                        FractionalUnits.Push(new Tuple<string, IPhysicalUnit>(FractionUnitSeparatorStr, tempPU));
+                        fractionUnitSeparatorStr = fractionUnitSeparator.ToString();
+                        FractionalUnits.Push(new Tuple<string, IPhysicalUnit>(fractionUnitSeparatorStr, tempPU));
 
-                        LastUnitFieldRemainingLen = UnitFieldString.Length;
-                        if (LastUnitFieldRemainingLen != 0)
+                        lastUnitFieldRemainingLen = unitFieldString.Length;
+                        if (lastUnitFieldRemainingLen != 0)
                         {   // Unparsed chars in (last?) field
-                            UnitStrLen -= LastUnitFieldRemainingLen;
+                            unitStrLen -= lastUnitFieldRemainingLen;
                         }
                     }
                 }
 
                 // Shift to next field
-                if (UnitStrSeparatorCharIndex >= 0)
+                if (unitStrSeparatorCharIndex >= 0)
                 {
-                    FractionUnitSeparator = unitString[UnitStrSeparatorCharIndex];
+                    fractionUnitSeparator = unitString[unitStrSeparatorCharIndex];
                 }
-                UnitStrStartCharIndex = NextUnitStrStartCharIndex;
+                unitStrStartCharIndex = nextUnitStrStartCharIndex;
             }
 
-            unitString = unitString.Substring(NextUnitStrStartCharIndex - LastUnitFieldRemainingLen);
+            unitString = unitString.Substring(nextUnitStrStartCharIndex - lastUnitFieldRemainingLen);
 
             foreach (Tuple<string, IPhysicalUnit> tempFU in FractionalUnits)
             {
@@ -1074,23 +1074,23 @@ namespace PhysicalMeasure
                 if (pu == null)
                 {
                     pu = tempPU;
-                    FractionUnitSeparatorStr = tempFractionUnitSeparator;
+                    fractionUnitSeparatorStr = tempFractionUnitSeparator;
                 }
                 else
                 {
                     if (new PhysicalQuantity(tempPU).ConvertTo(pu) != null)
                     {
-                        Debug.Assert(FractionUnitSeparatorStr != null, "Unit separator needed");
-                        pu = new MixedUnit(tempPU, FractionUnitSeparatorStr, pu);
+                        Debug.Assert(fractionUnitSeparatorStr != null, "Unit separator needed");
+                        pu = new MixedUnit(tempPU, fractionUnitSeparatorStr, pu);
 
-                        FractionUnitSeparatorStr = tempFractionUnitSeparator;
+                        fractionUnitSeparatorStr = tempFractionUnitSeparator;
                     }
                     else
                     {
                         Debug.Assert(resultLine == null, "No resultLine expected");
                         resultLine = tempPU.ToPrintString() + " is not a valid fractional unit for " + pu.ToPrintString() + ".";
 
-                        if (ThrowExceptionOnInvalidInput)
+                        if (throwExceptionOnInvalidInput)
                         {
                             throw new PhysicalUnitFormatException("The string argument is not in a valid physical unit format. " + resultLine);
                         }
@@ -1128,7 +1128,7 @@ namespace PhysicalMeasure
             return precedence;
         }
 
-        private class token
+        private class Token
         {
             public readonly TokenKind TokenKind;
 
@@ -1136,26 +1136,26 @@ namespace PhysicalMeasure
             public readonly SByte Exponent;
             public readonly OperatorKind Operator;
 
-            public token(IPhysicalUnit physicalUni)
+            public Token(IPhysicalUnit physicalUni)
             {
                 this.TokenKind = TokenKind.Unit;
                 this.PhysicalUnit = physicalUni;
             }
 
-            public token(SByte exponent)
+            public Token(SByte exponent)
             {
                 this.TokenKind = TokenKind.Exponent;
                 this.Exponent = exponent;
             }
 
-            public token(OperatorKind Operator)
+            public Token(OperatorKind Operator)
             {
                 this.TokenKind = TokenKind.Operator;
                 this.Operator = Operator;
             }
         }
 
-        private class expressionTokenizer
+        private class ExpressionTokenizer
         {
             private String inputString;
             private int pos = 0;
@@ -1166,26 +1166,26 @@ namespace PhysicalMeasure
             private Boolean throwExceptionOnInvalidInput = false;
 
             private Stack<OperatorKind> operators = new Stack<OperatorKind>();
-            private List<token> tokens = new List<token>();
+            private List<Token> tokens = new List<Token>();
 
             private TokenKind lastReadToken = TokenKind.None;
 
-            public expressionTokenizer(String inputStr)
+            public ExpressionTokenizer(String inputStr)
             {
                 this.inputString = inputStr;
             }
 
-            public expressionTokenizer(IPhysicalUnit dimensionless, String inputStr)
+            public ExpressionTokenizer(IPhysicalUnit someDimensionless, String someInputStr)
             {
-                this.dimensionless = dimensionless;
-                this.inputString = inputStr;
+                this.dimensionless = someDimensionless;
+                this.inputString = someInputStr;
             }
 
-            public expressionTokenizer(IPhysicalUnit dimensionless, Boolean throwExceptionOnInvalidInput, String inputStr)
+            public ExpressionTokenizer(IPhysicalUnit someDimensionless, Boolean someThrowExceptionOnInvalidInput, String someInputStr)
             {
-                this.dimensionless = dimensionless;
-                this.throwExceptionOnInvalidInput = throwExceptionOnInvalidInput;
-                this.inputString = inputStr;
+                this.dimensionless = someDimensionless;
+                this.throwExceptionOnInvalidInput = someThrowExceptionOnInvalidInput;
+                this.inputString = someInputStr;
             }
 
             public string GetRemainingInput()
@@ -1213,10 +1213,10 @@ namespace PhysicalMeasure
                     if (operators.Count > 0)
                     {
                         // Pop operators with precedence higher than new operator
-                        OperatorKind Precedence = OperatorPrecedence(newOperator);
-                        while ((operators.Count > 0) && (operators.Peek() >= Precedence))
+                        OperatorKind precedence = OperatorPrecedence(newOperator);
+                        while ((operators.Count > 0) && (operators.Peek() >= precedence))
                         {
-                            tokens.Add(new token(operators.Pop()));
+                            tokens.Add(new Token(operators.Pop()));
                         }
                     }
                     operators.Push(newOperator);
@@ -1247,15 +1247,15 @@ namespace PhysicalMeasure
                 }
             }
 
-            private token RemoveFirstToken()
+            private Token RemoveFirstToken()
             {   // return first operator from post fix operators
-                token token = tokens[0];
+                Token token = tokens[0];
                 tokens.RemoveAt(0);
 
                 return token;
             }
 
-            public token GetToken()
+            public Token GetToken()
             {
                 Debug.Assert(inputString != null, "Source needed");
 
@@ -1332,7 +1332,7 @@ namespace PhysicalMeasure
 
                                 lastReadToken = TokenKind.Exponent;
 
-                                return new token(exponent);
+                                return new Token(exponent);
                             }
                             else
                             {
@@ -1389,7 +1389,7 @@ namespace PhysicalMeasure
                                     afterLastOperandPos = pos;
 
                                     lastReadToken = TokenKind.Unit;
-                                    return new token(su);
+                                    return new Token(su);
                                 }
                             }
 
@@ -1421,7 +1421,7 @@ namespace PhysicalMeasure
                 //// Retrieve remaining operators from stack
                 while (operators.Count > 0)
                 {
-                    tokens.Add(new token(operators.Pop()));
+                    tokens.Add(new Token(operators.Pop()));
                 }
 
                 if (tokens.Count > 0)
@@ -1440,13 +1440,13 @@ namespace PhysicalMeasure
                 dimensionless = Physics.dimensionless;
             }
 
-            expressionTokenizer tokenizer = new expressionTokenizer(dimensionless, /* throwExceptionOnInvalidInput = */ false, s);
+            ExpressionTokenizer tokenizer = new ExpressionTokenizer(dimensionless, /* throwExceptionOnInvalidInput = */ false, s);
 
             Stack<IPhysicalUnit> operands = new Stack<IPhysicalUnit>();
 
             Boolean inputTokenInvalid = false;
             tokenizer.SetValidPos();
-            token token = tokenizer.GetToken();
+            Token token = tokenizer.GetToken();
 
             while (token != null && !inputTokenInvalid)
             {
@@ -1572,9 +1572,9 @@ namespace PhysicalMeasure
         /// </summary>
         public override String ToString()
         {
-            String UnitName = this.UnitString();
+            String unitName = this.UnitString();
             IUnitSystem system = this.ExponentsSystem; // this.SimpleSystem;
-            if ((!String.IsNullOrEmpty(UnitName))
+            if ((!String.IsNullOrEmpty(unitName))
                 && (system != null)
                 && (system != Physics.CurrentUnitSystems.Default)
                  /*
@@ -1584,10 +1584,10 @@ namespace PhysicalMeasure
                   */
                  )
             {
-                UnitName = system.Name + "." + UnitName;
+                unitName = system.Name + "." + unitName;
             }
 
-            return UnitName;
+            return unitName;
         }
 
         /// <summary>
@@ -1620,16 +1620,16 @@ namespace PhysicalMeasure
 
         public virtual string ValueString(double quantity, String format, IFormatProvider formatProvider)
         {
-            String ValStr = null;
+            String valStr = null;
             try
             {
-                ValStr = quantity.ToString(format, formatProvider);
+                valStr = quantity.ToString(format, formatProvider);
             }
             catch
             {
-                ValStr = quantity.ToString() + " ?" + format + "?";
+                valStr = quantity.ToString() + " ?" + format + "?";
             }
-            return ValStr;
+            return valStr;
         }
 
 
@@ -3289,18 +3289,18 @@ namespace PhysicalMeasure
 
         public IPrefixedUnitExponent CombinePrefixAndExponents(SByte outerPUE_PrefixExponent, SByte outerPUE_Exponent, out SByte scaleExponent, out Double scaleFactor)
         {
-            SByte CombinedPrefixExponent = 0;
+            SByte combinedPrefixExponent = 0;
             if (this.Exponent == 1 || outerPUE_PrefixExponent == 0)
             {
                 //
                 scaleFactor = 1;
                 scaleExponent = 0;
-                CombinedPrefixExponent = (SByte)(outerPUE_PrefixExponent + this.prefixedUnit.Prefix.Exponent);
+                combinedPrefixExponent = (SByte)(outerPUE_PrefixExponent + this.prefixedUnit.Prefix.Exponent);
             }
             else
             {
                 int reminder;
-                CombinedPrefixExponent = (SByte)Math.DivRem(outerPUE_PrefixExponent, this.Exponent, out reminder);
+                combinedPrefixExponent = (SByte)Math.DivRem(outerPUE_PrefixExponent, this.Exponent, out reminder);
                 if (reminder != 0)
                 {
                     scaleFactor = Math.Pow(10, 1.0 * reminder);
@@ -3311,21 +3311,21 @@ namespace PhysicalMeasure
                     scaleFactor = 1;
                     scaleExponent = 0;
                 }
-                CombinedPrefixExponent += this.prefixedUnit.Prefix.Exponent;
+                combinedPrefixExponent += this.prefixedUnit.Prefix.Exponent;
             }
 
-            IUnitPrefix CombinedUnitPrefix;
-            SByte CombinedScaleFactorExponent;
+            IUnitPrefix combinedUnitPrefix;
+            SByte combinedScaleFactorExponent;
 
-            Physics.UnitPrefixes.GetFloorUnitPrefixAndScaleFactorFromExponent(CombinedPrefixExponent, out CombinedUnitPrefix, out CombinedScaleFactorExponent);
+            Physics.UnitPrefixes.GetFloorUnitPrefixAndScaleFactorFromExponent(combinedPrefixExponent, out combinedUnitPrefix, out combinedScaleFactorExponent);
 
 
-            IUnitPrefixExponent PE = new UnitPrefixExponent((SByte)(CombinedPrefixExponent + this.prefixedUnit.Prefix.Exponent));
+            IUnitPrefixExponent pe = new UnitPrefixExponent((SByte)(combinedPrefixExponent + this.prefixedUnit.Prefix.Exponent));
 
-            IUnitPrefix UP = null;
-            if (Physics.UnitPrefixes.GetUnitPrefixFromExponent(PE, out UP))
+            IUnitPrefix up = null;
+            if (Physics.UnitPrefixes.GetUnitPrefixFromExponent(pe, out up))
             {
-                PrefixedUnitExponent CombinedPUE = new PrefixedUnitExponent(UP, this.prefixedUnit.Unit, (SByte)(this.Exponent * outerPUE_Exponent));
+                PrefixedUnitExponent CombinedPUE = new PrefixedUnitExponent(up, this.prefixedUnit.Unit, (SByte)(this.Exponent * outerPUE_Exponent));
                 return CombinedPUE;
             }
             else
@@ -3358,19 +3358,19 @@ namespace PhysicalMeasure
         /// </summary>
         public String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
         {
-            String Str = "";
+            String str = "";
 
             foreach (IPrefixedUnitExponent ue in this)
             {
                 Debug.Assert(ue.Exponent != 0, "ue.Exponent must be <> 0");
-                if (!String.IsNullOrEmpty(Str))
+                if (!String.IsNullOrEmpty(str))
                 {
-                    Str += '·';  // center dot '\0x0B7' (Char)183 U+00B7
+                    str += '·';  // center dot '\0x0B7' (Char)183 U+00B7
                 }
 
-                Str += ue.CombinedUnitString(mayUseSlash, invertExponents);
+                str += ue.CombinedUnitString(mayUseSlash, invertExponents);
             }
-            return Str;
+            return str;
         }
 
         public IPrefixedUnitExponentList Power(SByte exponent)
@@ -3495,12 +3495,12 @@ namespace PhysicalMeasure
 
         public CombinedUnit(IPhysicalUnit physicalUnit)
         {
-            ICombinedUnit CU = null;
+            ICombinedUnit cu = null;
 
-            INamedSymbolUnit NSU = physicalUnit as INamedSymbolUnit;
-            if (NSU != null)
+            INamedSymbolUnit nsu = physicalUnit as INamedSymbolUnit;
+            if (nsu != null)
             {
-                CU = new CombinedUnit(NSU);
+                cu = new CombinedUnit(nsu);
             }
             else
             {
@@ -3509,27 +3509,27 @@ namespace PhysicalMeasure
                     case UnitKind.PrefixedUnit:
                         IPrefixedUnit pu = physicalUnit as IPrefixedUnit;
                         Debug.Assert(pu != null);
-                        CU = new CombinedUnit(pu);
+                        cu = new CombinedUnit(pu);
                         break;
                     case UnitKind.PrefixedUnitExponent:
                         IPrefixedUnitExponent pue = physicalUnit as IPrefixedUnitExponent;
                         Debug.Assert(pue != null);
-                        CU = new CombinedUnit(pue);
+                        cu = new CombinedUnit(pue);
                         break;
                     case UnitKind.DerivedUnit:
                         IDerivedUnit du = physicalUnit as IDerivedUnit;
                         Debug.Assert(du != null);
-                        CU = new CombinedUnit(du);
+                        cu = new CombinedUnit(du);
                         break;
                     case UnitKind.MixedUnit:
                         IMixedUnit mu = physicalUnit as IMixedUnit;
                         Debug.Assert(mu != null);
-                        CU = new CombinedUnit(mu.MainUnit);
+                        cu = new CombinedUnit(mu.MainUnit);
                         break;
                     case UnitKind.CombinedUnit:
-                        ICombinedUnit cu = physicalUnit as ICombinedUnit;
-                        Debug.Assert(cu != null);
-                        CU = new CombinedUnit(cu);
+                        ICombinedUnit cu2 = physicalUnit as ICombinedUnit;
+                        Debug.Assert(cu2 != null);
+                        cu = new CombinedUnit(cu2);
                         break;
                     default:
                         Debug.Assert(false);
@@ -3537,11 +3537,11 @@ namespace PhysicalMeasure
                 }
             }
 
-            if (CU != null)
+            if (cu != null)
             {
-                this.scaleFactor = CU.FactorValue;
-                this.numerators = CU.Numerators;
-                this.denominators = CU.Denominators;
+                this.scaleFactor = cu.FactorValue;
+                this.numerators = cu.Numerators;
+                this.denominators = cu.Denominators;
             }
             else
             {
@@ -3840,8 +3840,8 @@ namespace PhysicalMeasure
 
         public ICombinedUnit OnlySingleSystemUnits(IUnitSystem us)
         {
-            PrefixedUnitExponentList TempNumerators = new PrefixedUnitExponentList();
-            PrefixedUnitExponentList TempDenominators = new PrefixedUnitExponentList();
+            PrefixedUnitExponentList tempNumerators = new PrefixedUnitExponentList();
+            PrefixedUnitExponentList tempDenominators = new PrefixedUnitExponentList();
 
             foreach (IPrefixedUnitExponent pue in Numerators)
             {
@@ -3849,7 +3849,7 @@ namespace PhysicalMeasure
                     || ((pue.Unit == null) && (us == null)))
                 {
                     // pue has the specified system; Include in result
-                    TempNumerators.Add(pue);
+                    tempNumerators.Add(pue);
                 }
             }
 
@@ -3859,10 +3859,10 @@ namespace PhysicalMeasure
                     || ((pue.Unit == null) && (us == null)))
                 {
                     // pue has the specified system; Include in result
-                    TempDenominators.Add(pue);
+                    tempDenominators.Add(pue);
                 }
             }
-            CombinedUnit cu = new CombinedUnit(TempNumerators, TempDenominators);
+            CombinedUnit cu = new CombinedUnit(tempNumerators, tempDenominators);
             return cu;
         }
 
@@ -4066,13 +4066,13 @@ namespace PhysicalMeasure
             IUnitSystem system = this.SimpleSystem;
             if (system == null)
             {
-                Double ScaledQuantity = scaleFactor;
+                Double scaledQuantity = scaleFactor;
                 IPhysicalQuantity pq1 = this.ConvertToSystemUnit();
 
                 if (pq1 != null)
                 {
                     // Simple system DerivedUnit
-                    Debug.Assert(ScaledQuantity == 1.0);
+                    Debug.Assert(scaledQuantity == 1.0);
                     Debug.Assert(pq1.Unit.SimpleSystem != null);
                 }
                 else
@@ -4306,16 +4306,16 @@ namespace PhysicalMeasure
                     }
 
                     // Reduce the found CombinedUnit exponent with ue2´s exponent; 
-                    SByte NewExponent = cef(ue.Exponent, multExponent);
-                    if (NewExponent > 0)
+                    SByte newExponent = cef(ue.Exponent, multExponent);
+                    if (newExponent > 0)
                     {
-                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.Prefix, ue.Unit, NewExponent);
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.Prefix, ue.Unit, newExponent);
                         outPuel1.Add(temp_pue);
                         // Done
                     }
                     else
                     {   // Convert to uppersit Numerator/Denominator
-                        multExponent = cef(0, NewExponent); 
+                        multExponent = cef(0, newExponent); 
                         changedExponentSign = true;
                     }
                 }
@@ -4362,74 +4362,6 @@ namespace PhysicalMeasure
             MultiplyPUEL(prefixedUnitExponent, SByte_Add, Numerators, ref tempNumerators,
                   ref primaryUnitFound, ref prefixExponent, ref prefixedUnitExponentScaleing,
                   ref multExponent, ref changedExponentSign);
-
-            /*
-            foreach (IPrefixedUnitExponent ue in Denominators)
-            {
-                if (!primaryUnitFound && prefixedUnitExponent.Unit.Equals(ue.Unit))
-                {
-                    primaryUnitFound = true;
-
-                    if (!prefixExponent.Equals(ue.Prefix.Exponent))
-                    {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move difference in scaling to prefixedUnitExponentScaleing
-                        prefixedUnitExponentScaleing = (SByte)((ue.Prefix.Exponent - prefixExponent) * multExponent);
-                        prefixExponent = ue.Prefix.Exponent;
-                    }
-
-                    // Reduce the found CombinedUnit exponent with ue2´s exponent; 
-                    SByte NewExponent = (SByte)(ue.Exponent - multExponent);
-                    if (NewExponent > 0)
-                    {
-                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.Prefix, ue.Unit, NewExponent);
-                        tempDenominators.Add(temp_pue);
-                        // Done
-                    }
-                    else
-                    {   // Convert to Numerator
-                        multExponent = (SByte)(-NewExponent);
-                        changedExponentSign = true;
-                    }
-                }
-                else
-                {
-                    tempDenominators.Add(ue);
-                }
-            }
-            */
-
-            /**
-            foreach (IPrefixedUnitExponent ue in Numerators)
-            {
-                if (!primaryUnitFound && prefixedUnitExponent.Unit.Equals(ue.Unit))
-                {
-                    primaryUnitFound = true;
-
-                    if (!prefixExponent.Equals(ue.Prefix.Exponent))
-                    {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move difference in scaling to prefixedUnitExponentScaleing
-                        prefixedUnitExponentScaleing = (SByte)((ue.Prefix.Exponent - prefixExponent) * multExponent);
-                        prefixExponent = ue.Prefix.Exponent;
-                    }
-
-                    // Add the found CombinedUnit exponent with ue2´s exponent; 
-                    SByte NewExponent = (SByte)(ue.Exponent + multExponent);
-                    if (NewExponent > 0)
-                    {
-                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.Prefix, ue.Unit, NewExponent);
-                        tempNumerators.Add(temp_pue);
-                        // Done
-                    }
-                    else
-                    {   // Convert to Denominator
-                        multExponent = (SByte)NewExponent;
-                        changedExponentSign = true;
-                    }
-                }
-                else
-                {
-                    tempNumerators.Add(ue);
-                }
-            }
-            **/
 
             if (!primaryUnitFound || changedExponentSign)
             {   // pue2.Unit is not among our Numerators or Denominators (or has changed from Numerators to Denominators)
@@ -4515,8 +4447,8 @@ namespace PhysicalMeasure
         {
             Debug.Assert(prefixedUnitExponent != null);
 
-            SByte NewExponent = (SByte)(-prefixedUnitExponent.Exponent);
-            PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.Prefix, prefixedUnitExponent.Unit, NewExponent);
+            SByte newExponent = (SByte)(-prefixedUnitExponent.Exponent);
+            PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.Prefix, prefixedUnitExponent.Unit, newExponent);
             return temp_pue;
         }
 
@@ -4539,32 +4471,32 @@ namespace PhysicalMeasure
 
         public override PhysicalUnit Root(SByte exponent)
         {
-            IPrefixedUnitExponentList TempNumerators;
-            IPrefixedUnitExponentList TempDenominators = null;
-            TempNumerators = Numerators.Root(exponent);
-            if (TempNumerators != null)
+            IPrefixedUnitExponentList tempNumerators;
+            IPrefixedUnitExponentList tempDenominators = null;
+            tempNumerators = Numerators.Root(exponent);
+            if (tempNumerators != null)
             {
-                TempDenominators = Denominators.Root(exponent);
+                tempDenominators = Denominators.Root(exponent);
             }
 
-            if ((TempNumerators != null) && (TempDenominators != null))
+            if ((tempNumerators != null) && (tempDenominators != null))
             {
-                CombinedUnit cu = new CombinedUnit(TempNumerators, TempDenominators);
+                CombinedUnit cu = new CombinedUnit(tempNumerators, tempDenominators);
                 return cu;
             }
             else
             {
-                SByte[] NewExponents = this.Exponents;
-                if (NewExponents != null)
+                SByte[] newExponents = this.Exponents;
+                if (newExponents != null)
                 {
-                    NewExponents = NewExponents.Root(exponent);
+                    newExponents = newExponents.Root(exponent);
                     Debug.Assert(this.ExponentsSystem != null);
-                    DerivedUnit du = new DerivedUnit(this.ExponentsSystem, NewExponents);
+                    DerivedUnit du = new DerivedUnit(this.ExponentsSystem, newExponents);
                     return du;
                 }
                 else
                 {
-                    Debug.Assert(NewExponents != null);
+                    Debug.Assert(newExponents != null);
                     //if (throwExceptionOnUnitMathError) {
                     throw new PhysicalUnitMathException("The result of the math operation on the PhysicalUnit argument can't be represented by this implementation of PhysicalMeasure: (" + this.ToPrintString() + ").Root(" + exponent.ToString() + ")");
                     //}
@@ -4612,7 +4544,7 @@ namespace PhysicalMeasure
                     primaryUnitFound = true;
 
                     // Reduce the found CombinedUnit exponent with ue2´s exponent; 
-                    SByte NewExponent = (SByte)(cef(ue.Exponent, prefixedUnitExponent.Exponent));
+                    SByte newExponent = (SByte)(cef(ue.Exponent, prefixedUnitExponent.Exponent));
 
                     SByte ue_prefixExp = 0; // 10^0 = 1
                     if (ue.Prefix != null)
@@ -4626,17 +4558,17 @@ namespace PhysicalMeasure
                         scalingExponent = prefixedUnitExponent.Exponent;
                     }
 
-                    if (NewExponent > 0)
+                    if (newExponent > 0)
                     {   // Still some exponent left for a denominator element
-                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.Prefix, ue.Unit, NewExponent);
+                        PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(ue.Prefix, ue.Unit, newExponent);
                         outPuel1.Add(temp_pue);
                         // Done
                     }
                     else
-                    if (NewExponent< 0)
+                    if (newExponent< 0)
                     {   // Convert to Numerator
                         multPrefixExponent = ue.Prefix.Exponent;
-                        multExponent = (SByte)(-NewExponent);
+                        multExponent = (SByte)(-newExponent);
                         ChangedExponentSign = true;
                     }
                 }
@@ -4708,11 +4640,11 @@ namespace PhysicalMeasure
                 }
 
                 IUnitPrefix unitPrefix = null;
-                SByte RestMultPrefixExponent = 0;
+                SByte restMultPrefixExponent = 0;
                 if (multPrefixExponent != 0)
                 {
-                    Physics.UnitPrefixes.GetFloorUnitPrefixAndScaleFactorFromExponent(multPrefixExponent, out unitPrefix, out RestMultPrefixExponent);
-                    multPrefixExponent = RestMultPrefixExponent;
+                    Physics.UnitPrefixes.GetFloorUnitPrefixAndScaleFactorFromExponent(multPrefixExponent, out unitPrefix, out restMultPrefixExponent);
+                    multPrefixExponent = restMultPrefixExponent;
                 }
 
                 if (multExponent > 0)
@@ -4727,15 +4659,15 @@ namespace PhysicalMeasure
                 }
             }
 
-            Double ResScaleFactor = scaleFactor;
+            Double resScaleFactor = scaleFactor;
             if (scalingPrefixExponent != 0 && scalingExponent != 0)
             {   // Add scaling factor without unit
                 sbyte exp = (sbyte)(scalingPrefixExponent * scalingExponent);
 
-                ResScaleFactor = scaleFactor * Math.Pow(10, exp);
+                resScaleFactor = scaleFactor * Math.Pow(10, exp);
             }
 
-            CombinedUnit cu = new CombinedUnit(ResScaleFactor, tempNumerators, tempDenominators);
+            CombinedUnit cu = new CombinedUnit(resScaleFactor, tempNumerators, tempDenominators);
             return cu;
         }
 
@@ -4743,8 +4675,8 @@ namespace PhysicalMeasure
         {
             Debug.Assert(prefixedUnitExponent != null);
 
-            SByte NewExponent = (SByte)(-prefixedUnitExponent.Exponent);
-            PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.Prefix, prefixedUnitExponent.Unit, NewExponent);
+            SByte newExponent = (SByte)(-prefixedUnitExponent.Exponent);
+            PrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.Prefix, prefixedUnitExponent.Unit, newExponent);
             return this.CombineMultiply(temp_pue);
         }
 
@@ -5046,11 +4978,11 @@ namespace PhysicalMeasure
 
         public override String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
         {
-            String UnitName = "";
-            Boolean NextLevelMayUseSlash = mayUseSlash && Denominators.Count == 0;
+            String unitName = "";
+            Boolean nextLevelMayUseSlash = mayUseSlash && Denominators.Count == 0;
             if (Numerators.Count > 0)
             {
-                UnitName = Numerators.CombinedUnitString(NextLevelMayUseSlash, invertExponents);
+                unitName = Numerators.CombinedUnitString(nextLevelMayUseSlash, invertExponents);
             }
             else
             {
@@ -5062,24 +4994,24 @@ namespace PhysicalMeasure
 
             if (Denominators.Count > 0)
             {
-                if (mayUseSlash && !String.IsNullOrWhiteSpace(UnitName))
+                if (mayUseSlash && !String.IsNullOrWhiteSpace(unitName))
                 {
-                    UnitName += "/" + Denominators.CombinedUnitString(false, invertExponents);
+                    unitName += "/" + Denominators.CombinedUnitString(false, invertExponents);
                 }
                 else
                 {
-                    if (!String.IsNullOrWhiteSpace(UnitName))
+                    if (!String.IsNullOrWhiteSpace(unitName))
                     {
                         // center dot '\0x0B7' (Char)183 U+00B7
-                        UnitName += '·' + Denominators.CombinedUnitString(false, !invertExponents);
+                        unitName += '·' + Denominators.CombinedUnitString(false, !invertExponents);
                     }
                     else
                     {
-                        UnitName = Denominators.CombinedUnitString(false, !invertExponents);
+                        unitName = Denominators.CombinedUnitString(false, !invertExponents);
                     }
                 }
             }
-            return UnitName;
+            return unitName;
         }
         public override String ToString()
         {
@@ -5270,7 +5202,7 @@ namespace PhysicalMeasure
 
     #region Physical Unit System Classes
 
-    public abstract class UnitSystemBase : NamedObject, IUnitSystem
+    public abstract class AbstractUnitSystem : NamedObject, IUnitSystem
     {
 
         public abstract IUnitPrefixTable UnitPrefixes { get; }
@@ -5294,7 +5226,7 @@ namespace PhysicalMeasure
             }
         }
 
-        public UnitSystemBase(String someName)
+        public AbstractUnitSystem(String someName)
             : base(someName)
         {
         }
@@ -5489,8 +5421,8 @@ namespace PhysicalMeasure
         public INamedSymbolUnit NamedDerivedUnitFromUnit(IDerivedUnit derivedUnit)
         {
             SByte[] exponents = derivedUnit.Exponents;
-            int NoOfDimensions = exponents.NoOfDimensions();
-            if (NoOfDimensions > 1)
+            int noOfDimensions = exponents.NoOfDimensions();
+            if (noOfDimensions > 1)
             {
                 INamedSymbolUnit ns = NamedDerivedUnits.FirstOrNull(namedderivedunit => exponents.DimensionEquals(namedderivedunit.Exponents));
                 return ns;
@@ -5505,13 +5437,13 @@ namespace PhysicalMeasure
             if (PhysicalQuantity.IsPureUnit(pq))
             {
                 IPhysicalUnit derunit = PhysicalQuantity.PureUnit(pq);
-                SByte[] Exponents = derunit.Exponents;
-                int NoOfDimensions = Exponents.NoOfDimensions();
-                if (NoOfDimensions > 1)
+                SByte[] exponents = derunit.Exponents;
+                int noOfDimensions = exponents.NoOfDimensions();
+                if (noOfDimensions > 1)
                 {
                     foreach (NamedDerivedUnit namedderivedunit in this.NamedDerivedUnits)
                     {
-                        if (Exponents.DimensionEquals(namedderivedunit.Exponents))
+                        if (exponents.DimensionEquals(namedderivedunit.Exponents))
                         {
                             return namedderivedunit;
                         }
@@ -5947,7 +5879,7 @@ namespace PhysicalMeasure
         }
     }
 
-    public class UnitSystem : UnitSystemBase
+    public class UnitSystem : AbstractUnitSystem
     {
         private /* readonly */ UnitPrefixTable unitPrefixes;
         private /* readonly */ BaseUnit[] baseUnits;
@@ -6069,7 +6001,7 @@ namespace PhysicalMeasure
 
 
 
-    public class CombinedUnitSystem : UnitSystemBase, ICombinedUnitSystem
+    public class CombinedUnitSystem : AbstractUnitSystem, ICombinedUnitSystem
     {
         private /* readonly */ IUnitSystem[] unitSystemes;
 
@@ -6193,16 +6125,16 @@ namespace PhysicalMeasure
         public SByte[] UnitExponents(ICombinedUnit cu)
         {
             int noOfSubUnitSystems = UnitSystemes.Length;
-            SByte[] UnitSystemExponentsLength = new sbyte[noOfSubUnitSystems];
-            SByte[] UnitSystemExponentsOffsets = new sbyte[noOfSubUnitSystems];
+            SByte[] unitSystemExponentsLength = new sbyte[noOfSubUnitSystems];
+            SByte[] unitSystemExponentsOffsets = new sbyte[noOfSubUnitSystems];
 
             SByte noOfDimensions = 0;
             SByte index = 0;
             foreach (IUnitSystem us in UnitSystemes)
             {
-                UnitSystemExponentsOffsets[index] = noOfDimensions;
-                UnitSystemExponentsLength[index] = (sbyte)us.BaseUnits.Length;
-                noOfDimensions += UnitSystemExponentsLength[index];
+                unitSystemExponentsOffsets[index] = noOfDimensions;
+                unitSystemExponentsLength[index] = (sbyte)us.BaseUnits.Length;
+                noOfDimensions += unitSystemExponentsLength[index];
 
             }
 
@@ -6216,9 +6148,9 @@ namespace PhysicalMeasure
             {
                 subUnitParts[i] = cu.OnlySingleSystemUnits(UnitSystemes[i]);
                 SByte[] us_exponents = subUnitParts[i].Exponents;
-                if (us_exponents.Length < UnitSystemExponentsLength[index])
+                if (us_exponents.Length < unitSystemExponentsLength[index])
                 {
-                    us_exponents = us_exponents.AllExponents(UnitSystemExponentsLength[index]);
+                    us_exponents = us_exponents.AllExponents(unitSystemExponentsLength[index]);
                 }
                 resExponents = resExponents.Concat(us_exponents).ToArray();
             }
@@ -6229,16 +6161,16 @@ namespace PhysicalMeasure
         public IPhysicalQuantity ConvertToBaseUnit(ICombinedUnit cu)
         {
             int noOfSubUnitSystems = UnitSystemes.Length;
-            SByte[] UnitSystemExponentsLength = new sbyte[noOfSubUnitSystems];
-            SByte[] UnitSystemExponentsOffsets = new sbyte[noOfSubUnitSystems];
+            SByte[] unitSystemExponentsLength = new sbyte[noOfSubUnitSystems];
+            SByte[] unitSystemExponentsOffsets = new sbyte[noOfSubUnitSystems];
 
             SByte noOfDimensions = 0;
             SByte index = 0;
             foreach (IUnitSystem us in UnitSystemes)
             {
-                UnitSystemExponentsOffsets[index] = noOfDimensions;
-                UnitSystemExponentsLength[index] = (sbyte)us.BaseUnits.Length;
-                noOfDimensions += UnitSystemExponentsLength[index];
+                unitSystemExponentsOffsets[index] = noOfDimensions;
+                unitSystemExponentsLength[index] = (sbyte)us.BaseUnits.Length;
+                noOfDimensions += unitSystemExponentsLength[index];
                 index++;
             }
 
@@ -6258,9 +6190,9 @@ namespace PhysicalMeasure
                 resValue *= pq.Value;
                 Debug.Assert(pq.Unit != null);
                 SByte[] us_exponents = pq.Unit.Exponents;
-                if (us_exponents.Length < UnitSystemExponentsLength[i])
+                if (us_exponents.Length < unitSystemExponentsLength[i])
                 {
-                    us_exponents = us_exponents.AllExponents(UnitSystemExponentsLength[i]);
+                    us_exponents = us_exponents.AllExponents(unitSystemExponentsLength[i]);
                 }
                 resExponents = resExponents.Concat(us_exponents).ToArray();
             }
@@ -7529,11 +7461,11 @@ namespace PhysicalMeasure
             /*  No direct unit system conversion from  unitsystem1 to unitsystem2. 
              *  Try to find an intermediate unit system with conversion to/from unitsystem1 and unitsystem2 */
 
-            IList<IUnitSystem> OldUnitsystems1 = new List<IUnitSystem>() { }; // NoDiretConversionTounitsystems2
-            IList<IUnitSystem> NewUnitSystemsConvertableToUnitsystems1 = new List<IUnitSystem>() { unitsystem1 };
-            IList<IUnitSystem> OldUnitsystems2 = new List<IUnitSystem>() { }; // NoDiretConversionTounitsystems1
-            IList<IUnitSystem> NewUnitSystemsConvertableToUnitsystems2 = new List<IUnitSystem>() { unitsystem2 };
-            return GetIntermediateUnitSystemConversion(UnitSystemConversions, OldUnitsystems1, NewUnitSystemsConvertableToUnitsystems1, OldUnitsystems2, NewUnitSystemsConvertableToUnitsystems2);
+            IList<IUnitSystem> oldUnitsystems1 = new List<IUnitSystem>() { }; // NoDiretConversionTounitsystems2
+            IList<IUnitSystem> newUnitSystemsConvertableToUnitsystems1 = new List<IUnitSystem>() { unitsystem1 };
+            IList<IUnitSystem> oldUnitsystems2 = new List<IUnitSystem>() { }; // NoDiretConversionTounitsystems1
+            IList<IUnitSystem> newUnitSystemsConvertableToUnitsystems2 = new List<IUnitSystem>() { unitsystem2 };
+            return GetIntermediateUnitSystemConversion(UnitSystemConversions, oldUnitsystems1, newUnitSystemsConvertableToUnitsystems1, oldUnitsystems2, newUnitSystemsConvertableToUnitsystems2);
         }
 
 
