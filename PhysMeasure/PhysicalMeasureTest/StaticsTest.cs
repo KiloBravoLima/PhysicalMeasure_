@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using PhysicalMeasure;
+using static PhysicalMeasure.SI;
 
 namespace PhysicalMeasureTest
 {
@@ -684,7 +685,7 @@ namespace PhysicalMeasureTest
         ///A test for the SI static class
         ///</summary>
         [TestMethod()]
-        public void StaticsTest_CalculateEnergyIn1Gram()
+        public void StaticsTest_CalculateEnergyIn1Gram_version_1()
         {
             PhysicalQuantity m = new PhysicalQuantity(0.001, SI.Kg);
             PhysicalQuantity c = new PhysicalQuantity(299792458, SI.m / SI.s);
@@ -705,7 +706,60 @@ namespace PhysicalMeasureTest
 
             Assert.AreEqual(expected_E_formatedAsTJ, E_in_TJ_as_String);
         }
-      
+
+        /// <summary>
+        ///A test for the SI static class
+        ///</summary>
+        [TestMethod()]
+        public void StaticsTest_CalculateEnergyIn1Gram_Version_2()
+        {
+            PhysicalQuantity m = new PhysicalQuantity(0.001, SI.Kg);
+            PhysicalQuantity c = new PhysicalQuantity(299792458, SI.m / SI.s);
+
+            PhysicalQuantity E = m * c.Pow(2);
+
+            PhysicalQuantity expected = new PhysicalQuantity(0.001 * 299792458 * 299792458, SI.J);
+        
+            Assert.AreEqual(expected, E);
+        }
+
+        /// <summary>
+        ///A test for the SI static class
+        ///</summary>
+        [TestMethod()]
+        public void StaticsTest_CalculateEnergyIn1Gram_Version_3()
+        {
+            PhysicalQuantity M = 0.001 * SI.Kg;
+
+            PhysicalUnit MeterPerSecond = SI.m / SI.s;
+            PhysicalQuantity c = 299792458 * MeterPerSecond;
+
+            PhysicalQuantity expected = (0.001 * 299792458 * 299792458) * SI.J;
+
+            PhysicalQuantity E = M * (c^2);
+
+            Assert.AreEqual(expected, E);
+        }
+
+        /// <summary>
+        ///A test for the SI static class
+        ///</summary>
+        [TestMethod()]
+        public void StaticsTest_CalculateEnergyIn1Gram_Version_4()
+        {
+            // using static PhysicalMeasure.SI;
+
+            PhysicalQuantity M = 0.001 * Kg;
+
+            PhysicalUnit MeterPerSecond = m/s;
+            PhysicalQuantity c = 299792458 * MeterPerSecond;
+
+            PhysicalQuantity expected = (0.001 * 299792458 * 299792458) * J;
+
+            PhysicalQuantity E = M * c.Pow(2);
+
+            Assert.AreEqual(expected, E);
+        }
         #endregion SI unit symbol test
 
         #region Physical Constants Statics test

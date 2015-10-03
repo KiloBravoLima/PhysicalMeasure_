@@ -103,12 +103,12 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void DerivedUnitToStringTest()
         {
-            PhysicalUnit MeterPrSecond2 = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+            PhysicalUnit MeterPerSecond2 = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
 
             //String expected = "SI.m·s-2";
             String expected = "m·s-2";
 
-            String actual = MeterPrSecond2.ToString();
+            String actual = MeterPerSecond2.ToString();
 
             Assert.AreEqual(expected, actual);
         }
@@ -121,11 +121,11 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void DerivedUnitBaseUnitStringTest()
         {
-            PhysicalUnit MeterPrSecond2 = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+            PhysicalUnit MeterPerSecond2 = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
 
             String expected = "m·s-2";
 
-            IPhysicalQuantity pq = MeterPrSecond2.ConvertToBaseUnit();
+            IPhysicalQuantity pq = MeterPerSecond2.ConvertToBaseUnit();
 
             Assert.AreEqual(pq.Value, 1d);
 
@@ -978,14 +978,15 @@ namespace PhysicalMeasureTest
         {
             PhysicalQuantity m = new PhysicalQuantity(0.001, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
-            PhysicalUnit MeterPrSecond = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
-            PhysicalQuantity c = new PhysicalQuantity(299792458, MeterPrSecond);
+            PhysicalUnit MeterPerSecond = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
+            PhysicalQuantity c = new PhysicalQuantity(299792458, MeterPerSecond);
 
             PhysicalQuantity expected = new PhysicalQuantity(0.001 * 299792458 * 299792458, Physics.SI_Units.UnitFromSymbol("J"));
 
             PhysicalQuantity E = m * c.Pow(2);
             Assert.AreEqual(expected, E);
         }
+
 
         /// <summary>
         ///A test for DerivedUnit with exponent of absolute value larger than 1
@@ -997,8 +998,8 @@ namespace PhysicalMeasureTest
             PhysicalQuantity h = PhysicalQuantity.Parse("10 m") as PhysicalQuantity;
 
             //!!! To do: make this work: PhysicalQuantity g = PhysicalQuantity.Parse("9.81 m/s^2");
-            PhysicalUnit MeterPrSecond2 = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
-            PhysicalQuantity g = new PhysicalQuantity(9.81, MeterPrSecond2);
+            PhysicalUnit MeterPerSecond2 = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+            PhysicalQuantity g = new PhysicalQuantity(9.81, MeterPerSecond2);
 
             PhysicalQuantity expected = new PhysicalQuantity(0.001 * 9.81 * 10, Physics.SI_Units.UnitFromSymbol("J"));
 
@@ -1017,8 +1018,8 @@ namespace PhysicalMeasureTest
             PhysicalQuantity h = PhysicalQuantity.Parse("10 m") as PhysicalQuantity;
 
             //!!! To do: make this work: PhysicalQuantity g = PhysicalQuantity.Parse("9.81 m/s^2");
-            //PhysicalUnit MeterPrSecond2 = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
-            //PhysicalQuantity g = new PhysicalQuantity(9.81, MeterPrSecond2);
+            //PhysicalUnit MeterPerSecond2 = new DerivedUnit(PhysicalMeasure.Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+            //PhysicalQuantity g = new PhysicalQuantity(9.81, MeterPerSecond2);
             IPhysicalQuantity g = PhysicalQuantity.Parse("9.81 m/s^2");
 
             PhysicalQuantity expected = new PhysicalQuantity(0.001 * 9.81 * 10, Physics.SI_Units.UnitFromSymbol("J"));
@@ -1180,8 +1181,8 @@ namespace PhysicalMeasureTest
         {
             PhysicalQuantity m = new PhysicalQuantity(0.001, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
-            PhysicalUnit MeterPrSecond = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
-            PhysicalQuantity c = new PhysicalQuantity(299792458, MeterPrSecond);
+            PhysicalUnit MeterPerSecond = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
+            PhysicalQuantity c = new PhysicalQuantity(299792458, MeterPerSecond);
 
             PhysicalQuantity expected = new PhysicalQuantity(0.001 * 299792458 * 299792458, Physics.SI_Units.UnitFromSymbol("J"));
 
