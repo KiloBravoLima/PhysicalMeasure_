@@ -71,7 +71,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void CommandreaderConstructorTest_WithoutParams()
         {
-            Commandreader target = new Commandreader();
+            CommandReader target = new CommandReader();
             Assert.IsNotNull(target);
         }
 
@@ -83,7 +83,7 @@ namespace PhysCalculatorTests
         public void CommandreaderConstructorTest_NoArgs()
         {
             string[] args = {};
-            Commandreader target = new Commandreader(args);
+            CommandReader target = new CommandReader(args);
             Assert.IsNotNull(target);
         }
 
@@ -94,7 +94,7 @@ namespace PhysCalculatorTests
         public void CommandreaderConstructorTest_ReadFileArgs()
         {
             string[] args = {"read test" };
-            Commandreader target = new Commandreader(args);
+            CommandReader target = new CommandReader(args);
             Assert.IsNotNull(target);
         }
 
@@ -105,7 +105,7 @@ namespace PhysCalculatorTests
         public void CommandreaderConstructorTest_CommandArgs()
         {
             string[] args = { "1 + 2" };
-            Commandreader target = new Commandreader(args);
+            CommandReader target = new CommandReader(args);
             Assert.IsNotNull(target);
         }
 
@@ -116,7 +116,7 @@ namespace PhysCalculatorTests
         public void CommandreaderConstructorTest_MixedArgs()
         {
             string[] args = { "read test", "1 + 2" };
-            Commandreader target = new Commandreader(args);
+            CommandReader target = new CommandReader(args);
             Assert.IsNotNull(target);
             //Assert.AreEqual("test.cal", target.GetFile());
         }
@@ -128,7 +128,7 @@ namespace PhysCalculatorTests
         public void GetAccessorTest_AccessorNotFound()
         {
             string[] args = { };
-            Commandreader target = new Commandreader(args);
+            CommandReader target = new CommandReader(args);
             string actual;
             actual = target.Accessor();
             Assert.IsNull(actual);
@@ -141,7 +141,7 @@ namespace PhysCalculatorTests
         public void GetAccessorTest_AccessorFound()
         {
             string[] args = { "read test" };
-            Commandreader target = new Commandreader(args);
+            CommandReader target = new CommandReader(args);
             string expected = "Command list";
             string actual;
             actual = target.Accessor();
@@ -154,7 +154,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void HasFileTest_NoParams()
         {
-            Commandreader target = new Commandreader();
+            CommandReader target = new CommandReader();
             bool expected = false; 
             bool actual;
             actual = target.HasAccessor();
@@ -168,7 +168,7 @@ namespace PhysCalculatorTests
         public void HasFileTest_FileFound()
         {
             string[] args = { "read test" };
-            Commandreader target = new Commandreader(args);
+            CommandReader target = new CommandReader(args);
             bool expected = true; 
             bool actual;
             actual = target.HasAccessor();
@@ -183,7 +183,7 @@ namespace PhysCalculatorTests
         public void ReadCommandTest()
         {
             string[] args = { "read test" };
-            Commandreader target = new Commandreader(args);
+            CommandReader target = new CommandReader(args);
             string ResultLine = string.Empty;
             string ResultLineExpected = string.Empty;
             string CommandLine = string.Empty; 
@@ -203,7 +203,7 @@ namespace PhysCalculatorTests
         public void ReadFromFileTest()
         {
             string[] args = { "read test" };
-            Commandreader target = new Commandreader(args);
+            CommandReader target = new CommandReader(args);
             string ResultLine = string.Empty; 
             string ResultLineExpected = ""; 
             string expected = null;
@@ -219,7 +219,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void SetFileTest()
         {
-            Commandreader target = new Commandreader(); 
+            CommandReader target = new CommandReader(); 
             string filename = "testfilename";
             target.AddFile(filename);
             string expected = "testfilename";

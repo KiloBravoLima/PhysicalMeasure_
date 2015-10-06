@@ -20,7 +20,7 @@ namespace PhysicalCalculator
 {
     class PhysCalculator : Commandhandler
     {
-        Commandreader CommandLineReader = null;
+        CommandReader CommandLineReader = null;
         ResultWriter ResultLineWriter = null;
 
         const string AccumulatorName = "Accumulator";
@@ -33,10 +33,10 @@ namespace PhysicalCalculator
             InitGlobalContext();
 
             this.ResultLineWriter = new ResultWriter();
-            this.CommandLineReader = new Commandreader("Calculator Prompt", this.ResultLineWriter);
+            this.CommandLineReader = new CommandReader("Calculator Prompt", this.ResultLineWriter);
         }
 
-        public PhysCalculator(Commandreader someCommandLineReader)
+        public PhysCalculator(CommandReader someCommandLineReader)
         {
             InitGlobalContext();
 
@@ -49,10 +49,10 @@ namespace PhysicalCalculator
             InitGlobalContext();
 
             this.ResultLineWriter = new ResultWriter();
-            this.CommandLineReader = new Commandreader("Calculator Prompt", PhysCalculatorConfig_args, this.ResultLineWriter);
+            this.CommandLineReader = new CommandReader("Calculator Prompt", PhysCalculatorConfig_args, this.ResultLineWriter);
         }
 
-        public PhysCalculator(Commandreader someCommandLineReader, String[] PhysCalculatorConfig_args)
+        public PhysCalculator(CommandReader someCommandLineReader, String[] PhysCalculatorConfig_args)
         {
             InitGlobalContext();
 
@@ -60,7 +60,7 @@ namespace PhysicalCalculator
             this.CommandLineReader = someCommandLineReader;
         }
 
-        public PhysCalculator(Commandreader someCommandLineReader, ResultWriter someResultLineWriter)
+        public PhysCalculator(CommandReader someCommandLineReader, ResultWriter someResultLineWriter)
         {
             InitGlobalContext();
 
@@ -174,7 +174,7 @@ namespace PhysicalCalculator
             ExecuteCommands(CurrentContext, CommandLineReader, ResultLineWriter);
         }
 
-        public void ExecuteCommands(CalculatorEnvironment localContext, Commandreader commandLineReader, ResultWriter resultLineWriter)
+        public void ExecuteCommands(CalculatorEnvironment localContext, CommandReader commandLineReader, ResultWriter resultLineWriter)
         {
             Boolean CommandLineFromAccessor = false;
 
@@ -286,7 +286,7 @@ namespace PhysicalCalculator
         public Boolean ExecuteFunctionCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out IPhysicalQuantity functionResult)
         {
             // Dummy: Never used    funcBodyResult
-            Commandreader functionCommandLineReader = new Commandreader(localContext.Name, funcBodyCommands.ToArray(), CommandLineReader.ResultLineWriter);
+            CommandReader functionCommandLineReader = new CommandReader(localContext.Name, funcBodyCommands.ToArray(), CommandLineReader.ResultLineWriter);
             functionCommandLineReader.ReadFromConsoleWhenEmpty = false; // Return from ExecuteCommands() function when funcBodyCommands are done
 
             if (localContext.OutputTracelevel.HasFlag(TraceLevels.FunctionEnterLeave))
@@ -305,7 +305,7 @@ namespace PhysicalCalculator
         public Boolean ExecuteCommandsCallback(CalculatorEnvironment localContext, List<String> commands, ref String resultLine, out IPhysicalQuantity commandBlockResult)
         {
             // Dummy: Never used    resultLine
-            Commandreader CommandBlockLineReader = new Commandreader(localContext.Name, commands.ToArray(), CommandLineReader.ResultLineWriter);
+            CommandReader CommandBlockLineReader = new CommandReader(localContext.Name, commands.ToArray(), CommandLineReader.ResultLineWriter);
             CommandBlockLineReader.ReadFromConsoleWhenEmpty = false; // Return from ExecuteCommands() function when funcBodyCommands are done
 
             if (localContext.OutputTracelevel.HasFlag(TraceLevels.BlockEnterLeave))
@@ -597,7 +597,7 @@ namespace PhysicalCalculator
         }
 
 
-        public void SaveCommandHistoryToFile(Commandreader CommandLineReader, System.IO.StreamWriter file)
+        public void SaveCommandHistoryToFile(CommandReader CommandLineReader, System.IO.StreamWriter file)
         {
             //file.WriteLine("// {0}", CommandLineReader);
 
@@ -1533,15 +1533,9 @@ namespace PhysicalCalculator
             }
         }
 
-        public Boolean VariableSetLocal(String variableName, IPhysicalQuantity variableValue)
-        {
-            return VariableSet(CurrentContext, variableName, variableValue);
-        }
+        public Boolean VariableSetLocal(String variableName, IPhysicalQuantity variableValue) => VariableSet(CurrentContext, variableName, variableValue);
 
-        public Boolean VariableSetGlobal(String variableName, IPhysicalQuantity variableValue)
-        {
-            return VariableSet(GlobalContext, variableName, variableValue);
-        }
+        public Boolean VariableSetGlobal(String variableName, IPhysicalQuantity variableValue) => VariableSet(GlobalContext, variableName, variableValue);
 
         public Boolean VariableSet(String variableName, IPhysicalQuantity variableValue)
         {
@@ -1578,25 +1572,16 @@ namespace PhysicalCalculator
 
         #region  Custom Unit access
 
-        public Boolean SystemSet(IEnvironment context, String systemName, IPhysicalQuantity unitValue, out INametableItem systemItem)
-        {
-            //return context.SystemSet(systemName, unitValue, out systemItem);
-            return context.SystemSet(systemName, out systemItem);
-        }
+        //return context.SystemSet(systemName, unitValue, out systemItem);
+        public Boolean SystemSet(IEnvironment context, String systemName, IPhysicalQuantity unitValue, out INametableItem systemItem) => context.SystemSet(systemName, out systemItem);
 
-        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, IPhysicalQuantity unitValue, out INametableItem unitItem)
-        {
-            return context.UnitSet(unitSystem, unitName, unitValue, out unitItem);
-        }
+        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, IPhysicalQuantity unitValue, out INametableItem unitItem) => context.UnitSet(unitSystem, unitName, unitValue, out unitItem);
 
         #endregion  Custom Unit  access
 
         #region  Function access
 
-        public Boolean FunctionLookup(IEnvironment context, String functionName, out IFunctionEvaluator functionevaluator)
-        {
-            return context.FunctionFind(functionName, out functionevaluator);
-        }
+        public Boolean FunctionLookup(IEnvironment context, String functionName, out IFunctionEvaluator functionevaluator) => context.FunctionFind(functionName, out functionevaluator);
 
         public Boolean CommandsBlockEvaluate(String CommandBlockName, ICommandsEvaluator commandsEvaluator, out IPhysicalQuantity commandsResult, ref String resultLine)
         {
@@ -1654,7 +1639,7 @@ namespace PhysicalCalculator
 
                 CurrentContext = LocalContext;
 
-                Commandreader functionCommandLineReader = new Commandreader(functionName + ".cal", CommandLineReader.ResultLineWriter);
+                CommandReader functionCommandLineReader = new CommandReader(functionName + ".cal", CommandLineReader.ResultLineWriter);
 
                 functionCommandLineReader.ReadFromConsoleWhenEmpty = false; // Return from ExecuteCommands() function when file commands are done
 
@@ -1760,10 +1745,7 @@ namespace PhysicalCalculator
             return Found;
         }
 
-        public Boolean IdentifiersClear()
-        {
-            return CurrentContext.ClearLocalIdentifiers();
-        }
+        public Boolean IdentifiersClear() => CurrentContext.ClearLocalIdentifiers();
 
         #endregion  Identifier access
 
@@ -1771,30 +1753,77 @@ namespace PhysicalCalculator
 
     static class DateTimeSortString
     {
-        public static string ToSortString(this DateTime Me)
+        public static string ToSortString(this DateTime Me) => Me.ToString("yyyy-MM-dd HH:mm:ss");
+
+        public static string ToSortShortDateString(this DateTime Me) => Me.ToString("yyyy-MM-dd");
+
+        public static void ToBuildNo(this DateTime Me, out int buildNo, out int revisionNo)
         {
-            return Me.ToString("yyyy-MM-dd HH:mm:ss");
+            TimeSpan TimeSince_2000_01_01 = Me.Date - new DateTime(2000, 1, 1);
+
+            buildNo = TimeSince_2000_01_01.Days;
+            revisionNo = (int)(Me.TimeOfDay.TotalSeconds/2);
         }
 
-        public static string ToSortShortDateString(this DateTime Me)
-        {
-            return Me.ToString("yyyy-MM-dd");
-        }
     }
 
     static class AssemblyExtension
     {
-        public static String AssemblyInfo(this System.Reflection.Assembly Asm)
+        public static String AssemblyVersionInfo(this System.Reflection.Assembly assembly)
         {
-            System.Reflection.AssemblyName AsmName = Asm.GetName();
+            System.Reflection.AssemblyName AsmName = assembly.GetName();
 
-            //FileInfo AsmFileInfo = new FileInfo(Asm.Location);
             Version AsemVersion = AsmName.Version;
-            DateTime buildDateTime = new DateTime(2000, 1, 1).Add(new TimeSpan(TimeSpan.TicksPerDay * AsemVersion.Build +             // days since 1 January 2000
-                                                                               TimeSpan.TicksPerSecond * 2 * AsemVersion.Revision));  // seconds since midnight, (multiply by 2 to get original              
-            String InfoStr = String.Format("{0,-16} {1} {2}", AsmName.Name, AsemVersion.ToString(), buildDateTime.ToSortString());
+            String InfoStr;
+
+            if (AsemVersion.Build != 0)
+            {
+                DateTime buildDateTime = new DateTime(2000, 1, 1).Add(new TimeSpan(TimeSpan.TicksPerDay * AsemVersion.Build +             // days since 1 January 2000
+                                                                                   TimeSpan.TicksPerSecond * 2 * AsemVersion.Revision));  // seconds since midnight, (multiply by 2 to get original)
+                InfoStr = String.Format("{0} {1}", AsemVersion.ToString(), buildDateTime.ToSortString());
+            }
+            else
+            {
+                InfoStr = AsemVersion.ToString();
+            }
             return InfoStr;
         }
+
+        public static String AssemblyFileVersionInfo(this System.Reflection.Assembly assembly)
+        {
+            
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            //String AsemVersion = String.Format("{0}.{1}.{2}.{3}", fileVersionInfo.FileMajorPart, fileVersionInfo.FileMinorPart, fileVersionInfo.FileBuildPart, fileVersionInfo.FilePrivatePart);
+            String AsemVersion = fileVersionInfo.FileVersion;
+            String InfoStr;
+
+            if (fileVersionInfo.FileBuildPart != 0)
+            {
+                DateTime buildDateTime = new DateTime(2000, 1, 1).Add(new TimeSpan(TimeSpan.TicksPerDay * fileVersionInfo.FileBuildPart +             // days since 1 January 2000
+                                                                                   TimeSpan.TicksPerSecond * 2 * fileVersionInfo.FilePrivatePart));  // seconds since midnight, (multiply by 2 to get original)
+                InfoStr = String.Format("{0} {1}", AsemVersion, buildDateTime.ToSortString());
+            }
+            else
+            {
+                InfoStr = AsemVersion;
+            }
+            return InfoStr;
+
+        }
+
+        public static String AssemblyInfo(this System.Reflection.Assembly assembly)
+        {
+            System.Reflection.AssemblyName AsmName = assembly.GetName();
+
+            //FileInfo AsmFileInfo = new FileInfo(Asm.Location);
+            // Version AsemVersion = AsmName.Version;
+            String assemblyVersionInfo = AssemblyVersionInfo(assembly);
+            String assemblyFileVersionInfo = AssemblyFileVersionInfo(assembly);
+
+            String InfoStr = String.Format("{0,-16} {1} {2}", AsmName.Name, assemblyVersionInfo, assemblyFileVersionInfo);
+            return InfoStr;
+        }
+
     }
 }
 

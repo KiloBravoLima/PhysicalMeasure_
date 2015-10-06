@@ -11,3 +11,5 @@
 // [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Scope = "namespace", Target = "PhysicalMeasure")]
 // [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Scope = "namespace", Target = "PhysicalMeasure")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase", Scope = "type", Target = "PhysicalMeasure.Prefix", Justification = "That is how SI prefixes are named")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Language", "CSE0003:Use expression-bodied members", Justification = "<Pending>", Scope = "member", Target = "~M:PhysicalMeasure.PhysicalUnit.MakePhysicalUnit(System.SByte[],System.Double,System.Double)~PhysicalMeasure.IPhysicalUnit")]
+

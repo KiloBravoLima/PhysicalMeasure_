@@ -1,4 +1,27 @@
-﻿using System;
+﻿<#@ template debug="true" hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#
+
+DateTime now = DateTime.Now;
+String nowStr = now.ToString("yyyy-MM-dd HH:mm:ss");
+TimeSpan TimeSince_2000_01_01 = now.Date - new DateTime(2000, 1, 1);
+int nowBuildNo = (int)(TimeSince_2000_01_01.Days);
+int nowRevisionNo = (int)(now.TimeOfDay.TotalSeconds/2);
+
+int majorNo = 2;
+int minorNo = 0;
+
+string major = Environment.GetEnvironmentVariable("MAJOR");
+major = major == null ? majorNo.ToString() : int.Parse(major).ToString();
+string minor = Environment.GetEnvironmentVariable("MINOR");
+minor = minor == null ? minorNo.ToString() : int.Parse(minor).ToString();    
+
+string build = Environment.GetEnvironmentVariable("BUILD_NUMBER");
+build = build == null ? nowBuildNo.ToString() : int.Parse(build).ToString();
+string revision = Environment.GetEnvironmentVariable("REVISION");
+revision = revision == null ? nowRevisionNo.ToString() : int.Parse(revision).ToString();    
+#>
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -38,17 +61,17 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.0.0")]
 // [assembly: AssemblyFileVersion("1.0.0.0")]
 
-//  build at  2015-10-06 01:57:41
-//  major:    2
-//  minor:    0
-//  build:    5757
-//  revision: 3530
+//  build at  <#=nowStr#>
+//  major:    <#=major#>
+//  minor:    <#=minor#>
+//  build:    <#=build#>
+//  revision: <#=revision#>
 /*
 
 */
 
-[assembly: AssemblyVersion("2.0")]
-[assembly: AssemblyFileVersion("2.0.5757.3530")]
+[assembly: AssemblyVersion("<#=major#>.<#=minor#>")]
+[assembly: AssemblyFileVersion("<#=major#>.<#=minor#>.<#=build#>.<#=revision#>")]
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PhysCalculatorTests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PhysCalculatorTests2")]

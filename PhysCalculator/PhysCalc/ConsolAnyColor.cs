@@ -44,11 +44,7 @@ namespace ConsolAnyColor
                 ColorDWORD = r + (g << 8) + (b << 16);
             }
 
-            internal Color GetColor()
-            {
-                return Color.FromArgb((int)(0x000000FFU & ColorDWORD),
-                                      (int)(0x0000FF00U & ColorDWORD) >> 8, (int)(0x00FF0000U & ColorDWORD) >> 16);
-            }
+            internal Color GetColor() => Color.FromArgb((int)(0x000000FFU & ColorDWORD), (int)(0x0000FF00U & ColorDWORD) >> 8, (int)(0x00FF0000U & ColorDWORD) >> 16);
 
             internal void SetColor(Color color)
             {
@@ -136,15 +132,9 @@ namespace ConsolAnyColor
 
         // Set a specific console color to an RGB color
         // The default console colors used are gray (foreground) and black (background)
-        public static int SetColor(ConsoleColor colorToSet, Color targetColor)
-        {
-            return SetColor(colorToSet, new COLORREF(targetColor));
-        }
+        public static int SetColor(ConsoleColor colorToSet, Color targetColor) => SetColor(colorToSet, new COLORREF(targetColor));
 
-        public static int SetColor(ConsoleColor colorToSet, uint r, uint g, uint b)
-        {
-            return SetColor(colorToSet, new COLORREF(r, g, b));
-        }
+        public static int SetColor(ConsoleColor colorToSet, uint r, uint g, uint b) => SetColor(colorToSet, new COLORREF(r, g, b));
 
         public static int SetColor(ConsoleColor colorToSet, COLORREF targetColor)
         {

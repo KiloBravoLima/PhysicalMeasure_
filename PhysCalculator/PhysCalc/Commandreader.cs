@@ -6,7 +6,7 @@ using System.Text;
 namespace PhysicalCalculator
 {
     [Flags]
-    public enum TraceLevels : byte
+    public enum TraceLevels : Byte
     {
         None = 0x00,
         Results = 0x01,
@@ -152,7 +152,7 @@ namespace PhysicalCalculator
 
         //virtual public Boolean IsEmpty { get { return true; } } 
         abstract public Boolean IsEmpty { get; } 
-        abstract public string GetCommandLine(ref String ResultLine);
+        abstract public String GetCommandLine(ref String ResultLine);
     }
 
     class CommandBlockAccessor : CommandAccessor
@@ -172,17 +172,11 @@ namespace PhysicalCalculator
 
         public String CommandBlockName { get { return Name; } set { Name = value; } }
 
-        override public Boolean IsEmpty
-        {
-            get
-            {
-                return CommandBlock == null;
-            }
-        }
+        override public Boolean IsEmpty => CommandBlock == null;
 
-        override public string GetCommandLine(ref String ResultLine)
+        override public String GetCommandLine(ref String ResultLine)
         {
-            string S = null;
+            String S = null;
             if (CommandBlock == null)
             {
                 S = "";
@@ -261,19 +255,13 @@ namespace PhysicalCalculator
             set { Name = value; } 
         }
 
-        override public Boolean IsEmpty
-        {
-            get
-            {
-                // Will not work because FileReader is null also before the file is read: return FileReader == null;
-                return String.IsNullOrWhiteSpace(FileNameStr);
-            }
-        }
+        // Will not work because FileReader is null also before the file is read: return FileReader == null;
+        override public Boolean IsEmpty => String.IsNullOrWhiteSpace(FileNameStr);
 
-        override public string GetCommandLine(ref String ResultLine)
+        override public String GetCommandLine(ref String ResultLine)
         {
-            const string DefaultCalculatorScriptsSubdir = "Calculator Scripts";
-            string S = null;
+            const String DefaultCalculatorScriptsSubdir = "Calculator Scripts";
+            String S = null;
             if (FileReader == null && !String.IsNullOrWhiteSpace(FileNameStr))
             {
                 if (!File.Exists(FileNameStr)
@@ -338,17 +326,19 @@ namespace PhysicalCalculator
         }
     }
 
-    class ResultWriter
+    public class ResultWriter
     {
         public String FileNameStr = null;
         public StreamWriter FileStreamWriter = null;
 
         public List<String> ResultLines = null;
 
-        public int LinesWritten = 0;
+        public Int32 LinesWritten = 0;
 
         private ConsoleColor backgroundColor = Console.BackgroundColor;
         private ConsoleColor foregroundColor = Console.ForegroundColor;
+
+        public Boolean UseColors = true;
 
 
         public ResultWriter()
@@ -362,8 +352,7 @@ namespace PhysicalCalculator
             this.FileStreamWriter = null;
             this.ResultLines = null;
         }
-
-
+        
         public ResultWriter(List<String> ResultLines)
             : this((String)null)
         {
@@ -382,18 +371,20 @@ namespace PhysicalCalculator
 
         private void SetBackgroundColor(ConsoleColor color)
         {
+            if (!UseColors) return;
+
             // this.CheckFile(ref ResultLine);
 
             this.backgroundColor = color; 
 
             if (FileStreamWriter != null)
             {
-                string SetColorCommand = "\0background color=" + backgroundColor.ToString();
+                String SetColorCommand = "\0background color=" + backgroundColor.ToString();
                 FileStreamWriter.WriteLine(SetColorCommand);
             }
             else if (ResultLines != null)
             {
-                string SetColorCommand = "\0background color=" + backgroundColor.ToString();
+                String SetColorCommand = "\0background color=" + backgroundColor.ToString();
                 ResultLines.Add(SetColorCommand);
             }
             else
@@ -404,18 +395,20 @@ namespace PhysicalCalculator
 
         private void SetForegroundColor(ConsoleColor color)
         {
+            if (!UseColors) return;
+
             // this.CheckFile(ref ResultLine);
 
             this.foregroundColor = color; 
 
             if (FileStreamWriter != null)
             {
-                string SetColorCommand = "\0foreground color=" + foregroundColor.ToString();
+                String SetColorCommand = "\0foreground color=" + foregroundColor.ToString();
                 FileStreamWriter.WriteLine(SetColorCommand);
             }
             else if (ResultLines != null)
             {
-                string SetColorCommand = "\0foreground color=" + foregroundColor.ToString();
+                String SetColorCommand = "\0foreground color=" + foregroundColor.ToString();
                 ResultLines.Add(SetColorCommand);
             }
             else
@@ -426,16 +419,18 @@ namespace PhysicalCalculator
 
         public void ResetColor()
         {
+            if (!UseColors) return;
+
             // this.CheckFile(ref ResultLine);
 
             if (FileStreamWriter != null)
             {
-                string SetColorCommand = "\0ResetColor";
+                String SetColorCommand = "\0ResetColor";
                 FileStreamWriter.WriteLine(SetColorCommand);
             }
             else if (ResultLines != null)
             {
-                string SetColorCommand = "\0ResetColor";
+                String SetColorCommand = "\0ResetColor";
                 ResultLines.Add(SetColorCommand);
             }
             else
@@ -447,7 +442,7 @@ namespace PhysicalCalculator
             foregroundColor = Console.ForegroundColor;
         }
 
-        public enum textMode 
+        public enum TextMode 
         {
             Normal = 0,
             Highlight = 1,
@@ -455,26 +450,26 @@ namespace PhysicalCalculator
             Error = 3
         }
 
-        public void SetTextMode(textMode tm)
+        public void SetTextMode(TextMode tm)
         {
-            if (tm == textMode.Error)
+            if (tm == TextMode.Error)
             {
-                if (ForegroundColor != ConsoleColor.Red)
+                if (UseColors && ForegroundColor != ConsoleColor.Red)
                 { 
                     SetForegroundColor(ConsoleColor.Red);
                 }
             }
             else
             {
-                //if (ForegroundColor != ConsoleColor.Gray)
-                if (ForegroundColor == ConsoleColor.Red)
+                //if (UseColors && ForegroundColor != ConsoleColor.Gray)
+                if (UseColors && ForegroundColor == ConsoleColor.Red)
                 {
                     ResetColor();
                 }
             }
         }
 
-        public void CheckFile(ref string ResultText)
+        public void CheckFile(ref String ResultText)
         {
             if (FileStreamWriter == null)
             {
@@ -544,9 +539,9 @@ namespace PhysicalCalculator
 
         public void WriteErrorLine(String ResultLine)
         {
-            SetTextMode(textMode.Error);
+            SetTextMode(TextMode.Error);
             WriteLine(ResultLine);
-            SetTextMode(textMode.Normal);
+            SetTextMode(TextMode.Normal);
         }
 
         public void Close()
@@ -559,7 +554,7 @@ namespace PhysicalCalculator
         }
     }
 
-    class Commandreader
+    class CommandReader
     {
         private CommandAccessorStack CommandAccessors = null;
         public ResultWriter ResultLineWriter = null;
@@ -568,14 +563,14 @@ namespace PhysicalCalculator
         private TraceLevels GlobalOutputTracelevel = TraceLevels.Normal; //TraceLevels.All; // TraceLevels.Normal;
         private FormatProviderKind GlobalFormatProviderSource = FormatProviderKind.DefaultFormatProvider;
 
-        public List<String> CommandHistory = new List<string>();
+        public List<String> CommandHistory = new List<String>();
 
-        public Commandreader(ResultWriter ResultLineWriter = null)
+        public CommandReader(ResultWriter ResultLineWriter = null)
         {
             this.ResultLineWriter = ResultLineWriter;
         }
 
-        public Commandreader(String[] args, ResultWriter ResultLineWriter = null)
+        public CommandReader(String[] args, ResultWriter ResultLineWriter = null)
             : this(ResultLineWriter)
         {
             // args = CheckForOptions(args);
@@ -590,7 +585,7 @@ namespace PhysicalCalculator
             }
         }
 
-        public Commandreader(String CommandLine, ResultWriter ResultLineWriter = null)
+        public CommandReader(String CommandLine, ResultWriter ResultLineWriter = null)
             : this(ResultLineWriter)
         {
             if (File.Exists(CommandLine))
@@ -603,7 +598,7 @@ namespace PhysicalCalculator
             }
         }
 
-        public Commandreader(String CommandName, String[] args, ResultWriter ResultLineWriter = null)
+        public CommandReader(String CommandName, String[] args, ResultWriter ResultLineWriter = null)
             : this(ResultLineWriter)
         {
             if (args.Length == 1 && File.Exists(args[0]))
@@ -616,7 +611,7 @@ namespace PhysicalCalculator
             }
         }
 
-        public Commandreader(String CommandName, String CommandLine, ResultWriter ResultLineWriter = null)
+        public CommandReader(String CommandName, String CommandLine, ResultWriter ResultLineWriter = null)
             : this(ResultLineWriter)
         {
             if (File.Exists(CommandLine))
@@ -682,7 +677,7 @@ namespace PhysicalCalculator
             }
         }
 
-        public void Write(string Line)
+        public void Write(String Line)
         {   // Echo Line to output
             if (ResultLineWriter != null) 
             {   // Echo Line to file output
@@ -694,7 +689,7 @@ namespace PhysicalCalculator
             }
         }
 
-        public void WriteLine(string Line)
+        public void WriteLine(String Line)
         {   // Echo Line to output
             if (ResultLineWriter != null)
             {   // Echo Line to file output
@@ -742,10 +737,7 @@ namespace PhysicalCalculator
             CommandAccessors.Add(new CommandFileAccessor(filename));
         }
 
-        public Boolean HasAccessor()
-        {
-            return (CommandAccessors != null);
-        }
+        public Boolean HasAccessor() => (CommandAccessors != null);
 
         public String Accessor()
         {
