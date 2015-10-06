@@ -50,8 +50,7 @@ namespace PhysicalMeasure
         CombinedUnit,
         MixedUnit
     }
-
-
+    
     #endregion Physical Measure Constants
 
     #region Physical Measure Interfaces
@@ -91,7 +90,7 @@ namespace PhysicalMeasure
     public interface IUnitPrefixExponent : IUnitPrefixExponentMath
     {
         SByte Exponent { get; }
-        double Value { get; }
+        Double Value { get; }
     }
 
     public interface IUnitPrefix : INamed, IUnitPrefixExponent
@@ -105,16 +104,16 @@ namespace PhysicalMeasure
 
         Boolean GetUnitPrefixFromExponent(IUnitPrefixExponent someExponent, out IUnitPrefix unitPrefix);
 
-        Boolean GetUnitPrefixFromPrefixChar(char somePrefixChar, out IUnitPrefix unitPrefix);
+        Boolean GetUnitPrefixFromPrefixChar(Char somePrefixChar, out IUnitPrefix unitPrefix);
 
         // 
-        Boolean GetExponentFromPrefixChar(char somePrefixChar, out IUnitPrefixExponent exponent);
+        Boolean GetExponentFromPrefixChar(Char somePrefixChar, out IUnitPrefixExponent exponent);
 
-        Boolean GetPrefixCharFromExponent(IUnitPrefixExponent someExponent, out char prefixChar);
+        Boolean GetPrefixCharFromExponent(IUnitPrefixExponent someExponent, out Char prefixChar);
 
-        IUnitPrefix UnitPrefixFromPrefixChar(char somePrefixChar);
+        IUnitPrefix UnitPrefixFromPrefixChar(Char somePrefixChar);
 
-        IUnitPrefixExponent ExponentFromPrefixChar(char somePrefixChar);
+        IUnitPrefixExponent ExponentFromPrefixChar(Char somePrefixChar);
 
     }
 
@@ -175,10 +174,10 @@ namespace PhysicalMeasure
 
         String ReducedUnitString();
 
-        String ValueString(double quantity);
-        String ValueString(double quantity, String format, IFormatProvider formatProvider);
+        String ValueString(Double quantity);
+        String ValueString(Double quantity, String format, IFormatProvider formatProvider);
 
-        double FactorValue { get; }
+        Double FactorValue { get; }
         IPhysicalUnit PureUnit { get; }
     }
 
@@ -245,19 +244,19 @@ namespace PhysicalMeasure
         IPhysicalQuantity Multiply(IPhysicalQuantity physicalQuantity);
         IPhysicalQuantity Divide(IPhysicalQuantity physicalQuantity);
 
-        IPhysicalQuantity Multiply(double quantity);
-        IPhysicalQuantity Divide(double quantity);
+        IPhysicalQuantity Multiply(Double quantity);
+        IPhysicalQuantity Divide(Double quantity);
 
-        IPhysicalQuantity Multiply(double quantity, IPhysicalQuantity physicalQuantity);
-        IPhysicalQuantity Divide(double quantity, IPhysicalQuantity physicalQuantity);
+        IPhysicalQuantity Multiply(Double quantity, IPhysicalQuantity physicalQuantity);
+        IPhysicalQuantity Divide(Double quantity, IPhysicalQuantity physicalQuantity);
     }
 
     public interface IEquivalence<T>
     {
         // Like Equal, but allow to be off by a factor: this.Equivalent(other, out quotient) means (this == other * quotient) is true.
-        bool Equivalent(T other, out double quotient);
+        Boolean Equivalent(T other, out Double quotient);
 
-        // double Quotient(T other);   // quotient = 0 means not equivalent
+        // Double Quotient(T other);   // quotient = 0 means not equivalent
     }
 
     public interface IPhysicalUnitMath : IEquatable<IPhysicalUnit>, IEquivalence<IPhysicalUnit>, IUnitMath, ICombinedUnitMath, IPhysicalItemMath
@@ -267,7 +266,7 @@ namespace PhysicalMeasure
 
     public interface IPhysicalUnitConvertible
     {
-        bool IsLinearConvertible();
+        Boolean IsLinearConvertible();
 
 
         // Unspecific/relative non-quantity unit conversion (e.g. temperature interval)
@@ -286,15 +285,15 @@ namespace PhysicalMeasure
 
 
         // Specific/absolute quantity unit conversion (e.g. specific temperature)
-        IPhysicalQuantity ConvertTo(ref double quantity, IPhysicalUnit convertToUnit);
-        IPhysicalQuantity ConvertTo(ref double quantity, IUnitSystem convertToUnitSystem);
+        IPhysicalQuantity ConvertTo(ref Double quantity, IPhysicalUnit convertToUnit);
+        IPhysicalQuantity ConvertTo(ref Double quantity, IUnitSystem convertToUnitSystem);
 
-        IPhysicalQuantity ConvertToSystemUnit(ref double quantity);
+        IPhysicalQuantity ConvertToSystemUnit(ref Double quantity);
 
-        IPhysicalQuantity ConvertToBaseUnit(double quantity);
+        IPhysicalQuantity ConvertToBaseUnit(Double quantity);
         IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity);
 
-        IPhysicalQuantity ConvertToBaseUnit(double quantity, IUnitSystem convertToUnitSystem);
+        IPhysicalQuantity ConvertToBaseUnit(Double quantity, IUnitSystem convertToUnitSystem);
         IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity, IUnitSystem convertToUnitSystem);
     }
 
@@ -328,7 +327,7 @@ namespace PhysicalMeasure
         IPhysicalQuantity Rot(SByte exponent);
     }
 
-    public interface IPhysicalQuantityMath : IComparable, IEquivalence<IPhysicalQuantity>, IEquatable<double>, IEquatable<IPhysicalUnit>, IEquatable<IPhysicalQuantity>, IQuantityMath, IPhysicalItemMath
+    public interface IPhysicalQuantityMath : IComparable, IEquivalence<IPhysicalQuantity>, IEquatable<Double>, IEquatable<IPhysicalUnit>, IEquatable<IPhysicalQuantity>, IQuantityMath, IPhysicalItemMath
     {
         IPhysicalQuantity Zero { get; }
         IPhysicalQuantity One { get; }
@@ -376,17 +375,17 @@ namespace PhysicalMeasure
     public interface IValueConversion
     {
         // Unspecific/relative non-quantity unit conversion (e.g. temperature interval)
-        double Convert(bool backwards = false);
-        double ConvertToPrimaryUnit();
-        double ConvertFromPrimaryUnit();
+        Double Convert(Boolean backwards = false);
+        Double ConvertToPrimaryUnit();
+        Double ConvertFromPrimaryUnit();
 
         // Specific/absolute quantity unit conversion (e.g. specific temperature)
-        double Convert(double value, bool backwards = false);
-        double ConvertToPrimaryUnit(double value);
-        double ConvertFromPrimaryUnit(double value);
+        Double Convert(Double value, Boolean backwards = false);
+        Double ConvertToPrimaryUnit(Double value);
+        Double ConvertFromPrimaryUnit(Double value);
 
-        double LinearOffset { get; }
-        double LinearScale { get; }
+        Double LinearOffset { get; }
+        Double LinearScale { get; }
     }
 
     public interface IConvertibleUnit : INamedSymbolUnit
@@ -400,8 +399,8 @@ namespace PhysicalMeasure
 
 
         // Specific/absolute quantity unit conversion (e.g. specific temperature)
-        IPhysicalQuantity ConvertToPrimaryUnit(double quantity);
-        IPhysicalQuantity ConvertFromPrimaryUnit(double quantity);
+        IPhysicalQuantity ConvertToPrimaryUnit(Double quantity);
+        IPhysicalQuantity ConvertFromPrimaryUnit(Double quantity);
     }
 
     public interface ICombinedUnit : IPhysicalUnit
@@ -438,7 +437,7 @@ namespace PhysicalMeasure
 
     public interface IPhysicalQuantity : IFormattable, IPhysicalQuantityMath, IPhysicalQuantityConvertible
     {
-        double Value { get; }
+        Double Value { get; }
         IPhysicalUnit Unit { get; }
 
         String ToPrintString();

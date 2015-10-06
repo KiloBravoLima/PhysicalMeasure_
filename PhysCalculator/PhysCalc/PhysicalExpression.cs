@@ -356,10 +356,7 @@ namespace PhysicalCalculator.Expression
                 this.Operator = Operator;
             }
 
-            public override string ToString()
-            {
-                return TokenKind.ToString() + (TokenKind == TokenKind.None ? "" : " " + (TokenKind == TokenKind.Operand ? Operand.ToString() : Operator.ToString()));
-            }
+            public override string ToString() => TokenKind.ToString() + (TokenKind == TokenKind.None ? "" : " " + (TokenKind == TokenKind.Operand ? Operand.ToString() : Operator.ToString()));
         }
 
         class expressiontokenizer
@@ -394,7 +391,7 @@ namespace PhysicalCalculator.Expression
                 this.InputString = InputString;
             }
 
-            public string RemainingInput { get { return InputString.Substring(Pos); }  } 
+            public string RemainingInput => InputString.Substring(Pos);
 
             /*
             public string GetRemainingInput()
@@ -403,7 +400,7 @@ namespace PhysicalCalculator.Expression
             }
             */
 
-            public Boolean InputRecognized { get { return inputRecognized; } } 
+            public Boolean InputRecognized => inputRecognized;
 
             // public string ErrorMessage { get { return errorMessage; } } 
 
@@ -1553,9 +1550,6 @@ namespace PhysicalCalculator.Expression
             return OperatorKind.none;
         }
 
-        public static OperatorKind Precedence(this OperatorKind operatoren)
-        {
-            return OperatorPrecedence(operatoren);
-        }
+        public static OperatorKind Precedence(this OperatorKind operatoren) => OperatorPrecedence(operatoren);
     }
 }

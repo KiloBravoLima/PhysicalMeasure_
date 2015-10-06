@@ -89,10 +89,7 @@ namespace PhysicalCalculator.Identifiers
         }
         */
 
-        public virtual String ToListString(String name)
-        {
-            return String.Format("{0} {1}", Identifierkind.ToString(), name);
-        }
+        public virtual String ToListString(String name) => String.Format("{0} {1}", Identifierkind.ToString(), name);
 
         public void WriteToTextFile(String name, System.IO.StreamWriter file)
         {
@@ -102,7 +99,7 @@ namespace PhysicalCalculator.Identifiers
 
     class NamedSystem : NametableItem 
     {
-        public override IdentifierKind Identifierkind { get { return IdentifierKind.UnitSystem; } }
+        public override IdentifierKind Identifierkind => IdentifierKind.UnitSystem;
 
         public IUnitSystem UnitSystem;
 
@@ -115,15 +112,12 @@ namespace PhysicalCalculator.Identifiers
             // Physics.Default_UnitSystem_Stack.Push(NewUnitSystem);
         }
 
-        public override String ToListString(String name)
-        {
-            return String.Format("system {0}", name);
-        }
+        public override String ToListString(String name) => String.Format("system {0}", name);
     }
 
     class NamedUnit : NametableItem 
     {
-        public override IdentifierKind Identifierkind { get { return IdentifierKind.Unit; } }
+        public override IdentifierKind Identifierkind => IdentifierKind.Unit;
 
         public IPhysicalUnit pu;
 
@@ -167,10 +161,7 @@ namespace PhysicalCalculator.Identifiers
             }
         }
 
-        private static IBaseUnit MakeBaseUnit(String name)
-        {
-            return MakeBaseUnit(name, null);
-        }
+        private static IBaseUnit MakeBaseUnit(String name) => MakeBaseUnit(name, null);
 
         private static IBaseUnit MakeBaseUnit(String name, IUnitSystem unitSystem)
         {
@@ -263,7 +254,7 @@ namespace PhysicalCalculator.Identifiers
 
     class NamedVariable : PhysicalQuantity, INametableItem
     {
-        public virtual IdentifierKind Identifierkind { get { return IdentifierKind.Variable; } }
+        public virtual IdentifierKind Identifierkind => IdentifierKind.Variable;
 
         public IEnvironment Environment = null;
         public CultureInfo CultureInfo 
@@ -285,10 +276,7 @@ namespace PhysicalCalculator.Identifiers
             this.Environment = environment;
         }
 
-        public virtual String ToListString(String name)
-        {
-            return String.Format("var {0} = {1}", name, this.ToString(null, CultureInfo));
-        }
+        public virtual String ToListString(String name) => String.Format("var {0} = {1}", name, this.ToString(null, CultureInfo));
 
         public void WriteToTextFile(String name, System.IO.StreamWriter file)
         {
@@ -298,17 +286,14 @@ namespace PhysicalCalculator.Identifiers
 
     class NamedConstant : NamedVariable
     {
-        public override IdentifierKind Identifierkind { get { return IdentifierKind.Constant; } }
+        public override IdentifierKind Identifierkind => IdentifierKind.Constant;
 
         public NamedConstant(IPhysicalQuantity somephysicalquantity, IEnvironment environment = null)
             : base(somephysicalquantity, environment)
         {
         }
 
-        public override String ToListString(String name)
-        {
-            return String.Format("constant {0} = {1}", name, this.ToString(null, CultureInfo));
-        }
+        public override String ToListString(String name) => String.Format("constant {0} = {1}", name, this.ToString(null, CultureInfo));
     }
 
 
@@ -390,10 +375,7 @@ namespace PhysicalCalculator.Identifiers
             return true;
         }
 
-        public Boolean RemoveItem(String itemName)
-        {
-            return this.Remove(itemName);
-        }
+        public Boolean RemoveItem(String itemName) => this.Remove(itemName);
 
         public Boolean ClearItems()
         {
@@ -546,12 +528,9 @@ namespace PhysicalCalculator.Identifiers
 
         #region INameTableItem interface implementation
 
-        public override IdentifierKind Identifierkind { get { return IdentifierKind.Environment; } }
+        public override IdentifierKind Identifierkind => IdentifierKind.Environment;
 
-        public override String ToListString(String name)
-        {
-            return String.Format("Namespace {0}", name);
-        }
+        public override String ToListString(String name) => String.Format("Namespace {0}", name);
 
         #endregion INameTableItem interface implementation
 
@@ -600,17 +579,11 @@ namespace PhysicalCalculator.Identifiers
 
         #region Common Identifier access
 
-        public Boolean SetLocalIdentifier(String identifierName, INametableItem item)
-        {
-            // Update or add local item
-            return NamedItems.SetItem(identifierName, item);
-        }
+        // Update or add local item
+        public Boolean SetLocalIdentifier(String identifierName, INametableItem item) => NamedItems.SetItem(identifierName, item);
 
-        public Boolean FindLocalIdentifier(String identifierName, out INametableItem item)
-        {
-            // Check local items
-            return NamedItems.GetItem(identifierName, out item);
-        }
+        // Check local items
+        public Boolean FindLocalIdentifier(String identifierName, out INametableItem item) => NamedItems.GetItem(identifierName, out item);
 
         public Boolean FindIdentifier(String identifierName, out IEnvironment foundInContext, out INametableItem item)
         {
@@ -713,11 +686,8 @@ namespace PhysicalCalculator.Identifiers
             return ListStringBuilder.ToString();
         }
 
-        public Boolean RemoveLocalIdentifier(String identifierName)
-        {
-            // Check local items
-            return NamedItems.RemoveItem(identifierName);
-        }
+        // Check local items
+        public Boolean RemoveLocalIdentifier(String identifierName) => NamedItems.RemoveItem(identifierName);
 
         public Boolean ClearLocalIdentifiers()
         {

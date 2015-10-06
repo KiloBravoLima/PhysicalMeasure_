@@ -22,7 +22,7 @@ namespace PhysicalCalculator.Function
 
     abstract class PhysicalQuantityFunction : NametableItem, IFunctionEvaluator
     {
-        override public IdentifierKind Identifierkind { get { return IdentifierKind.Function; } }
+        override public IdentifierKind Identifierkind => IdentifierKind.Function;
 
         override public String ToListString(String Name)
         {
@@ -34,7 +34,7 @@ namespace PhysicalCalculator.Function
 
         protected List<PhysicalQuantityFunctionParam> formalparamlist;
 
-        public List<PhysicalQuantityFunctionParam> Parameterlist { get { return formalparamlist; } }
+        public List<PhysicalQuantityFunctionParam> Parameterlist => formalparamlist;
 
         public void ParamListAdd(PhysicalQuantityFunctionParam param) 
         {
@@ -240,10 +240,7 @@ namespace PhysicalCalculator.Function
 
         public List<String> Commands { get { return _commands; } set { _commands = value; } }
 
-        public Boolean Evaluate(CalculatorEnvironment localContext, out IPhysicalQuantity functionResult, ref String resultLine)
-        {
-            return Evaluate(localContext, null, out functionResult, ref resultLine);
-        }
+        public Boolean Evaluate(CalculatorEnvironment localContext, out IPhysicalQuantity functionResult, ref String resultLine) => Evaluate(localContext, null, out functionResult, ref resultLine);
 
         override public Boolean Evaluate(CalculatorEnvironment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
         {

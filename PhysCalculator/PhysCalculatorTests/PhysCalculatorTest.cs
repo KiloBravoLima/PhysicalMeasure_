@@ -6,6 +6,7 @@ using PhysicalMeasure;
 
 using PhysicalCalculator;
 using PhysicalCalculator.Identifiers;
+using System.Linq;
 
 namespace PhysCalculatorTests
 {
@@ -86,7 +87,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void PhysCalculatorConstructorTest1()
         {
-            Commandreader CommandLineReader = new Commandreader(); 
+            CommandReader CommandLineReader = new CommandReader(); 
             string[] PhysCalculatorConfig_args = { "read test", "print 1 m + 2 Km" }; 
             PhysCalculator target = new PhysCalculator(CommandLineReader, PhysCalculatorConfig_args);
             Assert.IsNotNull(target);
@@ -108,7 +109,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void PhysCalculatorConstructorTest3()
         {
-            Commandreader CommandLineReader = null; 
+            CommandReader CommandLineReader = null; 
             PhysCalculator target = new PhysCalculator(CommandLineReader);
             Assert.IsNotNull(target);
         }
@@ -877,7 +878,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             CalculatorEnvironment localContext = new CalculatorEnvironment() ;
             ResultWriter resultLineWriter = new ResultWriter(ResultLines);
-            Commandreader commandLineReader = new Commandreader(CommandLines, resultLineWriter) ;
+            CommandReader commandLineReader = new CommandReader(CommandLines, resultLineWriter) ;
             target.ExecuteCommands(localContext, commandLineReader, resultLineWriter);
 
             IPhysicalQuantity AccumulatorActual;
@@ -936,7 +937,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             CalculatorEnvironment localContext = new CalculatorEnvironment();
             ResultWriter resultLineWriter = new ResultWriter(ResultLines);
-            Commandreader commandLineReader = new Commandreader(CommandLines, resultLineWriter);
+            CommandReader commandLineReader = new CommandReader(CommandLines, resultLineWriter);
             target.ExecuteCommands(localContext, commandLineReader, resultLineWriter);
 
             IPhysicalQuantity AccumulatorActual;
@@ -999,7 +1000,149 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         }
 
 
-        
+        public static String PhysicalExpressionEval(String txtExpression, ResultWriter ResultLineWriter = null)
+        {
+            String Result = "Internal error";
+            try
+            {
+                if (ResultLineWriter == null)
+                {
+                    ResultLineWriter = new ResultWriter();
+                }
+                CommandReader CommandLineReader = new CommandReader(txtExpression, ResultLineWriter);
+                if (CommandLineReader == null)
+                {
+                    ResultLineWriter.WriteErrorLine(String.Format("PhysCalculator CommandReader failed to load with {0} arguments: \"{1}\" ", 1, txtExpression));
+                }
+                else
+                {
+                    CommandLineReader.ReadFromConsoleWhenEmpty = true;
+                    PhysCalculator Calculator = new PhysCalculator(CommandLineReader, ResultLineWriter);
+                    if (Calculator == null)
+                    {
+                        ResultLineWriter.WriteErrorLine(String.Format("PhysCalculator failed to load with {0} arguments: \"{1}\" ", 1, txtExpression));
+                    }
+                    else
+                    {
+                        CommandLineReader.ReadFromConsoleWhenEmpty = false;
+                        CommandLineReader.WriteCommandToResultWriter = false;
+                        ResultLineWriter.ResultLines = new List<String>();
+                        // ResultLineWriter.WriteLine("PhysCalculator ready ");
+                        Calculator.Run();
+                        //ResultLineWriter.WriteLine("PhysCalculator finished");
+
+                        if (ResultLineWriter.ResultLines.Count > 0)
+                        {   // Use 
+                            /*
+                            Result = "";
+                            ResultLineWriter.ResultLines.ForEach(ResultLine  =>
+                            {
+                                // Console.WriteLine(name);
+                                if (!String.IsNullOrEmpty(Result))
+                                {
+                                    Result += "\n";
+                                }
+                                Result += ResultLine;
+                            }
+                            );
+                            */
+
+                            Result = ResultLineWriter.ResultLines.Aggregate("", (result, resultLine) =>
+                            {
+                                // Console.WriteLine(name);
+                                if (!String.IsNullOrEmpty(result))
+                                {
+                                    result += "\n";
+                                }
+                                result += resultLine;
+                                return result;
+                            }
+                            );
+                        }
+                    }
+                }
+            }
+            /* 
+            catch (EvalException ex)
+            {
+                // Report expression error and move caret to error position
+                Result = "Evaluation error : " + ex.Message;
+            }
+            */
+            catch (Exception ex)
+            {
+                // Unknown error
+                Result = "Unexpected error : " + ex.Message;
+            }
+
+            return Result;
+        }
+
+        static void ShowPhysicalMeasureEval(ResultWriter ResultLineWriter, string str)
+        {
+            ResultWriter singleLineWriter = new ResultWriter();
+            singleLineWriter.UseColors = false;
+            string res = PhysicalExpressionEval(str, singleLineWriter);
+            ResultLineWriter.WriteLine(str + " = " + res);
+        }
+
+
+        static void ShowStartLines(ResultWriter ResultLineWriter)
+        {
+            ResultLineWriter.WriteLine("c#:");
+
+            ResultLineWriter.WriteLine("3 / 4 * 5 / 6 = " + (3D / 4 * 5 / 6).ToString());
+            ResultLineWriter.WriteLine("(3 / 4) * (5 / 6) = " + ((3D / 4) * (5D / 6)).ToString());
+            ResultLineWriter.WriteLine("3 / 4 / 5 * 6 / 7 / 8 = " + (3D / 4 / 5 * 6D / 7 / 8).ToString());
+            ResultLineWriter.WriteLine("((3 / 4) / 5) * ((6 / 7) / 8) = " + (((3D / 4) / 5) * ((6D / 7) / 8)).ToString());
+
+            ResultLineWriter.WriteLine("3 + -2 = " + (3 + -2).ToString());
+            ResultLineWriter.WriteLine("3 - -2 = " + (3 - -2).ToString());
+            ResultLineWriter.WriteLine("3 - - -2 = " + (3 - - -2).ToString());
+            ResultLineWriter.WriteLine("3 - - - -2 = " + (3 - - - -2).ToString());
+            ResultLineWriter.WriteLine("3 - - - + -2 = " + (3 - - -+-2).ToString());
+            ResultLineWriter.WriteLine("3 - - - + + -2 = " + (3 - - -+ +-2).ToString());
+
+            ResultLineWriter.WriteLine("PhysicalMeasure:");
+
+            ShowPhysicalMeasureEval(ResultLineWriter, "3 / 4 * 5 / 6");
+            ShowPhysicalMeasureEval(ResultLineWriter, "(3 / 4) * (5 / 6)");
+            ShowPhysicalMeasureEval(ResultLineWriter, "3 / 4 / 5 * 6 / 7 / 8");
+            ShowPhysicalMeasureEval(ResultLineWriter, "((3 / 4) / 5) * ((6 / 7) / 8)");
+            ShowPhysicalMeasureEval(ResultLineWriter, "3 + -2");
+            ShowPhysicalMeasureEval(ResultLineWriter, "3 - -2");
+            ShowPhysicalMeasureEval(ResultLineWriter, "3 - - -2");
+            ShowPhysicalMeasureEval(ResultLineWriter, "3 - - - -2");
+            ShowPhysicalMeasureEval(ResultLineWriter, "3 - - - + -2");
+            ShowPhysicalMeasureEval(ResultLineWriter, "3 - - - + + -2");
+        }
+
+
+        /// <summary>
+        ///A test for testing how C3 and PhysicalCalculator.Program.PhysicalExpressionEval evaluates expressions"
+        ///</summary>
+        [TestMethod()]
+        public void TestShowStartLines()
+        {
+            ResultWriter ResultLineWriter = new ResultWriter();
+            ResultLineWriter.ResultLines = new List<string>(); 
+
+            ResultLineWriter.UseColors = false;
+            ShowStartLines(ResultLineWriter);
+
+            if (ResultLineWriter.ResultLines.Count > 2)
+            {   
+                // Output all lines
+                ResultLineWriter.ResultLines.ForEach(ResultLine => Console.WriteLine(ResultLine));
+                
+                // Check result lines
+                int NoOfExpressions = ResultLineWriter.ResultLines.Count / 2 - 1;
+                for (int ExpIndex = 1; ExpIndex < NoOfExpressions; ExpIndex++)
+                {
+                    Assert.AreEqual(ResultLineWriter.ResultLines[ExpIndex], ResultLineWriter.ResultLines[ExpIndex + NoOfExpressions + 1]);
+                }
+            }
+        }
 
         /*****************
         /// <summary>
@@ -1063,44 +1206,44 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         }
         *****************/
 
-        /**
-        /// <summary>
-        ///A test for ParseExpressionList
-        ///</summary>
-        [TestMethod()]
-        public void ParseExpressionListTest_1()
-        {
-            PhysCalculator target = new PhysCalculator();
-            string commandLine = " 1 , 2 m, 3 KgN, 4.5 J/K , 6 h,7 g, 8 Km , 9 mm , 10 mKgs-2 ";
-            string CommandLineExpected = string.Empty; 
-            string ResultLine = string.Empty; 
-            string ResultLineExpected = string.Empty; 
-            List<IPhysicalQuantity> expected = new List<IPhysicalQuantity>();
-            expected.Add(PhysicalMeasure.PhysicalQuantity.Parse(" 1 "));
-            expected.Add(PhysicalMeasure.PhysicalQuantity.Parse(" 2 m "));
-            expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("3 KgN "));
-            expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("4.5 J/K "));
-            expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("6 h "));
-            expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("7 g "));
-            expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("8 Km"));
-            expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("9 mm"));
-            expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("10 mKgs-2"));
-
-            List<IPhysicalQuantity> actual;
-            actual = target.ParseExpressionList(ref commandLine, ref ResultLine);
-            Assert.AreEqual(CommandLineExpected, commandLine);
-            Assert.AreEqual(ResultLineExpected, ResultLine);
-
-            for (int i = 0; i < expected.Count; i++ )
+            /**
+            /// <summary>
+            ///A test for ParseExpressionList
+            ///</summary>
+            [TestMethod()]
+            public void ParseExpressionListTest_1()
             {
-                Assert.AreEqual(expected[i], actual[i]);
-            }
-        }
-        **/
+                PhysCalculator target = new PhysCalculator();
+                string commandLine = " 1 , 2 m, 3 KgN, 4.5 J/K , 6 h,7 g, 8 Km , 9 mm , 10 mKgs-2 ";
+                string CommandLineExpected = string.Empty; 
+                string ResultLine = string.Empty; 
+                string ResultLineExpected = string.Empty; 
+                List<IPhysicalQuantity> expected = new List<IPhysicalQuantity>();
+                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse(" 1 "));
+                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse(" 2 m "));
+                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("3 KgN "));
+                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("4.5 J/K "));
+                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("6 h "));
+                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("7 g "));
+                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("8 Km"));
+                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("9 mm"));
+                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("10 mKgs-2"));
 
-        /// <summary>
-        ///A test for ParseExpressionList
-        ///</summary>
+                List<IPhysicalQuantity> actual;
+                actual = target.ParseExpressionList(ref commandLine, ref ResultLine);
+                Assert.AreEqual(CommandLineExpected, commandLine);
+                Assert.AreEqual(ResultLineExpected, ResultLine);
+
+                for (int i = 0; i < expected.Count; i++ )
+                {
+                    Assert.AreEqual(expected[i], actual[i]);
+                }
+            }
+            **/
+
+            /// <summary>
+            ///A test for ParseExpressionList
+            ///</summary>
         [TestMethod()]
         public void RunArgCommandsTest()
         {

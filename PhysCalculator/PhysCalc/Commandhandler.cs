@@ -41,51 +41,27 @@ namespace CommandParser
         }
 
         // static 
-        public Boolean StartsWithKeyword(String Keyword, String CommandLine)
-        {
-            return CommandLine.StartsWithKeyword(Keyword);
-        }
+        public Boolean StartsWithKeyword(String Keyword, String CommandLine) => CommandLine.StartsWithKeyword(Keyword);
 
         // static 
-        public String SkipToken(String Token, String CommandLine)
-        {
-            return CommandLine.SkipToken(Token);
-        }
+        public String SkipToken(String Token, String CommandLine) => CommandLine.SkipToken(Token);
 
         // static 
-        public Boolean ParseChar(Char ch, ref String CommandLine, ref string ResultLine)
-        {
-            return TokenString.ParseChar(ch, ref CommandLine, ref ResultLine);
-        }
+        public Boolean ParseChar(Char ch, ref String CommandLine, ref string ResultLine) => TokenString.ParseChar(ch, ref CommandLine, ref ResultLine);
 
         // static 
-        public Boolean TryParseChar(Char ch, ref String CommandLine)
-        {
-            return TokenString.TryParseChar(ch, ref CommandLine);
-        }
+        public Boolean TryParseChar(Char ch, ref String CommandLine) => TokenString.TryParseChar(ch, ref CommandLine);
 
         // static 
-        public Boolean ParseToken(String Token, ref String CommandLine, ref string ResultLine)
-        {
-            return TokenString.ParseToken(Token, ref CommandLine, ref ResultLine);
-        }
+        public Boolean ParseToken(String Token, ref String CommandLine, ref string ResultLine) => TokenString.ParseToken(Token, ref CommandLine, ref ResultLine);
 
         // static 
-        public Boolean TryParseToken(String Token, ref String CommandLine)
-        {
-            return TokenString.TryParseToken(Token, ref CommandLine);
-        }
+        public Boolean TryParseToken(String Token, ref String CommandLine) => TokenString.TryParseToken(Token, ref CommandLine);
 
-        public Boolean TryParseTokenPrefix(String Token, ref String CommandLine)
-        {
-            return TokenString.TryParseTokenPrefix(Token, ref CommandLine);
-        }
+        public Boolean TryParseTokenPrefix(String Token, ref String CommandLine) => TokenString.TryParseTokenPrefix(Token, ref CommandLine);
 
 
         // static 
-        public String ReadToken(String CommandLine, out String Token)
-        {
-            return CommandLine.ReadToken(out Token);
-        }
+        public String ReadToken(String CommandLine, out String Token) => CommandLine.ReadToken(out Token);
     }
 }

@@ -75,11 +75,8 @@ namespace TokenParser
 
         #region Class extension parse methods
 
-        public static Boolean IsHexDigit(this Char c)
-        {
-            //return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9');
-            return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
-        }
+        //public static Boolean IsHexDigit(this Char c) => (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9');
+        public static Boolean IsHexDigit(this Char c) => (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 
 
         public static int PeekChar(this String commandLine, out Char ch)
@@ -98,15 +95,9 @@ namespace TokenParser
         }
 
 
-        public static Boolean IsKeyword(this String commandLine, String keyword)
-        {
-            return commandLine.Equals(keyword, StringComparison.OrdinalIgnoreCase);
-        }
+        public static Boolean IsKeyword(this String commandLine, String keyword) => commandLine.Equals(keyword, StringComparison.OrdinalIgnoreCase);
 
-        public static Boolean StartsWithKeyword(this String commandLine, String keyword)
-        {
-            return commandLine.StartsWith(keyword, StringComparison.OrdinalIgnoreCase);
-        }
+        public static Boolean StartsWithKeyword(this String commandLine, String keyword) => commandLine.StartsWith(keyword, StringComparison.OrdinalIgnoreCase);
 
         public static int StartsWithKeywordPrefix(this String commandLine, String keyword)
         {
@@ -122,10 +113,7 @@ namespace TokenParser
             }
         }
 
-        public static String SkipToken(this String commandLine, String token)
-        {
-            return commandLine.Substring(token.Length).TrimStart();
-        }
+        public static String SkipToken(this String commandLine, String token) => commandLine.Substring(token.Length).TrimStart();
 
         public static String ReadToken(this String commandLine, out String token)
         {
@@ -156,10 +144,7 @@ namespace TokenParser
             return i;
         }
 
-        public static Boolean IsIdentifier(this String commandLine)
-        {
-            return (!String.IsNullOrEmpty(commandLine)) && (Char.IsLetter(commandLine[0]) || Char.Equals(commandLine[0], '_'));
-        }
+        public static Boolean IsIdentifier(this String commandLine) => (!String.IsNullOrEmpty(commandLine)) && (Char.IsLetter(commandLine[0]) || Char.Equals(commandLine[0], '_'));
 
         public static String ReadIdentifier(this String commandLine, out String identifier)
         {
