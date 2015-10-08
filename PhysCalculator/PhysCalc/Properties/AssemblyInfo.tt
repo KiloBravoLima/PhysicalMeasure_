@@ -72,4 +72,3 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("<#=major#>.<#=minor#>.<#=build#>.<#=revision#>")]
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PhysCalculatorTests")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PhysCalculatorTests2")]

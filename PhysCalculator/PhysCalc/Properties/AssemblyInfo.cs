@@ -36,17 +36,16 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.0.0")]
 // [assembly: AssemblyFileVersion("1.0.0.0")]
 
-//  build at  2015-10-06 01:57:41
+//  build at  2015-10-08 01:41:23
 //  major:    2
 //  minor:    0
-//  build:    5757
-//  revision: 3530
+//  build:    5759
+//  revision: 3041
 /*
 
 */
 
 [assembly: AssemblyVersion("2.0")]
-[assembly: AssemblyFileVersion("2.0.5757.3530")]
+[assembly: AssemblyFileVersion("2.0.5759.3041")]
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PhysCalculatorTests")]
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PhysCalculatorTests2")]
