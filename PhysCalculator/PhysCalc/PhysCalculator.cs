@@ -5,7 +5,6 @@ using System.Text;
 using System.Diagnostics;
 using System.IO;
 
-
 using PhysicalMeasure;
 
 using TokenParser;
@@ -104,7 +103,6 @@ namespace PhysicalCalculator
             someEnvironment.NamedItems.AddItem("myN", new NamedConstant(PhysicalMeasure.Constants.myN));
             someEnvironment.NamedItems.AddItem("RK", new NamedConstant(PhysicalMeasure.Constants.RK));
         }
-
         
         private void UsingAtomicAndNuclearPhysicalConstants(CalculatorEnvironment someEnvironment)
         {
@@ -320,7 +318,6 @@ namespace PhysicalCalculator
             }
             return true;
         }
-
 
         public override Boolean Command(ref String commandLine, out String resultLine)
         {
@@ -700,8 +697,6 @@ namespace PhysicalCalculator
             resultLine = ListStringBuilder.ToString();
             return true;
         }
-
-
         
         public Boolean CommandUsingConstants(ref String commandLine, ref String resultLine)
         {
@@ -1748,7 +1743,6 @@ namespace PhysicalCalculator
         public Boolean IdentifiersClear() => CurrentContext.ClearLocalIdentifiers();
 
         #endregion  Identifier access
-
     }
 
     static class DateTimeSortString
@@ -1791,7 +1785,6 @@ namespace PhysicalCalculator
 
         public static String AssemblyFileVersionInfo(this System.Reflection.Assembly assembly)
         {
-            
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             //String AsemVersion = String.Format("{0}.{1}.{2}.{3}", fileVersionInfo.FileMajorPart, fileVersionInfo.FileMinorPart, fileVersionInfo.FileBuildPart, fileVersionInfo.FilePrivatePart);
             String AsemVersion = fileVersionInfo.FileVersion;
@@ -1808,7 +1801,6 @@ namespace PhysicalCalculator
                 InfoStr = AsemVersion;
             }
             return InfoStr;
-
         }
 
         public static String AssemblyInfo(this System.Reflection.Assembly assembly)
