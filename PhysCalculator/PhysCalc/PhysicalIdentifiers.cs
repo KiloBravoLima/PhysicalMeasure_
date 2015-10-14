@@ -167,7 +167,7 @@ namespace PhysicalCalculator.Identifiers
         {
             if (unitSystem == null)
             {
-                unitSystem = new UnitSystem(name + "_system", null, null, null, null);
+                unitSystem = new UnitSystem(name + "_system", false);
             }
             
             if (unitSystem != null)
@@ -197,7 +197,7 @@ namespace PhysicalCalculator.Identifiers
             {
                 ConvertibleUnit[] convertibleunitarray = new ConvertibleUnit[1];
                 convertibleunitarray[0] = new ConvertibleUnit(name, name, primaryUnit, new ScaledValueConversion(1.0 / scaleFactor));
-                unitSystem = new UnitSystem(name + "_system", null, null, null, convertibleunitarray);
+                unitSystem = new UnitSystem(name + "_system", null, (BaseUnit[])null, null, convertibleunitarray);
                 return convertibleunitarray[0];
             }
             else

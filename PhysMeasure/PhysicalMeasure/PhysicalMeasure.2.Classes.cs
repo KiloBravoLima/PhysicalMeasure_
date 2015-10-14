@@ -3273,6 +3273,72 @@ namespace PhysicalMeasure
 
         }
         
+        public CombinedUnit(IUnitPrefix prefix, ICombinedUnit combinedUnit)
+        {
+            IUnitPrefix somePrefix = prefix;
+            Double someFactorValue = combinedUnit.FactorValue;
+
+            Boolean found = false;
+            PrefixedUnitExponentList someNumerators = new PrefixedUnitExponentList();
+            PrefixedUnitExponentList someDenominators = new PrefixedUnitExponentList();
+
+            foreach (IPrefixedUnitExponent pue in combinedUnit.Numerators)
+            {
+                Boolean added = false;
+
+                IUnitPrefix tempPrefix = null;
+                SByte ScaleFactorExponent = 0;
+                Double somePrefixExponentDiff = 0;
+
+                if (!found )
+                {
+                    if (someFactorValue != 1)
+                    {
+                        // Try to combine specified prefix with combinedUnit valueFactor to a prefix
+                        Double tempSomeFactorValue = Math.Pow(10, somePrefix.Exponent) * someFactorValue;
+                        Double somePrefixExponentD = Math.Log10(tempSomeFactorValue);
+                        SByte somePrefixExponent = (SByte)Math.Ceiling(somePrefixExponentD);
+                        somePrefixExponentDiff = somePrefixExponentD - somePrefixExponent;
+
+                        Physics.UnitPrefixes.GetFloorUnitPrefixAndScaleFactorFromExponent(somePrefixExponent, out tempPrefix, out ScaleFactorExponent);
+                    }
+                    else
+                    {   
+                        // Just use specified prefix
+                        tempPrefix = somePrefix;
+                    }
+                }
+
+                if (!found && tempPrefix != null)
+                {
+                    IPrefixedUnitExponent tempPue = new PrefixedUnitExponent(tempPrefix, pue.Unit, pue.Exponent);
+                    someNumerators.Add(tempPue);
+                    somePrefix = null;
+                    if (ScaleFactorExponent != 0)
+                    {
+                        someFactorValue = Math.Pow(10, ScaleFactorExponent + somePrefixExponentDiff);
+                    }
+
+                    found = true;
+                    added = true; 
+                }
+                
+                if (!added)
+                {
+                    someNumerators.Add(pue);
+                }
+            }
+
+            foreach (IPrefixedUnitExponent pue in combinedUnit.Denominators)
+            {
+                someDenominators.Add(pue);
+            }
+
+            this.scaleFactor = someFactorValue;
+            this.numerators = someNumerators;
+            this.denominators = someDenominators;
+        }
+
         public CombinedUnit(IPrefixedUnitExponent prefixedUnitExponent)
             : this(new PrefixedUnitExponentList(), new PrefixedUnitExponentList())
         {
@@ -5677,6 +5743,15 @@ namespace PhysicalMeasure
             CheckConvertibleUnitSystem();
         }
 
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnit[] someNamedDerivedUnits, ConvertibleUnit[] someConvertibleUnits)
+            : this(someName, someUnitPrefixes, new BaseUnit[] { someBaseUnit }, someNamedDerivedUnits)
+        {
+            this.isIsolated = someBaseUnit.BaseUnitNumber == (SByte)MonetaryBaseQuantityKind.Currency;
+            this.convertibleUnits = someConvertibleUnits;
+
+            CheckConvertibleUnitSystem();
+        }
+
         private void CheckBaseUnitSystem()
         {
             Debug.Assert(this.baseUnits != null);
@@ -6532,17 +6607,32 @@ namespace PhysicalMeasure
                 return physicalQuantity.Unit;
             }
 
-           Double prefixExponentD = Math.Log10(physicalQuantity.Value);
+            Double prefixExponentD = Math.Log10(physicalQuantity.Value);
             SByte prefixExponent = (SByte)Math.Floor(prefixExponentD);
             if (prefixExponentD - prefixExponent == 0)
             {
                 IUnitPrefix unitPrefix;
+                if (physicalQuantity.Unit.Kind == UnitKind.PrefixedUnit)
+                {
+                    PrefixedUnit prefixUnit = physicalQuantity.Unit as PrefixedUnit;
+                    if (Physics.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent((SByte)(prefixExponent + prefixUnit.Prefix.Exponent)), out unitPrefix))
+                    {
+                        return new PrefixedUnit(unitPrefix, prefixUnit.Unit);
+                    }
+                }
+                    
                 if (Physics.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent(prefixExponent), out unitPrefix))
                 {
                     INamedSymbolUnit namedSymbolUnit = physicalQuantity.Unit as INamedSymbolUnit;
                     if (namedSymbolUnit != null)
                     {
                         return new PrefixedUnit(unitPrefix, namedSymbolUnit);
+                    }
+
+                    if (physicalQuantity.Unit.Kind == UnitKind.CombinedUnit)
+                    {
+                        ICombinedUnit combinedUnit = physicalQuantity.Unit as ICombinedUnit;
+                        return new CombinedUnit(unitPrefix, combinedUnit);
                     }
                 }
             }

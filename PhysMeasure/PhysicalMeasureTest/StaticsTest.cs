@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using PhysicalMeasure;
 using static PhysicalMeasure.SI;
+//using static PhysicalMeasure.Prefix;
 
 namespace PhysicalMeasureTest
 {
@@ -759,6 +760,33 @@ namespace PhysicalMeasureTest
             PhysicalQuantity E = M * c.Pow(2);
 
             Assert.AreEqual(expected, E);
+        }
+
+        /// <summary>
+        ///A test for the SI static class
+        ///</summary>
+        [TestMethod()]
+        public void StaticsTest_CalculatePriceInEuroForEnergiConsumed()
+        {
+            // using static PhysicalMeasure.SI;
+            // using static Prefix;
+
+            BaseUnit Euro = new BaseUnit(null, (SByte)MonetaryBaseQuantityKind.Currency, "Euro", "€");
+            ConvertibleUnit Cent = new ConvertibleUnit("Euro-cent", "E¢", Euro, new ScaledValueConversion(100));  /* [E¢] = 100 * [€] */
+
+            UnitSystem EuroUnitSystem = new UnitSystem("Euros", Physics.UnitPrefixes, Euro, null, new ConvertibleUnit[] { Cent } );
+
+            PhysicalUnit kWh = Prefix.k * W * SI.h; // Kilo Watt hour
+
+            PhysicalQuantity EnergyUnitPrice = 31.75 * Cent / kWh;
+
+            PhysicalQuantity EnergyConsumed = 1234.56 * kWh;
+
+            PhysicalQuantity PriceEnergyConsumed = EnergyConsumed * EnergyUnitPrice;
+
+            Double PriceInEuroForEnergyConsumed = PriceEnergyConsumed.ConvertTo(Euro).Value;
+
+            Assert.AreEqual(PriceInEuroForEnergyConsumed, 31.75/100 * 1234.56 );
         }
         #endregion SI unit symbol test
 

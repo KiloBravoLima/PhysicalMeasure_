@@ -925,10 +925,10 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
               { "unit DKR",
                 "unit Øre = 0.01 DKR",
                 "set EnergyUnitPrice = 241.75 Øre /1.0 KWh",
-                "set EnergiConsumed = 1234.56 kWh",
-                "set PriceEnergiConsumed = EnergiConsumed * EnergyUnitPrice",
-                "print PriceEnergiConsumed [DKR]",
-                "set PriceDKREnergiConsumed=PriceEnergiConsumed [DKR]"
+                "set EnergyConsumed = 1234.56 kWh",
+                "set PriceEnergyConsumed = EnergyConsumed * EnergyUnitPrice",
+                "print PriceEnergyConsumed [DKR]",
+                "set PriceDKREnergyConsumed=PriceEnergyConsumed [DKR]"
               };
             List<String> ResultLines = new List<string>();
             string CommandLineExpected = string.Empty;
@@ -948,32 +948,32 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             INametableItem DKRItem;
             INametableItem OereItem;
             INametableItem EnergyUnitPriceItem;
-            INametableItem EnergiConsumedItem;
-            INametableItem PriceEnergiConsumedItem;
-            INametableItem PriceDKREnergiConsumedItem;
+            INametableItem EnergyConsumedItem;
+            INametableItem PriceEnergyConsumedItem;
+            INametableItem PriceDKREnergyConsumedItem;
 
             Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
             Assert.AreEqual(true, target.IdentifierItemLookup("DKR", out context, out DKRItem), "for DKR access");
             Assert.AreEqual(true, target.IdentifierItemLookup("Øre", out context, out OereItem), "for Øre access");
             Assert.AreEqual(true, target.IdentifierItemLookup("EnergyUnitPrice", out context, out EnergyUnitPriceItem), "for EnergyUnitPrice access");
-            Assert.AreEqual(true, target.IdentifierItemLookup("EnergiConsumed", out context, out EnergiConsumedItem), "for EnergiConsumed access");
-            Assert.AreEqual(true, target.IdentifierItemLookup("PriceEnergiConsumed", out context, out PriceEnergiConsumedItem), "for PriceEnergiConsumed access");
-            Assert.AreEqual(true, target.IdentifierItemLookup("PriceDKREnergiConsumed", out context, out PriceDKREnergiConsumedItem), "for PriceDKREnergiConsumedItem access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("EnergyConsumed", out context, out EnergyConsumedItem), "for EnergyConsumed access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("PriceEnergyConsumed", out context, out PriceEnergyConsumedItem), "for PriceEnergyConsumed access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("PriceDKREnergyConsumed", out context, out PriceDKREnergyConsumedItem), "for PriceDKREnergyConsumedItem access");
 
             Assert.AreEqual(IdentifierKind.Unit, DKRItem.Identifierkind, " for DKR unit item");
             Assert.AreEqual(IdentifierKind.Unit, OereItem.Identifierkind, " for Øre unit item");
             Assert.AreEqual(IdentifierKind.Variable, EnergyUnitPriceItem.Identifierkind, " for EnergyUnitPrice variable item");
-            Assert.AreEqual(IdentifierKind.Variable, EnergiConsumedItem.Identifierkind, " for EnergiConsumed variable item");
-            Assert.AreEqual(IdentifierKind.Variable, PriceEnergiConsumedItem.Identifierkind, " for PriceEnergiConsumed variable item");
-            Assert.AreEqual(IdentifierKind.Variable, PriceDKREnergiConsumedItem.Identifierkind, " for PriceDKREnergiConsumed variable item");
+            Assert.AreEqual(IdentifierKind.Variable, EnergyConsumedItem.Identifierkind, " for EnergyConsumed variable item");
+            Assert.AreEqual(IdentifierKind.Variable, PriceEnergyConsumedItem.Identifierkind, " for PriceEnergyConsumed variable item");
+            Assert.AreEqual(IdentifierKind.Variable, PriceDKREnergyConsumedItem.Identifierkind, " for PriceDKREnergyConsumed variable item");
 
             IPhysicalQuantity EnergyUnitPriceExpected = new PhysicalQuantity(241.75, ((NamedUnit)OereItem).pu.Divide( SI.W * Prefix.k * SI.h));
-            IPhysicalQuantity EnergiConsumedExpected = new PhysicalQuantity( 1234.56, SI.W * Prefix.k * SI.h);
-            IPhysicalQuantity PriceEnergiConsumedExpected = new PhysicalQuantity(298454.88, ((NamedUnit)OereItem).pu);
-            IPhysicalQuantity PriceDKREnergiConsumedExpected = new PhysicalQuantity(2984.5488, ((NamedUnit)DKRItem).pu);
+            IPhysicalQuantity EnergyConsumedExpected = new PhysicalQuantity( 1234.56, SI.W * Prefix.k * SI.h);
+            IPhysicalQuantity PriceEnergyConsumedExpected = new PhysicalQuantity(298454.88, ((NamedUnit)OereItem).pu);
+            IPhysicalQuantity PriceDKREnergyConsumedExpected = new PhysicalQuantity(2984.5488, ((NamedUnit)DKRItem).pu);
             IPhysicalQuantity AccumulatorExpected = new PhysicalQuantity(2.4175 * 1234.56, ((NamedUnit)DKRItem).pu);
 
-            IPhysicalQuantity pq = PriceEnergiConsumedItem as IPhysicalQuantity;
+            IPhysicalQuantity pq = PriceEnergyConsumedItem as IPhysicalQuantity;
             IPhysicalUnit pu = pq.Unit;
             UnitKind uk = pu.Kind;
 
@@ -987,9 +987,9 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             SByte[] esponents = cu.Exponents;
 
             Assert.AreEqual(EnergyUnitPriceExpected, EnergyUnitPriceItem as PhysicalQuantity, "for EnergyUnitPrice");
-            Assert.AreEqual(EnergiConsumedExpected, EnergiConsumedItem as PhysicalQuantity, "for EnergiConsumed");
-            Assert.AreEqual(PriceEnergiConsumedExpected, PriceEnergiConsumedItem as PhysicalQuantity, "for PriceEnergiConsumed");
-            Assert.AreEqual(PriceDKREnergiConsumedExpected, PriceDKREnergiConsumedItem as PhysicalQuantity, "for PriceDKREnergiConsumed");
+            Assert.AreEqual(EnergyConsumedExpected, EnergyConsumedItem as PhysicalQuantity, "for EnergyConsumed");
+            Assert.AreEqual(PriceEnergyConsumedExpected, PriceEnergyConsumedItem as PhysicalQuantity, "for PriceEnergyConsumed");
+            Assert.AreEqual(PriceDKREnergyConsumedExpected, PriceDKREnergyConsumedItem as PhysicalQuantity, "for PriceDKREnergyConsumed");
             Assert.AreEqual(AccumulatorExpected, AccumulatorActual, "for accumulator");
 
             ResultLine = ResultLines[ResultLines.Count - 1];
