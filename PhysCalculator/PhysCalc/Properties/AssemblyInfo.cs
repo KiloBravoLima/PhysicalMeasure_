@@ -9,9 +9,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Physical quantity calculator")]
 [assembly: AssemblyConfiguration("")]
 
-[assembly: AssemblyCompany("Kilo Bravo Lima")]
+[assembly: AssemblyCompany("Kilo Bravo")]
 [assembly: AssemblyProduct("PhysCalc")]
-[assembly: AssemblyCopyright("Copyright © Kilo Bravo Lima 2010-2015")]
+[assembly: AssemblyCopyright("Copyright © 2010-2015 Kilo Bravo")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -23,29 +23,15 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("9e19d828-26ef-460d-8d72-a0f3c9b675f4")]
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-// [assembly: AssemblyVersion("1.0.0.0")]
-// [assembly: AssemblyFileVersion("1.0.0.0")]
 
-//  build at  2015-10-08 01:41:23
+//  Build at  2015-10-14 02:35:15
 //  major:    2
 //  minor:    0
-//  build:    5759
-//  revision: 3041
-/*
+//  build:    5765
+//  revision: 4657
 
-*/
 
 [assembly: AssemblyVersion("2.0")]
-[assembly: AssemblyFileVersion("2.0.5759.3041")]
+[assembly: AssemblyFileVersion("2.0.5765.4657")]
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("PhysCalculatorTests")]
+[assembly: InternalsVisibleTo("PhysCalculatorTests")]
