@@ -2597,6 +2597,21 @@ namespace PhysicalMeasure
         {
         }
 
+
+        public static PhysicalUnit operator *(NamedDerivedUnit u, IUnitPrefix up)
+        {
+            Debug.Assert(up != null, "The " + nameof(up) + " parameter must be specified");
+
+            return new PrefixedUnit(up, u);
+        }
+
+        public static PhysicalUnit operator *(IUnitPrefix up, NamedDerivedUnit u)
+        {
+            Debug.Assert(up != null, "The " + nameof(up) + " parameter must be specified");
+
+            return new PrefixedUnit(up, u);
+        }
+
         /// <summary>
         /// String PrefixedUnitExponent formatted symbol (without system name prefixed).
         /// </summary>
