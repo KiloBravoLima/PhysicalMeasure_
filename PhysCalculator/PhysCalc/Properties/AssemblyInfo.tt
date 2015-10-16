@@ -30,7 +30,12 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("PhysCalc")]
 [assembly: AssemblyDescription("Physical quantity calculator")]
-[assembly: AssemblyConfiguration("")]
+ 
+#if DEBUG
+[assembly: AssemblyConfiguration("Debug")]
+#else
+// [assembly: AssemblyConfiguration("Release")]
+#endif
 
 [assembly: AssemblyCompany("Kilo Bravo")]
 [assembly: AssemblyProduct("PhysCalc")]
@@ -56,5 +61,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyVersion("<#=major#>.<#=minor#>")]
 [assembly: AssemblyFileVersion("<#=major#>.<#=minor#>.<#=build#>.<#=revision#>")]
+[assembly: AssemblyInformationalVersion("<#=major#>.<#=minor#>.<#=build#>.<#=revision#>")]
+
 
 [assembly: InternalsVisibleTo("PhysCalculatorTests")]

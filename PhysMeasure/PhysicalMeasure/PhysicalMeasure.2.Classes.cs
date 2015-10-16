@@ -2597,7 +2597,6 @@ namespace PhysicalMeasure
         {
         }
 
-
         public static PhysicalUnit operator *(NamedDerivedUnit u, IUnitPrefix up)
         {
             Debug.Assert(up != null, "The " + nameof(up) + " parameter must be specified");

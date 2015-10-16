@@ -31,7 +31,13 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("PhysicalMeasure")]
 [assembly: AssemblyDescription("Physical Unit System Framework. PhysicalMeasure is a C# library for handling physical quantities by specifying value and unit. Scaling of units and conversions between multiple unit systems are supported.")]
-[assembly: AssemblyConfiguration("")]
+
+#if DEBUG
+[assembly: AssemblyConfiguration("Debug")]
+#else
+// [assembly: AssemblyConfiguration("Release")]
+#endif
+
 [assembly: AssemblyCompany("Kilo Bravo")]
 [assembly: AssemblyProduct("PhysicalMeasure")]
 [assembly: AssemblyCopyright("Copyright © 2010-2015 Kilo Bravo")]
@@ -56,6 +62,8 @@ using System.Runtime.InteropServices;
 //  revision: <#=revision#>
 [assembly: AssemblyVersion("<#=major#>.<#=minor#>")]
 [assembly: AssemblyFileVersion("<#=major#>.<#=minor#>.<#=build#>.<#=revision#>")]
+[assembly: AssemblyInformationalVersion("<#=major#>.<#=minor#>.<#=build#>.<#=revision#>")]
+
 
 
 [assembly: InternalsVisibleTo("PhysCalculatorTests")]
