@@ -1652,15 +1652,8 @@ namespace PhysicalMeasure
             return pq;
         }
 
-        public virtual IPhysicalQuantity ConvertToSystemUnit(ref Double quantity)
-        {
-            // TODO : Conversion value is specified. Must assume Specific conversion e.g. specific temperature.
-            Debug.Assert(false);  //
-            IPhysicalQuantity pq = this.ConvertToSystemUnit().Multiply(quantity);
-            //// Mark quantity as used now
-            quantity = 1;
-            return pq;
-        }
+        // Conversion value is specified. Must assume Specific conversion e.g. specific temperature.
+        public abstract IPhysicalQuantity ConvertToSystemUnit(ref Double quantity);
 
         public abstract IPhysicalQuantity ConvertToBaseUnit();
 
@@ -2862,6 +2855,16 @@ namespace PhysicalMeasure
             return pq;
         }
 
+        public override IPhysicalQuantity ConvertToSystemUnit(ref Double quantity)
+        {
+            // Conversion value is specified. Must assume Specific conversion e.g. specific temperature.
+            IPhysicalQuantity pq = unit.ConvertToSystemUnit(ref quantity);
+            if (pq != null && prefix != null && prefix.Exponent != 0)
+            {
+                pq = pq.Multiply(prefix.Value);
+            }
+            return pq;
+        }
 
         public override IPhysicalQuantity ConvertToBaseUnit()
         {
@@ -2979,6 +2982,17 @@ namespace PhysicalMeasure
         public override IPhysicalQuantity ConvertToSystemUnit()
         {
             IPhysicalQuantity pq = prefixedUnit.ConvertToSystemUnit();
+            if (exponent != 1)
+            {
+                pq = pq.Pow(exponent);
+            }
+            return pq;
+        }
+
+        public override IPhysicalQuantity ConvertToSystemUnit(ref Double quantity)
+        {
+            // Conversion value is specified. Must assume Specific conversion e.g. specific temperature.
+            IPhysicalQuantity pq = prefixedUnit.ConvertToSystemUnit(ref quantity);
             if (exponent != 1)
             {
                 pq = pq.Pow(exponent);
