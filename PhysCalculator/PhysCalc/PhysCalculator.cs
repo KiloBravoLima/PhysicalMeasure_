@@ -626,6 +626,7 @@ namespace PhysicalCalculator
                         ParseChar('=', ref commandLine, ref resultLine);
                         //commandLine.ReadToken(out FilePathStr);
                         FilePathStr = commandLine;
+                        commandLine = "";
                     }
                 }
 
@@ -633,6 +634,7 @@ namespace PhysicalCalculator
                 if (!string.IsNullOrWhiteSpace(commandLine))
                 {
                     FilePathStr = commandLine;
+                    commandLine = "";
                 }
             }
 
