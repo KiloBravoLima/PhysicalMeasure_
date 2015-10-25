@@ -772,9 +772,11 @@ namespace PhysicalMeasureTest
             // using static Prefix;
 
             BaseUnit Euro = new BaseUnit(null, (SByte)MonetaryBaseQuantityKind.Currency, "Euro", "€");
-            ConvertibleUnit Cent = new ConvertibleUnit("Euro-cent", "E¢", Euro, new ScaledValueConversion(100));  /* [E¢] = 100 * [€] */
+            ConvertibleUnit Cent = new ConvertibleUnit("Euro-cent", "¢", Euro, new ScaledValueConversion(100));  /* [¢] = 100 * [€] */
 
             UnitSystem EuroUnitSystem = new UnitSystem("Euros", Physics.UnitPrefixes, Euro, null, new ConvertibleUnit[] { Cent } );
+
+            PhysicalUnit EurosAndCents = new MixedUnit(Euro, " ", Cent,"00", true);
 
             PhysicalUnit kWh = Prefix.k * W * SI.h; // Kilo Watt hour
 
@@ -784,9 +786,15 @@ namespace PhysicalMeasureTest
 
             PhysicalQuantity PriceEnergyConsumed = EnergyConsumed * EnergyUnitPrice;
 
+            IPhysicalQuantity PriceEnergyConsumedEurosAndCents = PriceEnergyConsumed.ConvertTo(EurosAndCents);
+
             Double PriceInEuroForEnergyConsumed = PriceEnergyConsumed.ConvertTo(Euro).Value;
 
+            String PriceInEuroForEnergyConsumedStr = PriceEnergyConsumedEurosAndCents.ToString();
+
             Assert.AreEqual(PriceInEuroForEnergyConsumed, 31.75/100 * 1234.56 );
+            Assert.AreEqual(PriceInEuroForEnergyConsumedStr, "391 € 97 ¢");
+
         }
         #endregion SI unit symbol test
 

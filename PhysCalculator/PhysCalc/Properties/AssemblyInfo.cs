@@ -29,16 +29,16 @@ using System.Runtime.InteropServices;
 [assembly: Guid("9e19d828-26ef-460d-8d72-a0f3c9b675f4")]
 
 
-//  Build at  2015-10-20 02:17:20
+//  Build at  2015-10-25 22:42:50
 //  major:    2
 //  minor:    0
-//  build:    5771
-//  revision: 4120
+//  build:    5776
+//  revision: 40885
 
 
 [assembly: AssemblyVersion("2.0")]
-[assembly: AssemblyFileVersion("2.0.5771.4120")]
-[assembly: AssemblyInformationalVersion("2.0.5771.4120")]
+[assembly: AssemblyFileVersion("2.0.5776.40885")]
+[assembly: AssemblyInformationalVersion("2.0.5776.40885")]
 
 
 [assembly: InternalsVisibleTo("PhysCalculatorTests")]

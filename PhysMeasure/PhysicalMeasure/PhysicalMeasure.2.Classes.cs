@@ -1511,6 +1511,7 @@ namespace PhysicalMeasure
             if ((!String.IsNullOrEmpty(unitName))
                 && (system != null)
                 && (system != Physics.CurrentUnitSystems.Default)
+                && (!system.IsIsolatedUnitSystem)
                  /*
                  && (!(    Physics.SI_Units == Physics.Default_UnitSystem 
                         && system.IsCombinedUnitSystem 
@@ -1561,6 +1562,34 @@ namespace PhysicalMeasure
                 valStr = quantity.ToString() + " ?" + format + "?";
             }
             return valStr;
+        }
+
+        public virtual string ValueAndUnitString(double quantity) 
+        {
+            String valStr = ValueString(quantity);
+            String unitStr = this.ToString();
+            if (String.IsNullOrEmpty(unitStr))
+            {
+                return valStr;
+            }
+            else
+            {
+                return valStr + " " + unitStr;
+            }
+        }
+
+        public virtual string ValueAndUnitString(double quantity, String format, IFormatProvider formatProvider)
+        {
+            String valStr = ValueString(quantity, format, formatProvider);
+            String unitStr = this.ToString();
+            if (String.IsNullOrEmpty(unitStr))
+            {
+                return valStr;
+            }
+            else
+            {
+                return valStr + " " + unitStr;
+            }
         }
 
         public virtual Double FactorValue => 1;
@@ -4880,6 +4909,8 @@ namespace PhysicalMeasure
 
         protected readonly String separator;
         protected readonly String fractionalValueFormat;
+        protected readonly Boolean inlineUnitFormat;
+
 
         public IPhysicalUnit MainUnit
         {
@@ -4908,12 +4939,19 @@ namespace PhysicalMeasure
             }
         }
 
-        public MixedUnit(IPhysicalUnit someMainUnit, String someSeparator, IPhysicalUnit someFractionalUnit, String someFractionalValueFormat)
+        public MixedUnit(IPhysicalUnit someMainUnit, String someSeparator, IPhysicalUnit someFractionalUnit, String someFractionalValueFormat, Boolean someInlineUnitFormat)
         {
             this.mainUnit = someMainUnit;
             this.separator = someSeparator;
             this.fractionalUnit = someFractionalUnit;
             this.fractionalValueFormat = someFractionalValueFormat;
+            this.inlineUnitFormat = someInlineUnitFormat;
+        }
+
+        public MixedUnit(IPhysicalUnit someMainUnit, String someSeparator, IPhysicalUnit someFractionalUnit, String someFractionalValueFormat)
+            : this(someMainUnit, someSeparator, someFractionalUnit, someFractionalValueFormat, false)
+
+        {
         }
 
         public MixedUnit(IPhysicalUnit someMainUnit, String separator, IPhysicalUnit someFractionalUnit)
@@ -5010,26 +5048,81 @@ namespace PhysicalMeasure
             Debug.Assert(mainUnit != null);
 
             string valStr;
-            if (FractionalUnit != null)
+            if (FractionalUnit == null)
             {
-               Double integralValue = Math.Truncate(quantity);
-               Double fractionalValue = quantity - integralValue;
-                IPhysicalQuantity fracPQ = new PhysicalQuantity(fractionalValue, this.MainUnit);
-                IPhysicalQuantity fracPQConv = fracPQ.ConvertTo(this.FractionalUnit);
-                if (fracPQConv != null)
-                {
-                    valStr = MainUnit.ValueString(integralValue, format, formatProvider) + separator + FractionalUnit.ValueString(fracPQConv.Value, fractionalValueFormat, null);
-                }
-                else
-                {
-                    valStr = MainUnit.ValueString(quantity, format, formatProvider);
-                }
+                valStr = MainUnit.ValueString(quantity, format, formatProvider);
+            }
+
+            Double integralValue = Math.Truncate(quantity);
+            Double fractionalValue = quantity - integralValue;
+            IPhysicalQuantity fracPQ = new PhysicalQuantity(fractionalValue, this.MainUnit);
+            IPhysicalQuantity fracPQConv = fracPQ.ConvertTo(this.FractionalUnit);
+            if (fracPQConv != null)
+            {
+                valStr = MainUnit.ValueString(integralValue, format, formatProvider) + separator + FractionalUnit.ValueString(fracPQConv.Value, fractionalValueFormat, null);
             }
             else
             {
                 valStr = MainUnit.ValueString(quantity, format, formatProvider);
             }
             return valStr;
+        }
+
+        public override string ValueAndUnitString(double quantity) => ValueAndUnitString(quantity, null, null);
+
+        public override string ValueAndUnitString(double quantity, String format, IFormatProvider formatProvider)
+        {
+            Debug.Assert(mainUnit != null);
+
+            string resultStr;
+            if (FractionalUnit == null)
+            {
+                resultStr = MainUnit.ValueAndUnitString(quantity, format, formatProvider);
+                return resultStr;
+            }
+
+            Double integralValue = Math.Truncate(quantity);
+            Double fractionalValue = quantity - integralValue;
+            IPhysicalQuantity fracPQ = new PhysicalQuantity(fractionalValue, this.MainUnit);
+            IPhysicalQuantity fracPQConv = fracPQ.ConvertTo(this.FractionalUnit);
+
+            if (inlineUnitFormat)
+            {
+                if (fracPQConv != null)
+                {
+                    resultStr = MainUnit.ValueAndUnitString(integralValue, format, formatProvider)
+                                + separator
+                                + FractionalUnit.ValueAndUnitString(fracPQConv.Value, fractionalValueFormat, null);
+                }
+                else
+                {
+                    resultStr = MainUnit.ValueAndUnitString(quantity, format, formatProvider);
+                }
+
+                return resultStr;
+            }
+
+            String valStr;
+            if (fracPQConv != null)
+            {
+                valStr = MainUnit.ValueString(integralValue, format, formatProvider) + separator + FractionalUnit.ValueString(fracPQConv.Value, fractionalValueFormat, null);
+            }
+            else
+            {
+                valStr = MainUnit.ValueString(quantity, format, formatProvider);
+            }
+
+            String unitStr = this.ToString();
+            if (String.IsNullOrEmpty(unitStr))
+            {
+                resultStr = valStr;
+            }
+            else
+            {
+                resultStr = valStr + " " + unitStr;
+            }
+
+            return resultStr;
         }
     }
 
@@ -6251,7 +6344,15 @@ namespace PhysicalMeasure
         public PhysicalQuantity(Double somevalue, IPhysicalUnit someunit)
         {
             this.value = somevalue;
-            this.unit = someunit;
+
+            if (someunit != null)
+            {
+                this.unit = someunit;
+            }
+            else
+            {
+                this.unit = Physics.dimensionless;
+            }
         }
 
         public PhysicalQuantity(IPhysicalQuantity somephysicalquantity)
@@ -6299,34 +6400,16 @@ namespace PhysicalMeasure
         /// </summary>
         public String ToString(String format, IFormatProvider formatProvider)
         {
-           Double unitValue = this.Unit.FactorValue;
+            Double unitValue = this.Unit.FactorValue;
             IUnit pureUnit = this.Unit.PureUnit;
-            String valStr = pureUnit.ValueString(this.Value * unitValue, format, formatProvider);
-            String unitStr = pureUnit.ToString();
-            if (String.IsNullOrEmpty(unitStr))
-            {
-                return valStr;
-            }
-            else
-            {
-                return valStr + " " + unitStr;
-            }
+            return pureUnit.ValueAndUnitString(this.Value * unitValue, format, formatProvider);
         }
 
         public override String ToString()
         {
-           Double unitValue = this.Unit.FactorValue;
+            Double unitValue = this.Unit.FactorValue;
             IUnit pureUnit = this.Unit.PureUnit;
-            String valStr = pureUnit.ValueString(this.Value * unitValue);
-            String unitStr = pureUnit.ToString();
-            if (String.IsNullOrEmpty(unitStr))
-            {
-                return valStr;
-            }
-            else
-            {
-                return valStr + " " + unitStr;
-            }
+            return pureUnit.ValueAndUnitString(this.Value * unitValue);
         }
 
         public virtual String ToPrintString()

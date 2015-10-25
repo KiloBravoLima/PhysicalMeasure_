@@ -177,6 +177,9 @@ namespace PhysicalMeasure
         String ValueString(Double quantity);
         String ValueString(Double quantity, String format, IFormatProvider formatProvider);
 
+        String ValueAndUnitString(Double quantity);
+        String ValueAndUnitString(Double quantity, String format, IFormatProvider formatProvider);
+
         Double FactorValue { get; }
         IPhysicalUnit PureUnit { get; }
     }
