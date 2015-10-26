@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="PhysicalMeasure.ico" />
+    <Content Include="PhysicalMeasure.png" />
     <Content Include="Properties\AssemblyInfo.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AssemblyInfo.cs</LastGenOutput>

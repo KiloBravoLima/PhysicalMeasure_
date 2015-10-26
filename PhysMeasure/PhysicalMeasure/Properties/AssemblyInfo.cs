@@ -32,14 +32,14 @@ using System.Runtime.InteropServices;
 [assembly: Guid("c12e9e3a-4f77-4b3b-9175-5f30dbb00be9")]
 
 
-//  Build at  2015-10-25 22:42:50
+//  Build at  2015-10-26 18:44:10
 //  major:    2
 //  minor:    0
-//  build:    5776
-//  revision: 40885
+//  build:    5777
+//  revision: 33725
 [assembly: AssemblyVersion("2.0")]
-[assembly: AssemblyFileVersion("2.0.5776.40885")]
-[assembly: AssemblyInformationalVersion("2.0.5776.40885")]
+[assembly: AssemblyFileVersion("2.0.5777.33725")]
+[assembly: AssemblyInformationalVersion("2.0.5777.33725")]
 
 
 
