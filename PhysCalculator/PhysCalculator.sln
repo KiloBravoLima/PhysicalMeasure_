@@ -31,6 +31,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7EFECBE3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasure", "..\PhysMeasure\PhysicalMeasure\PhysicalMeasure.csproj", "{4A1384AC-58AA-4758-822F-25CCC6123F51}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSInteractive", "CSInteractive", "{CC98C940-05AA-4889-8B52-F97A477AC754}"
+	ProjectSection(SolutionItems) = preProject
+		CSInteractivePhysicalMeasureTest.csx = CSInteractivePhysicalMeasureTest.csx
+		CSInteractiveSetup.csx = CSInteractiveSetup.csx
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionsTests", "..\PhysMeasure\KBLExtensionsTests\ExtensionsTests.csproj", "{51533EFE-2004-4123-8099-6A8226470F91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KBL.Extensions", "..\PhysMeasure\KBLExtensions\KBL.Extensions.csproj", "{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +95,30 @@ Global
 		{4A1384AC-58AA-4758-822F-25CCC6123F51}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4A1384AC-58AA-4758-822F-25CCC6123F51}.Release|x86.ActiveCfg = Release|Any CPU
 		{4A1384AC-58AA-4758-822F-25CCC6123F51}.Release|x86.Build.0 = Release|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Debug|x86.Build.0 = Debug|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Release|x86.ActiveCfg = Release|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Release|x86.Build.0 = Release|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Debug|x86.Build.0 = Debug|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|x86.ActiveCfg = Release|Any CPU
+		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +126,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{3D655BBE-CBDC-4023-ACD4-6B5F65AF01FB} = {7EFECBE3-80D2-46D0-93EE-CEEF9971C067}
 		{02BDC068-8801-44EB-B355-AD4C48EEC54D} = {7EFECBE3-80D2-46D0-93EE-CEEF9971C067}
+		{51533EFE-2004-4123-8099-6A8226470F91} = {7EFECBE3-80D2-46D0-93EE-CEEF9971C067}
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 4

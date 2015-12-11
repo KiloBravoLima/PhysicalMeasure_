@@ -843,10 +843,10 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
             string ResultLineExpected = null;
-            IPhysicalQuantity AccumulatorExpected = new PhysicalQuantity(111);
+            Quantity AccumulatorExpected = new Quantity(111);
             bool expected = true;
             bool actual;
-            IPhysicalQuantity AccumulatorActual;
+            Quantity AccumulatorActual;
             actual = target.Command(ref CommandLine, out ResultLine);
             string AccumulatorAccessResultLineExpected = "";
 
@@ -881,7 +881,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             CommandReader commandLineReader = new CommandReader(CommandLines, resultLineWriter) ;
             target.ExecuteCommands(localContext, commandLineReader, resultLineWriter);
 
-            IPhysicalQuantity AccumulatorActual;
+            Quantity AccumulatorActual;
             // actual = target.Command(ref CommandLine, out ResultLine);
             string AccumulatorAccessResultLineExpected = "";
 
@@ -890,15 +890,15 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
             Assert.AreEqual(true, target.IdentifierItemLookup("USD", out context, out USDItem), "for accumulator access");
-            ICombinedUnit ExpectedUnit = new CombinedUnit();
+            CombinedUnit ExpectedUnit = new CombinedUnit();
             Assert.AreEqual(USDItem.Identifierkind, IdentifierKind.Unit, "For USD unit item");
             ExpectedUnit = ExpectedUnit.CombineMultiply(((NamedUnit)USDItem).pu);
 
-            ICombinedUnit kWh_Unit = SI.W.CombineMultiply(Prefix.k).CombineMultiply(SI.h);
+            CombinedUnit kWh_Unit = SI.W.CombineMultiply(Prefix.k).CombineMultiply(SI.h);
             ExpectedUnit = ExpectedUnit.CombineDivide(kWh_Unit);
 
             // IPhysicalUnit ExpectedUnit;
-            IPhysicalQuantity AccumulatorExpected = new PhysicalQuantity(6521.73913043478, ExpectedUnit);  // {6521,73913043478 USD/KW·h}
+            Quantity AccumulatorExpected = new Quantity(6521.73913043478, ExpectedUnit);  // {6521,73913043478 USD/KW·h}
             Assert.AreEqual(AccumulatorExpected, AccumulatorActual, "For accumulator");
 
             ResultLine = ResultLines[ResultLines.Count - 1]; 
@@ -940,7 +940,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             CommandReader commandLineReader = new CommandReader(CommandLines, resultLineWriter);
             target.ExecuteCommands(localContext, commandLineReader, resultLineWriter);
 
-            IPhysicalQuantity AccumulatorActual;
+            Quantity AccumulatorActual;
             // actual = target.Command(ref CommandLine, out ResultLine);
             string AccumulatorAccessResultLineExpected = "";
 
@@ -967,14 +967,14 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.AreEqual(IdentifierKind.Variable, PriceEnergyConsumedItem.Identifierkind, " for PriceEnergyConsumed variable item");
             Assert.AreEqual(IdentifierKind.Variable, PriceDKREnergyConsumedItem.Identifierkind, " for PriceDKREnergyConsumed variable item");
 
-            IPhysicalQuantity EnergyUnitPriceExpected = new PhysicalQuantity(241.75, ((NamedUnit)OereItem).pu.Divide( SI.W * Prefix.k * SI.h));
-            IPhysicalQuantity EnergyConsumedExpected = new PhysicalQuantity( 1234.56, SI.W * Prefix.k * SI.h);
-            IPhysicalQuantity PriceEnergyConsumedExpected = new PhysicalQuantity(298454.88, ((NamedUnit)OereItem).pu);
-            IPhysicalQuantity PriceDKREnergyConsumedExpected = new PhysicalQuantity(2984.5488, ((NamedUnit)DKRItem).pu);
-            IPhysicalQuantity AccumulatorExpected = new PhysicalQuantity(2.4175 * 1234.56, ((NamedUnit)DKRItem).pu);
+            IQuantity EnergyUnitPriceExpected = new Quantity(241.75, ((NamedUnit)OereItem).pu.Divide( SI.W * Prefix.k * SI.h));
+            IQuantity EnergyConsumedExpected = new Quantity( 1234.56, SI.W * Prefix.k * SI.h);
+            IQuantity PriceEnergyConsumedExpected = new Quantity(298454.88, ((NamedUnit)OereItem).pu);
+            IQuantity PriceDKREnergyConsumedExpected = new Quantity(2984.5488, ((NamedUnit)DKRItem).pu);
+            IQuantity AccumulatorExpected = new Quantity(2.4175 * 1234.56, ((NamedUnit)DKRItem).pu);
 
-            IPhysicalQuantity pq = PriceEnergyConsumedItem as IPhysicalQuantity;
-            IPhysicalUnit pu = pq.Unit;
+            IQuantity pq = PriceEnergyConsumedItem as IQuantity;
+            Unit pu = pq.Unit;
             UnitKind uk = pu.Kind;
 
             ICombinedUnit cu = pu as ICombinedUnit;
@@ -986,10 +986,10 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             SByte[] esponents = cu.Exponents;
 
-            Assert.AreEqual(EnergyUnitPriceExpected, EnergyUnitPriceItem as PhysicalQuantity, "for EnergyUnitPrice");
-            Assert.AreEqual(EnergyConsumedExpected, EnergyConsumedItem as PhysicalQuantity, "for EnergyConsumed");
-            Assert.AreEqual(PriceEnergyConsumedExpected, PriceEnergyConsumedItem as PhysicalQuantity, "for PriceEnergyConsumed");
-            Assert.AreEqual(PriceDKREnergyConsumedExpected, PriceDKREnergyConsumedItem as PhysicalQuantity, "for PriceDKREnergyConsumed");
+            Assert.AreEqual(EnergyUnitPriceExpected, EnergyUnitPriceItem as Quantity, "for EnergyUnitPrice");
+            Assert.AreEqual(EnergyConsumedExpected, EnergyConsumedItem as Quantity, "for EnergyConsumed");
+            Assert.AreEqual(PriceEnergyConsumedExpected, PriceEnergyConsumedItem as Quantity, "for PriceEnergyConsumed");
+            Assert.AreEqual(PriceDKREnergyConsumedExpected, PriceDKREnergyConsumedItem as Quantity, "for PriceDKREnergyConsumed");
             Assert.AreEqual(AccumulatorExpected, AccumulatorActual, "for accumulator");
 
             ResultLine = ResultLines[ResultLines.Count - 1];
@@ -1146,19 +1146,19 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
         /*****************
         /// <summary>
-        ///A test for GetPhysicalQuantity
+        ///A test for GetQuantity
         ///</summary>
         [TestMethod()]
-        public void GetPhysicalQuantityTest()
+        public void GetQuantityTest()
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
             string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity actual;
-            actual = target.GetPhysicalQuantity(ref commandLine, ref ResultLine);
+            IQuantity expected = null; // TODO: Initialize to an appropriate value
+            IQuantity actual;
+            actual = target.GetQuantity(ref commandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -1176,8 +1176,8 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity actual;
+            IQuantity expected = null; // TODO: Initialize to an appropriate value
+            IQuantity actual;
             actual = target.ParseConvertedExpression(ref commandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
@@ -1196,8 +1196,8 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity actual;
+            IQuantity expected = null; // TODO: Initialize to an appropriate value
+            IQuantity actual;
             actual = target.ParseExpression(ref commandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
@@ -1218,18 +1218,18 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
                 string CommandLineExpected = string.Empty; 
                 string ResultLine = string.Empty; 
                 string ResultLineExpected = string.Empty; 
-                List<IPhysicalQuantity> expected = new List<IPhysicalQuantity>();
-                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse(" 1 "));
-                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse(" 2 m "));
-                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("3 KgN "));
-                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("4.5 J/K "));
-                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("6 h "));
-                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("7 g "));
-                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("8 Km"));
-                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("9 mm"));
-                expected.Add(PhysicalMeasure.PhysicalQuantity.Parse("10 mKgs-2"));
+                List<IQuantity> expected = new List<IQuantity>();
+                expected.Add(PhysicalMeasure.Quantity.Parse(" 1 "));
+                expected.Add(PhysicalMeasure.Quantity.Parse(" 2 m "));
+                expected.Add(PhysicalMeasure.Quantity.Parse("3 KgN "));
+                expected.Add(PhysicalMeasure.Quantity.Parse("4.5 J/K "));
+                expected.Add(PhysicalMeasure.Quantity.Parse("6 h "));
+                expected.Add(PhysicalMeasure.Quantity.Parse("7 g "));
+                expected.Add(PhysicalMeasure.Quantity.Parse("8 Km"));
+                expected.Add(PhysicalMeasure.Quantity.Parse("9 mm"));
+                expected.Add(PhysicalMeasure.Quantity.Parse("10 mKgs-2"));
 
-                List<IPhysicalQuantity> actual;
+                List<IQuantity> actual;
                 actual = target.ParseExpressionList(ref commandLine, ref ResultLine);
                 Assert.AreEqual(CommandLineExpected, commandLine);
                 Assert.AreEqual(ResultLineExpected, ResultLine);
@@ -1260,17 +1260,17 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             target.Run();
 
-            IPhysicalQuantity VarValue;
-            IPhysicalQuantity VarValueExpected = new PhysicalQuantity(340, SI.m/SI.s);
+            Quantity VarValue;
+            Quantity VarValueExpected = new Quantity(340, SI.m/SI.s);
             String ResultLine = null;
             bool GetVarRes = target.VariableGet(target.CurrentContext, "SoundSpeed", out VarValue, ref ResultLine);
             Assert.IsTrue(GetVarRes);
-            Assert.AreEqual<IPhysicalQuantity>( VarValueExpected, VarValue);
+            Assert.AreEqual<IQuantity>( VarValueExpected, VarValue);
       
-            VarValueExpected = new PhysicalQuantity(1224, new CombinedUnit() *  new PrefixedUnitExponent(Prefix.K, SI.m, 1) /SI.h);
+            VarValueExpected = new Quantity(1224, new CombinedUnit() *  new PrefixedUnitExponent(Prefix.K, SI.m, 1) /SI.h);
             GetVarRes = target.VariableGet(target.CurrentContext, "SoundSpeedInKmPrHour", out VarValue, ref ResultLine);
             Assert.IsTrue(GetVarRes);
-            Assert.AreEqual<IPhysicalQuantity>( VarValueExpected, VarValue);
+            Assert.AreEqual<IQuantity>( VarValueExpected, VarValue);
         }
 
         /*****************
@@ -1285,8 +1285,8 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity actual;
+            IQuantity expected = null; // TODO: Initialize to an appropriate value
+            IQuantity actual;
             actual = target.ParseFactor(ref commandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
@@ -1301,13 +1301,13 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         public void ParseOptionalConvertedExpressionTest()
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
-            IPhysicalQuantity pq = null; // TODO: Initialize to an appropriate value
+            IQuantity pq = null; // TODO: Initialize to an appropriate value
             string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity actual;
+            IQuantity expected = null; // TODO: Initialize to an appropriate value
+            IQuantity actual;
             actual = target.ParseOptionalConvertedExpression(pq, ref commandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
@@ -1322,13 +1322,13 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         public void ParseOptionalExpressionTest()
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
-            IPhysicalQuantity pq = null; // TODO: Initialize to an appropriate value
+            IQuantity pq = null; // TODO: Initialize to an appropriate value
             string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity actual;
+            IQuantity expected = null; // TODO: Initialize to an appropriate value
+            IQuantity actual;
             actual = target.ParseOptionalExpression(pq, ref commandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
@@ -1343,13 +1343,13 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         public void ParseOptionalTermTest()
         {
             PhysCalculator target = new PhysCalculator(); // TODO: Initialize to an appropriate value
-            IPhysicalQuantity pq = null; // TODO: Initialize to an appropriate value
+            IQuantity pq = null; // TODO: Initialize to an appropriate value
             string commandLine = string.Empty; // TODO: Initialize to an appropriate value
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity actual;
+            IQuantity expected = null; // TODO: Initialize to an appropriate value
+            IQuantity actual;
             actual = target.ParseOptionalTerm(pq, ref commandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
@@ -1369,8 +1369,8 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLineExpected = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLine = string.Empty; // TODO: Initialize to an appropriate value
             string ResultLineExpected = string.Empty; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity expected = null; // TODO: Initialize to an appropriate value
-            IPhysicalQuantity actual;
+            IQuantity expected = null; // TODO: Initialize to an appropriate value
+            IQuantity actual;
             actual = target.ParseTerm(ref commandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, commandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
@@ -1387,13 +1387,13 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         {
             PhysCalculator target = new PhysCalculator();
             string VariableName = "Testvar";
-            IPhysicalQuantity VariableValue = 2 * SI.N * SI.m;
+            Quantity VariableValue = 2 * SI.N * SI.m;
             bool expected = true;
             bool actual;
             actual = target.VariableSet(VariableName, VariableValue);
             Assert.AreEqual(expected, actual);
 
-            IPhysicalQuantity VariableValueExpected = VariableValue;
+            Quantity VariableValueExpected = VariableValue;
             String ResultLine = null;
             actual = target.VariableGet(target.CurrentContext, VariableName, out VariableValue, ref ResultLine);
             Assert.AreEqual(VariableValueExpected, VariableValue);
@@ -1408,7 +1408,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         {
             PhysCalculator target = new PhysCalculator();
             string VariableName = "Testvar";
-            IPhysicalQuantity VariableValue = 2 * SI.N * SI.m;
+            Quantity VariableValue = 2 * SI.N * SI.m;
             bool expected = true;
             bool actual;
             actual = target.VariableSet(VariableName, VariableValue);
@@ -1426,7 +1426,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         {
             PhysCalculator target = new PhysCalculator();
             string VariableName = "Testvar";
-            IPhysicalQuantity VariableValue = 2 * SI.N * SI.m; 
+            Quantity VariableValue = 2 * SI.N * SI.m; 
             bool expected = true; 
             bool actual;
             actual = target.VariableSet(VariableName, VariableValue);

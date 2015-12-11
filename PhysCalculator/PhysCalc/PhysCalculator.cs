@@ -5,6 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.IO;
 
+using KBL.Extensions;
 using PhysicalMeasure;
 
 using TokenParser;
@@ -23,7 +24,7 @@ namespace PhysicalCalculator
         ResultWriter ResultLineWriter = null;
 
         const string AccumulatorName = "Accumulator";
-        IPhysicalQuantity Accumulator = null;
+        Quantity Accumulator = null;
         CalculatorEnvironment GlobalContext;
         public CalculatorEnvironment CurrentContext;
 
@@ -266,11 +267,11 @@ namespace PhysicalCalculator
                 {
                     /**
                         Possible exceptions:
-                            InvalidCastException("The 'obj' argument is not a IPhysicalUnit object.");
+                            InvalidCastException("The 'obj' argument is not a IUnit object.");
                             ArgumentException("object'unitStr physical unit " + temp.Unit.ToString() + " is not convertible to a " + ConvToUnitName);
-                            ArgumentException("object is not a IPhysicalQuantity");
+                            ArgumentException("object is not a IQuantity");
                             ArgumentException("Physical quantity is not a pure unit; but has a value = " + physicalQuantity.Value.ToString());
-                            InvalidCastException("The 'obj' argument is not a IPhysicalQuantity object."); 
+                            InvalidCastException("The 'obj' argument is not a IQuantity object."); 
                             ArgumentException("object'unitStr physical unit " + pq2.Unit.ToString()+ " is not convertible to a " + pq1.Unit.ToString());
                       
                     **/
@@ -281,7 +282,7 @@ namespace PhysicalCalculator
             } while ((CommandLineFromAccessor || !CommandLineEmpty || !ResultLineEmpty) && !LoopExit);
         }
 
-        public Boolean ExecuteFunctionCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out IPhysicalQuantity functionResult)
+        public Boolean ExecuteFunctionCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out Quantity functionResult)
         {
             // Dummy: Never used    funcBodyResult
             CommandReader functionCommandLineReader = new CommandReader(localContext.Name, funcBodyCommands.ToArray(), CommandLineReader.ResultLineWriter);
@@ -300,7 +301,7 @@ namespace PhysicalCalculator
             return true;
         }
 
-        public Boolean ExecuteCommandsCallback(CalculatorEnvironment localContext, List<String> commands, ref String resultLine, out IPhysicalQuantity commandBlockResult)
+        public Boolean ExecuteCommandsCallback(CalculatorEnvironment localContext, List<String> commands, ref String resultLine, out Quantity commandBlockResult)
         {
             // Dummy: Never used    resultLine
             CommandReader CommandBlockLineReader = new CommandReader(localContext.Name, commands.ToArray(), CommandLineReader.ResultLineWriter);
@@ -467,7 +468,7 @@ namespace PhysicalCalculator
             System.Reflection.Assembly PhysCaclAsm = System.Reflection.Assembly.GetExecutingAssembly();
 
             //PhysicalMeasure
-            System.Reflection.Assembly PhysicalMeasureAsm = typeof(PhysicalQuantity).Assembly;
+            System.Reflection.Assembly PhysicalMeasureAsm = typeof(Quantity).Assembly;
 
             resultLine = PhysCaclAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo();
 
@@ -481,7 +482,7 @@ namespace PhysicalCalculator
             System.Reflection.Assembly PhysCaclAsm = System.Reflection.Assembly.GetExecutingAssembly();
 
             //PhysicalMeasure
-            System.Reflection.Assembly PhysicalMeasureAsm = typeof(PhysicalQuantity).Assembly;
+            System.Reflection.Assembly PhysicalMeasureAsm = typeof(Quantity).Assembly;
 
             resultLine = "PhysCalculator" + "\n";
             resultLine += PhysCaclAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo() + "\n";
@@ -773,7 +774,7 @@ namespace PhysicalCalculator
                         List<string> ExpectedFollow = new List<string>();
                         ExpectedFollow.Add(";");
 
-                        IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
+                        Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                         if (!ALocalIdentifier || pq != null)
                         {
@@ -838,7 +839,7 @@ namespace PhysicalCalculator
                             List<string> ExpectedFollow = new List<string>();
                             ExpectedFollow.Add(";");
 
-                            IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
+                            Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                             if (pq != null)
                             {
@@ -945,7 +946,7 @@ namespace PhysicalCalculator
                         List<string> ExpectedFollow = new List<string>();
                         ExpectedFollow.Add(";");
 
-                        IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
+                        Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                         if ((pq != null) && pq.IsDimensionless)
                         {
@@ -1018,7 +1019,7 @@ namespace PhysicalCalculator
             }
             else
             {
-                IPhysicalQuantity pq = Accumulator;
+                Quantity pq = Accumulator;
 
                 if (pq != null)
                 {
@@ -1124,7 +1125,7 @@ namespace PhysicalCalculator
 
             do
             {
-                IPhysicalQuantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
+                Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                 if (pq != null)
                 {
@@ -1250,9 +1251,9 @@ namespace PhysicalCalculator
 
         #region Command helpers
 
-        public IPhysicalQuantity GetPhysicalQuantity(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
+        public Quantity GetPhysicalQuantity(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
-            IPhysicalQuantity pq = PhysicalCalculator.Expression.PhysicalExpression.ParseConvertedExpression(ref commandLine, ref resultLine, ExpectedFollow);
+            Quantity pq = PhysicalCalculator.Expression.PhysicalExpression.ParseConvertedExpression(ref commandLine, ref resultLine, ExpectedFollow);
 
             if (pq == null)
             {
@@ -1512,7 +1513,7 @@ namespace PhysicalCalculator
 
         #region Variables access
 
-        public Boolean VariableSet(IEnvironment context, String variableName, IPhysicalQuantity variableValue)
+        public Boolean VariableSet(IEnvironment context, String variableName, Quantity variableValue)
         {
             if (variableName == AccumulatorName)
             {
@@ -1530,11 +1531,11 @@ namespace PhysicalCalculator
             }
         }
 
-        public Boolean VariableSetLocal(String variableName, IPhysicalQuantity variableValue) => VariableSet(CurrentContext, variableName, variableValue);
+        public Boolean VariableSetLocal(String variableName, Quantity variableValue) => VariableSet(CurrentContext, variableName, variableValue);
 
-        public Boolean VariableSetGlobal(String variableName, IPhysicalQuantity variableValue) => VariableSet(GlobalContext, variableName, variableValue);
+        public Boolean VariableSetGlobal(String variableName, Quantity variableValue) => VariableSet(GlobalContext, variableName, variableValue);
 
-        public Boolean VariableSet(String variableName, IPhysicalQuantity variableValue)
+        public Boolean VariableSet(String variableName, Quantity variableValue)
         {
             if (variableName == AccumulatorName)
             {
@@ -1547,7 +1548,7 @@ namespace PhysicalCalculator
             }
         }
 
-        public Boolean VariableGet(IEnvironment context, String variableName, out IPhysicalQuantity variableValue, ref String resultLine)
+        public Boolean VariableGet(IEnvironment context, String variableName, out Quantity variableValue, ref String resultLine)
         {
             if (variableName == AccumulatorName)
             {
@@ -1570,9 +1571,9 @@ namespace PhysicalCalculator
         #region  Custom Unit access
 
         //return context.SystemSet(systemName, unitValue, out systemItem);
-        public Boolean SystemSet(IEnvironment context, String systemName, IPhysicalQuantity unitValue, out INametableItem systemItem) => context.SystemSet(systemName, out systemItem);
+        public Boolean SystemSet(IEnvironment context, String systemName, IQuantity unitValue, out INametableItem systemItem) => context.SystemSet(systemName, out systemItem);
 
-        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, IPhysicalQuantity unitValue, out INametableItem unitItem) => context.UnitSet(unitSystem, unitName, unitValue, out unitItem);
+        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, Quantity unitValue, out INametableItem unitItem) => context.UnitSet(unitSystem, unitName, unitValue, out unitItem);
 
         #endregion  Custom Unit  access
 
@@ -1580,7 +1581,7 @@ namespace PhysicalCalculator
 
         public Boolean FunctionLookup(IEnvironment context, String functionName, out IFunctionEvaluator functionevaluator) => context.FunctionFind(functionName, out functionevaluator);
 
-        public Boolean CommandsBlockEvaluate(String CommandBlockName, ICommandsEvaluator commandsEvaluator, out IPhysicalQuantity commandsResult, ref String resultLine)
+        public Boolean CommandsBlockEvaluate(String CommandBlockName, ICommandsEvaluator commandsEvaluator, out Quantity commandsResult, ref String resultLine)
         {
             Boolean OK = false;
             commandsResult = null;
@@ -1602,7 +1603,7 @@ namespace PhysicalCalculator
         }
 
 
-        public Boolean FunctionEvaluate(String FunctionName, IFunctionEvaluator functionEvaluator, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
+        public Boolean FunctionEvaluate(String FunctionName, IFunctionEvaluator functionEvaluator, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine)
         {
             Boolean OK = false;
             functionResult = null;
@@ -1623,7 +1624,7 @@ namespace PhysicalCalculator
             return OK;
         }
 
-        public Boolean FunctionEvaluateFileRead(String functionName, out IPhysicalQuantity functionResult, ref String resultLine)
+        public Boolean FunctionEvaluateFileRead(String functionName, out Quantity functionResult, ref String resultLine)
         {
             Boolean OK = false;
             functionResult = null;
@@ -1747,78 +1748,9 @@ namespace PhysicalCalculator
         #endregion  Identifier access
     }
 
-    static class DateTimeSortString
-    {
-        public static string ToSortString(this DateTime Me) => Me.ToString("yyyy-MM-dd HH:mm:ss");
 
-        public static string ToSortShortDateString(this DateTime Me) => Me.ToString("yyyy-MM-dd");
 
-        public static void ToBuildNo(this DateTime Me, out int buildNo, out int revisionNo)
-        {
-            TimeSpan TimeSince_2000_01_01 = Me.Date - new DateTime(2000, 1, 1);
 
-            buildNo = TimeSince_2000_01_01.Days;
-            revisionNo = (int)(Me.TimeOfDay.TotalSeconds/2);
-        }
-
-    }
-
-    static class AssemblyExtension
-    {
-        public static String AssemblyVersionInfo(this System.Reflection.Assembly assembly)
-        {
-            System.Reflection.AssemblyName AsmName = assembly.GetName();
-
-            Version AsemVersion = AsmName.Version;
-            String InfoStr;
-
-            if (AsemVersion.Build != 0)
-            {
-                DateTime buildDateTime = new DateTime(2000, 1, 1).Add(new TimeSpan(TimeSpan.TicksPerDay * AsemVersion.Build +             // days since 1 January 2000
-                                                                                   TimeSpan.TicksPerSecond * 2 * AsemVersion.Revision));  // seconds since midnight, (multiply by 2 to get original)
-                InfoStr = String.Format("{0} {1}", AsemVersion.ToString(), buildDateTime.ToSortString());
-            }
-            else
-            {
-                InfoStr = AsemVersion.ToString();
-            }
-            return InfoStr;
-        }
-
-        public static String AssemblyFileVersionInfo(this System.Reflection.Assembly assembly)
-        {
-            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            //String AsemVersion = String.Format("{0}.{1}.{2}.{3}", fileVersionInfo.FileMajorPart, fileVersionInfo.FileMinorPart, fileVersionInfo.FileBuildPart, fileVersionInfo.FilePrivatePart);
-            String AsemVersion = fileVersionInfo.FileVersion;
-            String InfoStr;
-
-            if (fileVersionInfo.FileBuildPart != 0)
-            {
-                DateTime buildDateTime = new DateTime(2000, 1, 1).Add(new TimeSpan(TimeSpan.TicksPerDay * fileVersionInfo.FileBuildPart +             // days since 1 January 2000
-                                                                                   TimeSpan.TicksPerSecond * 2 * fileVersionInfo.FilePrivatePart));  // seconds since midnight, (multiply by 2 to get original)
-                InfoStr = String.Format("{0} {1}", AsemVersion, buildDateTime.ToSortString());
-            }
-            else
-            {
-                InfoStr = AsemVersion;
-            }
-            return InfoStr;
-        }
-
-        public static String AssemblyInfo(this System.Reflection.Assembly assembly)
-        {
-            System.Reflection.AssemblyName AsmName = assembly.GetName();
-
-            //FileInfo AsmFileInfo = new FileInfo(Asm.Location);
-            // Version AsemVersion = AsmName.Version;
-            String assemblyVersionInfo = AssemblyVersionInfo(assembly);
-            String assemblyFileVersionInfo = AssemblyFileVersionInfo(assembly);
-
-            String InfoStr = String.Format("{0,-16} {1} {2}", AsmName.Name, assemblyVersionInfo, assemblyFileVersionInfo);
-            return InfoStr;
-        }
-
-    }
 }
 
 

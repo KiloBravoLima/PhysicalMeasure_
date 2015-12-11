@@ -5,7 +5,7 @@ using TokenParser;
 namespace CommandParser
 {
 
-    class Commandhandler
+    public class Commandhandler
     {
         public Commandhandler()
         {

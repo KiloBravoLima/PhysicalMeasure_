@@ -78,9 +78,7 @@
     <Compile Include="PhysicalExpression.cs" />
     <Compile Include="PhysicalFunction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AssemblyInfo.tt</DependentUpon>
+      <DependentUpon>AssemblyInfo.txt4</DependentUpon>
     </Compile>
     <Compile Include="TokenString.cs" />
     <Compile Include="PhysCalculator.cs" />
@@ -133,15 +131,17 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Calculator Scripts\Valuta.cal" />
+    <None Include="packages.config" />
+    <None Include="Properties\AssemblyInfo.txt4" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Properties\AssemblyInfo.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>AssemblyInfo.cs</LastGenOutput>
-    </Content>
     <Content Include="PhysicalMeasure.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\PhysMeasure\KBLExtensions\KBL.Extensions.csproj">
+      <Project>{7139b888-5ce1-4604-b2e8-19fd45bc8b0e}</Project>
+      <Name>KBL.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\PhysMeasure\PhysicalMeasure\PhysicalMeasure.csproj">
       <Project>{4a1384ac-58aa-4758-822f-25ccc6123f51}</Project>
       <Name>PhysicalMeasure</Name>
@@ -152,7 +152,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /Y /S "$(ProjectDir)Calculator Scripts\*.cal" "$(TargetDir)"</PostBuildEvent>
+    <PostBuildEvent>xcopy /Y /S "$(ProjectDir)Calculator Scripts\*.cal" "$(TargetDir)"
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>rem touch "($ProjectDir)Properties\*.tt"</PreBuildEvent>

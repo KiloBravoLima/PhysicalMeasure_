@@ -74,23 +74,17 @@ namespace PhysicalMeasure
         IUnitSystem SimpleSystem { get; }
     }
 
-    public interface INamedSymbolSystemItem : ISystemItem, INamedSymbol
+    public interface IUnitPrefixExponent
     {
-    }
+        SByte Exponent { get; }
+        Double Value { get; }
 
-    public interface IUnitPrefixExponentMath
-    {
+        //  IUnitPrefixExponentMath
         IUnitPrefixExponent Multiply(IUnitPrefixExponent prefix);
         IUnitPrefixExponent Divide(IUnitPrefixExponent prefix);
 
         IUnitPrefixExponent Power(SByte exponent);
         IUnitPrefixExponent Root(SByte exponent);
-    }
-
-    public interface IUnitPrefixExponent : IUnitPrefixExponentMath
-    {
-        SByte Exponent { get; }
-        Double Value { get; }
     }
 
     public interface IUnitPrefix : INamed, IUnitPrefixExponent
@@ -100,7 +94,7 @@ namespace PhysicalMeasure
 
     public interface IUnitPrefixTable
     {
-        IUnitPrefix[] UnitPrefixes { get; }
+        UnitPrefix[] UnitPrefixes { get; }
 
         Boolean GetUnitPrefixFromExponent(IUnitPrefixExponent someExponent, out IUnitPrefix unitPrefix);
 
@@ -114,16 +108,14 @@ namespace PhysicalMeasure
         IUnitPrefix UnitPrefixFromPrefixChar(Char somePrefixChar);
 
         IUnitPrefixExponent ExponentFromPrefixChar(Char somePrefixChar);
-
     }
 
-    public interface INamedSymbolUnit : INamedSymbol, IPhysicalUnit //  <BaseUnit | NamedDerivedUnit | ConvertiableUnit>
+    public interface INamedSymbolUnit : INamedSymbol, IUnit //  <BaseUnit | NamedDerivedUnit | ConvertiableUnit>
     {
         // Unprefixed unit, coherent unit symbol
-
     }
 
-    public interface IPrefixedUnit : IPhysicalUnit
+    public interface IPrefixedUnit : IUnit
     {
         IUnitPrefix Prefix { get; }
         INamedSymbolUnit Unit { get; }
@@ -134,16 +126,16 @@ namespace PhysicalMeasure
         String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false);
     }
 
-    public interface IAsPhysicalQuantity
+    public interface IAsQuantity
     {
-        IPhysicalQuantity AsPhysicalQuantity();
+        Quantity AsQuantity();
     }
 
-    public interface IPrefixedUnitExponent : IPrefixedUnit, ICombinedUnitFormat, IAsPhysicalQuantity
+    public interface IPrefixedUnitExponent : IPrefixedUnit, ICombinedUnitFormat, IAsQuantity
     {
         SByte Exponent { get; }
 
-        IPrefixedUnitExponent CombinePrefixAndExponents(SByte outerPUE_PrefixExponent, SByte outerPUE_Exponent, out SByte scaleExponent, out Double scaleFactor);
+        PrefixedUnitExponent CombinePrefixAndExponents(SByte outerPUE_PrefixExponent, SByte outerPUE_Exponent, out SByte scaleExponent, out Double scaleFactor);
     }
 
     public interface IPrefixedUnitExponentList : IList<IPrefixedUnitExponent>, ICombinedUnitFormat
@@ -152,10 +144,13 @@ namespace PhysicalMeasure
         IPrefixedUnitExponentList Power(SByte exponent);
     }
 
-    public interface IUnit
+    public interface IUnitKindAccess
     {
         UnitKind Kind { get; }
+    }
 
+    public interface IUnitExponentsAccess
+    {
         /** Returns the same unit system as property ISystemItem.SimpleSystem if all sub units are from that same system. 
          *  Can be a combined unit system if sub units reference different unit systems which are not convertible to each other (neither directly or indirectly). 
          *  Can not be null.
@@ -163,7 +158,10 @@ namespace PhysicalMeasure
         IUnitSystem ExponentsSystem { get; }
 
         SByte[] Exponents { get; }
+    }
 
+    public interface IUnitStringFormatting
+    {
         String PureUnitString();
 
         String UnitString();
@@ -174,84 +172,87 @@ namespace PhysicalMeasure
 
         String ReducedUnitString();
 
-        String ValueString(Double quantity);
-        String ValueString(Double quantity, String format, IFormatProvider formatProvider);
+        String ValueString(Double value);
+        String ValueString(Double value, String format, IFormatProvider formatProvider);
 
-        String ValueAndUnitString(Double quantity);
-        String ValueAndUnitString(Double quantity, String format, IFormatProvider formatProvider);
+        String ValueAndUnitString(Double value);
+        String ValueAndUnitString(Double value, String format, IFormatProvider formatProvider);
 
         Double FactorValue { get; }
-        IPhysicalUnit PureUnit { get; }
     }
 
-    public interface ISystemUnit : ISystemItem, IUnit
+    public interface IPureUnitAccess
+    {
+        Unit PureUnit { get; }
+    }
+
+    public interface ISystemUnit : ISystemItem, IUnitKindAccess, IUnitExponentsAccess, IUnitStringFormatting, IPureUnitAccess
     {
 
     }
 
-
-    public interface IUnitMath
+    public interface IPureUnitMath
     {
-        IPhysicalUnit Multiply(IUnitPrefixExponent prefix);
-        IPhysicalUnit Divide(IUnitPrefixExponent prefix);
+        Unit Multiply(IUnitPrefixExponent prefix);
+        Unit Divide(IUnitPrefixExponent prefix);
 
-        IPhysicalUnit Multiply(INamedSymbolUnit namedSymbolUnit);
-        IPhysicalUnit Divide(INamedSymbolUnit namedSymbolUnit);
-
-
-        IPhysicalUnit Multiply(IPrefixedUnit prefixedUnit);
-        IPhysicalUnit Divide(IPrefixedUnit prefixedUnit);
-
-        IPhysicalUnit Multiply(IPrefixedUnitExponent prefixedUnitExponent);
-        IPhysicalUnit Divide(IPrefixedUnitExponent prefixedUnitExponent);
+        Unit Multiply(INamedSymbolUnit namedSymbolUnit);
+        Unit Divide(INamedSymbolUnit namedSymbolUnit);
 
 
-        IPhysicalUnit Multiply(IPhysicalUnit physicalUnit);
-        IPhysicalUnit Divide(IPhysicalUnit physicalUnit);
+        Unit Multiply(PrefixedUnit prefixedUnit);
+        Unit Divide(PrefixedUnit prefixedUnit);
 
-        IPhysicalUnit Pow(SByte exponent);
-        IPhysicalUnit Rot(SByte exponent);
+        Unit Multiply(IPrefixedUnitExponent prefixedUnitExponent);
+        Unit Divide(IPrefixedUnitExponent prefixedUnitExponent);
+
+
+        Unit Multiply(Unit physicalUnit);
+        Unit Divide(Unit physicalUnit);
+
+        Unit Pow(SByte exponent);
+        Unit Rot(SByte exponent);
     }
 
     public interface ICombinedUnitMath
     {
-        ICombinedUnit CombineMultiply(Double factor);
-        ICombinedUnit CombineDivide(Double factor);
+        CombinedUnit CombineMultiply(Double factor);
+        CombinedUnit CombineDivide(Double factor);
 
-        ICombinedUnit CombineMultiply(IUnitPrefixExponent prefix);
-        ICombinedUnit CombineDivide(IUnitPrefixExponent prefix);
+        CombinedUnit CombineMultiply(IUnitPrefixExponent prefix);
+        CombinedUnit CombineDivide(IUnitPrefixExponent prefix);
 
-        ICombinedUnit CombineMultiply(INamedSymbolUnit namedSymbolUnit);
-        ICombinedUnit CombineDivide(INamedSymbolUnit namedSymbolUnit);
+        CombinedUnit CombineMultiply(INamedSymbolUnit namedSymbolUnit);
+        CombinedUnit CombineDivide(INamedSymbolUnit namedSymbolUnit);
 
 
-        ICombinedUnit CombineMultiply(IPrefixedUnit prefixedUnit);
-        ICombinedUnit CombineDivide(IPrefixedUnit prefixedUnit);
+        CombinedUnit CombineMultiply(PrefixedUnit prefixedUnit);
+        CombinedUnit CombineDivide(PrefixedUnit prefixedUnit);
 
-        ICombinedUnit CombineMultiply(IPrefixedUnitExponent prefixedUnitExponent);
-        ICombinedUnit CombineDivide(IPrefixedUnitExponent prefixedUnitExponent);
+        CombinedUnit CombineMultiply(PrefixedUnitExponent prefixedUnitExponent);
+        CombinedUnit CombineDivide(PrefixedUnitExponent prefixedUnitExponent);
 
-        ICombinedUnit CombineMultiply(IPhysicalUnit physicalUnit);
-        ICombinedUnit CombineDivide(IPhysicalUnit physicalUnit);
+        CombinedUnit CombineMultiply(Unit physicalUnit);
+        CombinedUnit CombineDivide(Unit physicalUnit);
 
-        ICombinedUnit CombinePow(SByte exponent);
-        ICombinedUnit CombineRot(SByte exponent);
+        CombinedUnit CombinePow(SByte exponent);
+        CombinedUnit CombineRot(SByte exponent);
     }
 
 
-    public interface IPhysicalItemMath
+    public interface IUnitItemMath
     {
-        IPhysicalUnit Dimensionless { get; }
+        Unit Dimensionless { get; }
         Boolean IsDimensionless { get; }
 
-        IPhysicalQuantity Multiply(IPhysicalQuantity physicalQuantity);
-        IPhysicalQuantity Divide(IPhysicalQuantity physicalQuantity);
+        Quantity Multiply(Quantity physicalQuantity);
+        Quantity Divide(Quantity physicalQuantity);
 
-        IPhysicalQuantity Multiply(Double quantity);
-        IPhysicalQuantity Divide(Double quantity);
+        Quantity Multiply(Double value);
+        Quantity Divide(Double value);
 
-        IPhysicalQuantity Multiply(Double quantity, IPhysicalQuantity physicalQuantity);
-        IPhysicalQuantity Divide(Double quantity, IPhysicalQuantity physicalQuantity);
+        Quantity Multiply(Double value, Quantity physicalQuantity);
+        Quantity Divide(Double value, Quantity physicalQuantity);
     }
 
     public interface IEquivalence<T>
@@ -262,112 +263,108 @@ namespace PhysicalMeasure
         // Double Quotient(T other);   // quotient = 0 means not equivalent
     }
 
-    public interface IPhysicalUnitMath : IEquatable<IPhysicalUnit>, IEquivalence<IPhysicalUnit>, IUnitMath, ICombinedUnitMath, IPhysicalItemMath
+    public interface IUnitMath : IEquatable<Unit>, IEquivalence<Unit>, IPureUnitMath, ICombinedUnitMath, IUnitItemMath
     {
 
     }
 
-    public interface IPhysicalUnitConvertible
+    public interface IUnitConversion
     {
         Boolean IsLinearConvertible();
 
 
         // Unspecific/relative non-quantity unit conversion (e.g. temperature interval)
-        IPhysicalQuantity this[IPhysicalUnit convertToUnit] { get; }
-        IPhysicalQuantity this[IPhysicalQuantity convertToUnit] { get; }
+        Quantity this[Unit convertToUnit] { get; }
+        Quantity this[Quantity convertToUnit] { get; }
 
 
-        IPhysicalQuantity ConvertTo(IPhysicalUnit convertToUnit);
-        IPhysicalQuantity ConvertTo(IUnitSystem convertToUnitSystem);
+        Quantity ConvertTo(Unit convertToUnit);
+        Quantity ConvertTo(IUnitSystem convertToUnitSystem);
 
-        IPhysicalQuantity ConvertToSystemUnit();   /// Unique defined simple unit system this unit is part of
-        IPhysicalQuantity ConvertToBaseUnit();     /// Express the unit by base units only; No ConvertibleUnit, MixedUnit or NamedDerivatedUnit.
-        IPhysicalQuantity ConvertToBaseUnit(IUnitSystem convertToUnitSystem);
+        Quantity ConvertToSystemUnit();   /// Unique defined simple unit system this unit is part of
+        Quantity ConvertToBaseUnit();     /// Express the unit by base units only; No ConvertibleUnit, MixedUnit or NamedDerivatedUnit.
+        Quantity ConvertToBaseUnit(IUnitSystem convertToUnitSystem);
 
-        IPhysicalQuantity ConvertToDerivedUnit();
+        Quantity ConvertToDerivedUnit();
 
 
         // Specific/absolute quantity unit conversion (e.g. specific temperature)
-        IPhysicalQuantity ConvertTo(ref Double quantity, IPhysicalUnit convertToUnit);
-        IPhysicalQuantity ConvertTo(ref Double quantity, IUnitSystem convertToUnitSystem);
+        Quantity ConvertTo(ref Double value, Unit convertToUnit);
+        Quantity ConvertTo(ref Double value, IUnitSystem convertToUnitSystem);
 
-        IPhysicalQuantity ConvertToSystemUnit(ref Double quantity);
+        Quantity ConvertToSystemUnit(ref Double value);
 
-        IPhysicalQuantity ConvertToBaseUnit(Double quantity);
-        IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity);
+        Quantity ConvertToBaseUnit(Double value);
+        Quantity ConvertToBaseUnit(Quantity physicalQuantity);
 
-        IPhysicalQuantity ConvertToBaseUnit(Double quantity, IUnitSystem convertToUnitSystem);
-        IPhysicalQuantity ConvertToBaseUnit(IPhysicalQuantity physicalQuantity, IUnitSystem convertToUnitSystem);
+        Quantity ConvertToBaseUnit(Double value, IUnitSystem convertToUnitSystem);
+        Quantity ConvertToBaseUnit(Quantity physicalQuantity, IUnitSystem convertToUnitSystem);
     }
 
-    public interface IPhysicalUnit : ISystemUnit, IPhysicalUnitMath, IPhysicalUnitConvertible, IAsPhysicalQuantity /*  : <BaseUnit | DerivedUnit | ConvertibleUnit | CombinedUnit | MixedUnit> */
+    public interface IUnit : ISystemUnit, IUnitMath, IUnitConversion, IAsQuantity /*  : <BaseUnit | DerivedUnit | ConvertibleUnit | CombinedUnit | MixedUnit> */
     {
-#if DEBUG
-        // [Conditional("DEBUG")]
-        void TestPropertiesPrint();
-#endif
     }
 
-    public interface IQuantityMath
+    public interface IQuantityFactorMath
     {
-        IPhysicalQuantity Multiply(IUnitPrefixExponent prefix);
-        IPhysicalQuantity Divide(IUnitPrefixExponent prefix);
+        Quantity Multiply(IUnitPrefixExponent prefix);
+        Quantity Divide(IUnitPrefixExponent prefix);
 
-        IPhysicalQuantity Multiply(INamedSymbolUnit namedSymbolUnit);
-        IPhysicalQuantity Divide(INamedSymbolUnit namedSymbolUnit);
+        Quantity Multiply(INamedSymbolUnit namedSymbolUnit);
+        Quantity Divide(INamedSymbolUnit namedSymbolUnit);
 
 
-        IPhysicalQuantity Multiply(IPrefixedUnit prefixedUnit);
-        IPhysicalQuantity Divide(IPrefixedUnit prefixedUnit);
+        Quantity Multiply(PrefixedUnit prefixedUnit);
+        Quantity Divide(PrefixedUnit prefixedUnit);
 
-        IPhysicalQuantity Multiply(IPrefixedUnitExponent prefixedUnitExponent);
-        IPhysicalQuantity Divide(IPrefixedUnitExponent prefixedUnitExponent);
+        Quantity Multiply(PrefixedUnitExponent prefixedUnitExponent);
+        Quantity Divide(PrefixedUnitExponent prefixedUnitExponent);
 
-        IPhysicalQuantity Multiply(IPhysicalUnit physicalUnit);
-        IPhysicalQuantity Divide(IPhysicalUnit physicalUnit);
+        Quantity Multiply(Unit physicalUnit);
+        Quantity Divide(Unit physicalUnit);
 
-        IPhysicalQuantity Pow(SByte exponent);
-        IPhysicalQuantity Rot(SByte exponent);
+        Quantity Pow(SByte exponent);
+        Quantity Rot(SByte exponent);
     }
 
-    public interface IPhysicalQuantityMath : IComparable, IEquivalence<IPhysicalQuantity>, IEquatable<Double>, IEquatable<IPhysicalUnit>, IEquatable<IPhysicalQuantity>, IQuantityMath, IPhysicalItemMath
+    public interface IQuantityMath : IComparable, IEquivalence<Quantity>, IEquatable<Double>, IEquatable<Unit>, IEquatable<Quantity>, IQuantityFactorMath, IUnitItemMath
     {
-        IPhysicalQuantity Zero { get; }
-        IPhysicalQuantity One { get; }
+        Quantity Zero { get; }
+        Quantity One { get; }
 
-        IPhysicalQuantity Add(IPhysicalQuantity physicalQuantity);
-        IPhysicalQuantity Subtract(IPhysicalQuantity physicalQuantity);
+        Quantity Add(Quantity physicalQuantity);
+        Quantity Subtract(Quantity physicalQuantity);
     }
 
-    public interface IPhysicalQuantityConvertible
+    public interface IQuantityConversion
     {
         // Auto detecting if specific or relative unit conversion 
-        IPhysicalQuantity this[IPhysicalUnit convertToUnit] { get; }
-        IPhysicalQuantity this[IPhysicalQuantity convertToUnit] { get; }
+        Quantity this[Unit convertToUnit] { get; }
+        Quantity this[Quantity convertToUnit] { get; }
 
-        IPhysicalQuantity ConvertTo(IPhysicalUnit convertToUnit);
-        IPhysicalQuantity ConvertTo(IUnitSystem convertToUnitSystem);
+        Quantity ConvertTo(Unit convertToUnit);
+        Quantity ConvertTo(IUnitSystem convertToUnitSystem);
 
-        IPhysicalQuantity ConvertToSystemUnit();
-        IPhysicalQuantity ConvertToBaseUnit();
+        Quantity ConvertToSystemUnit();
+        Quantity ConvertToBaseUnit();
 
-        IPhysicalQuantity ConvertToDerivedUnit();
+        Quantity ConvertToDerivedUnit();
 
         // Unspecific/relative non-quantity unit conversion (e.g. temperature interval)
-        IPhysicalQuantity RelativeConvertTo(IPhysicalUnit convertToUnit);
-        IPhysicalQuantity RelativeConvertTo(IUnitSystem convertToUnitSystem);
+        Quantity RelativeConvertTo(Unit convertToUnit);
+        Quantity RelativeConvertTo(IUnitSystem convertToUnitSystem);
 
         // Specific/absolute quantity unit conversion (e.g. specific temperature)
-        IPhysicalQuantity SpecificConvertTo(IPhysicalUnit convertToUnit);
-        IPhysicalQuantity SpecificConvertTo(IUnitSystem convertToUnitSystem);
+        Quantity SpecificConvertTo(Unit convertToUnit);
+        Quantity SpecificConvertTo(IUnitSystem convertToUnitSystem);
     }
 
-    public interface IBaseUnit : IPhysicalUnit, INamedSymbolUnit
+    public interface IBaseUnit : IUnit, INamedSymbolUnit
     {
         SByte BaseUnitNumber { get; }
     }
 
-    public interface IDerivedUnit : IPhysicalUnit
+    public interface IDerivedUnit : IUnit
     {
     }
 
@@ -393,20 +390,20 @@ namespace PhysicalMeasure
 
     public interface IConvertibleUnit : INamedSymbolUnit
     {
-        IPhysicalUnit PrimaryUnit { get; }
+        Unit PrimaryUnit { get; }
         IValueConversion Conversion { get; }
 
         // Unspecific/relative non-quantity unit conversion (e.g. temperature interval)
-        IPhysicalQuantity ConvertToPrimaryUnit();
-        IPhysicalQuantity ConvertFromPrimaryUnit();
+        Quantity ConvertToPrimaryUnit();
+        Quantity ConvertFromPrimaryUnit();
 
 
         // Specific/absolute quantity unit conversion (e.g. specific temperature)
-        IPhysicalQuantity ConvertToPrimaryUnit(Double quantity);
-        IPhysicalQuantity ConvertFromPrimaryUnit(Double quantity);
+        Quantity ConvertToPrimaryUnit(Double value);
+        Quantity ConvertFromPrimaryUnit(Double value);
     }
 
-    public interface ICombinedUnit : IPhysicalUnit
+    public interface ICombinedUnit : IUnit
     {
         IPrefixedUnitExponentList Numerators { get; }
         IPrefixedUnitExponentList Denominators { get; }
@@ -425,23 +422,23 @@ namespace PhysicalMeasure
          **/
         IUnitSystem SomeSimpleSystem { get; }
 
-        ICombinedUnit OnlySingleSystemUnits(IUnitSystem us);
+        CombinedUnit OnlySingleSystemUnits(IUnitSystem us);
 
         // Specific conversion
-        IPhysicalQuantity ConvertFrom(IPhysicalQuantity physicalQuantity);
+        Quantity ConvertFrom(Quantity physicalQuantity);
     }
 
-    public interface IMixedUnit : IPhysicalUnit
+    public interface IMixedUnit : IUnit
     {
-        IPhysicalUnit MainUnit { get; }
-        IPhysicalUnit FractionalUnit { get; }
+        Unit MainUnit { get; }
+        Unit FractionalUnit { get; }
         String Separator { get; }
     }
 
-    public interface IPhysicalQuantity : IFormattable, IPhysicalQuantityMath, IPhysicalQuantityConvertible
+    public interface IQuantity : IFormattable, IQuantityMath, IQuantityConversion
     {
         Double Value { get; }
-        IPhysicalUnit Unit { get; }
+        Unit Unit { get; }
 
         String ToPrintString();
     }
@@ -451,37 +448,36 @@ namespace PhysicalMeasure
         bool IsIsolatedUnitSystem { get; }
         bool IsCombinedUnitSystem { get; }
 
-        IUnitPrefixTable UnitPrefixes { get; }
-        IBaseUnit[] BaseUnits { get; }
-        INamedDerivedUnit[] NamedDerivedUnits { get; }
-        IConvertibleUnit[] ConvertibleUnits { get; }
+        UnitPrefixTable UnitPrefixes { get; }
+        BaseUnit[] BaseUnits { get; }
+        NamedDerivedUnit[] NamedDerivedUnits { get; }
+        ConvertibleUnit[] ConvertibleUnits { get; }
 
-        IPhysicalUnit Dimensionless { get; }
+        Unit Dimensionless { get; }
         INamedSymbolUnit UnitFromName(String unitName);
         INamedSymbolUnit UnitFromSymbol(String unitSymbol);
 
-        //IPrefixedUnit ScaledUnitFromSymbol(String scaledUnitSymbol);
-        IPhysicalUnit ScaledUnitFromSymbol(String scaledUnitSymbol);
+        Unit ScaledUnitFromSymbol(String scaledUnitSymbol);
 
-        INamedSymbolUnit NamedDerivedUnitFromUnit(IPhysicalUnit derivedUnit);
-        IPhysicalUnit UnitFromExponents(SByte[] exponents);
-        IPhysicalUnit UnitFromUnitInfo(SByte[] exponents, SByte NoOfNonZeroExponents, SByte NoOfNonOneExponents, SByte FirstNonZeroExponent);
+        INamedSymbolUnit NamedDerivedUnitFromUnit(Unit derivedUnit);
+        Unit UnitFromExponents(SByte[] exponents);
+        Unit UnitFromUnitInfo(SByte[] exponents, SByte NoOfNonZeroExponents, SByte NoOfNonOneExponents, SByte FirstNonZeroExponent);
 
         // Unspecific/relative non-quantity unit conversion (e.g. temperature interval)
-        IPhysicalQuantity ConvertTo(IPhysicalUnit convertFromUnit, IPhysicalUnit convertToUnit);
-        IPhysicalQuantity ConvertTo(IPhysicalUnit convertFromUnit, IUnitSystem convertToUnitSystem);
+        Quantity ConvertTo(Unit convertFromUnit, Unit convertToUnit);
+        Quantity ConvertTo(Unit convertFromUnit, IUnitSystem convertToUnitSystem);
 
         // Specific/absolute quantity unit conversion (e.g. specific temperature)
-        IPhysicalQuantity ConvertTo(IPhysicalQuantity physicalQuantity, IPhysicalUnit convertToUnit);
-        IPhysicalQuantity ConvertTo(IPhysicalQuantity physicalQuantity, IUnitSystem convertToUnitSystem);
+        Quantity ConvertTo(Quantity physicalQuantity, Unit convertToUnit);
+        Quantity ConvertTo(Quantity physicalQuantity, IUnitSystem convertToUnitSystem);
 
-        IPhysicalQuantity SpecificConvertTo(IPhysicalQuantity physicalQuantity, IPhysicalUnit convertToUnit);
+        Quantity SpecificConvertTo(Quantity physicalQuantity, Unit convertToUnit);
     }
 
     public interface ICombinedUnitSystem : IUnitSystem, IEquatable<ICombinedUnitSystem>
     {
-        SByte[] UnitExponents(ICombinedUnit cu);
-        IPhysicalQuantity ConvertToBaseUnit(ICombinedUnit cu);
+        SByte[] UnitExponents(CombinedUnit cu);
+        Quantity ConvertToBaseUnit(CombinedUnit cu);
 
         IUnitSystem[] UnitSystemes { get; }
         Boolean ContainsSubUnitSystem(IUnitSystem unitsystem);
