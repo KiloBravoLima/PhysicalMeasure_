@@ -10,15 +10,15 @@ using PhysicalCalculator.Identifiers;
 
 namespace PhysicalCalculator.Function
 {
-    // Expression<Func<IPhysicalQuantity, IPhysicalQuantity, IPhysicalQuantity>> lambda = (pq1, pq2) => pq1 * pq2;
+    // Expression<Func<IQuantity, IQuantity, IQuantity>> lambda = (pq1, pq2) => pq1 * pq2;
 
 
-    //public delegate IPhysicalQuantity PhysicalQuantityFunction(...);
-    public delegate IPhysicalQuantity ZeroParamFunction();
-    public delegate IPhysicalQuantity UnaryFunction_PQ(IPhysicalQuantity pq);
-    public delegate IPhysicalQuantity BinaryFunction_PQ_SB(IPhysicalQuantity pq, SByte sb);
-    public delegate IPhysicalQuantity BinaryFunction_PQ_PQ(IPhysicalQuantity pq1, IPhysicalQuantity pq2);
-    //public delegate IPhysicalQuantity TernaryFunction_PQ_PQ(IPhysicalQuantity pq1, IPhysicalQuantity pq2, IPhysicalQuantity pq3);
+    //public delegate IQuantity PhysicalQuantityFunction(...);
+    public delegate IQuantity ZeroParamFunction();
+    public delegate IQuantity UnaryFunction_PQ(IQuantity pq);
+    public delegate IQuantity BinaryFunction_PQ_SB(IQuantity pq, SByte sb);
+    public delegate IQuantity BinaryFunction_PQ_PQ(IQuantity pq1, IQuantity pq2);
+    //public delegate IQuantity TernaryFunction_PQ_PQ(IQuantity pq1, IQuantity pq2, IQuantity pq3);
 
     abstract class PhysicalQuantityFunction : NametableItem, IFunctionEvaluator
     {
@@ -70,7 +70,7 @@ namespace PhysicalCalculator.Function
             return ListStringBuilder.ToString();
         }
 
-        public Boolean CheckParams(List<IPhysicalQuantity> actualParameterlist, ref String resultLine)
+        public Boolean CheckParams(List<Quantity> actualParameterlist, ref String resultLine)
         {
             int ParamCount = Parameterlist.Count;
             if (actualParameterlist.Count < ParamCount)
@@ -88,14 +88,14 @@ namespace PhysicalCalculator.Function
             return true;
         }
 
-        abstract public Boolean Evaluate(CalculatorEnvironment localContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine);
+        abstract public Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine);
     }
 
 
     /**
     //class PhysicalQuantityFunction<TFunc> : PhysicalQuantityFunction where TFunc : LambdaExpression
-    //class PhysicalQuantityFunction<TFunc> : PhysicalQuantityFunction where TFunc : Expression<Func<PhysicalQuantity>>
-    //class PhysicalQuantityFunction<TFunc> : PhysicalQuantityFunction where TFunc : Func<PhysicalQuantity>
+    //class PhysicalQuantityFunction<TFunc> : PhysicalQuantityFunction where TFunc : Expression<Func<Quantity>>
+    //class PhysicalQuantityFunction<TFunc> : PhysicalQuantityFunction where TFunc : Func<Quantity>
     class PhysicalQuantityFunction<TFunc> : PhysicalQuantityFunction where TFunc : IInvocable
     {
         private TFunc FF;
@@ -106,7 +106,7 @@ namespace PhysicalCalculator.Function
             this.FF = func;
         }
 
-        override public Boolean Evaluate(CalculatorEnvironment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
+        override public Boolean Evaluate(CalculatorEnvironment localContext, List<IQuantity> actualParameterlist, out IQuantity functionResult, ref String resultLine)
         {
 
             if (!CheckParams(actualParameterlist, ref resultLine))
@@ -125,10 +125,10 @@ namespace PhysicalCalculator.Function
     class PhysicalQuantityFunction_PQ_SB : PhysicalQuantityFunction
     {
         //UnaryFunction F;
-        Func<IPhysicalQuantity, SByte, IPhysicalQuantity> F;
+        Func<Quantity, SByte, Quantity> F;
 
         //public PhysicalQuantityUnaryFunction(UnaryFunction func)
-        public PhysicalQuantityFunction_PQ_SB(Func<IPhysicalQuantity, SByte, IPhysicalQuantity> func)
+        public PhysicalQuantityFunction_PQ_SB(Func<Quantity, SByte, Quantity> func)
         {
             F = func;
 
@@ -136,14 +136,14 @@ namespace PhysicalCalculator.Function
             ParamListAdd(new PhysicalQuantityFunctionParam("SB", null)); 
         }
 
-        public PhysicalQuantityFunction_PQ_SB(Func<IPhysicalQuantity, SByte, IPhysicalQuantity> func, List<PhysicalQuantityFunctionParam> formalparams)
+        public PhysicalQuantityFunction_PQ_SB(Func<Quantity, SByte, Quantity> func, List<PhysicalQuantityFunctionParam> formalparams)
         {
             F = func;
             formalparamlist = formalparams;
         }
 
 
-        override public Boolean Evaluate(CalculatorEnvironment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
+        override public Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> actualParameterlist, out Quantity functionResult, ref String resultLine)
         {
             if (!CheckParams(actualParameterlist, ref resultLine)) 
             {
@@ -160,14 +160,14 @@ namespace PhysicalCalculator.Function
     class PhysicalQuantityBinaryFunction_PQ_PQ : PhysicalQuantityFunction
     {
         //BinaryFunction F;
-        Func<IPhysicalQuantity, IPhysicalQuantity, IPhysicalQuantity> F;
+        Func<Quantity, Quantity, Quantity> F;
 
-        public PhysicalQuantityBinaryFunction_PQ_PQ(Func<IPhysicalQuantity, IPhysicalQuantity, IPhysicalQuantity> func)
+        public PhysicalQuantityBinaryFunction_PQ_PQ(Func<Quantity, Quantity, Quantity> func)
         {
             F = func;
         }
 
-        override public Boolean Evaluate(CalculatorEnvironment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
+        override public Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> actualParameterlist, out Quantity functionResult, ref String resultLine)
         {
             if (!CheckParams(actualParameterlist, ref resultLine))
             {
@@ -190,7 +190,7 @@ namespace PhysicalCalculator.Function
             F = func;
         }
 
-        public Boolean Evaluate(CalculatorEnvironment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
+        public Boolean Evaluate(CalculatorEnvironment localContext, List<IQuantity> actualParameterlist, out IQuantity functionResult, ref String resultLine)
         {
             if (!CheckParams(actualParameterlist, ref resultLine))
             {
@@ -240,9 +240,9 @@ namespace PhysicalCalculator.Function
 
         public List<String> Commands { get { return _commands; } set { _commands = value; } }
 
-        public Boolean Evaluate(CalculatorEnvironment localContext, out IPhysicalQuantity functionResult, ref String resultLine) => Evaluate(localContext, null, out functionResult, ref resultLine);
+        public Boolean Evaluate(CalculatorEnvironment localContext, out Quantity functionResult, ref String resultLine) => Evaluate(localContext, null, out functionResult, ref resultLine);
 
-        override public Boolean Evaluate(CalculatorEnvironment localContext, List<IPhysicalQuantity> actualParameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
+        override public Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> actualParameterlist, out Quantity functionResult, ref String resultLine)
         {
             if (PhysicalFunction.ExecuteCommandsCallback != null)
             {
@@ -257,10 +257,10 @@ namespace PhysicalCalculator.Function
                         return false;
                     }
 
-                    IPhysicalQuantity paramValue = actualParameterlist[ParamIndex];
+                    Quantity paramValue = actualParameterlist[ParamIndex];
                     if (Param.Unit != null)
                     {
-                        IPhysicalQuantity paramValueConverted = paramValue.ConvertTo(Param.Unit);
+                        Quantity paramValueConverted = paramValue.ConvertTo(Param.Unit);
                         if (paramValueConverted == null)
                         {
                             resultLine = "Parameter no " + (ParamIndex + 1).ToString() + " " + Param.Name + "  " + paramValue.ToString() + " has invalid unit.\nThe unit " + paramValue.Unit.ToPrintString() + " can't be converted to " + Param.Unit.ToPrintString();
@@ -314,7 +314,7 @@ namespace PhysicalCalculator.Function
           
          **/
 
-        public delegate Boolean ExecuteCommandsFunc(CalculatorEnvironment localContext, List<String> FuncBodyCommands, ref String funcBodyResult, out IPhysicalQuantity functionResult);
+        public delegate Boolean ExecuteCommandsFunc(CalculatorEnvironment localContext, List<String> FuncBodyCommands, ref String funcBodyResult, out Quantity functionResult);
 
         public static ExecuteCommandsFunc ExecuteCommandsCallback;
 
@@ -474,7 +474,7 @@ namespace PhysicalCalculator.Function
             commandLine = commandLine.ReadIdentifier(out ParamName);
             Debug.Assert(ParamName != null);
 
-            IPhysicalUnit ParamUnit = PhysicalCalculator.Expression.PhysicalExpression.ParseOptionalConvertToUnit(ref commandLine, ref resultLine);
+            Unit ParamUnit = PhysicalCalculator.Expression.PhysicalExpression.ParseOptionalConvertToUnit(ref commandLine, ref resultLine);
 
             PhysicalQuantityFunctionParam param = new PhysicalQuantityFunctionParam(ParamName, ParamUnit);
 

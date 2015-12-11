@@ -6,15 +6,14 @@
 *****************************************************************************************************/
 
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Kilo Bravo")]
-[assembly: AssemblyDescription("Physical quantity calculator using PhysicalMeasure")]
- 
+[assembly: AssemblyDescription("Class extension methodes for Double, IEnumerable, Array, String, DateTime, Assembly")]
+
 #if DEBUG
 [assembly: AssemblyConfiguration("Debug")]
 #else
@@ -22,10 +21,11 @@ using System.Runtime.InteropServices;
 #endif
 
 [assembly: AssemblyCompany("Kilo Bravo")]
-[assembly: AssemblyProduct("PhysCalc")]
+[assembly: AssemblyProduct("KBL.Extensions")]
 [assembly: AssemblyCopyright("Copyright © 2010-2015 Kilo Bravo")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
@@ -33,17 +33,16 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("9e19d828-26ef-460d-8d72-a0f3c9b675f4")]
+[assembly: Guid("7139b888-5ce1-4604-b2e8-19fd45bc8b0e")]
 
 //  Build at  2015-12-11 02:05:58 2015-12-11 02:00:00
-//  major:    3
+//  major:    1
 //  minor:    0
 //  build:    5823
 //  revision: 3600
 
-[assembly: AssemblyVersion("3.0")]
-[assembly: AssemblyFileVersion("3.0.5823.3600")]
-[assembly: AssemblyInformationalVersion("3.0.5823.3600")]
+[assembly: AssemblyVersion("1.0")]
+[assembly: AssemblyFileVersion("1.0.5823.3600")]
+[assembly: AssemblyInformationalVersion("1.0.5823.3600")]
 
 
-[assembly: InternalsVisibleTo("PhysCalculatorTests")]

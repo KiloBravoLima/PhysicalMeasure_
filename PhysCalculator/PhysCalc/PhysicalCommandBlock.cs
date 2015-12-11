@@ -22,7 +22,7 @@ namespace PhysicalCalculator.CommandBlock
             return ListStringBuilder.ToString();
         }
 
-        abstract public Boolean Evaluate(CalculatorEnvironment localContext, out IPhysicalQuantity functionResult, ref String resultLine);
+        abstract public Boolean Evaluate(CalculatorEnvironment localContext, out Quantity functionResult, ref String resultLine);
 
         public void WriteToTextFile(String name, System.IO.StreamWriter file)
         {
@@ -62,7 +62,7 @@ namespace PhysicalCalculator.CommandBlock
             return ListStringBuilder.ToString();
         }
 
-        override public Boolean Evaluate(CalculatorEnvironment localContext, out IPhysicalQuantity commandBlockResult, ref String resultLine)
+        override public Boolean Evaluate(CalculatorEnvironment localContext, out Quantity commandBlockResult, ref String resultLine)
         {
             if (PhysicalCommandBlock.ExecuteCommandsCallback != null)
             {
@@ -97,7 +97,7 @@ namespace PhysicalCalculator.CommandBlock
           
          **/
 
-        public delegate Boolean ExecuteCommandsFunc(CalculatorEnvironment localContext, List<String> FuncBodyCommands, ref String funcBodyResult, out IPhysicalQuantity functionResult);
+        public delegate Boolean ExecuteCommandsFunc(CalculatorEnvironment localContext, List<String> FuncBodyCommands, ref String funcBodyResult, out Quantity functionResult);
 
         public static ExecuteCommandsFunc ExecuteCommandsCallback;
 

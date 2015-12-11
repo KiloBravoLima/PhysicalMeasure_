@@ -17,9 +17,9 @@ namespace PhysicalCalculator.Identifiers
     public class PhysicalQuantityFunctionParam
     {
         public String Name;
-        public IPhysicalUnit Unit;
+        public Unit Unit;
 
-        public PhysicalQuantityFunctionParam(String Name, IPhysicalUnit Unit)
+        public PhysicalQuantityFunctionParam(String Name, Unit Unit)
         {
             this.Name = Name;
             this.Unit = Unit;
@@ -40,7 +40,7 @@ namespace PhysicalCalculator.Identifiers
         //String ToListString(String name);
         //void WriteToTextFile(String name, System.IO.StreamWriter file);
 
-        Boolean Evaluate(CalculatorEnvironment localContext, out IPhysicalQuantity result, ref String resultLine);
+        Boolean Evaluate(CalculatorEnvironment localContext, out Quantity result, ref String resultLine);
     }
 
     public interface ICommands
@@ -66,7 +66,7 @@ namespace PhysicalCalculator.Identifiers
 
         void ParamListAdd(PhysicalQuantityFunctionParam parameter);
 
-        Boolean Evaluate(CalculatorEnvironment localContext, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine);
+        Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine);
     }
 
     /*
@@ -105,7 +105,7 @@ namespace PhysicalCalculator.Identifiers
 
         public NamedSystem(String name)
         {
-            //UnitSystem NewUnitSystem = new UnitSystem(name, null);
+            //SingleUnitSystem NewUnitSystem = new SingleUnitSystem(name, null);
             UnitSystem NewUnitSystem = new UnitSystem(name, true);
 
             UnitSystem = NewUnitSystem;
@@ -119,11 +119,11 @@ namespace PhysicalCalculator.Identifiers
     {
         public override IdentifierKind Identifierkind => IdentifierKind.Unit;
 
-        public IPhysicalUnit pu;
+        public Unit pu;
 
         public IEnvironment Environment = null;
 
-        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalUnit physicalUnit, CalculatorEnvironment environment = null /* = null */)
+        public NamedUnit(IUnitSystem unitSystem, String name, Unit physicalUnit, CalculatorEnvironment environment = null /* = null */)
         {
             this.Environment = environment;
             if (physicalUnit != null)
@@ -136,7 +136,7 @@ namespace PhysicalCalculator.Identifiers
             }
         }
 
-        public NamedUnit(IUnitSystem unitSystem, String name, IPhysicalQuantity physicalQuantity, CalculatorEnvironment environment /* = null */)
+        public NamedUnit(IUnitSystem unitSystem, String name, Quantity physicalQuantity, CalculatorEnvironment environment /* = null */)
         {
             this.Environment = environment;
             if (physicalQuantity != null)
@@ -161,9 +161,9 @@ namespace PhysicalCalculator.Identifiers
             }
         }
 
-        private static IBaseUnit MakeBaseUnit(String name) => MakeBaseUnit(name, null);
+        private static BaseUnit MakeBaseUnit(String name) => MakeBaseUnit(name, null);
 
-        private static IBaseUnit MakeBaseUnit(String name, IUnitSystem unitSystem)
+        private static BaseUnit MakeBaseUnit(String name, IUnitSystem unitSystem)
         {
             if (unitSystem == null)
             {
@@ -177,7 +177,7 @@ namespace PhysicalCalculator.Identifiers
                 {
                     NoOfBaseUnits = unitSystem.BaseUnits.Length;
                 }
-                IBaseUnit[] baseunitarray = new BaseUnit[NoOfBaseUnits + 1];
+                BaseUnit[] baseunitarray = new BaseUnit[NoOfBaseUnits + 1];
                 if (NoOfBaseUnits > 0)
                 {
                     unitSystem.BaseUnits.CopyTo(baseunitarray, 0);
@@ -191,7 +191,7 @@ namespace PhysicalCalculator.Identifiers
             return null;
         }
 
-        private static IConvertibleUnit MakeScaledUnit(String name, IUnitSystem unitSystem, IPhysicalUnit primaryUnit, Double scaleFactor)
+        private static ConvertibleUnit MakeScaledUnit(String name, IUnitSystem unitSystem, Unit primaryUnit, Double scaleFactor)
         {
             if (unitSystem == null)
             {
@@ -252,7 +252,7 @@ namespace PhysicalCalculator.Identifiers
         }
     }
 
-    class NamedVariable : PhysicalQuantity, INametableItem
+    class NamedVariable : Quantity, INametableItem
     {
         public virtual IdentifierKind Identifierkind => IdentifierKind.Variable;
 
@@ -270,7 +270,7 @@ namespace PhysicalCalculator.Identifiers
             }
         }
 
-        public NamedVariable(IPhysicalQuantity somephysicalquantity, IEnvironment environment = null)
+        public NamedVariable(Quantity somephysicalquantity, IEnvironment environment = null)
             : base(somephysicalquantity)
         {
             this.Environment = environment;
@@ -288,7 +288,7 @@ namespace PhysicalCalculator.Identifiers
     {
         public override IdentifierKind Identifierkind => IdentifierKind.Constant;
 
-        public NamedConstant(IPhysicalQuantity somephysicalquantity, IEnvironment environment = null)
+        public NamedConstant(Quantity somephysicalquantity, IEnvironment environment = null)
             : base(somephysicalquantity, environment)
         {
         }
@@ -745,7 +745,7 @@ namespace PhysicalCalculator.Identifiers
             return context.SetLocalIdentifier(systemName, systemItem);
         }
 
-        public Boolean UnitSet(IUnitSystem unitSystem, String unitName, IPhysicalQuantity unitValue, out INametableItem unitItem)
+        public Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, out INametableItem unitItem)
         {
             // Find identifier 
             IEnvironment context;
@@ -784,7 +784,7 @@ namespace PhysicalCalculator.Identifiers
             return context.SetLocalIdentifier(unitName, unitItem);
         }
 
-        public Boolean UnitGet(String unitName, out IPhysicalUnit unitValue, ref String resultLine)
+        public Boolean UnitGet(String unitName, out Unit unitValue, ref String resultLine)
         {
             // Find identifier 
             IEnvironment context;
@@ -809,7 +809,7 @@ namespace PhysicalCalculator.Identifiers
 
         #region Variable Identifier access
 
-        public Boolean VariableSetLocal(String variableName, IPhysicalQuantity variableValue)
+        public Boolean VariableSetLocal(String variableName, Quantity variableValue)
         {
             // Find identifier 
             INametableItem Item;
@@ -833,7 +833,7 @@ namespace PhysicalCalculator.Identifiers
             return true;
         }
 
-        public Boolean VariableSet(String variableName, IPhysicalQuantity variableValue)
+        public Boolean VariableSet(String variableName, Quantity variableValue)
         {
             // Find identifier 
             IEnvironment context;
@@ -858,7 +858,7 @@ namespace PhysicalCalculator.Identifiers
             return true;
         }
 
-        public Boolean VariableGet(String variableName, out IPhysicalQuantity variableValue, ref String resultLine)
+        public Boolean VariableGet(String variableName, out Quantity variableValue, ref String resultLine)
         {
             // Find identifier 
             IEnvironment context;
@@ -866,7 +866,7 @@ namespace PhysicalCalculator.Identifiers
             Boolean Found = FindIdentifier(variableName, out context, out Item);
             if (Found && ((Item.Identifierkind == IdentifierKind.Variable) || (Item.Identifierkind == IdentifierKind.Constant)))
             {   // Identifier is a variable or constant in some context; Get it
-                variableValue = Item as IPhysicalQuantity;
+                variableValue = Item as Quantity;
                 return true;
             }
             else

@@ -554,7 +554,7 @@ namespace PhysicalCalculator
         }
     }
 
-    class CommandReader
+    public class CommandReader
     {
         private CommandAccessorStack CommandAccessors = null;
         public ResultWriter ResultLineWriter = null;

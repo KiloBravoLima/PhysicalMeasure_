@@ -48,10 +48,6 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
@@ -63,7 +59,6 @@
     <Compile Include="CommandreaderTest.cs" />
     <Compile Include="Commandreader_FileAccesserListTest.cs" />
     <Compile Include="Commandreader_FileAccesserTest.cs" />
-    <Compile Include="DateTimeSortStringTest.cs" />
     <Compile Include="PhysCalculatorTest.cs" />
     <Compile Include="ProgramTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

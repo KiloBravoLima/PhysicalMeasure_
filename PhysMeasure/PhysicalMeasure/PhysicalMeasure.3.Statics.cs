@@ -5,9 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-//using PhysicalMeasure.Interfaces;
-//using PhysicalMeasure.Classes;
-
 
 namespace PhysicalMeasure
 {
@@ -48,7 +45,7 @@ namespace PhysicalMeasure
                 yocto   y       1000^−8     10^−24  0.000000000000000000000001  Septillionth    Quadrillionth   1991 
         */
 
-        public static readonly UnitPrefixTable UnitPrefixes = new UnitPrefixTable(new UnitPrefix[] {new UnitPrefix(UnitPrefixes, "yotta", 'Y', 24), 
+        public static readonly UnitPrefixTable UnitPrefixes = new UnitPrefixTable(new UnitPrefix[] {new UnitPrefix(UnitPrefixes, "yotta", 'Y', 24),
                                                                                                     new UnitPrefix(UnitPrefixes, "zetta", 'Z', 21),
                                                                                                     new UnitPrefix(UnitPrefixes, "exa",   'E', 18),
                                                                                                     new UnitPrefix(UnitPrefixes, "peta",  'P', 15),
@@ -60,16 +57,16 @@ namespace PhysicalMeasure
                                                                                                     new UnitPrefix(UnitPrefixes, "hecto", 'H', 2),   /* h */
                                                                                        /* extra */  new UnitPrefix(UnitPrefixes, "hecto", 'h', 2),   /* h */
                                                                                                     new UnitPrefix(UnitPrefixes, "deca",  'D', 1),   /* da */
-                                                                                                    new UnitPrefix(UnitPrefixes, "deci",  'd', -1), 
-                                                                                                    new UnitPrefix(UnitPrefixes, "centi", 'c', -2), 
+                                                                                                    new UnitPrefix(UnitPrefixes, "deci",  'd', -1),
+                                                                                                    new UnitPrefix(UnitPrefixes, "centi", 'c', -2),
                                                                                                     new UnitPrefix(UnitPrefixes, "milli", 'm', -3),
                                                                                                     // new UnitPrefix(UnitPrefixes, "micro", 'μ', -6), // '\0x03BC' (Char)956  
                                                                                                     new UnitPrefix(UnitPrefixes, "micro", 'µ', -6),  // ANSI '\0x00B5' (Char)181   
-                                                                                                    new UnitPrefix(UnitPrefixes, "nano",  'n', -9), 
-                                                                                                    new UnitPrefix(UnitPrefixes, "pico",  'p', -12), 
-                                                                                                    new UnitPrefix(UnitPrefixes, "femto", 'f', -15), 
-                                                                                                    new UnitPrefix(UnitPrefixes, "atto",  'a', -18), 
-                                                                                                    new UnitPrefix(UnitPrefixes, "zepto", 'z', -21), 
+                                                                                                    new UnitPrefix(UnitPrefixes, "nano",  'n', -9),
+                                                                                                    new UnitPrefix(UnitPrefixes, "pico",  'p', -12),
+                                                                                                    new UnitPrefix(UnitPrefixes, "femto", 'f', -15),
+                                                                                                    new UnitPrefix(UnitPrefixes, "atto",  'a', -18),
+                                                                                                    new UnitPrefix(UnitPrefixes, "zepto", 'z', -21),
                                                                                                     new UnitPrefix(UnitPrefixes, "yocto", 'y', -24) });
         /*  http://en.wikipedia.org/wiki/Category:SI_units 
             SI base units
@@ -119,188 +116,201 @@ namespace PhysicalMeasure
          
         */
 
-        public static readonly BaseUnit[] SI_BaseUnits = new BaseUnit[] {  new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Length, "meter", "m"), 
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Mass, "kilogram", "Kg"), /* kg */
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Time, "second", "s"), 
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"), 
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"), 
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"), 
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd") };
-
-        public static readonly UnitSystem SI_Units = new UnitSystem("SI", UnitPrefixes,
-                                                                 SI_BaseUnits,
-                                                                 new NamedDerivedUnit[] {   new NamedDerivedUnit(SI_Units, "hertz",     "Hz",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "radian",    "rad",  new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "steradian", "sr",   new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "newton",    "N",    new SByte[] { 1, 1, -2, 0, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "pascal",    "Pa",   new SByte[] { -1, 1, -2, 0, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "joule",     "J",    new SByte[] { 2, 1, -2, 0, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "watt",      "W",    new SByte[] { 2, 1, -3, 0, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "coulomb",   "C",    new SByte[] { 1, 0, 0, 1, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "volt",      "V",    new SByte[] { 2, 1, -3, -1, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "farad",     "F",    new SByte[] { -2, -1, 4, 2, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "ohm",       "Ω",    new SByte[] { 2, 1, -3, -2, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "siemens",   "S",    new SByte[] { -2, -1, 3, 2, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "weber",     "Wb",   new SByte[] { 2, 1, -2, -1, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "tesla",     "T",    new SByte[] { 0, 1, -2, -1, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "henry",     "H",    new SByte[] { 2, 1, -2, -2, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "lumen",     "lm",   new SByte[] { 0, 0, 0, 0, 0, 0, 1 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "lux",       "lx",   new SByte[] { -2, 0, 0, 0, 0, 0, 1 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "becquerel", "Bq",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "gray",      "Gy",   new SByte[] { 2, 0, -2, 0, 0, 0, 0 }),
-                                                                                            new NamedDerivedUnit(SI_Units, "katal",     "kat",  new SByte[] { 0, 0, -1, 0, 0, 1, 0 }) },
-                                                                 new ConvertibleUnit[] { new ConvertibleUnit("gram", "g", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Mass], new ScaledValueConversion(1000)),  /* [g] = 1000 * [Kg] */
-                                                                                         new ConvertibleUnit("Celsius", "°C" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ , SI_BaseUnits[(int)PhysicalBaseQuantityKind.ThermodynamicTemperature], new LinearValueConversion(-273.15, 1)),    /* [°C] = 1 * [K] - 273.15 */
-                                                                                         new ConvertibleUnit("hour", "h", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/3600)), /* [h] = 1/3600 * [s] */
-                                                                                         new ConvertibleUnit("liter", "l", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Length].Pow(3), new ScaledValueConversion(1000) ) }) ; /* [l] = 1000 * [m3] */
+        public static readonly BaseUnit[] SI_BaseUnits 
+            = new BaseUnit[] {  new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Length, "meter", "m"),
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Mass, "kilogram", "Kg"), /* kg */
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Time, "second", "s"),
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"),
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"),
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"),
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd") };
 
 
-        public static readonly PhysicalUnit dimensionless = SI_Units.Dimensionless as PhysicalUnit;
+        // public static readonly IUnit Hz_PQ = SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Time]^-1;
+        public static readonly IDerivedUnit Hz = (IDerivedUnit)(SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Time]^-1);
 
-        public static readonly UnitSystem CGS_Units = new UnitSystem("CGS", UnitPrefixes,
-                                                                  new BaseUnit[] {  new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.Length, "centimeter", "cm"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.Mass, "gram", "g"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.Time, "second", "s"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"), 
-                                                                                    new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd")});
+        public static readonly UnitSystem SI_Units 
+            = new UnitSystem("SI", UnitPrefixes, SI_BaseUnits,
+                             new NamedDerivedUnit[] {   new NamedDerivedUnit(SI_Units, "hertz",     "Hz",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "radian",    "rad",  new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "steradian", "sr",   new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "newton",    "N",    new SByte[] { 1, 1, -2, 0, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "pascal",    "Pa",   new SByte[] { -1, 1, -2, 0, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "joule",     "J",    new SByte[] { 2, 1, -2, 0, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "watt",      "W",    new SByte[] { 2, 1, -3, 0, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "coulomb",   "C",    new SByte[] { 1, 0, 0, 1, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "volt",      "V",    new SByte[] { 2, 1, -3, -1, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "farad",     "F",    new SByte[] { -2, -1, 4, 2, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "ohm",       "Ω",    new SByte[] { 2, 1, -3, -2, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "siemens",   "S",    new SByte[] { -2, -1, 3, 2, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "weber",     "Wb",   new SByte[] { 2, 1, -2, -1, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "tesla",     "T",    new SByte[] { 0, 1, -2, -1, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "henry",     "H",    new SByte[] { 2, 1, -2, -2, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "lumen",     "lm",   new SByte[] { 0, 0, 0, 0, 0, 0, 1 }),
+                                                        new NamedDerivedUnit(SI_Units, "lux",       "lx",   new SByte[] { -2, 0, 0, 0, 0, 0, 1 }),
+                                                        new NamedDerivedUnit(SI_Units, "becquerel", "Bq",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "gray",      "Gy",   new SByte[] { 2, 0, -2, 0, 0, 0, 0 }),
+                                                        new NamedDerivedUnit(SI_Units, "katal",     "kat",  new SByte[] { 0, 0, -1, 0, 0, 1, 0 })},
 
-        public static readonly BaseUnit[] MGD_BaseUnits = new BaseUnit[] {  new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Length, "meter", "m"), 
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Mass, "kilogram", "Kg"), /* kg */
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Time, "day", "d"),
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"), 
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"), 
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"), 
-                                                                    new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd") };
+                             new ConvertibleUnit[] {    new ConvertibleUnit("gram", "g", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Mass], new ScaledValueConversion(1000)),  /* [g] = 1000 * [Kg] */
+                                                        new ConvertibleUnit("Celsius", "°C" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ ,
+                                                                            SI_BaseUnits[(int)PhysicalBaseQuantityKind.ThermodynamicTemperature], new LinearValueConversion(-273.15, 1)),    /* [°C] = 1 * [K] - 273.15 */
+                                                        new ConvertibleUnit("hour", "h", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/3600)), /* [h] = 1/3600 * [s] */
+                                                        new ConvertibleUnit("liter", "l", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Length].Pow(3), new ScaledValueConversion(1000) ) }); /* [l] = 1000 * [m3] */
 
-        public static readonly UnitSystem MGD_Units = new UnitSystem("MGD", UnitPrefixes,
-                                                                  MGD_BaseUnits, 
-                                                                 null,
-                                                                 new ConvertibleUnit[] { new ConvertibleUnit("second", "sec", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24 * 60 * 60)),  /* [sec]  = 24 * 60 * 60 * [d] */
-                                                                                         new ConvertibleUnit("minute", "min", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24 * 60)),       /* [min]  = 24 * 60 * [d] */
-                                                                                         new ConvertibleUnit("hour", "hour", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24)),             /* [hour] = 24 * [d] */
-                                                                                         new ConvertibleUnit("day", "day", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new IdentityValueConversion()),               /* [day]  = 1 * [d] */
-                                                                                         new ConvertibleUnit("year", "year", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/36.25)),      /* [year] = 1/365.25 * [d] */
-                                                                                         new ConvertibleUnit("year", "y", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/365.25)) });     /* [y]    = 1/365.25 * [d] */
 
-        public static readonly UnitSystem MGM_Units = new UnitSystem("MGM", UnitPrefixes,
-                                                                  new BaseUnit[] {  new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.Length, "meter", "m"), 
-                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.Mass, "kilogram", "Kg"), 
+        public static readonly Unit dimensionless = SI_Units.Dimensionless as Unit;
 
-                                                                                /*  new BaseUnit(MGM_Units, (SByte)MeasureKind.Time, "second", "s"), */
-                                                                                /*  new BaseUnit(MGM_Units, (SByte)MeasureKind.Time, "day", "d"), */
-                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.Time, "moment", "ø"), 
+        public static readonly UnitSystem CGS_Units 
+            = new UnitSystem("CGS", UnitPrefixes,
+                             new BaseUnit[] {new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.Length, "centimeter", "cm"),
+                                             new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.Mass, "gram", "g"),
+                                             new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.Time, "second", "s"),
+                                             new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"),
+                                             new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"),
+                                             new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"),
+                                             new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd")});
 
-                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"), 
-                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"), 
-                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"), 
-                                                                                    new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd") });
+
+        public static readonly BaseUnit[] MGD_BaseUnits
+            = new BaseUnit[] {  new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Length, "meter", "m"),
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Mass, "kilogram", "Kg"), /* kg */
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Time, "day", "d"),
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"),
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"),
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"),
+                                new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd") };
+
+        public static readonly UnitSystem MGD_Units 
+            = new UnitSystem("MGD", UnitPrefixes, MGD_BaseUnits, null,
+                             new ConvertibleUnit[] {new ConvertibleUnit("second", "sec", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24 * 60 * 60)),  /* [sec]  = 24 * 60 * 60 * [d] */
+                                                    new ConvertibleUnit("minute", "min", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24 * 60)),       /* [min]  = 24 * 60 * [d] */
+                                                    new ConvertibleUnit("hour", "hour", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24)),             /* [hour] = 24 * [d] */
+                                                    new ConvertibleUnit("day", "day", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new IdentityValueConversion()),               /* [day]  = 1 * [d] */
+                                                    new ConvertibleUnit("year", "year", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/36.25)),      /* [year] = 1/365.25 * [d] */
+                                                    new ConvertibleUnit("year", "y", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/365.25)) });     /* [y]    = 1/365.25 * [d] */
+
+        public static readonly UnitSystem MGM_Units 
+            = new UnitSystem("MGM", UnitPrefixes,
+                             new BaseUnit[] {new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.Length, "meter", "m"),
+                                             new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.Mass, "kilogram", "Kg"), 
+                                             
+                                             new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.Time, "moment", "ø"),
+
+                                             new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"),
+                                             new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"),
+                                             new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"),
+                                             new BaseUnit(MGM_Units, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd") });
 
         public static UnitSystemStack CurrentUnitSystems = new UnitSystemStack();
         public static UnitLookup UnitSystems = new UnitLookup(new UnitSystem[] { SI_Units, CGS_Units, MGD_Units, MGM_Units });
 
-        public static readonly UnitSystemConversion SItoCGSConversion = new UnitSystemConversion(SI_Units, CGS_Units, new ValueConversion[] { new ScaledValueConversion(100),       /* 1 m       <SI> = 100 cm        <CGS>  */
-                                                                                                                                     new ScaledValueConversion(1000),               /* 1 Kg      <SI> = 1000 g        <CGS>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 s       <SI> = 1 s           <CGS>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 A       <SI> = 1 A           <CGS>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 K       <SI> = 1 K           <CGS>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 mol     <SI> = 1 mol         <CGS>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 candela <SI> = 1 candela     <CGS>  */
-                                                                                                                                    });
+        public static readonly UnitSystemConversion SItoCGSConversion
+            = new UnitSystemConversion(SI_Units, CGS_Units,
+                new ValueConversion[] { new ScaledValueConversion(100),       /* 1 m       <SI> = 100 cm        <CGS>  */
+                                        new ScaledValueConversion(1000),      /* 1 Kg      <SI> = 1000 g        <CGS>  */
+                                        new IdentityValueConversion(),        /* 1 s       <SI> = 1 s           <CGS>  */
+                                        new IdentityValueConversion(),        /* 1 A       <SI> = 1 A           <CGS>  */
+                                        new IdentityValueConversion(),        /* 1 K       <SI> = 1 K           <CGS>  */
+                                        new IdentityValueConversion(),        /* 1 mol     <SI> = 1 mol         <CGS>  */
+                                        new IdentityValueConversion(),        /* 1 candela <SI> = 1 candela     <CGS>  */
+                                    });
 
-        public static readonly UnitSystemConversion SItoMGDConversion = new UnitSystemConversion(SI_Units, MGD_Units, new ValueConversion[] { new IdentityValueConversion(),        /* 1 m       <SI> = 1 m           <MGD>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 Kg      <SI> = 1 Kg          <MGD>  */
-                                                                                                                                     new ScaledValueConversion(1.0/(24*60*60)),     /* 1 s       <SI> = 1/86400 d     <MGD>  */
-                                                                                                                                  /* new ScaledValueConversion(10000/(24*60*60)),   /* 1 s       <SI> = 10000/86400 ø <MGD>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 A       <SI> = 1 A           <MGD>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 K       <SI> = 1 K           <MGD>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 mol     <SI> = 1 mol         <MGD>  */
-                                                                                                                                     new IdentityValueConversion(),                 /* 1 candela <SI> = 1 candela     <MGD>  */
-                                                                                                                                   });
+        public static readonly UnitSystemConversion SItoMGDConversion 
+            = new UnitSystemConversion(SI_Units, MGD_Units, 
+                new ValueConversion[] {new IdentityValueConversion(),        /* 1 m       <SI> = 1 m           <MGD>  */
+                                       new IdentityValueConversion(),                 /* 1 Kg      <SI> = 1 Kg          <MGD>  */
+                                       new ScaledValueConversion(1.0/(24*60*60)),     /* 1 s       <SI> = 1/86400 d     <MGD>  */
+                                       /* new ScaledValueConversion(10000/(24*60*60)),   /* 1 s       <SI> = 10000/86400 ø <MGD>  */
+                                       new IdentityValueConversion(),                 /* 1 A       <SI> = 1 A           <MGD>  */
+                                       new IdentityValueConversion(),                 /* 1 K       <SI> = 1 K           <MGD>  */
+                                       new IdentityValueConversion(),                 /* 1 mol     <SI> = 1 mol         <MGD>  */
+                                       new IdentityValueConversion(),                 /* 1 candela <SI> = 1 candela     <MGD>  */
+                                     });
 
-        public static readonly UnitSystemConversion MGDtoMGMConversion = new UnitSystemConversion(MGD_Units, MGM_Units, new ValueConversion[] { new IdentityValueConversion(),      /* 1 m       <MGD> = 1 m           <MGM>  */
-                                                                                                                                       new IdentityValueConversion(),               /* 1 Kg      <MGD> = 1 Kg          <MGM>  */
-                                                                                                                                       new ScaledValueConversion(10000),            /* 1 d       <MGD> = 10000 ø       <MGM>  */
-                                                                                                                                       new IdentityValueConversion(),               /* 1 A       <MGD> = 1 A           <MGM>  */
-                                                                                                                                       new IdentityValueConversion(),               /* 1 K       <MGD> = 1 K           <MGM>  */
-                                                                                                                                       new IdentityValueConversion(),               /* 1 mol     <MGD> = 1 mol         <MGM>  */
-                                                                                                                                       new IdentityValueConversion(),               /* 1 candela <MGD> = 1 candela     <MGM>  */
-                                                                                                                                     });
+        public static readonly UnitSystemConversion MGDtoMGMConversion = 
+            new UnitSystemConversion(MGD_Units, MGM_Units, 
+                new ValueConversion[] {new IdentityValueConversion(),      /* 1 m       <MGD> = 1 m           <MGM>  */
+                                       new IdentityValueConversion(),               /* 1 Kg      <MGD> = 1 Kg          <MGM>  */
+                                       new ScaledValueConversion(10000),            /* 1 d       <MGD> = 10000 ø       <MGM>  */
+                                       new IdentityValueConversion(),               /* 1 A       <MGD> = 1 A           <MGM>  */
+                                       new IdentityValueConversion(),               /* 1 K       <MGD> = 1 K           <MGM>  */
+                                       new IdentityValueConversion(),               /* 1 mol     <MGD> = 1 mol         <MGM>  */
+                                       new IdentityValueConversion(),               /* 1 candela <MGD> = 1 candela     <MGM>  */
+                                    });
 
-        public static UnitSystemConversionLookup UnitSystemConversions = new UnitSystemConversionLookup(new List<UnitSystemConversion> { SItoCGSConversion, SItoMGDConversion, MGDtoMGMConversion });
+        public static UnitSystemConversionLookup UnitSystemConversions = new UnitSystemConversionLookup(new List<UnitSystemConversion> { SItoCGSConversion, SItoMGDConversion, MGDtoMGMConversion});
     }
 
-    public static partial class Prefix
+    public static class Prefix
     {
         /* SI unit prefixes */
-        public static readonly UnitPrefix Y = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[0];
-        public static readonly UnitPrefix Z = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[1];
-        public static readonly UnitPrefix E = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[2];
-        public static readonly UnitPrefix P = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[3];
-        public static readonly UnitPrefix T = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[4];
-        public static readonly UnitPrefix G = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[5];
-        public static readonly UnitPrefix M = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[6];
-        public static readonly UnitPrefix K = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[7];
-        public static readonly UnitPrefix k = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[8];
-        public static readonly UnitPrefix H = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[9];
-        public static readonly UnitPrefix h = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[10];
-        public static readonly UnitPrefix D = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[11];
-        public static readonly UnitPrefix da = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[11]; // Extra
-        public static readonly UnitPrefix d = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[12];
-        public static readonly UnitPrefix c = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[13];
-        public static readonly UnitPrefix m = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[14];
-        public static readonly UnitPrefix my = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[15];
-        public static readonly UnitPrefix n = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[16];
-        public static readonly UnitPrefix p = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[17];
-        public static readonly UnitPrefix f = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[18];
-        public static readonly UnitPrefix a = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[19];
-        public static readonly UnitPrefix z = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[20];
-        public static readonly UnitPrefix y = (UnitPrefix)Physics.UnitPrefixes.UnitPrefixes[21];
+        public static readonly UnitPrefix Y = (UnitPrefix)Physics.UnitPrefixes['Y']; // .UnitPrefixFromPrefixChar('Y'); // .UnitPrefixes[0];
+        public static readonly UnitPrefix Z = (UnitPrefix)Physics.UnitPrefixes['Z']; // .UnitPrefixFromPrefixChar('Z'); // .UnitPrefixes[1];
+        public static readonly UnitPrefix E = (UnitPrefix)Physics.UnitPrefixes['E']; // .UnitPrefixFromPrefixChar('E'); // .UnitPrefixes[2];
+        public static readonly UnitPrefix P = (UnitPrefix)Physics.UnitPrefixes['P']; // .UnitPrefixFromPrefixChar('P'); // .UnitPrefixes[3];
+        public static readonly UnitPrefix T = (UnitPrefix)Physics.UnitPrefixes['T']; // .UnitPrefixFromPrefixChar('T'); // .UnitPrefixes[4];
+        public static readonly UnitPrefix G = (UnitPrefix)Physics.UnitPrefixes['G']; // .UnitPrefixFromPrefixChar('G'); // .UnitPrefixes[5];
+        public static readonly UnitPrefix M = (UnitPrefix)Physics.UnitPrefixes['M']; // .UnitPrefixFromPrefixChar('M'); // .UnitPrefixes[6];
+        public static readonly UnitPrefix K = (UnitPrefix)Physics.UnitPrefixes['K']; // .UnitPrefixFromPrefixChar('K'); // .UnitPrefixes[7];
+        public static readonly UnitPrefix k = (UnitPrefix)Physics.UnitPrefixes['k']; // .UnitPrefixFromPrefixChar('k'); // .UnitPrefixes[8];
+        public static readonly UnitPrefix H = (UnitPrefix)Physics.UnitPrefixes['H']; // .UnitPrefixFromPrefixChar('H'); // .UnitPrefixes[9];
+        public static readonly UnitPrefix h = (UnitPrefix)Physics.UnitPrefixes['h']; // .UnitPrefixFromPrefixChar('h'); // .UnitPrefixes[10];
+        public static readonly UnitPrefix D = (UnitPrefix)Physics.UnitPrefixes['D']; // .UnitPrefixFromPrefixChar('D'); // .UnitPrefixes[11];
+        public static readonly UnitPrefix da = (UnitPrefix)Physics.UnitPrefixes['D']; // .UnitPrefixFromPrefixChar('D'); // .UnitPrefixes[11]; // Extra
+        public static readonly UnitPrefix d = (UnitPrefix)Physics.UnitPrefixes['d']; // .UnitPrefixFromPrefixChar('d'); // .UnitPrefixes[12];
+        public static readonly UnitPrefix c = (UnitPrefix)Physics.UnitPrefixes['c']; // .UnitPrefixFromPrefixChar('c'); // .UnitPrefixes[13];
+        public static readonly UnitPrefix m = (UnitPrefix)Physics.UnitPrefixes['m']; // .UnitPrefixFromPrefixChar('m'); // .UnitPrefixes[14];
+        public static readonly UnitPrefix my = (UnitPrefix)Physics.UnitPrefixes['µ']; // .UnitPrefixFromPrefixChar('µ'); // .UnitPrefixes[15];
+        public static readonly UnitPrefix n = (UnitPrefix)Physics.UnitPrefixes['n']; // .UnitPrefixFromPrefixChar('n'); // .UnitPrefixes[16];
+        public static readonly UnitPrefix p = (UnitPrefix)Physics.UnitPrefixes['p']; // .UnitPrefixFromPrefixChar('p'); // .UnitPrefixes[17];
+        public static readonly UnitPrefix f = (UnitPrefix)Physics.UnitPrefixes['f']; // .UnitPrefixFromPrefixChar('f'); // .UnitPrefixes[18];
+        public static readonly UnitPrefix a = (UnitPrefix)Physics.UnitPrefixes['a']; // .UnitPrefixFromPrefixChar('a'); // .UnitPrefixes[19];
+        public static readonly UnitPrefix z = (UnitPrefix)Physics.UnitPrefixes['z']; // .UnitPrefixFromPrefixChar('z'); // .UnitPrefixes[20];
+        public static readonly UnitPrefix y = (UnitPrefix)Physics.UnitPrefixes['y']; // .UnitPrefixFromPrefixChar('y'); // .UnitPrefixes[21];
     }
 
 
-    public static partial class SI 
+    public static class SI
     {
         /* SI base units */
-        public static readonly BaseUnit m   = (BaseUnit)Physics.SI_Units.BaseUnits[0];
-        public static readonly BaseUnit Kg  = (BaseUnit)Physics.SI_Units.BaseUnits[1];
-        public static readonly BaseUnit s   = (BaseUnit)Physics.SI_Units.BaseUnits[2];
-        public static readonly BaseUnit A   = (BaseUnit)Physics.SI_Units.BaseUnits[3];
-        public static readonly BaseUnit K   = (BaseUnit)Physics.SI_Units.BaseUnits[4];
-        public static readonly BaseUnit mol = (BaseUnit)Physics.SI_Units.BaseUnits[5];
-        public static readonly BaseUnit cd  = (BaseUnit)Physics.SI_Units.BaseUnits[6];
+        public static readonly BaseUnit m = (BaseUnit)Physics.SI_Units["m"]; // .UnitFromSymbol("m"); // .BaseUnits[0];
+        public static readonly BaseUnit Kg  = (BaseUnit)Physics.SI_Units["Kg"]; // .UnitFromSymbol("Kg"); // .BaseUnits[1];
+        public static readonly BaseUnit s   = (BaseUnit)Physics.SI_Units["s"]; // .UnitFromSymbol("s"); // .BaseUnits[2];
+        public static readonly BaseUnit A   = (BaseUnit)Physics.SI_Units["A"]; // .UnitFromSymbol("A"); // .BaseUnits[3];
+        public static readonly BaseUnit K   = (BaseUnit)Physics.SI_Units["K"]; // .UnitFromSymbol("K"); // .BaseUnits[4];
+        public static readonly BaseUnit mol = (BaseUnit)Physics.SI_Units["mol"]; // .UnitFromSymbol("mol"); // .BaseUnits[5];
+        public static readonly BaseUnit cd  = (BaseUnit)Physics.SI_Units["cd"]; // .UnitFromSymbol("cd"); // .BaseUnits[6];
 
         /* Named units derived from SI base units */
-        public static readonly NamedDerivedUnit Hz  = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[0];
-        public static readonly NamedDerivedUnit rad = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[1];
-        public static readonly NamedDerivedUnit sr  = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[2];
-        public static readonly NamedDerivedUnit N   = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[3];
-        public static readonly NamedDerivedUnit Pa  = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[4];
-        public static readonly NamedDerivedUnit J   = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[5];
-        public static readonly NamedDerivedUnit W   = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[6];
-        public static readonly NamedDerivedUnit C   = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[7];
-        public static readonly NamedDerivedUnit V   = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[8];
-        public static readonly NamedDerivedUnit F   = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[9];
-        public static readonly NamedDerivedUnit Ohm = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[10];
-        public static readonly NamedDerivedUnit S   = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[11];
-        public static readonly NamedDerivedUnit Wb  = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[12];
-        public static readonly NamedDerivedUnit T   = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[13];
-        public static readonly NamedDerivedUnit H   = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[14];
-        public static readonly NamedDerivedUnit lm  = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[15];
-        public static readonly NamedDerivedUnit lx  = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[16];
-        public static readonly NamedDerivedUnit Bq  = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[17];
-        public static readonly NamedDerivedUnit Gy  = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[18];
-        public static readonly NamedDerivedUnit kat = (NamedDerivedUnit)Physics.SI_Units.NamedDerivedUnits[19];
+        public static readonly NamedDerivedUnit Hz  = (NamedDerivedUnit)Physics.SI_Units["Hz"]; // .UnitFromSymbol("Hz"); // .NamedDerivedUnits[0];
+        public static readonly NamedDerivedUnit rad = (NamedDerivedUnit)Physics.SI_Units["rad"]; // .UnitFromSymbol("rad"); // .NamedDerivedUnits[1];
+        public static readonly NamedDerivedUnit sr  = (NamedDerivedUnit)Physics.SI_Units["sr"]; // .UnitFromSymbol("sr"); // .NamedDerivedUnits[2];
+        public static readonly NamedDerivedUnit N   = (NamedDerivedUnit)Physics.SI_Units["N"]; // .UnitFromSymbol("N"); // .NamedDerivedUnits[3];
+        public static readonly NamedDerivedUnit Pa  = (NamedDerivedUnit)Physics.SI_Units["Pa"]; // .UnitFromSymbol("Pa"); // .NamedDerivedUnits[4];
+        public static readonly NamedDerivedUnit J   = (NamedDerivedUnit)Physics.SI_Units["J"]; // .UnitFromSymbol("J"); // .NamedDerivedUnits[5];
+        public static readonly NamedDerivedUnit W   = (NamedDerivedUnit)Physics.SI_Units["W"]; // .UnitFromSymbol("W"); // .NamedDerivedUnits[6];
+        public static readonly NamedDerivedUnit C   = (NamedDerivedUnit)Physics.SI_Units["C"]; // .UnitFromSymbol("C"); // .NamedDerivedUnits[7];
+        public static readonly NamedDerivedUnit V   = (NamedDerivedUnit)Physics.SI_Units["V"]; // .UnitFromSymbol("V"); // .NamedDerivedUnits[8];
+        public static readonly NamedDerivedUnit F   = (NamedDerivedUnit)Physics.SI_Units["F"]; // .UnitFromSymbol("F"); // .NamedDerivedUnits[9];
+        public static readonly NamedDerivedUnit Ohm = (NamedDerivedUnit)Physics.SI_Units["Ω"]; // .UnitFromSymbol("Ω"); // .NamedDerivedUnits[10];
+        public static readonly NamedDerivedUnit S   = (NamedDerivedUnit)Physics.SI_Units["S"]; // .UnitFromSymbol("S"); // .NamedDerivedUnits[11];
+        public static readonly NamedDerivedUnit Wb  = (NamedDerivedUnit)Physics.SI_Units["Wb"]; // .UnitFromSymbol("Wb"); // .NamedDerivedUnits[12];
+        public static readonly NamedDerivedUnit T   = (NamedDerivedUnit)Physics.SI_Units["T"]; // .UnitFromSymbol("T"); // .NamedDerivedUnits[13];
+        public static readonly NamedDerivedUnit H   = (NamedDerivedUnit)Physics.SI_Units["H"]; // .UnitFromSymbol("H"); // .NamedDerivedUnits[14];
+        public static readonly NamedDerivedUnit lm  = (NamedDerivedUnit)Physics.SI_Units["lm"]; // .UnitFromSymbol("lm"); // .NamedDerivedUnits[15];
+        public static readonly NamedDerivedUnit lx  = (NamedDerivedUnit)Physics.SI_Units["lx"]; // .UnitFromSymbol("lx"); // .NamedDerivedUnits[16];
+        public static readonly NamedDerivedUnit Bq  = (NamedDerivedUnit)Physics.SI_Units["Bq"]; // .UnitFromSymbol("Bq"); // .NamedDerivedUnits[17];
+        public static readonly NamedDerivedUnit Gy  = (NamedDerivedUnit)Physics.SI_Units["Gy"]; // .UnitFromSymbol("Gy"); // .NamedDerivedUnits[18];
+        public static readonly NamedDerivedUnit kat = (NamedDerivedUnit)Physics.SI_Units["kat"]; // .UnitFromSymbol("kat"); // .NamedDerivedUnits[19];
 
         /* Convertible units */
-        public static readonly ConvertibleUnit g  = (ConvertibleUnit)Physics.SI_Units.ConvertibleUnits[0];
-        public static readonly ConvertibleUnit Ce = (ConvertibleUnit)Physics.SI_Units.ConvertibleUnits[1];
-        public static readonly ConvertibleUnit h  = (ConvertibleUnit)Physics.SI_Units.ConvertibleUnits[2];
-        public static readonly ConvertibleUnit l  = (ConvertibleUnit)Physics.SI_Units.ConvertibleUnits[3];
+        public static readonly ConvertibleUnit g  = (ConvertibleUnit)Physics.SI_Units["g"]; // .UnitFromSymbol("g"); // .ConvertibleUnits[0];
+        public static readonly ConvertibleUnit Ce = (ConvertibleUnit)Physics.SI_Units["°C"]; // .UnitFromSymbol("°C"); // .ConvertibleUnits[1];
+        public static readonly ConvertibleUnit h  = (ConvertibleUnit)Physics.SI_Units["h"]; // .UnitFromSymbol("h"); // .ConvertibleUnits[2];
+        public static readonly ConvertibleUnit l  = (ConvertibleUnit)Physics.SI_Units["l"]; // .UnitFromSymbol("l"); // .ConvertibleUnits[3];
     }
 
 
-#endregion Physical Measure Static Classes
-
+    #endregion Physical Measure Static Classes
 }

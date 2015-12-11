@@ -29,10 +29,10 @@ namespace PhysicalCalculator.Expression
 
         Boolean SystemSet(String systemName, out INametableItem systemItem);
 
-        Boolean UnitSet(IUnitSystem unitSystem, String unitName, IPhysicalQuantity unitValue, out INametableItem unitItem);
+        Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, out INametableItem unitItem);
 
-        Boolean VariableGet(String variableName, out IPhysicalQuantity variableValue, ref String resultLine);
-        Boolean VariableSet(String variableName, IPhysicalQuantity variableValue);
+        Boolean VariableGet(String variableName, out Quantity variableValue, ref String resultLine);
+        Boolean VariableSet(String variableName, Quantity variableValue);
 
         Boolean FunctionFind(String functionName, out IFunctionEvaluator functionEvaluator);
     }
@@ -89,10 +89,10 @@ namespace PhysicalCalculator.Expression
         public delegate Boolean IdentifierContextLookupFunc(String identifierName, out IEnvironment foundInContext, out IdentifierKind identifierKind);
         public delegate Boolean QualifiedIdentifierContextLookupFunc(IEnvironment lookInContext, String identifierName, out IEnvironment foundInContext, out IdentifierKind identifierKind);
 
-        public delegate Boolean VariableValueLookupFunc(IEnvironment lookInContext, String variableName, out IPhysicalQuantity variableValue, ref String resultLine);
+        public delegate Boolean VariableValueLookupFunc(IEnvironment lookInContext, String variableName, out Quantity variableValue, ref String resultLine);
         public delegate Boolean FunctionLookupFunc(IEnvironment lookInContext, String functionName, out IFunctionEvaluator functionEvaluator);
-        public delegate Boolean FunctionEvaluateFunc(String functionName, IFunctionEvaluator functionevaluator, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine);
-        public delegate Boolean FunctionEvaluateFileReadFunc(String functionName, out IPhysicalQuantity functionResult, ref String resultLine);
+        public delegate Boolean FunctionEvaluateFunc(String functionName, IFunctionEvaluator functionevaluator, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine);
+        public delegate Boolean FunctionEvaluateFileReadFunc(String functionName, out Quantity functionResult, ref String resultLine);
 
         // Delegate static globals
         public static IdentifierItemLookupFunc IdentifierItemLookupCallback;
@@ -139,7 +139,7 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static Boolean VariableGet(IEnvironment lookInContext, String variableName, out IPhysicalQuantity variableValue, ref String resultLine)
+        public static Boolean VariableGet(IEnvironment lookInContext, String variableName, out Quantity variableValue, ref String resultLine)
         {
             variableValue = null;
             if (VariableValueGetCallback != null)
@@ -149,7 +149,7 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static Boolean FunctionGet(IEnvironment lookInContext, String functionName, List<IPhysicalQuantity> parameterlist, out IPhysicalQuantity functionResult, ref String resultLine)
+        public static Boolean FunctionGet(IEnvironment lookInContext, String functionName, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine)
         {
             functionResult = null;
             IFunctionEvaluator functionevaluator;
@@ -172,7 +172,7 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static Boolean FileFunctionGet(String functionName, out IPhysicalQuantity functionResult, ref String resultLine)
+        public static Boolean FileFunctionGet(String functionName, out Quantity functionResult, ref String resultLine)
         {
             functionResult = null;
             if (FunctionEvaluateFileReadCallback != null)
@@ -186,9 +186,9 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static List<IPhysicalQuantity> ParseExpressionList(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
+        public static List<Quantity> ParseExpressionList(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
-            List<IPhysicalQuantity> pqList = new List<IPhysicalQuantity>();
+            List<Quantity> pqList = new List<Quantity>();
             Boolean MoreToParse = false;
             Boolean OK = true;
             List<String> TempExpectedFollow = ExpectedFollow;
@@ -199,7 +199,7 @@ namespace PhysicalCalculator.Expression
             }
             do
             {
-                IPhysicalQuantity pq = null;
+                Quantity pq = null;
                 pq = ParseConvertedExpression(ref commandLine, ref resultLine, TempExpectedFollow);
                 OK = pq != null;
                 if (OK)
@@ -218,7 +218,7 @@ namespace PhysicalCalculator.Expression
 
         public static Nullable<Boolean> ParseBooleanExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
-            IPhysicalQuantity pq = ParseExpression(ref commandLine, ref resultLine, ExpectedFollow);
+            IQuantity pq = ParseExpression(ref commandLine, ref resultLine, ExpectedFollow);
             if (pq != null)
             {
                 return !pq.Equals(PQ_False);
@@ -226,9 +226,9 @@ namespace PhysicalCalculator.Expression
             return null;
         }
 
-        public static IPhysicalQuantity ParseConvertedExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
+        public static Quantity ParseConvertedExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
-            IPhysicalQuantity pq;
+            Quantity pq;
 
             List<String> TempExpectedFollow = ExpectedFollow;
             if (!TempExpectedFollow.Contains("["))
@@ -245,12 +245,12 @@ namespace PhysicalCalculator.Expression
             return pq;
         }
 
-        public static IPhysicalQuantity ParseOptionalConvertedExpression(IPhysicalQuantity pq, ref String commandLine, ref String resultLine)
+        public static Quantity ParseOptionalConvertedExpression(Quantity pq, ref String commandLine, ref String resultLine)
         {
-            IPhysicalQuantity pqRes = pq;
+            Quantity pqRes = pq;
             if (!String.IsNullOrEmpty(commandLine))
             {
-                IPhysicalUnit pu = ParseOptionalConvertToUnit(ref commandLine, ref resultLine);
+                Unit pu = ParseOptionalConvertToUnit(ref commandLine, ref resultLine);
                 if (pu != null)
                 {
                     pqRes = pq.ConvertTo(pu);
@@ -259,7 +259,7 @@ namespace PhysicalCalculator.Expression
                         resultLine = "The unit " + pq.Unit.ToPrintString() + " can't be converted to " + pu.ToPrintString() + "\n";
                         //  pqRes = pq.ConvertTo(new CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit) }, new PrefixedUnitExponentList { new PrefixedUnitExponent(pu) }));
                         //  pqRes = pq.ConvertTo(new CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit.Divide(pu).Unit) }, null));
-                        ICombinedUnit newRelativeUnit = new CombinedUnit(pu).CombineMultiply(pq.Unit.Divide(pu));
+                        CombinedUnit newRelativeUnit = new CombinedUnit(pu).CombineMultiply(pq.Unit.Divide(pu));
                         pqRes = pq.ConvertTo(newRelativeUnit);
                     }
                     return pqRes;
@@ -272,18 +272,18 @@ namespace PhysicalCalculator.Expression
             return pqRes;
         }
 
-        public static IPhysicalQuantity CheckForNamedDerivedUnit(IPhysicalQuantity pq)
+        public static Quantity CheckForNamedDerivedUnit(Quantity pq)
         {
-            IPhysicalQuantity pqRes = pq;
+            Quantity pqRes = pq;
             if (pqRes != null)
             {   
                 IUnitSystem unitSystem = pqRes.Unit.SimpleSystem;
                 if (unitSystem != null && !unitSystem.IsCombinedUnitSystem)
                 {
-                    IPhysicalUnit namedDerivedUnit = unitSystem.NamedDerivedUnitFromUnit(pqRes.Unit);
+                    Unit namedDerivedUnit = (Unit)unitSystem.NamedDerivedUnitFromUnit(pqRes.Unit);
                     if (namedDerivedUnit != null)
                     {
-                        pqRes = new PhysicalQuantity(pqRes.Value, namedDerivedUnit);
+                        pqRes = new Quantity(pqRes.Value, namedDerivedUnit);
                     }
                 }
             }
@@ -291,9 +291,9 @@ namespace PhysicalCalculator.Expression
             return pqRes;
         }
 
-        public static IPhysicalUnit ParseOptionalConvertToUnit(ref String commandLine, ref String resultLine)
+        public static Unit ParseOptionalConvertToUnit(ref String commandLine, ref String resultLine)
         {
-            IPhysicalUnit pu = null;
+            Unit pu = null;
             if (TokenString.TryParseToken("[", ref commandLine))
             { // "Convert to unit" square parentheses
 
@@ -341,10 +341,10 @@ namespace PhysicalCalculator.Expression
         {
             public readonly TokenKind TokenKind;
 
-            public readonly IPhysicalQuantity Operand;
+            public readonly Quantity Operand;
             public readonly OperatorKind Operator;
 
-            public token(IPhysicalQuantity Operand)
+            public token(Quantity Operand)
             {
                 this.TokenKind = TokenKind.Operand;
                 this.Operand = Operand;
@@ -366,7 +366,7 @@ namespace PhysicalCalculator.Expression
             
             public int Pos = 0;
             
-            public IPhysicalUnit dimensionless = Physics.dimensionless;
+            public Unit dimensionless = Physics.dimensionless;
             public List<String> ExpectedFollow = new List<String>(); // The list of words and symbols which will terminate parsing the InputString without signaling an error.
 
             public Boolean ThrowExceptionOnInvalidInput = false;
@@ -385,7 +385,7 @@ namespace PhysicalCalculator.Expression
                 this.InputString = InputString;
             }
 
-            public expressiontokenizer(IPhysicalUnit dimensionless, String InputString)
+            public expressiontokenizer(Unit dimensionless, String InputString)
             {
                 this.dimensionless = dimensionless;
                 this.InputString = InputString;
@@ -636,7 +636,7 @@ namespace PhysicalCalculator.Expression
                                 Pos += OldLen - CommandLine.Length;
                                 if (OK)
                                 {
-                                    IPhysicalUnit pu = null;
+                                    Unit pu = null;
                                     if (!String.IsNullOrWhiteSpace(CommandLine))
                                     {   // Parse optional unit
                                         OldLen = CommandLine.Length;
@@ -653,7 +653,7 @@ namespace PhysicalCalculator.Expression
                                         pu = dimensionless;
                                     }
 
-                                    IPhysicalQuantity pq = new PhysicalQuantity(D, pu);
+                                    Quantity pq = new Quantity(D, pu);
 
                                     LastReadToken = TokenKind.Operand;
                                     return new token(pq);
@@ -681,7 +681,7 @@ namespace PhysicalCalculator.Expression
                             int OldLen = CommandLine.Length;
                             String ResultLine = "";
 
-                            IPhysicalQuantity pq;
+                            Quantity pq;
 
                             Boolean PrimaryIdentifierFound = ParseQualifiedIdentifier(ref CommandLine, ref ResultLine, out IdentifierName, out pq);
                             // 2014-09-09 Moved to only be done when PrimaryIdentifierFound or call of .cal file as function : Pos += OldLen - CommandLine.Length;
@@ -820,19 +820,19 @@ namespace PhysicalCalculator.Expression
             }
         }
 
-        public static readonly IPhysicalQuantity PQ_False = new PhysicalQuantity(0);
-        public static readonly IPhysicalQuantity PQ_True = new PhysicalQuantity(1);
+        public static readonly Quantity PQ_False = new Quantity(0);
+        public static readonly Quantity PQ_True = new Quantity(1);
 
-        public static IPhysicalQuantity ParseExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow ) // = null)
+        public static Quantity ParseExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow ) // = null)
         {
             //public static readonly 
-            PhysicalUnit dimensionless = new CombinedUnit();
+            Unit dimensionless = new CombinedUnit();
 
             expressiontokenizer Tokenizer = new expressiontokenizer(dimensionless, commandLine);
 
             Tokenizer.ExpectedFollow = ExpectedFollow;
             Tokenizer.ThrowExceptionOnInvalidInput = false;
-            Stack<IPhysicalQuantity> Operands = new Stack<IPhysicalQuantity>();
+            Stack<Quantity> Operands = new Stack<Quantity>();
 
             token Token = Tokenizer.GetToken();
             while (Token != null)
@@ -842,7 +842,7 @@ namespace PhysicalCalculator.Expression
 
                 if (Token.TokenKind == TokenKind.Operand)
                 {
-                    // Stack PhysicalQuantity operand
+                    // Stack Quantity operand
                     Debug.Assert(Token.Operand != null);
                     Operands.Push(Token.Operand);
                 }
@@ -857,9 +857,9 @@ namespace PhysicalCalculator.Expression
                     {
                         Debug.Assert(Operands.Count >= 1);
 
-                        IPhysicalQuantity pqTop = Operands.Pop();
+                        Quantity pqTop = Operands.Pop();
                         // Invert sign of pq
-                        IPhysicalQuantity pqResult = pqTop.Multiply(-1);
+                        Quantity pqResult = pqTop.Multiply(-1);
                         Debug.Assert(pqResult != null);
                         Operands.Push(pqResult);
                     }
@@ -867,7 +867,7 @@ namespace PhysicalCalculator.Expression
                     {
                         Debug.Assert(Operands.Count >= 1);
 
-                        IPhysicalQuantity pqTop = Operands.Pop();
+                        Quantity pqTop = Operands.Pop();
                         // Invert pqTop as boolean
                         if (!pqTop.Equals(PQ_False))
                         {
@@ -883,37 +883,37 @@ namespace PhysicalCalculator.Expression
                     {
                         Debug.Assert(Operands.Count >= 2);
 
-                        IPhysicalQuantity pqSecond = Operands.Pop();
-                        IPhysicalQuantity pqFirst = Operands.Pop();
+                        Quantity pqSecond = Operands.Pop();
+                        Quantity pqFirst = Operands.Pop();
 
                         Debug.Assert(pqSecond != null);
                         Debug.Assert(pqFirst != null);
 
                         if (Token.Operator == OperatorKind.add)
                         {
-                            // Combine pq1 and pq2 to the new PhysicalQuantity pq1*pq2   
-                            IPhysicalQuantity pqResult = pqFirst.Add(pqSecond);
+                            // Combine pq1 and pq2 to the new Quantity pq1*pq2   
+                            Quantity pqResult = pqFirst.Add(pqSecond);
                             Debug.Assert(pqResult != null);
                             Operands.Push(pqResult);
                         }
                         else if (Token.Operator == OperatorKind.sub)
                         {
-                            // Combine pq1 and pq2 to the new PhysicalQuantity pq1/pq2
-                            IPhysicalQuantity pqResult = pqFirst.Subtract(pqSecond);
+                            // Combine pq1 and pq2 to the new Quantity pq1/pq2
+                            Quantity pqResult = pqFirst.Subtract(pqSecond);
                             Debug.Assert(pqResult != null);
                             Operands.Push(pqResult);
                         }
                         else if (Token.Operator == OperatorKind.mult)
                         {
-                            // Combine pq1 and pq2 to the new PhysicalQuantity pq1*pq2   
-                            IPhysicalQuantity pqResult = pqFirst.Multiply(pqSecond);
+                            // Combine pq1 and pq2 to the new Quantity pq1*pq2   
+                            Quantity pqResult = pqFirst.Multiply(pqSecond);
                             Debug.Assert(pqResult != null);
                             Operands.Push(pqResult);
                         }
                         else if (Token.Operator == OperatorKind.div)
                         {
-                            // Combine pq1 and pq2 to the new PhysicalQuantity pq1/pq2
-                            IPhysicalQuantity pqResult = pqFirst.Divide(pqSecond);
+                            // Combine pq1 and pq2 to the new Quantity pq1/pq2
+                            Quantity pqResult = pqFirst.Divide(pqSecond);
                             Debug.Assert(pqResult != null);
                             Operands.Push(pqResult);
                         }
@@ -941,15 +941,15 @@ namespace PhysicalCalculator.Expression
 
                             if (Token.Operator == OperatorKind.pow)
                             {
-                                // Combine pq and exponent to the new PhysicalQuantity pq^expo
-                                IPhysicalQuantity pqResult = pqFirst.Pow(Exponent);
+                                // Combine pq and exponent to the new Quantity pq^expo
+                                Quantity pqResult = pqFirst.Pow(Exponent);
                                 Debug.Assert(pqResult != null);
                                 Operands.Push(pqResult);
                             }
                             else
                             {
-                                // Combine pq and exponent to the new PhysicalQuantity pq^(1/expo)
-                                IPhysicalQuantity pqResult = pqFirst.Rot(Exponent);
+                                // Combine pq and exponent to the new Quantity pq^(1/expo)
+                                Quantity pqResult = pqFirst.Rot(Exponent);
                                 Debug.Assert(pqResult != null);
                                 Operands.Push(pqResult);
                             }
@@ -1035,7 +1035,7 @@ namespace PhysicalCalculator.Expression
         }
 
 
-        public static Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, out String identifierName, out IPhysicalQuantity identifierValue)
+        public static Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, out String identifierName, out Quantity identifierValue)
         {
             identifierValue = null;
 
@@ -1095,7 +1095,7 @@ namespace PhysicalCalculator.Expression
 
                         List<string> ExpectedFollow = new List<string>();
                         ExpectedFollow.Add(")");
-                        List<IPhysicalQuantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow);
+                        List<Quantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow);
                         Boolean OK = parameterlist != null;
                         if (OK)
                         {
@@ -1354,9 +1354,9 @@ namespace PhysicalCalculator.Expression
             return OK;
         }
 
-        public static IPhysicalUnit ParsePhysicalUnit(ref String commandLine, ref String resultLine)
+        public static Unit ParsePhysicalUnit(ref String commandLine, ref String resultLine)
         {
-            IPhysicalUnit pu = null;
+            Unit pu = null;
             Boolean UnitIdentifierFound = false;
             String IdentifierName;
             IEnvironment Context;
@@ -1396,7 +1396,7 @@ namespace PhysicalCalculator.Expression
                     }
                     String UnitStr = commandLine.Substring(0, UnitStringLen);
                     String tempResultLine = null;
-                    pu = PhysicalUnit.ParseUnit(ref UnitStr, ref tempResultLine, false);
+                    pu = Unit.ParseUnit(ref UnitStr, ref tempResultLine, false);
                     if (pu != null || String.IsNullOrEmpty(resultLine))
                     {
                         resultLine = tempResultLine;

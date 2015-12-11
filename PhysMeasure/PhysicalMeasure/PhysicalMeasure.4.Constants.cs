@@ -18,10 +18,10 @@ namespace PhysicalMeasure
                 Planck constant                     h           6.62606896(33) × 10−34 J·s          5.0 × 10−8 
                 reduced Planck constant             h/2 pi      1.054571628(53) × 10−34 J·s         5.0 × 10−8 
          */
-        public static readonly PhysicalQuantity c = new PhysicalQuantity(299792458, SI.m / SI.s);
-        public static readonly PhysicalQuantity G = new PhysicalQuantity(6.67428E-11, (SI.m^3) / (SI.Kg * (SI.s ^ 2)));
-        public static readonly PhysicalQuantity h = new PhysicalQuantity(6.62E-34, SI.J * SI.s);
-        public static readonly PhysicalQuantity h_bar = new PhysicalQuantity(1.054571628 - 34, SI.J * SI.s);
+        public static readonly Quantity c = new Quantity(299792458, SI.m / SI.s);
+        public static readonly Quantity G = new Quantity(6.67428E-11, (SI.m^3) / (SI.Kg * (SI.s ^ 2)));
+        public static readonly Quantity h = new Quantity(6.62E-34, SI.J * SI.s);
+        public static readonly Quantity h_bar = new Quantity(1.054571628E-34, SI.J * SI.s);
 
         /*
             Table of electromagnetic constants
@@ -42,17 +42,17 @@ namespace PhysicalMeasure
                 nuclear magneton                    myN         5.05078343(43)×10−27            J·T−1                   8.6 × 10−8 
                 von Klitzing constant               RK          25812.807557(18)                Ω                       6.8 × 10−10 
         */
-        public static readonly PhysicalQuantity my0 = new PhysicalQuantity(1.256637061E-6, SI.N / (SI.A^2));
-        public static readonly PhysicalQuantity epsilon0 = new PhysicalQuantity(8.854187817E-12, SI.F / SI.m);
-        public static readonly PhysicalQuantity Z0 = new PhysicalQuantity(376.730313461, SI.Ohm);
-        public static readonly PhysicalQuantity ke = new PhysicalQuantity(8.987551787E9, SI.N * (SI.m^2) /(SI.C^2));
-        public static readonly PhysicalQuantity e = new PhysicalQuantity(1.602176487E-19, SI.C);
-        public static readonly PhysicalQuantity myB = new PhysicalQuantity(9.27400915E-24, SI.J / SI.T);
-        public static readonly PhysicalQuantity G0 = new PhysicalQuantity(7.7480917004E-5, SI.S);
-        public static readonly PhysicalQuantity KJ = new PhysicalQuantity(4.83597891E14, SI.Hz / SI.V);
-        public static readonly PhysicalQuantity phi0 = new PhysicalQuantity(2.067833667E-15, SI.Wb);
-        public static readonly PhysicalQuantity myN = new PhysicalQuantity(5.05078343E-27, SI.J / SI.T);
-        public static readonly PhysicalQuantity RK = new PhysicalQuantity(25812.807557, SI.Ohm);
+        public static readonly Quantity my0 = new Quantity(1.256637061E-6, SI.N / (SI.A^2));
+        public static readonly Quantity epsilon0 = new Quantity(8.854187817E-12, SI.F / SI.m);
+        public static readonly Quantity Z0 = new Quantity(376.730313461, SI.Ohm);
+        public static readonly Quantity ke = new Quantity(8.987551787E9, SI.N * (SI.m^2) /(SI.C^2));
+        public static readonly Quantity e = new Quantity(1.602176487E-19, SI.C);
+        public static readonly Quantity myB = new Quantity(9.27400915E-24, SI.J / SI.T);
+        public static readonly Quantity G0 = new Quantity(7.7480917004E-5, SI.S);
+        public static readonly Quantity KJ = new Quantity(4.83597891E14, SI.Hz / SI.V);
+        public static readonly Quantity phi0 = new Quantity(2.067833667E-15, SI.Wb);
+        public static readonly Quantity myN = new Quantity(5.05078343E-27, SI.J / SI.T);
+        public static readonly Quantity RK = new Quantity(25812.807557, SI.Ohm);
 
         /*
             Table of atomic and nuclear constants
@@ -69,19 +69,19 @@ namespace PhysicalMeasure
                 Thomson cross section               tcs         6.65245873(13)×10−29            m²                      2.0 × 10−8 
                 weak mixing angle                   ThetaW      0.22215(76)                                             3.4 × 10−3 
         */
-        public static readonly PhysicalQuantity a0 = new PhysicalQuantity(5.291772108E-11, SI.m);
-        public static readonly PhysicalQuantity re = new PhysicalQuantity(2.8179402894E-15, SI.m);
-        public static readonly PhysicalQuantity me = new PhysicalQuantity(9.10938215E-31, SI.Kg);
+        public static readonly Quantity a0 = new Quantity(5.291772108E-11, SI.m);
+        public static readonly Quantity re = new Quantity(2.8179402894E-15, SI.m);
+        public static readonly Quantity me = new Quantity(9.10938215E-31, SI.Kg);
         /** */
-        public static readonly PhysicalQuantity GF = new PhysicalQuantity(1.16639E-5, (Prefix.G * Constants.e * SI.V) ^ -2);
+        public static readonly Quantity GF = new Quantity(1.16639E-5, (Prefix.G * Constants.e * SI.V) ^ -2);
         /* **/
-        public static readonly PhysicalQuantity alpha = new PhysicalQuantity(7.2973525376E-3, Physics.dimensionless);
-        public static readonly PhysicalQuantity Eh = new PhysicalQuantity(4.35974417E-18, SI.J);
-        public static readonly PhysicalQuantity mp = new PhysicalQuantity(1.672621637E-27, SI.Kg);
-        public static readonly PhysicalQuantity h2me = new PhysicalQuantity(3.636947550E-4, (SI.m ^ 2) / SI.s);
-        public static readonly PhysicalQuantity Rinf = new PhysicalQuantity(10973731.568525, SI.m ^ -1);
-        public static readonly PhysicalQuantity tcs = new PhysicalQuantity(6.65245873E-29, SI.m ^ 2);
-        public static readonly PhysicalQuantity ThetaW = new PhysicalQuantity(0.22215, Physics.dimensionless);
+        public static readonly Quantity alpha = new Quantity(7.2973525376E-3, Physics.dimensionless);
+        public static readonly Quantity Eh = new Quantity(4.35974417E-18, SI.J);
+        public static readonly Quantity mp = new Quantity(1.672621637E-27, SI.Kg);
+        public static readonly Quantity h2me = new Quantity(3.636947550E-4, (SI.m ^ 2) / SI.s);
+        public static readonly Quantity Rinf = new Quantity(10973731.568525, SI.m ^ -1);
+        public static readonly Quantity tcs = new Quantity(6.65245873E-29, SI.m ^ 2);
+        public static readonly Quantity ThetaW = new Quantity(0.22215, Physics.dimensionless);
     }
     #endregion Physical Constants Statics
 }
