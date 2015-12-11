@@ -236,6 +236,7 @@ fileTemplateManager.StartNewFile("PhysicalMeasure.nuspec", "PhysicalMeasure", "N
   </metadata>
   <files>
     <!-- <file src="bin\$configuration$\PhysicalMeasure.dll" target="lib\net46\PhysicalMeasure.dll" />  -->
+	<file src="bin\$configuration$\KBL.Extensions.dll" target="lib\net46\KBL.Extensions.dll" />
   </files>
 </package>
 <#
