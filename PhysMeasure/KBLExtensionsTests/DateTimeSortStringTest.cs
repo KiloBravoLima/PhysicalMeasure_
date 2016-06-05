@@ -72,7 +72,8 @@ namespace ExtensionsTests
             DateTime Me = new DateTime(1963, 1, 17, 12, 13, 14);
             string expected = "1963-01-17";
             string actual;
-            actual = KBL.Extensions.DateTimeSortString.ToSortShortDateString(Me);
+            // actual = KBL.Extensions.DateTimeSortString.ToSortShortDateString(Me);
+            actual = Me.ToSortShortDateString();
             Assert.AreEqual(expected, actual);
         }
 
@@ -85,7 +86,8 @@ namespace ExtensionsTests
             DateTime Me = new DateTime(1963, 1, 17, 12, 13, 14);
             string expected = "1963-01-17 12:13:14";
             string actual;
-            actual = KBL.Extensions.DateTimeSortString.ToSortString(Me);
+            //actual = KBL.Extensions.DateTimeSortString.ToSortString(Me);
+            actual = Me.ToSortShortDateString();
             Assert.AreEqual(expected, actual);
         }
     }

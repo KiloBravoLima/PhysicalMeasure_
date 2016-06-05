@@ -5,7 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.IO;
 
-using KBL.Extensions;
+using System.Reflection;
 using PhysicalMeasure;
 
 using TokenParser;
@@ -218,7 +218,8 @@ namespace PhysicalCalculator
                             }
                             else
                             {
-                                LoopExit = CommandLine.Equals("Exit", StringComparison.OrdinalIgnoreCase);
+                                // LoopExit = CommandLine.Equals("Exit", StringComparison.OrdinalIgnoreCase);
+                                LoopExit = TryParseToken("Exit", ref CommandLine);
                                 if (!LoopExit)
                                 {
                                     LoopExit = !Command(ref CommandLine, out ResultLine);
@@ -1069,6 +1070,12 @@ namespace PhysicalCalculator
             Boolean clearNamedItems = TryParseTokenPrefix("Items", ref commandLine);
             Boolean clearCommands = TryParseTokenPrefix("Commands", ref commandLine);
 
+            if (!clearNamedItems && !clearCommands)
+            {
+                // Default to both
+                clearNamedItems = clearCommands = true;
+            }
+
             Boolean result = true;
             resultLine = "";
 
@@ -1147,13 +1154,6 @@ namespace PhysicalCalculator
 
         public Boolean IdentifierAssumed(ref String commandLine, ref String resultLine)
         {
-            /*
-            string token;
-            int len = commandLine.PeekToken(out token);
-            
-            if (token.IsIdentifier())
-            */
-
             string identifier;
             int len = commandLine.PeekIdentifier(out identifier);
 
@@ -1293,22 +1293,6 @@ namespace PhysicalCalculator
 
             commandLine = commandLine.ReadIdentifier(out identifierName);
             Debug.Assert(identifierName != null);
-
-            /**
-            Boolean IdentifierFound = CurrentContext.FindIdentifier(identifierName, out PrimaryContext, out item);
-
-            if (!IdentifierFound)
-            {
-                // Look for Global system settings and predefined symbols
-
-                // IdentifierFound = PredefinedContextIdentifierLookup(identifierName, out PrimaryContext, out identifierkind);
-
-                // IdentifierFound = PredefinedContextIdentifierItemLookup(identifierName, out PrimaryContext, out item);
-                CalculatorEnvironment tempPrimaryContext;
-                IdentifierFound = PredefinedContextIdentifierLookup(identifierName, out tempPrimaryContext);
-                PrimaryContext = tempPrimaryContext;
-            }
-            **/
 
             Boolean IdentifierFound = IdentifierItemLookup(identifierName, out PrimaryContext, out item);
             if (IdentifierFound)

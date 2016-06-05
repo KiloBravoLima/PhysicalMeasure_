@@ -347,12 +347,11 @@ namespace PhysicalMeasureTest
             Assert.AreEqual(len2.Value, len_value);
             Assert.AreSame(len2.Unit, Km);
 
-            //String VerStr = PhysicalMeasure.PMAssemply.VersionInfo();
             System.Reflection.Assembly assembly = typeof(Quantity).Assembly;
-            String VerStr = KBL.Extensions.AssemblyExtensions.AssemblyInfo(assembly);
+            String VerStr = System.Reflection.AssemblyExtensions.AssemblyInfo(assembly);
 
 
-            System.Diagnostics.Debug.WriteLine("KBL.Extensions.AssemblyExtensions.AssemblyInfo(assembly):" + VerStr);
+            System.Diagnostics.Debug.WriteLine("AssemblyExtensions.AssemblyInfo(assembly):" + VerStr);
             // Assert.AreEqual(VerStr, ".");
         }
 
