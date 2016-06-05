@@ -61,6 +61,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\PhysicalMeasureIcon128.png" />
+    <Content Include="Resources\PhysicalMeasureIcon.png" />
     <Content Include="Resources\PhysicalMeasure.ico" />
     <Content Include="Resources\PhysicalMeasure.png" />
     <Content Include="Properties\AssemblyInfo.tt">
@@ -77,6 +79,7 @@
     </None>
     <None Include="Nuget files\PhysicalMeasure.Sample.nuspec">
       <DependentUpon>AssemblyInfo.txt4</DependentUpon>
+      <SubType>Designer</SubType>
     </None>
     <None Include="Properties\AssemblyInfo.ttlog">
       <AutoGen>True</AutoGen>
@@ -91,13 +94,13 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Nuget files\Nuspec files2\" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\KBLExtensions\KBL.Extensions.csproj">
       <Project>{7139b888-5ce1-4604-b2e8-19fd45bc8b0e}</Project>
       <Name>KBL.Extensions</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Nuget files\Nuspec files2\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
