@@ -31,14 +31,12 @@ namespace PhysicalCalculator.Identifiers
         IdentifierKind Identifierkind { get; }
 
         String ToListString(String name);
-        void WriteToTextFile(String name, System.IO.StreamWriter file);
     }
 
 
     public interface IEvaluator
     {
         //String ToListString(String name);
-        //void WriteToTextFile(String name, System.IO.StreamWriter file);
 
         Boolean Evaluate(CalculatorEnvironment localContext, out Quantity result, ref String resultLine);
     }
@@ -52,12 +50,6 @@ namespace PhysicalCalculator.Identifiers
     {
     }
 
-    /*
-    public interface ICommandBlockEvaluator :  ICommandsEvaluator
-    {
-        
-    }
-    */
     public interface IFunctionEvaluator : INametableItem
     {
         List<PhysicalQuantityFunctionParam> Parameterlist { get; }
@@ -69,12 +61,7 @@ namespace PhysicalCalculator.Identifiers
         Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine);
     }
 
-    /*
-    public interface ICommandsEvaluator : IFunctionEvaluator
-    {
-        List<String> Commands { get; set; }
-    }
-    */
+
     public interface IFunctionCommandsEvaluator : IFunctionEvaluator, ICommands
     {
     }
@@ -83,18 +70,7 @@ namespace PhysicalCalculator.Identifiers
     {
         public abstract IdentifierKind Identifierkind { get; }
 
-        /*
-        public NametableItem()
-        {
-        }
-        */
-
         public virtual String ToListString(String name) => String.Format("{0} {1}", Identifierkind.ToString(), name);
-
-        public void WriteToTextFile(String name, System.IO.StreamWriter file)
-        {
-            file.WriteLine(ToListString(name));
-        }
     }
 
     class NamedSystem : NametableItem 
@@ -105,11 +81,7 @@ namespace PhysicalCalculator.Identifiers
 
         public NamedSystem(String name)
         {
-            //SingleUnitSystem NewUnitSystem = new SingleUnitSystem(name, null);
-            UnitSystem NewUnitSystem = new UnitSystem(name, true);
-
-            UnitSystem = NewUnitSystem;
-            // Physics.Default_UnitSystem_Stack.Push(NewUnitSystem);
+            UnitSystem = new UnitSystem(name, true);
         }
 
         public override String ToListString(String name) => String.Format("system {0}", name);

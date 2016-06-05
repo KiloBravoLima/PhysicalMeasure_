@@ -3877,7 +3877,6 @@ namespace PhysicalMeasure
                                     }
                                 }
                             }
-                            Debug.WriteLine("CombinedUnit.ConvertToDerivedUnit() are missing base unit and exponents");
                             Debug.Assert(exponents != null, "CombinedUnit.ConvertToDerivedUnit() are missing base unit and exponents");
                         }
                         catch

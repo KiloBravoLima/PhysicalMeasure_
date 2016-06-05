@@ -245,70 +245,70 @@ namespace PhysicalMeasure
     public static class Prefix
     {
         /* SI unit prefixes */
-        public static readonly UnitPrefix Y = (UnitPrefix)Physics.UnitPrefixes['Y']; // .UnitPrefixFromPrefixChar('Y'); // .UnitPrefixes[0];
-        public static readonly UnitPrefix Z = (UnitPrefix)Physics.UnitPrefixes['Z']; // .UnitPrefixFromPrefixChar('Z'); // .UnitPrefixes[1];
-        public static readonly UnitPrefix E = (UnitPrefix)Physics.UnitPrefixes['E']; // .UnitPrefixFromPrefixChar('E'); // .UnitPrefixes[2];
-        public static readonly UnitPrefix P = (UnitPrefix)Physics.UnitPrefixes['P']; // .UnitPrefixFromPrefixChar('P'); // .UnitPrefixes[3];
-        public static readonly UnitPrefix T = (UnitPrefix)Physics.UnitPrefixes['T']; // .UnitPrefixFromPrefixChar('T'); // .UnitPrefixes[4];
-        public static readonly UnitPrefix G = (UnitPrefix)Physics.UnitPrefixes['G']; // .UnitPrefixFromPrefixChar('G'); // .UnitPrefixes[5];
-        public static readonly UnitPrefix M = (UnitPrefix)Physics.UnitPrefixes['M']; // .UnitPrefixFromPrefixChar('M'); // .UnitPrefixes[6];
-        public static readonly UnitPrefix K = (UnitPrefix)Physics.UnitPrefixes['K']; // .UnitPrefixFromPrefixChar('K'); // .UnitPrefixes[7];
-        public static readonly UnitPrefix k = (UnitPrefix)Physics.UnitPrefixes['k']; // .UnitPrefixFromPrefixChar('k'); // .UnitPrefixes[8];
-        public static readonly UnitPrefix H = (UnitPrefix)Physics.UnitPrefixes['H']; // .UnitPrefixFromPrefixChar('H'); // .UnitPrefixes[9];
-        public static readonly UnitPrefix h = (UnitPrefix)Physics.UnitPrefixes['h']; // .UnitPrefixFromPrefixChar('h'); // .UnitPrefixes[10];
-        public static readonly UnitPrefix D = (UnitPrefix)Physics.UnitPrefixes['D']; // .UnitPrefixFromPrefixChar('D'); // .UnitPrefixes[11];
-        public static readonly UnitPrefix da = (UnitPrefix)Physics.UnitPrefixes['D']; // .UnitPrefixFromPrefixChar('D'); // .UnitPrefixes[11]; // Extra
-        public static readonly UnitPrefix d = (UnitPrefix)Physics.UnitPrefixes['d']; // .UnitPrefixFromPrefixChar('d'); // .UnitPrefixes[12];
-        public static readonly UnitPrefix c = (UnitPrefix)Physics.UnitPrefixes['c']; // .UnitPrefixFromPrefixChar('c'); // .UnitPrefixes[13];
-        public static readonly UnitPrefix m = (UnitPrefix)Physics.UnitPrefixes['m']; // .UnitPrefixFromPrefixChar('m'); // .UnitPrefixes[14];
-        public static readonly UnitPrefix my = (UnitPrefix)Physics.UnitPrefixes['µ']; // .UnitPrefixFromPrefixChar('µ'); // .UnitPrefixes[15];
-        public static readonly UnitPrefix n = (UnitPrefix)Physics.UnitPrefixes['n']; // .UnitPrefixFromPrefixChar('n'); // .UnitPrefixes[16];
-        public static readonly UnitPrefix p = (UnitPrefix)Physics.UnitPrefixes['p']; // .UnitPrefixFromPrefixChar('p'); // .UnitPrefixes[17];
-        public static readonly UnitPrefix f = (UnitPrefix)Physics.UnitPrefixes['f']; // .UnitPrefixFromPrefixChar('f'); // .UnitPrefixes[18];
-        public static readonly UnitPrefix a = (UnitPrefix)Physics.UnitPrefixes['a']; // .UnitPrefixFromPrefixChar('a'); // .UnitPrefixes[19];
-        public static readonly UnitPrefix z = (UnitPrefix)Physics.UnitPrefixes['z']; // .UnitPrefixFromPrefixChar('z'); // .UnitPrefixes[20];
-        public static readonly UnitPrefix y = (UnitPrefix)Physics.UnitPrefixes['y']; // .UnitPrefixFromPrefixChar('y'); // .UnitPrefixes[21];
+        public static readonly UnitPrefix Y = (UnitPrefix)Physics.UnitPrefixes['Y'];
+        public static readonly UnitPrefix Z = (UnitPrefix)Physics.UnitPrefixes['Z'];
+        public static readonly UnitPrefix E = (UnitPrefix)Physics.UnitPrefixes['E'];
+        public static readonly UnitPrefix P = (UnitPrefix)Physics.UnitPrefixes['P'];
+        public static readonly UnitPrefix T = (UnitPrefix)Physics.UnitPrefixes['T'];
+        public static readonly UnitPrefix G = (UnitPrefix)Physics.UnitPrefixes['G'];
+        public static readonly UnitPrefix M = (UnitPrefix)Physics.UnitPrefixes['M'];
+        public static readonly UnitPrefix K = (UnitPrefix)Physics.UnitPrefixes['K'];
+        public static readonly UnitPrefix k = (UnitPrefix)Physics.UnitPrefixes['k'];
+        public static readonly UnitPrefix H = (UnitPrefix)Physics.UnitPrefixes['H'];
+        public static readonly UnitPrefix h = (UnitPrefix)Physics.UnitPrefixes['h'];
+        public static readonly UnitPrefix D = (UnitPrefix)Physics.UnitPrefixes['D'];
+        public static readonly UnitPrefix da = (UnitPrefix)Physics.UnitPrefixes['D']; // Extra
+        public static readonly UnitPrefix d = (UnitPrefix)Physics.UnitPrefixes['d']; 
+        public static readonly UnitPrefix c = (UnitPrefix)Physics.UnitPrefixes['c']; 
+        public static readonly UnitPrefix m = (UnitPrefix)Physics.UnitPrefixes['m']; 
+        public static readonly UnitPrefix my = (UnitPrefix)Physics.UnitPrefixes['µ']; 
+        public static readonly UnitPrefix n = (UnitPrefix)Physics.UnitPrefixes['n'];
+        public static readonly UnitPrefix p = (UnitPrefix)Physics.UnitPrefixes['p'];
+        public static readonly UnitPrefix f = (UnitPrefix)Physics.UnitPrefixes['f'];
+        public static readonly UnitPrefix a = (UnitPrefix)Physics.UnitPrefixes['a'];
+        public static readonly UnitPrefix z = (UnitPrefix)Physics.UnitPrefixes['z'];
+        public static readonly UnitPrefix y = (UnitPrefix)Physics.UnitPrefixes['y'];
     }
 
 
     public static class SI
     {
         /* SI base units */
-        public static readonly BaseUnit m = (BaseUnit)Physics.SI_Units["m"]; // .UnitFromSymbol("m"); // .BaseUnits[0];
-        public static readonly BaseUnit Kg  = (BaseUnit)Physics.SI_Units["Kg"]; // .UnitFromSymbol("Kg"); // .BaseUnits[1];
-        public static readonly BaseUnit s   = (BaseUnit)Physics.SI_Units["s"]; // .UnitFromSymbol("s"); // .BaseUnits[2];
-        public static readonly BaseUnit A   = (BaseUnit)Physics.SI_Units["A"]; // .UnitFromSymbol("A"); // .BaseUnits[3];
-        public static readonly BaseUnit K   = (BaseUnit)Physics.SI_Units["K"]; // .UnitFromSymbol("K"); // .BaseUnits[4];
-        public static readonly BaseUnit mol = (BaseUnit)Physics.SI_Units["mol"]; // .UnitFromSymbol("mol"); // .BaseUnits[5];
-        public static readonly BaseUnit cd  = (BaseUnit)Physics.SI_Units["cd"]; // .UnitFromSymbol("cd"); // .BaseUnits[6];
+        public static readonly BaseUnit m   = (BaseUnit)Physics.SI_Units["m"]; 
+        public static readonly BaseUnit Kg  = (BaseUnit)Physics.SI_Units["Kg"]; 
+        public static readonly BaseUnit s   = (BaseUnit)Physics.SI_Units["s"];
+        public static readonly BaseUnit A   = (BaseUnit)Physics.SI_Units["A"];
+        public static readonly BaseUnit K   = (BaseUnit)Physics.SI_Units["K"];
+        public static readonly BaseUnit mol = (BaseUnit)Physics.SI_Units["mol"];
+        public static readonly BaseUnit cd  = (BaseUnit)Physics.SI_Units["cd"]; 
 
         /* Named units derived from SI base units */
-        public static readonly NamedDerivedUnit Hz  = (NamedDerivedUnit)Physics.SI_Units["Hz"]; // .UnitFromSymbol("Hz"); // .NamedDerivedUnits[0];
-        public static readonly NamedDerivedUnit rad = (NamedDerivedUnit)Physics.SI_Units["rad"]; // .UnitFromSymbol("rad"); // .NamedDerivedUnits[1];
-        public static readonly NamedDerivedUnit sr  = (NamedDerivedUnit)Physics.SI_Units["sr"]; // .UnitFromSymbol("sr"); // .NamedDerivedUnits[2];
-        public static readonly NamedDerivedUnit N   = (NamedDerivedUnit)Physics.SI_Units["N"]; // .UnitFromSymbol("N"); // .NamedDerivedUnits[3];
-        public static readonly NamedDerivedUnit Pa  = (NamedDerivedUnit)Physics.SI_Units["Pa"]; // .UnitFromSymbol("Pa"); // .NamedDerivedUnits[4];
-        public static readonly NamedDerivedUnit J   = (NamedDerivedUnit)Physics.SI_Units["J"]; // .UnitFromSymbol("J"); // .NamedDerivedUnits[5];
-        public static readonly NamedDerivedUnit W   = (NamedDerivedUnit)Physics.SI_Units["W"]; // .UnitFromSymbol("W"); // .NamedDerivedUnits[6];
-        public static readonly NamedDerivedUnit C   = (NamedDerivedUnit)Physics.SI_Units["C"]; // .UnitFromSymbol("C"); // .NamedDerivedUnits[7];
-        public static readonly NamedDerivedUnit V   = (NamedDerivedUnit)Physics.SI_Units["V"]; // .UnitFromSymbol("V"); // .NamedDerivedUnits[8];
-        public static readonly NamedDerivedUnit F   = (NamedDerivedUnit)Physics.SI_Units["F"]; // .UnitFromSymbol("F"); // .NamedDerivedUnits[9];
-        public static readonly NamedDerivedUnit Ohm = (NamedDerivedUnit)Physics.SI_Units["Ω"]; // .UnitFromSymbol("Ω"); // .NamedDerivedUnits[10];
-        public static readonly NamedDerivedUnit S   = (NamedDerivedUnit)Physics.SI_Units["S"]; // .UnitFromSymbol("S"); // .NamedDerivedUnits[11];
-        public static readonly NamedDerivedUnit Wb  = (NamedDerivedUnit)Physics.SI_Units["Wb"]; // .UnitFromSymbol("Wb"); // .NamedDerivedUnits[12];
-        public static readonly NamedDerivedUnit T   = (NamedDerivedUnit)Physics.SI_Units["T"]; // .UnitFromSymbol("T"); // .NamedDerivedUnits[13];
-        public static readonly NamedDerivedUnit H   = (NamedDerivedUnit)Physics.SI_Units["H"]; // .UnitFromSymbol("H"); // .NamedDerivedUnits[14];
-        public static readonly NamedDerivedUnit lm  = (NamedDerivedUnit)Physics.SI_Units["lm"]; // .UnitFromSymbol("lm"); // .NamedDerivedUnits[15];
-        public static readonly NamedDerivedUnit lx  = (NamedDerivedUnit)Physics.SI_Units["lx"]; // .UnitFromSymbol("lx"); // .NamedDerivedUnits[16];
-        public static readonly NamedDerivedUnit Bq  = (NamedDerivedUnit)Physics.SI_Units["Bq"]; // .UnitFromSymbol("Bq"); // .NamedDerivedUnits[17];
-        public static readonly NamedDerivedUnit Gy  = (NamedDerivedUnit)Physics.SI_Units["Gy"]; // .UnitFromSymbol("Gy"); // .NamedDerivedUnits[18];
-        public static readonly NamedDerivedUnit kat = (NamedDerivedUnit)Physics.SI_Units["kat"]; // .UnitFromSymbol("kat"); // .NamedDerivedUnits[19];
+        public static readonly NamedDerivedUnit Hz  = (NamedDerivedUnit)Physics.SI_Units["Hz"]; 
+        public static readonly NamedDerivedUnit rad = (NamedDerivedUnit)Physics.SI_Units["rad"]; 
+        public static readonly NamedDerivedUnit sr  = (NamedDerivedUnit)Physics.SI_Units["sr"]; 
+        public static readonly NamedDerivedUnit N   = (NamedDerivedUnit)Physics.SI_Units["N"]; 
+        public static readonly NamedDerivedUnit Pa  = (NamedDerivedUnit)Physics.SI_Units["Pa"]; 
+        public static readonly NamedDerivedUnit J   = (NamedDerivedUnit)Physics.SI_Units["J"]; 
+        public static readonly NamedDerivedUnit W   = (NamedDerivedUnit)Physics.SI_Units["W"]; 
+        public static readonly NamedDerivedUnit C   = (NamedDerivedUnit)Physics.SI_Units["C"]; 
+        public static readonly NamedDerivedUnit V   = (NamedDerivedUnit)Physics.SI_Units["V"]; 
+        public static readonly NamedDerivedUnit F   = (NamedDerivedUnit)Physics.SI_Units["F"]; 
+        public static readonly NamedDerivedUnit Ohm = (NamedDerivedUnit)Physics.SI_Units["Ω"]; 
+        public static readonly NamedDerivedUnit S   = (NamedDerivedUnit)Physics.SI_Units["S"]; 
+        public static readonly NamedDerivedUnit Wb  = (NamedDerivedUnit)Physics.SI_Units["Wb"]; 
+        public static readonly NamedDerivedUnit T   = (NamedDerivedUnit)Physics.SI_Units["T"]; 
+        public static readonly NamedDerivedUnit H   = (NamedDerivedUnit)Physics.SI_Units["H"]; 
+        public static readonly NamedDerivedUnit lm  = (NamedDerivedUnit)Physics.SI_Units["lm"];
+        public static readonly NamedDerivedUnit lx  = (NamedDerivedUnit)Physics.SI_Units["lx"];
+        public static readonly NamedDerivedUnit Bq  = (NamedDerivedUnit)Physics.SI_Units["Bq"];
+        public static readonly NamedDerivedUnit Gy  = (NamedDerivedUnit)Physics.SI_Units["Gy"];
+        public static readonly NamedDerivedUnit kat = (NamedDerivedUnit)Physics.SI_Units["kat"];
 
         /* Convertible units */
-        public static readonly ConvertibleUnit g  = (ConvertibleUnit)Physics.SI_Units["g"]; // .UnitFromSymbol("g"); // .ConvertibleUnits[0];
-        public static readonly ConvertibleUnit Ce = (ConvertibleUnit)Physics.SI_Units["°C"]; // .UnitFromSymbol("°C"); // .ConvertibleUnits[1];
-        public static readonly ConvertibleUnit h  = (ConvertibleUnit)Physics.SI_Units["h"]; // .UnitFromSymbol("h"); // .ConvertibleUnits[2];
-        public static readonly ConvertibleUnit l  = (ConvertibleUnit)Physics.SI_Units["l"]; // .UnitFromSymbol("l"); // .ConvertibleUnits[3];
+        public static readonly ConvertibleUnit g  = (ConvertibleUnit)Physics.SI_Units["g"];
+        public static readonly ConvertibleUnit Ce = (ConvertibleUnit)Physics.SI_Units["°C"];
+        public static readonly ConvertibleUnit h  = (ConvertibleUnit)Physics.SI_Units["h"];
+        public static readonly ConvertibleUnit l  = (ConvertibleUnit)Physics.SI_Units["l"];
     }
 
 
