@@ -10,7 +10,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
 
-using KBL.Extensions;
 using static PhysicalMeasure.DimensionExponentsExtension;
 
 namespace PhysicalMeasure
@@ -2714,10 +2713,13 @@ namespace PhysicalMeasure
                 if (physicalUnit.SimpleSystem != this.SimpleSystem)
                 {
                     Quantity pq_pu = physicalUnit.ConvertTo(this.SimpleSystem);
-                    Quantity pq = this.Divide(pq_pu);
-                    if (pq.Value.Equals(1.0))
+                    if (pq_pu != null)
                     {
-                        return pq.Unit;
+                        Quantity pq = this.Divide(pq_pu);
+                        if (pq.Value.Equals(1.0))
+                        {
+                            return pq.Unit;
+                        }
                     }
                 }
 
