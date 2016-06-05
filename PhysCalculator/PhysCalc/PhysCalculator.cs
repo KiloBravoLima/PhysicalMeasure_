@@ -591,7 +591,8 @@ namespace PhysicalCalculator
 
             foreach (KeyValuePair<String, INametableItem> Item in context.NamedItems)
             {
-                Item.Value.WriteToTextFile(Item.Key, file);
+                String ItemTextLine = Item.Value.ToListString(Item.Key);
+                file.WriteLine(ItemTextLine);
             }
         }
 
@@ -668,11 +669,9 @@ namespace PhysicalCalculator
 
                 if (dir.Exists)
                 {
-                    // Get All of the .cal files from the directory and order them by file name in descending order
-                    //IEnumerable<FileInfo> files = dir.GetFiles("*.cal").OrderByDescending(e => e.name); 
+                    // Get All of the .cal files from the directory and order them 
                     CalFiles = dir.GetFiles("*.cal").OrderBy(KeySelector);
                     int fileCount = 0;
-                    //foreach (FileInfo fi in dir.EnumerateFiles("*.cal"))
                     foreach (FileInfo fi in CalFiles)
                     {
                         if (fileCount == 0)

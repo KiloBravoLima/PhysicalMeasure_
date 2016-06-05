@@ -1116,6 +1116,13 @@ namespace PhysicalCalculator.Expression
             return PrimaryIdentifierFound;
         }
 
+
+        public static Boolean isValidDigit(Char ch, int numberBase)
+        {
+            return    Char.IsDigit(ch)
+                   || (numberBase == 0x10) && TokenString.IsHexDigitLetter(ch);
+        }
+
         public static Boolean ParseDouble(ref String commandLine, ref String resultLine, out Double D)
         {
             Boolean OK = false;
@@ -1145,10 +1152,11 @@ namespace PhysicalCalculator.Expression
                 int exponentNumberSignPos = -1; // No exponent number sign found
                 int exponentHexNumberPos = -1; // No exponent hex number prefix found
 
-                if ((commandLine[0] == '-') || (commandLine[0] == '+'))
+
+                if ((commandLine[numLen] == '-') || (commandLine[numLen] == '+'))
                 {
                     numberSignPos = numLen;
-                    numLen = 1;
+                    numLen++;
                 }
 
                 while (numLen < maxLen && Char.IsDigit(commandLine[numLen]))
@@ -1168,35 +1176,26 @@ namespace PhysicalCalculator.Expression
                     numberBase = 0x10; // Hexadecimal number expected
                 }
 
-                while ((numLen < maxLen)
-                       && (Char.IsDigit(commandLine[numLen])
-                           || ((numberBase == 0x10)
-                               && Char.IsLetter(commandLine[numLen])
-                    //&& Char.IsHexDigit(Char.ToLower(commandLine[numLen])))))
-                               && TokenString.IsHexDigit(Char.ToLower(commandLine[numLen])))))
+
+                while ((numLen < maxLen) && isValidDigit(commandLine[numLen], numberBase))
                 {
                     numLen++;
                 }
 
                 if ((numLen < maxLen)
-                    && ((commandLine[numLen] == '.')
+                    && (   (commandLine[numLen] == '.')
                         || (commandLine[numLen] == ',')))
                 {
                     DecimalCharPos = numLen;
                     numLen++;
                 }
-                while (   (numLen < maxLen)
-                       && (   Char.IsDigit(commandLine[numLen]) 
-                           || (   (numberBase == 0x10) 
-                               && Char.IsLetter(commandLine[numLen])
-                               //&& Char.IsHexDigit(Char.ToLower(commandLine[numLen])))))
-                               && TokenString.IsHexDigit(Char.ToLower(commandLine[numLen])))))
+                while ((numLen < maxLen) && isValidDigit(commandLine[numLen], numberBase))
                 {
                     numLen++;
                 }
 
                 if ((numLen < maxLen)
-                    && ((commandLine[numLen] == 'E')
+                    && (   (commandLine[numLen] == 'E')
                         || (commandLine[numLen] == 'e')
                         || (commandLine[numLen] == 'H')
                         || (commandLine[numLen] == 'h')))
@@ -1229,12 +1228,7 @@ namespace PhysicalCalculator.Expression
                         exponentNumberBase = 0x10; // Hexadecimal number expected
                     }
 
-                    while ((numLen < maxLen)
-                           && (Char.IsDigit(commandLine[numLen])
-                               || ((exponentNumberBase == 0x10)
-                                   && Char.IsLetter(commandLine[numLen])
-                        //&& Char.IsHexDigit(Char.ToLower(commandLine[numLen])))))
-                                   && TokenString.IsHexDigit(Char.ToLower(commandLine[numLen])))))
+                    while ((numLen < maxLen) && isValidDigit(commandLine[numLen], numberBase))
                     {
                         numLen++;
                     }
@@ -1339,7 +1333,6 @@ namespace PhysicalCalculator.Expression
                         {
                             OK = Double.TryParse(commandLine.Substring(0, numLen), numberstyle, NumberFormatInfo.InvariantInfo, out D); // styles, provider
                         }
-
                     }
                     if (OK)
                     {
