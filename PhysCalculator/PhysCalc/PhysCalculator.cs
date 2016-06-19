@@ -75,8 +75,8 @@ namespace PhysicalCalculator
             somePredefinedSystem.NamedItems.AddItem("True", new NamedConstant(PhysicalCalculator.Expression.PhysicalExpression.PQ_True));
 
             // Physical quantity functions
-            somePredefinedSystem.NamedItems.AddItem("Pow", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Pow(exp)));
-            somePredefinedSystem.NamedItems.AddItem("Rot", new PhysicalQuantityFunction_PQ_SB((pq, exp) => pq.Rot(exp)));
+            somePredefinedSystem.NamedItems.AddItem("Pow", new PhysicalQuantityFunction_PQ_SB(somePredefinedSystem, (pq, exp) => pq.Pow(exp)));
+            somePredefinedSystem.NamedItems.AddItem("Rot", new PhysicalQuantityFunction_PQ_SB(somePredefinedSystem, (pq, exp) => pq.Rot(exp)));
         }
 
         private void UsingUniversalPhysicalConstants(CalculatorEnvironment someEnvironment)
@@ -152,10 +152,13 @@ namespace PhysicalCalculator
         {
             // Setup Lookup callback delegate static globals
             PhysicalExpression.IdentifierItemLookupCallback = IdentifierItemLookup;
+            PhysicalExpression.QualifiedIdentifierItemLookupCallback = QualifiedIdentifierItemLookup;
             PhysicalExpression.IdentifierContextLookupCallback = IdentifierContextLookup;
             PhysicalExpression.QualifiedIdentifierContextLookupCallback = QualifiedIdentifierCalculatorContextLookup;
 
             PhysicalExpression.VariableValueGetCallback = VariableGet;
+            PhysicalExpression.UnitGetCallback = UnitGet;
+
             PhysicalExpression.FunctionLookupCallback = FunctionLookup;
             PhysicalExpression.FunctionEvaluateCallback = FunctionEvaluate;
             PhysicalExpression.FunctionEvaluateFileReadCallback = FunctionEvaluateFileRead;
@@ -1549,6 +1552,16 @@ namespace PhysicalCalculator
             }
         }
 
+        public Boolean UnitGet(IEnvironment context, String variableName, out Unit unitValue, ref String resultLine)
+        {
+            if (context == null)
+            {
+                context = CurrentContext;
+            }
+            Debug.Assert(context != null);
+            return context.UnitGet(variableName, out unitValue, ref resultLine);
+        }
+
         #endregion  Variables access
 
         #region  Custom Unit access
@@ -1574,11 +1587,12 @@ namespace PhysicalCalculator
                 CalculatorEnvironment LocalContext = new CalculatorEnvironment(CurrentContext, "Commands " + CommandBlockName, EnvironmentKind.FunctionEnv);
                 //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
                 LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
+                CalculatorEnvironment OldCurrentContext = CurrentContext;
 
                 CurrentContext = LocalContext;
 
                 OK = commandsEvaluator.Evaluate(LocalContext, out commandsResult, ref resultLine);
-                CurrentContext = LocalContext.OuterContext;
+                CurrentContext = OldCurrentContext;
                 LocalContext.OuterContext = null;
             }
 
@@ -1593,14 +1607,17 @@ namespace PhysicalCalculator
 
             if (functionEvaluator != null)
             {
-                CalculatorEnvironment LocalContext = new CalculatorEnvironment(CurrentContext, "Function " + FunctionName, EnvironmentKind.FunctionEnv);
+                CalculatorEnvironment FunctionStaticOuterContext = functionEvaluator.StaticOuterContext;
+                Debug.Assert(FunctionStaticOuterContext != null);
+                CalculatorEnvironment LocalContext = new CalculatorEnvironment(FunctionStaticOuterContext, "Function " + FunctionName, EnvironmentKind.FunctionEnv);
                 //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
                 LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
+                CalculatorEnvironment OldCurrentContext = CurrentContext;
 
                 CurrentContext = LocalContext;
 
                 OK = functionEvaluator.Evaluate(LocalContext, parameterlist, out functionResult, ref resultLine);
-                CurrentContext = LocalContext.OuterContext;
+                CurrentContext = OldCurrentContext;
                 LocalContext.OuterContext = null;
             }
 
@@ -1614,9 +1631,10 @@ namespace PhysicalCalculator
 
             if (CommandLineReader != null)
             {
-                CalculatorEnvironment LocalContext = new CalculatorEnvironment(CurrentContext, "File Function " + functionName, EnvironmentKind.FunctionEnv);
+                CalculatorEnvironment LocalContext = new CalculatorEnvironment(GlobalContext, "File Function " + functionName, EnvironmentKind.FunctionEnv);
                 //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
                 LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
+                CalculatorEnvironment OldCurrentContext = CurrentContext;
 
                 CurrentContext = LocalContext;
 
@@ -1636,7 +1654,7 @@ namespace PhysicalCalculator
                 }
                 OK = true;
 
-                CurrentContext = LocalContext.OuterContext;
+                CurrentContext = OldCurrentContext;
                 LocalContext.OuterContext = null;
             }
 
@@ -1693,6 +1711,11 @@ namespace PhysicalCalculator
         }
 
 
+        public Boolean QualifiedIdentifierItemLookup(IEnvironment LookInContext, String IdentifierName, out INametableItem Item)
+        {
+            return LookInContext.FindLocalIdentifier(IdentifierName, out Item);
+        }
+
         public Boolean IdentifierContextLookup(String IdentifierName, out IEnvironment FoundInContext, out IdentifierKind identifierkind)
         {
             INametableItem item;
@@ -1713,15 +1736,17 @@ namespace PhysicalCalculator
         {
             INametableItem Item;
 
-            Boolean Found = LookInContext.FindIdentifier(IdentifierName, out FoundInContext, out Item);
+            Boolean Found = LookInContext.FindLocalIdentifier(IdentifierName, out Item);
 
             if (Found)
             {
                 identifierkind = Item.Identifierkind;
+                FoundInContext = LookInContext;
             }
             else
             {
                 identifierkind = IdentifierKind.Unknown;
+                FoundInContext = null;
             }
             return Found;
         }

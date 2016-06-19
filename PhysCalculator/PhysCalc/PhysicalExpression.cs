@@ -25,14 +25,17 @@ namespace PhysicalCalculator.Expression
         Boolean SetLocalIdentifier(String identifierName, INametableItem item);
         Boolean RemoveLocalIdentifier(String identifierName);
 
+        Boolean FindLocalIdentifier(String identifierName, out INametableItem item);
         Boolean FindIdentifier(String identifierName, out IEnvironment foundInContext, out INametableItem item);
 
         Boolean SystemSet(String systemName, out INametableItem systemItem);
 
+        Boolean UnitGet(String unitName, out Unit unitValue, ref String resultLine);
         Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, out INametableItem unitItem);
 
         Boolean VariableGet(String variableName, out Quantity variableValue, ref String resultLine);
         Boolean VariableSet(String variableName, Quantity variableValue);
+
 
         Boolean FunctionFind(String functionName, out IFunctionEvaluator functionEvaluator);
     }
@@ -86,20 +89,25 @@ namespace PhysicalCalculator.Expression
         // Delegate types
         // VariableLookup callback
         public delegate Boolean IdentifierItemLookupFunc(String identifierName, out IEnvironment foundInContext, out INametableItem item);
+        public delegate Boolean QualifiedIdentifierItemLookupFunc(IEnvironment lookInContext, String identifierName, out INametableItem item);
         public delegate Boolean IdentifierContextLookupFunc(String identifierName, out IEnvironment foundInContext, out IdentifierKind identifierKind);
         public delegate Boolean QualifiedIdentifierContextLookupFunc(IEnvironment lookInContext, String identifierName, out IEnvironment foundInContext, out IdentifierKind identifierKind);
 
         public delegate Boolean VariableValueLookupFunc(IEnvironment lookInContext, String variableName, out Quantity variableValue, ref String resultLine);
+        public delegate Boolean UnitLookupFunc(IEnvironment lookInContext, String variableName, out Unit unitValue, ref String resultLine);
         public delegate Boolean FunctionLookupFunc(IEnvironment lookInContext, String functionName, out IFunctionEvaluator functionEvaluator);
         public delegate Boolean FunctionEvaluateFunc(String functionName, IFunctionEvaluator functionevaluator, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine);
         public delegate Boolean FunctionEvaluateFileReadFunc(String functionName, out Quantity functionResult, ref String resultLine);
 
         // Delegate static globals
         public static IdentifierItemLookupFunc IdentifierItemLookupCallback;
+        public static QualifiedIdentifierItemLookupFunc QualifiedIdentifierItemLookupCallback;
+
         public static IdentifierContextLookupFunc IdentifierContextLookupCallback;
         public static QualifiedIdentifierContextLookupFunc QualifiedIdentifierContextLookupCallback;
 
         public static VariableValueLookupFunc VariableValueGetCallback;
+        public static UnitLookupFunc UnitGetCallback;
         public static FunctionLookupFunc FunctionLookupCallback;
         public static FunctionEvaluateFunc FunctionEvaluateCallback;
         public static FunctionEvaluateFileReadFunc FunctionEvaluateFileReadCallback;
@@ -113,6 +121,16 @@ namespace PhysicalCalculator.Expression
             if (IdentifierItemLookupCallback != null)
             {
                 return IdentifierItemLookupCallback(identifierName, out foundInContext, out item);
+            }
+            return false;
+        }
+
+        public static Boolean QualifiedIdentifierItemLookup(IEnvironment lookInContext, String identifierName, out INametableItem item, ref String resultLine)
+        {
+            item = null;
+            if (QualifiedIdentifierItemLookupCallback != null)
+            {
+                return QualifiedIdentifierItemLookupCallback(lookInContext, identifierName, out item);
             }
             return false;
         }
@@ -145,6 +163,16 @@ namespace PhysicalCalculator.Expression
             if (VariableValueGetCallback != null)
             {
                 return VariableValueGetCallback(lookInContext, variableName, out variableValue, ref resultLine);
+            }
+            return false;
+        }
+
+        public static Boolean UnitGet(IEnvironment lookInContext, String unitName, out Unit unitValue, ref String resultLine)
+        {
+            unitValue = null;
+            if (UnitGetCallback != null)
+            {
+                return UnitGetCallback(lookInContext, unitName, out unitValue, ref resultLine);
             }
             return false;
         }
@@ -186,7 +214,7 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static List<Quantity> ParseExpressionList(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
+        public static List<Quantity> ParseExpressionList(ref String commandLine, ref String resultLine, List<String> ExpectedFollow, Boolean AllowEmptyList = false )
         {
             List<Quantity> pqList = new List<Quantity>();
             Boolean MoreToParse = false;
@@ -209,7 +237,10 @@ namespace PhysicalCalculator.Expression
                 }
                 else
                 {
-                    return null;
+                    if (!AllowEmptyList)
+                    {
+                        return null;
+                    }
                 }
             } while (OK && MoreToParse);
             return pqList;
@@ -1034,7 +1065,54 @@ namespace PhysicalCalculator.Expression
             return (Operands.Count > 0) ? Operands.Pop() : null;
         }
 
+        /****
+        public static Boolean GetQualifiedIdentifierInnerContext(IEnvironment QualifiedIdentifierContext, IdentifierKind identifierkind, out IEnvironment QualifiedIdentifierInnerContext)
+        {
+            QualifiedIdentifierContext.FindLocalIdentifier()
+            if ((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant))
+            {
+                VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
+            }
+            else if (identifierkind == IdentifierKind.Function)
+            {
+                TokenString.ParseChar('(', ref commandLine, ref resultLine);
+                commandLine = commandLine.TrimStart();
 
+                List<string> ExpectedFollow = new List<string>();
+                ExpectedFollow.Add(")");
+                List<Quantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow);
+                Boolean OK = parameterlist != null;
+                if (OK)
+                {
+                    TokenString.ParseChar(')', ref commandLine, ref resultLine);
+
+                    FunctionGet(QualifiedIdentifierContext, identifierName, parameterlist, out identifierValue, ref resultLine);
+
+                    commandLine = commandLine.TrimStart();
+                }
+                else
+                {
+                    // Error in result line
+                    Debug.Assert(!String.IsNullOrEmpty(resultLine));
+                }
+            }
+            else
+            {
+                // Unexpeted identifier kind
+                Debug.Assert((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant) || (identifierkind == IdentifierKind.Function));
+
+                if (identifierkind == IdentifierKind.Unit)
+                {
+                    Unit foundUnit;
+                    UnitGet(QualifiedIdentifierContext, identifierName, out foundUnit, ref resultLine);
+                    identifierValue = new Quantity(foundUnit); 
+                    // ref resultLine
+                }
+            }
+        }
+        ****/
+
+        /**
         public static Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, out String identifierName, out Quantity identifierValue)
         {
             identifierValue = null;
@@ -1064,6 +1142,9 @@ namespace PhysicalCalculator.Expression
                     commandLine = commandLine.ReadIdentifier(out identifierName);
                     Debug.Assert(identifierName != null);
                     commandLine = commandLine.TrimStart();
+
+
+
 
                     IEnvironment FoundInContext;
                     IdentifierKind FoundIdentifierkind;
@@ -1111,11 +1192,118 @@ namespace PhysicalCalculator.Expression
                             Debug.Assert(!String.IsNullOrEmpty(resultLine));
                         }
                     }
+                    else
+                    {
+                        // Unexpeted identifier kind
+                        Debug.Assert((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant) || (identifierkind == IdentifierKind.Function));
+
+                        if (identifierkind == IdentifierKind.Unit)
+                        {
+                            Unit foundUnit;
+                            UnitGet(QualifiedIdentifierContext, identifierName, out foundUnit, ref resultLine);
+                            identifierValue = new Quantity(foundUnit); 
+                            // ref resultLine
+                        }
+                    }
                 }
             }
             return PrimaryIdentifierFound;
         }
+        **/
 
+
+        public static Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, out String identifierName, out Quantity identifierValue)
+        {
+            identifierValue = null;
+
+            IEnvironment PrimaryContext;
+
+            commandLine = commandLine.ReadIdentifier(out identifierName);
+            Debug.Assert(identifierName != null);
+
+            INametableItem PrimaryItem;
+            Boolean PrimaryIdentifierFound = IdentifierItemLookup(identifierName, out PrimaryContext, out PrimaryItem, ref resultLine);
+
+            if (PrimaryIdentifierFound)
+            {
+                Boolean IdentifierFound = PrimaryIdentifierFound;
+                String QualifiedIdentifierName = identifierName;
+                IEnvironment QualifiedIdentifierContext = PrimaryContext;
+                INametableItem IdentifierItem = PrimaryItem;
+
+                while (IdentifierFound && !String.IsNullOrEmpty(commandLine) && commandLine[0] == '.')
+                {
+                    TokenString.ParseChar('.', ref commandLine, ref resultLine);
+                    commandLine = commandLine.TrimStart();
+
+                    commandLine = commandLine.ReadIdentifier(out identifierName);
+                    Debug.Assert(identifierName != null);
+                    commandLine = commandLine.TrimStart();
+
+                    IEnvironment QualifiedIdentifierInnerContext = IdentifierItem as IEnvironment; // IdentifierItem.InnerContext;
+                    if (QualifiedIdentifierInnerContext != null)
+                    {
+                        QualifiedIdentifierContext = QualifiedIdentifierInnerContext;
+                    }
+
+                    IdentifierFound = QualifiedIdentifierItemLookup(QualifiedIdentifierContext, identifierName, out IdentifierItem, ref resultLine);
+                    if (IdentifierFound)
+                    {
+                        QualifiedIdentifierName += "." + identifierName;
+                    }
+                    else
+                    {
+                        resultLine = QualifiedIdentifierName + " don't have a field named '" + identifierName + "'";
+                    }
+                }
+
+                if (IdentifierFound)
+                {
+                    IdentifierKind identifierkind = IdentifierItem.Identifierkind;
+                    if ((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant))
+                    {
+                        VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
+                    }
+                    else if (identifierkind == IdentifierKind.Function)
+                    {
+                        TokenString.ParseChar('(', ref commandLine, ref resultLine);
+                        commandLine = commandLine.TrimStart();
+
+                        List<string> ExpectedFollow = new List<string>();
+                        ExpectedFollow.Add(")");
+                        List<Quantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow, true);
+                        Boolean OK = parameterlist != null;
+                        if (OK)
+                        {
+                            TokenString.ParseChar(')', ref commandLine, ref resultLine);
+
+                            FunctionGet(QualifiedIdentifierContext, identifierName, parameterlist, out identifierValue, ref resultLine);
+
+                            commandLine = commandLine.TrimStart();
+                        }
+                        else
+                        {
+                            // Error in result line
+                            Debug.Assert(!String.IsNullOrEmpty(resultLine));
+                        }
+                    }
+                    else
+                    {
+                        // Unexpeted identifier kind
+                        Debug.Assert((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant) || (identifierkind == IdentifierKind.Function));
+
+                        if (identifierkind == IdentifierKind.Unit)
+                        {
+                            Unit foundUnit;
+                            UnitGet(QualifiedIdentifierContext, identifierName, out foundUnit, ref resultLine);
+                            identifierValue = new Quantity(foundUnit);
+                            // ref resultLine
+                        }
+                    }
+                }
+            }
+            return PrimaryIdentifierFound;
+        }
 
         public static Boolean isValidDigit(Char ch, int numberBase)
         {

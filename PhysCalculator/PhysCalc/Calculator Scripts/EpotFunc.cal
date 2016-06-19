@@ -31,9 +31,19 @@ Func V_from_M_and_H(M [Kg], H [m])
 	print H, M, Eres, Vres
 }
 
-set Global.M = 60 Kg
-set Global.H = 100 Km
-Set Global.V = V_from_M_and_H(M, H) 
-if (Global.V == 1401.4278433083882 m/s) { set Global.OK=1 } else { set Global.OK=0 }
+Func TestFunc() 
+{ 
+	set Global.M = 60 Kg
+	set Global.H = 100 Km
+	Set Global.V = V_from_M_and_H(M, H) 
+	if (Global.V == 1401.4278433083882 m/s) { set Global.OK=1 } else { set Global.OK=0 }
+
+	set M = 100 Kg
+	set H = 1 m
+	Set V = V_from_M_and_H(M, H) 
+	if (V == 1401.4278433083882 m/s) { set Global.OK2=1 } else { set Global.OK2=0 }
+}
+
+TestFunc() 
 
 list

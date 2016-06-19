@@ -262,7 +262,7 @@ fileTemplateManager.StartNewFile("PhysicalMeasure.Sample.nuspec", "PhysicalMeasu
     <owners><#=developerName#></owners>
     <licenseUrl>http://physicalmeasure.codeplex.com/license</licenseUrl>
     <projectUrl>http://physicalmeasure.codeplex.com/</projectUrl>
-	<iconUrl>http://download-codeplex.sec.s-msft.com/Download/SourceControlFileDownload.ashx?ProjectName=physicalmeasure&amp;changeSetId=40664&amp;itemId=707533</iconUrl>
+    <iconUrl>http://download-codeplex.sec.s-msft.com/Download/SourceControlFileDownload.ashx?ProjectName=physicalmeasure&amp;changeSetId=40664&amp;itemId=707533</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description><#=productDescription#></description>
 

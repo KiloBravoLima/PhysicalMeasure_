@@ -33,7 +33,6 @@ namespace PhysicalCalculator.Identifiers
         String ToListString(String name);
     }
 
-
     public interface IEvaluator
     {
         //String ToListString(String name);
@@ -52,6 +51,9 @@ namespace PhysicalCalculator.Identifiers
 
     public interface IFunctionEvaluator : INametableItem
     {
+        CalculatorEnvironment StaticOuterContext { get; }
+        CalculatorEnvironment DynamicOuterContext { get; }
+
         List<PhysicalQuantityFunctionParam> Parameterlist { get; }
 
         String ParameterlistStr();
@@ -434,10 +436,10 @@ namespace PhysicalCalculator.Identifiers
             //public IEnvironment Environment = null;
             public INametableItem RedefineItem = null; 
 
-            public FunctionParseInfo(string NewFunctionName)
+            public FunctionParseInfo(CalculatorEnvironment staticOuterContext, string NewFunctionName)
             {
                 this.FunctionName = NewFunctionName;
-                this.Function = new PhysicalQuantityCommandsFunction();
+                this.Function = new PhysicalQuantityCommandsFunction(staticOuterContext);
             }
 
             // FunctionToParseInfo.functionName = functionName;
@@ -491,6 +493,7 @@ namespace PhysicalCalculator.Identifiers
         public CommandParserState ParseState = CommandParserState.ExecuteCommandLine;
         public FunctionParseInfo FunctionToParseInfo = null;
         public CommandBlockParseInfo CommandBlockToParseInfo = null;
+        public int CommandBlockLevel = 0;
 
         private TraceLevels _OutputTracelevel = TraceLevels.Normal;
         public TraceLevels OutputTracelevel { get { return _OutputTracelevel; } set { _OutputTracelevel = value; } }
@@ -527,7 +530,7 @@ namespace PhysicalCalculator.Identifiers
 
         public void BeginParsingFunction(string functionName)
         {
-            FunctionToParseInfo = new FunctionParseInfo(functionName);
+            FunctionToParseInfo = new FunctionParseInfo(this, functionName);
             ParseState = CommandParserState.ReadFunctionParameterList; 
         }
 
@@ -716,6 +719,8 @@ namespace PhysicalCalculator.Identifiers
             Physics.CurrentUnitSystems.Use((systemItem as NamedSystem).UnitSystem);  
             return context.SetLocalIdentifier(systemName, systemItem);
         }
+
+
 
         public Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, out INametableItem unitItem)
         {
