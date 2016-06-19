@@ -24,12 +24,14 @@ namespace PhysicalCalculator.Function
     {
         override public IdentifierKind Identifierkind => IdentifierKind.Function;
 
-        override public String ToListString(String Name)
-        {
-            StringBuilder ListStringBuilder = new StringBuilder();
+        override public String ToListString(String Name) => String.Format($"Func {Name}({ParameterlistStr()}) // BuildIn ");
 
-            ListStringBuilder.AppendFormat("Func {0}({1}) // BuildIn ", Name, ParameterlistStr());
-            return ListStringBuilder.ToString();
+        public CalculatorEnvironment StaticOuterContext { get; }
+        public CalculatorEnvironment DynamicOuterContext { get; }
+
+        public PhysicalQuantityFunction(CalculatorEnvironment staticOuterContext)
+        {
+            StaticOuterContext = staticOuterContext;
         }
 
         protected List<PhysicalQuantityFunctionParam> formalparamlist;
@@ -128,7 +130,8 @@ namespace PhysicalCalculator.Function
         Func<Quantity, SByte, Quantity> F;
 
         //public PhysicalQuantityUnaryFunction(UnaryFunction func)
-        public PhysicalQuantityFunction_PQ_SB(Func<Quantity, SByte, Quantity> func)
+        public PhysicalQuantityFunction_PQ_SB(CalculatorEnvironment staticOuterContext, Func<Quantity, SByte, Quantity> func)
+            : base(staticOuterContext)
         {
             F = func;
 
@@ -136,7 +139,8 @@ namespace PhysicalCalculator.Function
             ParamListAdd(new PhysicalQuantityFunctionParam("SB", null)); 
         }
 
-        public PhysicalQuantityFunction_PQ_SB(Func<Quantity, SByte, Quantity> func, List<PhysicalQuantityFunctionParam> formalparams)
+        public PhysicalQuantityFunction_PQ_SB(CalculatorEnvironment staticOuterContext, Func<Quantity, SByte, Quantity> func, List<PhysicalQuantityFunctionParam> formalparams)
+            : base(staticOuterContext)
         {
             F = func;
             formalparamlist = formalparams;
@@ -162,7 +166,8 @@ namespace PhysicalCalculator.Function
         //BinaryFunction F;
         Func<Quantity, Quantity, Quantity> F;
 
-        public PhysicalQuantityBinaryFunction_PQ_PQ(Func<Quantity, Quantity, Quantity> func)
+        public PhysicalQuantityBinaryFunction_PQ_PQ(CalculatorEnvironment staticOuterContext, Func<Quantity, Quantity, Quantity> func)
+            : base(staticOuterContext)
         {
             F = func;
         }
@@ -208,6 +213,7 @@ namespace PhysicalCalculator.Function
     {
         //override public IdentifierKind Identifierkind { get { return IdentifierKind.Function; } }
 
+
         override public String ToListString(String name)
         {
             StringBuilder ListStringBuilder = new StringBuilder();
@@ -235,6 +241,10 @@ namespace PhysicalCalculator.Function
             return ListStringBuilder.ToString();
         }
 
+        public PhysicalQuantityCommandsFunction(CalculatorEnvironment staticOuterContext)
+            : base(staticOuterContext)
+        {
+        }
 
         private List<String> _commands;
 
@@ -414,31 +424,68 @@ namespace PhysicalCalculator.Function
                             if (OK)
                             {
                                 localContext.ParseState = CommandParserState.ReadFunctionBody;
+                                localContext.CommandBlockLevel = 1;
                             }
                         }
                         if (localContext.ParseState == CommandParserState.ReadFunctionBody)
                         {
                             if (!String.IsNullOrEmpty(commandLine))
                             {
-                                int indexCommandEnd = commandLine.IndexOf('}');
-                                if (indexCommandEnd == -1)
-                                {   // Line are not terminated by '}'
+
+                                String TempcommandLine = commandLine;
+                                int indexStartComment = commandLine.IndexOf("//");
+                                if (indexStartComment >= 0)
+                                {   // Command are terminated by "//"
+                                    TempcommandLine = TempcommandLine.Substring(0, indexStartComment);
+                                }
+
+                                string NoCommentCommandLine = TempcommandLine;
+
+                                int indexCommandBlockBegin = TempcommandLine.IndexOf('{');
+                                int indexCommandBlockEnd = TempcommandLine.IndexOf('}');
+
+                                while (localContext.CommandBlockLevel > 0 && (indexCommandBlockBegin > 0 || indexCommandBlockEnd > 0))
+                                {
+
+                                    if (indexCommandBlockBegin > 0 && indexCommandBlockEnd > 0)
+                                    {
+                                        if (indexCommandBlockBegin < indexCommandBlockEnd)
+                                        {
+                                            localContext.CommandBlockLevel++;
+                                            TempcommandLine.Substring(indexCommandBlockBegin);
+                                        }
+                                        else
+                                        {
+                                            localContext.CommandBlockLevel--;
+                                            TempcommandLine.Substring(indexCommandBlockEnd);
+                                        }
+                                    }
+                                    else
+                                    if (indexCommandBlockBegin > 0)
+                                    {
+                                        localContext.CommandBlockLevel++;
+                                        TempcommandLine.Substring(indexCommandBlockBegin);
+                                    }
+                                    else
+                                    if (indexCommandBlockEnd > 0)
+                                    {
+                                        localContext.CommandBlockLevel--;
+                                        TempcommandLine.Substring(indexCommandBlockEnd);
+                                    }
+
+                                    indexCommandBlockBegin = TempcommandLine.IndexOf('{');
+                                    indexCommandBlockEnd = TempcommandLine.IndexOf('}');
+                                };
+
+                                int indexCommandEnd = -1;
+                                if (localContext.CommandBlockLevel > 0)
+                                {   // function block are not terminated by '}'
                                     // Whole commandLine is part of Command Block 
                                     indexCommandEnd = commandLine.Length;
                                 }
                                 else
                                 {
-                                    int indexStartComment = commandLine.IndexOf("//");
-                                    if (indexStartComment >= 0)
-                                    {   // Command are terminated by "//"
-                                        if (indexCommandEnd > indexStartComment)
-                                        {
-                                            // '}' is placed inside a comment
-                                            // Whole commandLine is part of Command Block 
-
-                                            indexCommandEnd = commandLine.Length;
-                                        }
-                                    }
+                                    indexCommandEnd = NoCommentCommandLine.Length - TempcommandLine.Length;
                                 }
 
                                 if (indexCommandEnd > 0)

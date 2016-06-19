@@ -87,7 +87,8 @@ namespace ExtensionsTests
             string expected = "1963-01-17 12:13:14";
             string actual;
             //actual = KBL.Extensions.DateTimeSortString.ToSortString(Me);
-            actual = Me.ToSortShortDateString();
+            //actual = Me.ToSortShortDateString();
+            actual = Me.ToSortString();
             Assert.AreEqual(expected, actual);
         }
     }
