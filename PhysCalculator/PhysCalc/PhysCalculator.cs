@@ -1259,7 +1259,7 @@ namespace PhysicalCalculator
 
             if (pq == null)
             {
-                if (!String.IsNullOrEmpty(resultLine)) 
+                if (!String.IsNullOrEmpty(resultLine) && !resultLine.EndsWith(".") && !resultLine.EndsWith("\n")) 
                 {
                     resultLine += ". ";
                 }
@@ -1275,7 +1275,7 @@ namespace PhysicalCalculator
 
             if (boolRes == null)
             {
-                if (!String.IsNullOrEmpty(resultLine)) 
+                if (!String.IsNullOrEmpty(resultLine) && !resultLine.EndsWith(".") && !resultLine.EndsWith("\n")) 
                 {
                     resultLine += ". ";
                 }

@@ -512,7 +512,7 @@ namespace PhysicalCalculator.Identifiers
         public Boolean FindNameSpace(String nameSpaceName, out CalculatorEnvironment context)
         {
             // Check this namespace
-            if (Name != null && Name.Equals(nameSpaceName))
+            if (Name != null && Name.Equals(nameSpaceName, StringComparison.OrdinalIgnoreCase))
             {
                 context = this;
                 return true;

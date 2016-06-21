@@ -258,33 +258,36 @@ namespace PhysicalCalculator.Function
             {
                 // Set params in local context
                 int ParamIndex = 0;
-                foreach (PhysicalQuantityFunctionParam Param in formalparamlist)
+                if (formalparamlist != null)
                 {
-                    if (actualParameterlist.Count <= ParamIndex)
+                    foreach (PhysicalQuantityFunctionParam Param in formalparamlist)
                     {
-                        resultLine = "Missing parameter no " + (ParamIndex + 1).ToString() + " " + Param.Name;
-                        functionResult = null;
-                        return false;
-                    }
-
-                    Quantity paramValue = actualParameterlist[ParamIndex];
-                    if (Param.Unit != null)
-                    {
-                        Quantity paramValueConverted = paramValue.ConvertTo(Param.Unit);
-                        if (paramValueConverted == null)
+                        if (actualParameterlist.Count <= ParamIndex)
                         {
-                            resultLine = "Parameter no " + (ParamIndex + 1).ToString() + " " + Param.Name + "  " + paramValue.ToString() + " has invalid unit.\nThe unit " + paramValue.Unit.ToPrintString() + " can't be converted to " + Param.Unit.ToPrintString();
-
+                            resultLine = "Missing parameter no " + (ParamIndex + 1).ToString() + " " + Param.Name;
                             functionResult = null;
                             return false;
                         }
-                        else
+
+                        Quantity paramValue = actualParameterlist[ParamIndex];
+                        if (Param.Unit != null)
                         {
-                            paramValue = paramValueConverted;
+                            Quantity paramValueConverted = paramValue.ConvertTo(Param.Unit);
+                            if (paramValueConverted == null)
+                            {
+                                resultLine = "Parameter no " + (ParamIndex + 1).ToString() + " " + Param.Name + "  " + paramValue.ToString() + " has invalid unit.\nThe unit " + paramValue.Unit.ToPrintString() + " can't be converted to " + Param.Unit.ToPrintString();
+
+                                functionResult = null;
+                                return false;
+                            }
+                            else
+                            {
+                                paramValue = paramValueConverted;
+                            }
                         }
+                        localContext.NamedItems.SetItem(Param.Name, new NamedVariable(paramValue));
+                        ParamIndex++;
                     }
-                    localContext.NamedItems.SetItem(Param.Name, new NamedVariable(paramValue));
-                    ParamIndex++;
                 }
 
                 if (ParamIndex < actualParameterlist.Count)
@@ -444,37 +447,29 @@ namespace PhysicalCalculator.Function
                                 int indexCommandBlockBegin = TempcommandLine.IndexOf('{');
                                 int indexCommandBlockEnd = TempcommandLine.IndexOf('}');
 
-                                while (localContext.CommandBlockLevel > 0 && (indexCommandBlockBegin > 0 || indexCommandBlockEnd > 0))
+                                while (localContext.CommandBlockLevel > 0 && (indexCommandBlockBegin >= 0 || indexCommandBlockEnd >= 0))
                                 {
-
-                                    if (indexCommandBlockBegin > 0 && indexCommandBlockEnd > 0)
-                                    {
-                                        if (indexCommandBlockBegin < indexCommandBlockEnd)
-                                        {
-                                            localContext.CommandBlockLevel++;
-                                            TempcommandLine.Substring(indexCommandBlockBegin);
-                                        }
-                                        else
-                                        {
-                                            localContext.CommandBlockLevel--;
-                                            TempcommandLine.Substring(indexCommandBlockEnd);
-                                        }
-                                    }
-                                    else
-                                    if (indexCommandBlockBegin > 0)
+                                    Boolean beginIsBeforeEnd = (indexCommandBlockBegin >= 0 && (indexCommandBlockEnd < 0 || indexCommandBlockEnd > indexCommandBlockBegin));
+                                    if (beginIsBeforeEnd)
                                     {
                                         localContext.CommandBlockLevel++;
-                                        TempcommandLine.Substring(indexCommandBlockBegin);
+                                        int skipLen = indexCommandBlockBegin + 1;
+                                        TempcommandLine = TempcommandLine.Length > skipLen ? TempcommandLine.Substring(skipLen) : "";
+                                        indexCommandBlockBegin = TempcommandLine.IndexOf('{');
+                                        indexCommandBlockEnd -= skipLen;
                                     }
                                     else
-                                    if (indexCommandBlockEnd > 0)
                                     {
                                         localContext.CommandBlockLevel--;
-                                        TempcommandLine.Substring(indexCommandBlockEnd);
+                                        int skipLen = indexCommandBlockEnd;
+                                        if (localContext.CommandBlockLevel > 0)
+                                        {   // Include '}' if it is not the end of this function block
+                                            skipLen++;
+                                        }
+                                        TempcommandLine = TempcommandLine.Length > skipLen ? TempcommandLine.Substring(skipLen) : "";
+                                        indexCommandBlockBegin -= skipLen;
+                                        indexCommandBlockEnd = TempcommandLine.IndexOf('}');
                                     }
-
-                                    indexCommandBlockBegin = TempcommandLine.IndexOf('{');
-                                    indexCommandBlockEnd = TempcommandLine.IndexOf('}');
                                 };
 
                                 int indexCommandEnd = -1;
@@ -498,7 +493,7 @@ namespace PhysicalCalculator.Function
                                     commandLine = commandLine.Substring(indexCommandEnd);
                                 }
 
-                                if (!String.IsNullOrEmpty(commandLine))
+                                if (localContext.CommandBlockLevel == 0)
                                 {
                                     OK = TokenString.ParseToken("}", ref commandLine, ref resultLine);
                                     if (OK)
