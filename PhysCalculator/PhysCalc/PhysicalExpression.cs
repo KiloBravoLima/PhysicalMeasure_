@@ -717,6 +717,16 @@ namespace PhysicalCalculator.Expression
                             Boolean PrimaryIdentifierFound = ParseQualifiedIdentifier(ref CommandLine, ref ResultLine, out IdentifierName, out pq);
                             // 2014-09-09 Moved to only be done when PrimaryIdentifierFound or call of .cal file as function : Pos += OldLen - CommandLine.Length;
                             int newPos = Pos + OldLen - CommandLine.Length;
+
+                            if (!String.IsNullOrEmpty(ResultLine))
+                            {
+                                if (!String.IsNullOrEmpty(ResultString))
+                                {
+                                    ResultString += ". ";
+                                }
+                                ResultString += ResultLine;
+                            }
+
                             if (PrimaryIdentifierFound)
                             {
                                 // Increment read pos; mark IdentifierName as read
@@ -768,7 +778,11 @@ namespace PhysicalCalculator.Expression
 
                             // End of recognized input; Stop reading and return operator tokens from stack.
                             inputRecognized = false;
-                            ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operand at '" + c + "' at position " + Pos.ToString();
+                            if (!String.IsNullOrEmpty(ResultString))
+                            {
+                                ResultString += ". ";
+                            }
+                            ResultString += "The string argument is not in a valid physical expression format. Invalid or missing operand at '" + c + "' at position " + Pos.ToString();
 
                             if (ThrowExceptionOnInvalidInput)
                             {
@@ -786,7 +800,11 @@ namespace PhysicalCalculator.Expression
 
                             if (!ExpectedFollow.Contains(new String(c,1)))
                             {
-                                ResultString = "The string argument is not in a valid physical expression format. Invalid input '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
+                                if (!String.IsNullOrEmpty(ResultString))
+                                {
+                                    ResultString += ". ";
+                                }
+                                ResultString += "The string argument is not in a valid physical expression format. Invalid input '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
                                 if (ThrowExceptionOnInvalidInput)
                                 {
                                     throw new PhysicalUnitFormatException(ResultString);
@@ -810,7 +828,11 @@ namespace PhysicalCalculator.Expression
                 {
                     // End of recognized input; Stop reading and return operator tokens from stack.
                     inputRecognized = false;
-                    ResultString = "The string argument is not in a valid physical expression format. Operand expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
+                    if (!String.IsNullOrEmpty(ResultString))
+                    {
+                        ResultString += ". ";
+                    }
+                    ResultString += "The string argument is not in a valid physical expression format. Operand expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
 
                     if (ThrowExceptionOnInvalidInput)
                     {
@@ -826,7 +848,11 @@ namespace PhysicalCalculator.Expression
                 {
                     // End of recognized input; Stop reading and return operator tokens from stack.
                     inputRecognized = false;
-                    ResultString = "The string argument is not in a valid physical expression format. Closing parenthesis expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
+                    if (!String.IsNullOrEmpty(ResultString))
+                    {
+                        ResultString += ". ";
+                    }
+                    ResultString += "The string argument is not in a valid physical expression format. Closing parenthesis expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
                     if (ThrowExceptionOnInvalidInput)
                     {
                         throw new PhysicalUnitFormatException(ResultString);
@@ -1037,9 +1063,9 @@ namespace PhysicalCalculator.Expression
             }
 
             commandLine = Tokenizer.RemainingInput; // Remaining of input string
-            resultLine = Tokenizer.ResultString;
-            if (!String.IsNullOrEmpty(resultLine))
+            if (!String.IsNullOrEmpty(Tokenizer.ResultString))
             {
+                resultLine += Tokenizer.ResultString;
                 resultLine += '\n';
             }
 
@@ -1064,153 +1090,6 @@ namespace PhysicalCalculator.Expression
 
             return (Operands.Count > 0) ? Operands.Pop() : null;
         }
-
-        /****
-        public static Boolean GetQualifiedIdentifierInnerContext(IEnvironment QualifiedIdentifierContext, IdentifierKind identifierkind, out IEnvironment QualifiedIdentifierInnerContext)
-        {
-            QualifiedIdentifierContext.FindLocalIdentifier()
-            if ((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant))
-            {
-                VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
-            }
-            else if (identifierkind == IdentifierKind.Function)
-            {
-                TokenString.ParseChar('(', ref commandLine, ref resultLine);
-                commandLine = commandLine.TrimStart();
-
-                List<string> ExpectedFollow = new List<string>();
-                ExpectedFollow.Add(")");
-                List<Quantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow);
-                Boolean OK = parameterlist != null;
-                if (OK)
-                {
-                    TokenString.ParseChar(')', ref commandLine, ref resultLine);
-
-                    FunctionGet(QualifiedIdentifierContext, identifierName, parameterlist, out identifierValue, ref resultLine);
-
-                    commandLine = commandLine.TrimStart();
-                }
-                else
-                {
-                    // Error in result line
-                    Debug.Assert(!String.IsNullOrEmpty(resultLine));
-                }
-            }
-            else
-            {
-                // Unexpeted identifier kind
-                Debug.Assert((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant) || (identifierkind == IdentifierKind.Function));
-
-                if (identifierkind == IdentifierKind.Unit)
-                {
-                    Unit foundUnit;
-                    UnitGet(QualifiedIdentifierContext, identifierName, out foundUnit, ref resultLine);
-                    identifierValue = new Quantity(foundUnit); 
-                    // ref resultLine
-                }
-            }
-        }
-        ****/
-
-        /**
-        public static Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, out String identifierName, out Quantity identifierValue)
-        {
-            identifierValue = null;
-
-            IEnvironment PrimaryContext;
-            IdentifierKind identifierkind;
-
-            commandLine = commandLine.ReadIdentifier(out identifierName);
-            Debug.Assert(identifierName != null);
-
-            Boolean PrimaryIdentifierFound = IdentifierContextLookup(identifierName, out PrimaryContext, out identifierkind, ref resultLine);
-
-            if (PrimaryIdentifierFound)
-            {
-                Boolean IdentifierFound = PrimaryIdentifierFound;
-
-                IEnvironment QualifiedIdentifierContext = null; 
-                String QualifiedIdentifierName = identifierName;
-
-                QualifiedIdentifierContext = PrimaryContext;
-
-                while (IdentifierFound && !String.IsNullOrEmpty(commandLine) && commandLine[0] == '.')
-                {
-                    TokenString.ParseChar('.', ref commandLine, ref resultLine);
-                    commandLine = commandLine.TrimStart();
-
-                    commandLine = commandLine.ReadIdentifier(out identifierName);
-                    Debug.Assert(identifierName != null);
-                    commandLine = commandLine.TrimStart();
-
-
-
-
-                    IEnvironment FoundInContext;
-                    IdentifierKind FoundIdentifierkind;
-
-                    IdentifierFound = QualifiedIdentifierContextLookup(QualifiedIdentifierContext, identifierName, out FoundInContext, out FoundIdentifierkind, ref resultLine);
-                    if (IdentifierFound)
-                    {
-                        QualifiedIdentifierContext = FoundInContext;
-                        identifierkind = FoundIdentifierkind;
-
-                        QualifiedIdentifierName += "." + identifierName;
-                    }
-                    else
-                    {
-                        resultLine = QualifiedIdentifierName + " don't have a field named '" + identifierName + "'";
-                    }
-                }
-
-                if (IdentifierFound)
-                {
-                    if ((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant))
-                    {
-                        VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
-                    }
-                    else if (identifierkind == IdentifierKind.Function)
-                    {
-                        TokenString.ParseChar('(', ref commandLine, ref resultLine);
-                        commandLine = commandLine.TrimStart();
-
-                        List<string> ExpectedFollow = new List<string>();
-                        ExpectedFollow.Add(")");
-                        List<Quantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow);
-                        Boolean OK = parameterlist != null;
-                        if (OK)
-                        {
-                            TokenString.ParseChar(')', ref commandLine, ref resultLine);
-
-                            FunctionGet(QualifiedIdentifierContext, identifierName, parameterlist, out identifierValue, ref resultLine);
-
-                            commandLine = commandLine.TrimStart();
-                        }
-                        else
-                        {
-                            // Error in result line
-                            Debug.Assert(!String.IsNullOrEmpty(resultLine));
-                        }
-                    }
-                    else
-                    {
-                        // Unexpeted identifier kind
-                        Debug.Assert((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant) || (identifierkind == IdentifierKind.Function));
-
-                        if (identifierkind == IdentifierKind.Unit)
-                        {
-                            Unit foundUnit;
-                            UnitGet(QualifiedIdentifierContext, identifierName, out foundUnit, ref resultLine);
-                            identifierValue = new Quantity(foundUnit); 
-                            // ref resultLine
-                        }
-                    }
-                }
-            }
-            return PrimaryIdentifierFound;
-        }
-        **/
-
 
         public static Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, out String identifierName, out Quantity identifierValue)
         {
@@ -1301,8 +1180,9 @@ namespace PhysicalCalculator.Expression
                         }
                     }
                 }
+
             }
-            return PrimaryIdentifierFound;
+            return PrimaryIdentifierFound;  // Indicate if PrimaryIdentifier was found; even if inner identifier was not found
         }
 
         public static Boolean isValidDigit(Char ch, int numberBase)
@@ -1339,7 +1219,7 @@ namespace PhysicalCalculator.Expression
                 int exponentCharPos = -1;  // No exponent char found
                 int exponentNumberSignPos = -1; // No exponent number sign found
                 int exponentHexNumberPos = -1; // No exponent hex number prefix found
-
+                Boolean canParseMore = true;
 
                 if ((commandLine[numLen] == '-') || (commandLine[numLen] == '+'))
                 {
@@ -1364,25 +1244,30 @@ namespace PhysicalCalculator.Expression
                     numberBase = 0x10; // Hexadecimal number expected
                 }
 
-
                 while ((numLen < maxLen) && isValidDigit(commandLine[numLen], numberBase))
                 {
                     numLen++;
                 }
 
-                if ((numLen < maxLen)
+                if (   (numLen < maxLen)
                     && (   (commandLine[numLen] == '.')
-                        || (commandLine[numLen] == ',')))
+                        || (commandLine[numLen] == ','))
+                    )
                 {
-                    DecimalCharPos = numLen;
-                    numLen++;
+                    canParseMore = (numLen+1 < maxLen) && isValidDigit(commandLine[numLen + 1], numberBase);
+                    if (canParseMore)
+                    {
+                        DecimalCharPos = numLen;
+                        numLen++;
+                    }
                 }
-                while ((numLen < maxLen) && isValidDigit(commandLine[numLen], numberBase))
+                while (canParseMore && (numLen < maxLen) && isValidDigit(commandLine[numLen], numberBase))
                 {
                     numLen++;
                 }
 
-                if ((numLen < maxLen)
+                if (   canParseMore 
+                    && (numLen < maxLen)
                     && (   (commandLine[numLen] == 'E')
                         || (commandLine[numLen] == 'e')
                         || (commandLine[numLen] == 'H')
