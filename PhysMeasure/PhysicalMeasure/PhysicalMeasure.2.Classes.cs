@@ -1621,6 +1621,8 @@ namespace PhysicalMeasure
 
         public virtual Unit PureUnit => this;
 
+        public virtual Unit AsNamedUnit() => null;
+       
         #endregion Unit print string methods
 
         #region Unit conversion methods
@@ -2620,6 +2622,8 @@ namespace PhysicalMeasure
         /// </summary>
         public override String PureUnitString() => this.Symbol;
 
+        public override Unit AsNamedUnit() => this;
+
         /// <summary>
         /// 
         /// </summary>
@@ -2711,11 +2715,25 @@ namespace PhysicalMeasure
 
         public override Quantity ConvertToBaseUnit() => new Quantity((Unit)this);
 
-        public override Quantity ConvertToDerivedUnit() => new Quantity((Unit)this);
-
         public override Quantity ConvertToBaseUnit(Double value) => new Quantity(value, (Unit)this);
 
         public override Quantity ConvertToBaseUnit(Quantity physicalQuantity) => physicalQuantity.ConvertTo((Unit)this);
+
+        public override Quantity ConvertToDerivedUnit() => new Quantity((Unit)this);
+
+        public override Unit AsNamedUnit()
+        {
+            IUnitSystem unitSystem = SimpleSystem;
+            if (unitSystem != null && !unitSystem.IsCombinedUnitSystem)
+            {
+                Unit namedDerivedUnit = unitSystem.NamedUnitFromUnit(this);
+                if (namedDerivedUnit != null)
+                {
+                    return  namedDerivedUnit;
+                }
+            }
+            return this;
+        }
 
         public override Unit Multiply(Unit physicalUnit)
         {
@@ -2874,6 +2892,8 @@ namespace PhysicalMeasure
             Debug.Assert(pq != null, "The 'physicalQuantity' must be valid and convertible to this unit");
             return this.ConvertToBaseUnit(pq.Value);
         }
+
+        public override Unit AsNamedUnit() => this;
     }
 
     public class ConvertibleUnit : SystemUnit, INamedSymbol, IConvertibleUnit
@@ -2951,6 +2971,8 @@ namespace PhysicalMeasure
             return this.namedSymbol.Symbol;
         }
 
+        public override Unit AsNamedUnit() => this;
+
         /// <summary>
         /// 
         /// </summary>
@@ -2989,9 +3011,6 @@ namespace PhysicalMeasure
             return pq;
         }
 
-        public override Quantity ConvertToDerivedUnit() => this.ConvertToBaseUnit();
-
-
         public override Quantity ConvertToBaseUnit(double value) => PrimaryUnit.ConvertToBaseUnit(new Quantity(value, (Unit)this));
 
         public override Quantity ConvertToBaseUnit(Quantity physicalQuantity)
@@ -3000,6 +3019,8 @@ namespace PhysicalMeasure
             Debug.Assert(pq != null, "The 'physicalQuantity' must be valid and convertible to this unit");
             return PrimaryUnit.ConvertToBaseUnit(pq);
         }
+
+        public override Quantity ConvertToDerivedUnit() => this.ConvertToPrimaryUnit().ConvertToDerivedUnit();
 
         public override Quantity ConvertTo(Unit convertToUnit)
         {
@@ -3061,6 +3082,8 @@ namespace PhysicalMeasure
         /// String with PrefixedUnitExponent formatted symbol (without system name prefixed).
         /// </summary>
         public override String PureUnitString() => Prefix.PrefixChar + Unit.Symbol;
+
+        public override Unit AsNamedUnit() => this;
 
         public PrefixedUnit(IUnitPrefix somePrefix, INamedSymbolUnit someUnit)
         {
@@ -5528,6 +5551,21 @@ namespace PhysicalMeasure
                     }
                 }
             }
+            return null;
+        }
+
+        public Unit NamedUnitFromUnit(Unit derivedUnit)
+        {
+            Quantity pq = derivedUnit.ConvertToDerivedUnit();
+            Unit pureUnit = Quantity.AsPureUnit(pq);
+            if (pureUnit != null && !(pureUnit is CombinedUnit))
+            {
+                // return pureUnit as INamedSymbolUnit or PrefixedUnit;
+                if (pureUnit is BaseUnit || pureUnit is NamedDerivedUnit || pureUnit is ConvertibleUnit || pureUnit is PrefixedUnit)
+                {
+                    return pureUnit as Unit;
+                }
+            }
 
             return null;
         }
@@ -6954,7 +6992,7 @@ namespace PhysicalMeasure
             return physicalQuantity.Value == 1;
         }
 
-        public static Unit PureUnit(Quantity physicalQuantity)
+        public static Unit AsPureUnit(Quantity physicalQuantity)
         {
             Debug.Assert(physicalQuantity != null);
 
@@ -6971,13 +7009,13 @@ namespace PhysicalMeasure
                 if (physicalQuantity.Unit.Kind == UnitKind.PrefixedUnit)
                 {
                     IPrefixedUnit prefixUnit = physicalQuantity.Unit as PrefixedUnit;
-                    if (Physics.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent((SByte)(prefixExponent + prefixUnit.Prefix.Exponent)), out unitPrefix))
+                    if (physicalQuantity.Unit.SimpleSystem.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent((SByte)(prefixExponent + prefixUnit.Prefix.Exponent)), out unitPrefix))
                     {
                         return new PrefixedUnit(unitPrefix, prefixUnit.Unit);
                     }
                 }
                     
-                if (Physics.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent(prefixExponent), out unitPrefix))
+                if (physicalQuantity.Unit.SimpleSystem.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent(prefixExponent), out unitPrefix))
                 {
                     INamedSymbolUnit namedSymbolUnit = physicalQuantity.Unit as INamedSymbolUnit;
                     if (namedSymbolUnit != null)
@@ -6993,9 +7031,44 @@ namespace PhysicalMeasure
                 }
             }
 
-            throw new ArgumentException("Physical quantity is not a pure unit; but has a value = " + physicalQuantity.Value.ToString());
+            return null;
+        }
 
-            //return null;
+        public static Unit PureUnit(Quantity physicalQuantity)
+        {
+            Unit pureUnit = AsPureUnit(physicalQuantity);
+            if (pureUnit == null)
+            {
+                throw new ArgumentException("Physical quantity is not a pure unit; but has a value = " + physicalQuantity.Value.ToString());
+            }
+
+            return pureUnit;
+        }
+
+        public static PrefixedUnit AsPrefixedUnit(Quantity physicalQuantity)
+        {
+            Debug.Assert(physicalQuantity != null);
+
+            Unit unit = AsPureUnit(physicalQuantity);
+            if (unit == null)
+            {
+                return null;
+            }
+
+            PrefixedUnit prefixedUnit = unit as PrefixedUnit;
+            return prefixedUnit;
+        }
+
+        public Quantity AsNamedUnit()
+        {
+            Unit namedUnit = Unit.AsNamedUnit();
+
+            if (namedUnit != null)
+            {
+                return new Quantity(this.Value, namedUnit);
+            }
+
+            return this;
         }
 
         public static Unit operator !(Quantity physicalQuantity) => PureUnit(physicalQuantity);

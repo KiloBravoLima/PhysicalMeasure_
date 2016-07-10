@@ -311,15 +311,11 @@ namespace PhysicalCalculator.Expression
         {
             Quantity pqRes = pq;
             if (pqRes != null)
-            {   
-                IUnitSystem unitSystem = pqRes.Unit.SimpleSystem;
-                if (unitSystem != null && !unitSystem.IsCombinedUnitSystem)
+            {
+                Unit namedDerivedUnit = pqRes.Unit?.AsNamedUnit();
+                if (namedDerivedUnit != null)
                 {
-                    Unit namedDerivedUnit = (Unit)unitSystem.NamedDerivedUnitFromUnit(pqRes.Unit);
-                    if (namedDerivedUnit != null)
-                    {
-                        pqRes = new Quantity(pqRes.Value, namedDerivedUnit);
-                    }
+                    pqRes = new Quantity(pqRes.Value, namedDerivedUnit);
                 }
             }
 

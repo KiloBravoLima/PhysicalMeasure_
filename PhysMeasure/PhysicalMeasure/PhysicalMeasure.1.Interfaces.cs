@@ -259,6 +259,7 @@ namespace PhysicalMeasure
     {
         // Like Equal, but allow to be off by a factor: this.Equivalent(other, out quotient) means (this == other * quotient) is true.
         Boolean Equivalent(T other, out Double quotient);
+        Boolean Equivalent(T other);
 
         // Double Quotient(T other);   // quotient = 0 means not equivalent
     }
@@ -301,7 +302,12 @@ namespace PhysicalMeasure
         Quantity ConvertToBaseUnit(Quantity physicalQuantity, IUnitSystem convertToUnitSystem);
     }
 
-    public interface IUnit : ISystemUnit, IUnitMath, IUnitConversion, IAsQuantity /*  : <BaseUnit | DerivedUnit | ConvertibleUnit | CombinedUnit | MixedUnit> */
+    public interface INamedUnit
+    {
+        Unit AsNamedUnit();
+    }
+
+    public interface IUnit : ISystemUnit, IUnitMath, IUnitConversion, INamedUnit, IAsQuantity /*  : <BaseUnit | DerivedUnit | ConvertibleUnit | CombinedUnit | MixedUnit> */
     {
     }
 
@@ -436,8 +442,13 @@ namespace PhysicalMeasure
         Unit FractionalUnit { get; }
         String Separator { get; }
     }
+    public interface IQuantityNamedUnit
+    {
+        Quantity AsNamedUnit();
+    }
 
-    public interface IQuantity : IFormattable, IQuantityMath, IQuantityConversion
+
+    public interface IQuantity : IFormattable, IQuantityMath, IQuantityConversion, IQuantityNamedUnit
     {
         Double Value { get; }
         Unit Unit { get; }
@@ -462,6 +473,8 @@ namespace PhysicalMeasure
         Unit ScaledUnitFromSymbol(String scaledUnitSymbol);
 
         INamedSymbolUnit NamedDerivedUnitFromUnit(Unit derivedUnit);
+        Unit NamedUnitFromUnit(Unit derivedUnit);
+
         Unit UnitFromExponents(SByte[] exponents);
         Unit UnitFromUnitInfo(SByte[] exponents, SByte NoOfNonZeroExponents, SByte NoOfNonOneExponents, SByte FirstNonZeroExponent);
 
