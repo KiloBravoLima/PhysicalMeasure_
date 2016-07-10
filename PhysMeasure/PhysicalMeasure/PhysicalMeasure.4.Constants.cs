@@ -82,6 +82,11 @@ namespace PhysicalMeasure
         public static readonly Quantity Rinf = new Quantity(10973731.568525, SI.m ^ -1);
         public static readonly Quantity tcs = new Quantity(6.65245873E-29, SI.m ^ 2);
         public static readonly Quantity ThetaW = new Quantity(0.22215, Physics.dimensionless);
+        /*
+            Other usefull constants
+        */
+        public static readonly Quantity g = new Quantity(9.82, SI.N/SI.Kg );  /// Gravitational constant at earth surface 9.82 N/Kg
+
     }
     #endregion Physical Constants Statics
 }

@@ -19,13 +19,14 @@
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <Features> localFunctions; refLocalsAndReturns; patterns</Features>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;FrameworkVersion_4_6;__DEMO__ , __DEMO_EXPERIMENTAL__</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;FrameworkVersion_4_6;/features:localFunctions;/features:patterns;/features:refLocalsAndReturns</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>

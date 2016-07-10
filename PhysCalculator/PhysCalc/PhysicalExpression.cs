@@ -278,28 +278,32 @@ namespace PhysicalCalculator.Expression
 
         public static Quantity ParseOptionalConvertedExpression(Quantity pq, ref String commandLine, ref String resultLine)
         {
-            Quantity pqRes = pq;
+            Unit pu = null;
             if (!String.IsNullOrEmpty(commandLine))
             {
-                Unit pu = ParseOptionalConvertToUnit(ref commandLine, ref resultLine);
-                if (pu != null)
+                pu = ParseOptionalConvertToUnit(ref commandLine, ref resultLine);
+                if (pu == Physics.ConvertToSIBaseUnits)
                 {
-                    pqRes = pq.ConvertTo(pu);
-                    if (pqRes == null)
-                    {
-                        resultLine = "The unit " + pq.Unit.ToPrintString() + " can't be converted to " + pu.ToPrintString() + "\n";
-                        //  pqRes = pq.ConvertTo(new CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit) }, new PrefixedUnitExponentList { new PrefixedUnitExponent(pu) }));
-                        //  pqRes = pq.ConvertTo(new CombinedUnit(new PrefixedUnitExponentList { new PrefixedUnitExponent(pu), new PrefixedUnitExponent(pq.Unit.Divide(pu).Unit) }, null));
-                        CombinedUnit newRelativeUnit = new CombinedUnit(pu).CombineMultiply(pq.Unit.Divide(pu));
-                        pqRes = pq.ConvertTo(newRelativeUnit);
-                    }
-                    return pqRes;
+                    pu = new CombinedUnit(pq.Unit.AsPrefixedUnitExponentList());
                 }
             }
 
-            // No unit specified to convert to; Check if pq can shown as a NamedDerivedUnit
-            pqRes = CheckForNamedDerivedUnit(pqRes);
-
+            Quantity pqRes;
+            if (pu != null)
+            {
+                pqRes = pq.ConvertTo(pu);
+                if (pqRes == null)
+                {
+                    resultLine = "The unit " + pq.Unit.ToPrintString() + " can't be converted to " + pu.ToPrintString() + "\n";
+                    CombinedUnit newRelativeUnit = new CombinedUnit(pu).CombineMultiply(pq.Unit.Divide(pu));
+                    pqRes = pq.ConvertTo(newRelativeUnit);
+                }
+            }
+            else
+            {
+                // No unit specified to convert to; Check if pq can shown as a NamedDerivedUnit
+                pqRes = CheckForNamedDerivedUnit(pq);
+            }
             return pqRes;
         }
 
@@ -347,9 +351,19 @@ namespace PhysicalCalculator.Expression
                         UnitString = commandLine.Substring(0, UnitStringLen);
                     }
 
-                    pu = ParsePhysicalUnit(ref UnitString, ref resultLine);
+                    String DimToken;
+                    UnitString.Trim().ReadToken(out DimToken);
+                    if (   DimToken.Equals("base", StringComparison.InvariantCultureIgnoreCase) 
+                        || DimToken.Equals("dim", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        pu = Physics.ConvertToSIBaseUnits;
+                    }
+                    else
+                    {
+                        pu = ParsePhysicalUnit(ref UnitString, ref resultLine);
+                    }
                 }
-
+                
                 commandLine = commandLine.Substring(UnitStringLen);
                 commandLine = commandLine.TrimStart();
 
@@ -761,8 +775,31 @@ namespace PhysicalCalculator.Expression
                                         }
                                     }
                                 }
+
+                                if (!PrimaryIdentifierFound)
+                                {
+                                    Unit pu = null;
+                                    CommandLine = RemainingInput;
+                                    if (!String.IsNullOrWhiteSpace(CommandLine))
+                                    {   // Try parse an unit
+                                        OldLen = CommandLine.Length;
+                                        CommandLine = CommandLine.TrimStart();
+                                        if (!String.IsNullOrEmpty(CommandLine) && (Char.IsLetter(CommandLine[0])))
+                                        {
+                                            ResultLine = "";
+                                            pu = ParsePhysicalUnit(ref CommandLine, ref ResultLine);
+                                            Pos += OldLen - CommandLine.Length;
+
+                                            if (pu != null)
+                                            {
+                                                pq = new Quantity(1, pu);
+                                            }
+                                        }
+                                    }
+                                }
+
                                 /**
-                                if (!IdentifierFound)
+                                if (!PrimaryIdentifierFound)
                                 {
                                     resultLine = "Unknown identifier: '" + IdentifierName + "'";
                                 }
@@ -1139,45 +1176,47 @@ namespace PhysicalCalculator.Expression
                 if (IdentifierFound)
                 {
                     IdentifierKind identifierkind = IdentifierItem.Identifierkind;
-                    if ((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant))
+                    switch (identifierkind)
                     {
-                        VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
-                    }
-                    else if (identifierkind == IdentifierKind.Function)
-                    {
-                        TokenString.ParseChar('(', ref commandLine, ref resultLine);
-                        commandLine = commandLine.TrimStart();
-
-                        List<string> ExpectedFollow = new List<string>();
-                        ExpectedFollow.Add(")");
-                        List<Quantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow, true);
-                        Boolean OK = parameterlist != null;
-                        if (OK)
-                        {
-                            TokenString.ParseChar(')', ref commandLine, ref resultLine);
-
-                            FunctionGet(QualifiedIdentifierContext, identifierName, parameterlist, out identifierValue, ref resultLine);
-
+                        case IdentifierKind.Constant:
+                        case IdentifierKind.Variable:
+                            VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
+                            break;
+                        case IdentifierKind.Function:
+                            TokenString.ParseChar('(', ref commandLine, ref resultLine);
                             commandLine = commandLine.TrimStart();
-                        }
-                        else
-                        {
-                            // Error in result line
-                            Debug.Assert(!String.IsNullOrEmpty(resultLine));
-                        }
-                    }
-                    else
-                    {
-                        // Unexpeted identifier kind
-                        Debug.Assert((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant) || (identifierkind == IdentifierKind.Function));
 
-                        if (identifierkind == IdentifierKind.Unit)
-                        {
+                            List<string> ExpectedFollow = new List<string>();
+                            ExpectedFollow.Add(")");
+                            List<Quantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow, true);
+                            Boolean OK = parameterlist != null;
+                            if (OK)
+                            {
+                                TokenString.ParseChar(')', ref commandLine, ref resultLine);
+
+                                FunctionGet(QualifiedIdentifierContext, identifierName, parameterlist, out identifierValue, ref resultLine);
+
+                                commandLine = commandLine.TrimStart();
+                            }
+                            else
+                            {
+                                // Error in result line
+                                Debug.Assert(!String.IsNullOrEmpty(resultLine));
+                            }
+                            break;
+                        case IdentifierKind.Unit:
                             Unit foundUnit;
                             UnitGet(QualifiedIdentifierContext, identifierName, out foundUnit, ref resultLine);
                             identifierValue = new Quantity(foundUnit);
                             // ref resultLine
-                        }
+                            break;
+                        case IdentifierKind.UnitSystem:
+                        case IdentifierKind.Unknown:
+                        case IdentifierKind.Environment:
+                        default:
+                            // Unexpeted identifier kind
+                            Debug.Assert((identifierkind == IdentifierKind.Variable) || (identifierkind == IdentifierKind.Constant) || (identifierkind == IdentifierKind.Function) || (identifierkind == IdentifierKind.Unit));
+                            break;
                     }
                 }
 

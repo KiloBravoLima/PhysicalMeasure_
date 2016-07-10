@@ -847,6 +847,22 @@ namespace PhysicalMeasure
             return res_unit;
         }
 
+        public PrefixedUnitExponentList AsPrefixedUnitExponentList()
+        {
+            IUnitSystem us = this.ExponentsSystem;
+            PrefixedUnitExponentList res = new PrefixedUnitExponentList(this.Exponents.Select((exp, i) =>
+            {
+                if (exp != 0)
+                {
+                    return new PrefixedUnitExponent(us.BaseUnits[i], exp);
+                }
+                else
+                {
+                    return null; 
+                } 
+            }));
+            return res;
+        }
 
 #if DEBUG
         // [Conditional("DEBUG")]
@@ -1555,9 +1571,23 @@ namespace PhysicalMeasure
             return valStr;
         }
 
-        public virtual string ValueAndUnitString(double value) 
+        public virtual string ValueString(double value, String format)
         {
-            String valStr = ValueString(value);
+            String valStr = null;
+            try
+            {
+                valStr = value.ToString(format);
+            }
+            catch
+            {
+                valStr = value.ToString() + " ?" + format + "?";
+            }
+            return valStr;
+        }
+
+
+        public virtual string ValueAndUnitString(String valStr)
+        {
             String unitStr = this.ToString();
             if (String.IsNullOrEmpty(unitStr))
             {
@@ -1569,18 +1599,22 @@ namespace PhysicalMeasure
             }
         }
 
+        public virtual string ValueAndUnitString(double value) 
+        {
+            String valStr = ValueString(value);
+            return ValueAndUnitString(valStr);
+        }
+
+        public virtual string ValueAndUnitString(double value, String format)
+        {
+            String valStr = ValueString(value, format);
+            return ValueAndUnitString(valStr);
+        }
+
         public virtual string ValueAndUnitString(double value, String format, IFormatProvider formatProvider)
         {
             String valStr = ValueString(value, format, formatProvider);
-            String unitStr = this.ToString();
-            if (String.IsNullOrEmpty(unitStr))
-            {
-                return valStr;
-            }
-            else
-            {
-                return valStr + " " + unitStr;
-            }
+            return ValueAndUnitString(valStr);
         }
 
         public virtual Double FactorValue => 1;
@@ -1956,6 +1990,11 @@ namespace PhysicalMeasure
             return true;
         }
 
+        public Boolean Equivalent(Unit other)
+        {
+            Double quotient;
+            return Equivalent(other, out quotient);
+        }
 
         public virtual Boolean Equals(Unit other)
         {
@@ -2081,6 +2120,18 @@ namespace PhysicalMeasure
             Unit pu = new DerivedUnit(u.ExponentsSystem, someExponents);
             return pu;
         }
+
+        protected static Unit AsUnitExponents(Unit u)
+        {
+            SByte[] exponents = u.Exponents;
+            int NoOfBaseUnits = exponents.Length;
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseQuanties, "The 'NoOfBaseUnits' must be <= Physics.NoOfBaseQuanties");
+
+            // Not valid during SI system initialization: Debug.Assert(u.System != null);
+            Unit pu = new DerivedUnit(u.ExponentsSystem, exponents);
+            return pu;
+        }
+
 
         public static Unit operator *(Unit u, IUnitPrefix up)
         {
@@ -3342,9 +3393,10 @@ namespace PhysicalMeasure
         }
 
         public PrefixedUnitExponentList(IEnumerable<IPrefixedUnitExponent> elements)
-            : base(elements)
+            : base(elements.Where(elm => elm != null))
         {
         }
+
 
         /// <summary>
         /// IFormattable.ToString implementation.
@@ -3452,6 +3504,11 @@ namespace PhysicalMeasure
 
         public CombinedUnit()
             : this(new PrefixedUnitExponentList(), new PrefixedUnitExponentList())
+        {
+        }
+
+        public CombinedUnit(IPrefixedUnitExponentList someNumerators)
+            : this(someNumerators, new PrefixedUnitExponentList())
         {
         }
 
@@ -6574,6 +6631,13 @@ namespace PhysicalMeasure
             return pureUnit.ValueAndUnitString(this.Value * unitValue, format, formatProvider);
         }
 
+        public String ToString(String format)
+        {
+            Double unitValue = this.Unit.FactorValue;
+            Unit pureUnit = this.Unit.PureUnit;
+            return pureUnit.ValueAndUnitString(this.Value * unitValue, format);
+        }
+
         public override String ToString()
         {
             Double unitValue = this.Unit.FactorValue;
@@ -6961,6 +7025,12 @@ namespace PhysicalMeasure
             return true;
         }
 
+        public Boolean Equivalent(Quantity other)
+        {
+            Double quotient;
+            return Equivalent(other, out quotient);
+        }
+
         public Boolean Equals(Quantity other)
         {
             if (Object.ReferenceEquals(null, other))
@@ -7256,6 +7326,8 @@ namespace PhysicalMeasure
         public Quantity Add(Quantity physicalQuantity) => CombineValues(this, physicalQuantity, (Double v1, Double v2) => v1 + v2);
 
         public Quantity Subtract(Quantity physicalQuantity) => CombineValues(this, physicalQuantity, (Double v1, Double v2) => v1 - v2);
+
+        public Quantity Abs() => new Quantity(Math.Abs(this.Value), this.Unit);
 
 
         public Quantity Multiply(INamedSymbolUnit physicalUnit) => this.Multiply(new PrefixedUnitExponent(null, physicalUnit, 1));
