@@ -1621,7 +1621,8 @@ namespace PhysicalMeasure
 
         public virtual Unit PureUnit => this;
 
-        public virtual Unit AsNamedUnit() => null;
+        public virtual Unit AsNamedUnit { get { return GetAsNamedUnit(); } }
+        public virtual Unit GetAsNamedUnit() => null;
        
         #endregion Unit print string methods
 
@@ -2622,7 +2623,7 @@ namespace PhysicalMeasure
         /// </summary>
         public override String PureUnitString() => this.Symbol;
 
-        public override Unit AsNamedUnit() => this;
+        public override Unit GetAsNamedUnit() => this;
 
         /// <summary>
         /// 
@@ -2721,17 +2722,18 @@ namespace PhysicalMeasure
 
         public override Quantity ConvertToDerivedUnit() => new Quantity((Unit)this);
 
-        public override Unit AsNamedUnit()
+        public override Unit GetAsNamedUnit()
         {
             IUnitSystem unitSystem = SimpleSystem;
             if (unitSystem != null && !unitSystem.IsCombinedUnitSystem)
             {
-                Unit namedDerivedUnit = unitSystem.NamedUnitFromUnit(this);
-                if (namedDerivedUnit != null)
+                Unit namedDerivatedUnit = (Unit)unitSystem.NamedDerivedUnitFromUnit(this);
+                if (namedDerivatedUnit != null)
                 {
-                    return  namedDerivedUnit;
+                    return namedDerivatedUnit;
                 }
             }
+
             return this;
         }
 
@@ -2893,7 +2895,7 @@ namespace PhysicalMeasure
             return this.ConvertToBaseUnit(pq.Value);
         }
 
-        public override Unit AsNamedUnit() => this;
+        public override Unit GetAsNamedUnit() => this;
     }
 
     public class ConvertibleUnit : SystemUnit, INamedSymbol, IConvertibleUnit
@@ -2971,7 +2973,7 @@ namespace PhysicalMeasure
             return this.namedSymbol.Symbol;
         }
 
-        public override Unit AsNamedUnit() => this;
+        public override Unit GetAsNamedUnit() => this;
 
         /// <summary>
         /// 
@@ -3083,7 +3085,7 @@ namespace PhysicalMeasure
         /// </summary>
         public override String PureUnitString() => Prefix.PrefixChar + Unit.Symbol;
 
-        public override Unit AsNamedUnit() => this;
+        public override Unit GetAsNamedUnit() => this;
 
         public PrefixedUnit(IUnitPrefix somePrefix, INamedSymbolUnit someUnit)
         {
@@ -4018,6 +4020,20 @@ namespace PhysicalMeasure
                 return pureunit;
             }
         }
+        public override Unit GetAsNamedUnit()
+        {
+            Quantity pq = this.ConvertToDerivedUnit();
+            Quantity pqNamedUnit = pq.AsNamedUnit;
+
+            Unit namedUnit = Quantity.GetAsNamedUnit(pqNamedUnit);
+            if (namedUnit != null)
+            {
+                // return namedUnit as INamedSymbolUnit or PrefixedUnit;
+                Debug.Assert(namedUnit is BaseUnit || namedUnit is NamedDerivedUnit || namedUnit is ConvertibleUnit || namedUnit is PrefixedUnit);
+                return namedUnit;
+            }
+            return this;
+        }
 
 
         /// <summary>
@@ -4356,7 +4372,6 @@ namespace PhysicalMeasure
 
         public Quantity ConvertFrom(Quantity physicalQuantity)
         {
-
             Quantity pq_unit = physicalQuantity;
             if (Numerators.Count == 1 && Denominators.Count == 0)
             {
@@ -4380,7 +4395,7 @@ namespace PhysicalMeasure
             }
             else
             {
-                // Not implemented yet
+                // TODO: Not implemented yet
                 Debug.Assert(false);
             }
 
@@ -5535,6 +5550,11 @@ namespace PhysicalMeasure
         public INamedSymbolUnit NamedDerivedUnitFromUnit(Unit derivedUnit)
         {
             Quantity pq = derivedUnit.ConvertToDerivedUnit();
+            if (!Quantity.IsPureUnit(pq))
+            {
+                Unit unit = Quantity.GetAsNamedUnit(pq);
+                return unit as INamedSymbolUnit;
+            }
             if (Quantity.IsPureUnit(pq))
             {
                 Unit derunit = Quantity.PureUnit(pq);
@@ -5554,21 +5574,6 @@ namespace PhysicalMeasure
             return null;
         }
 
-        public Unit NamedUnitFromUnit(Unit derivedUnit)
-        {
-            Quantity pq = derivedUnit.ConvertToDerivedUnit();
-            Unit pureUnit = Quantity.AsPureUnit(pq);
-            if (pureUnit != null && !(pureUnit is CombinedUnit))
-            {
-                // return pureUnit as INamedSymbolUnit or PrefixedUnit;
-                if (pureUnit is BaseUnit || pureUnit is NamedDerivedUnit || pureUnit is ConvertibleUnit || pureUnit is PrefixedUnit)
-                {
-                    return pureUnit as Unit;
-                }
-            }
-
-            return null;
-        }
 
         public INamedSymbolUnit this[String unitSymbol] => UnitFromSymbol(unitSymbol);
 
@@ -5607,6 +5612,7 @@ namespace PhysicalMeasure
                 {
                     MixedUnit imu = (MixedUnit)convertToUnit;
                     Quantity pq = ConvertTo(convertFromUnit, imu.MainUnit);
+                    Debug.Assert(pq != null);
                     return new Quantity(pq.Value, convertToUnit);
                 }
                 else if (convertFromUnit.Kind == UnitKind.ConvertibleUnit)
@@ -7005,28 +7011,90 @@ namespace PhysicalMeasure
             SByte prefixExponent = (SByte)Math.Floor(prefixExponentD);
             if (prefixExponentD - prefixExponent == 0)
             {
-                IUnitPrefix unitPrefix;
+                SByte newPrefixExponent = prefixExponent;
+                Unit newUnit = physicalQuantity.Unit;
                 if (physicalQuantity.Unit.Kind == UnitKind.PrefixedUnit)
                 {
                     IPrefixedUnit prefixUnit = physicalQuantity.Unit as PrefixedUnit;
-                    if (physicalQuantity.Unit.SimpleSystem.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent((SByte)(prefixExponent + prefixUnit.Prefix.Exponent)), out unitPrefix))
-                    {
-                        return new PrefixedUnit(unitPrefix, prefixUnit.Unit);
-                    }
+                    newPrefixExponent = (SByte)(prefixExponent + prefixUnit.Prefix.Exponent);
+                    newUnit = (Unit)prefixUnit.Unit;
                 }
-                    
-                if (physicalQuantity.Unit.SimpleSystem.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent(prefixExponent), out unitPrefix))
+
+                INamedSymbolUnit namedSymbolUnit = newUnit as INamedSymbolUnit;
+                if (namedSymbolUnit != null)
                 {
-                    INamedSymbolUnit namedSymbolUnit = physicalQuantity.Unit as INamedSymbolUnit;
-                    if (namedSymbolUnit != null)
+                    if (newPrefixExponent == 0)
+                    {
+                        return (Unit)namedSymbolUnit;
+                    }
+
+                    IUnitPrefix unitPrefix;
+                    if (physicalQuantity.Unit.SimpleSystem.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent(newPrefixExponent), out unitPrefix))
                     {
                         return new PrefixedUnit(unitPrefix, namedSymbolUnit);
                     }
-
-                    if (physicalQuantity.Unit.Kind == UnitKind.CombinedUnit)
+                }
+                if (physicalQuantity.Unit.Kind == UnitKind.CombinedUnit)
+                {
+                    CombinedUnit combinedUnit = (CombinedUnit)physicalQuantity.Unit;
+                    IUnitPrefix unitPrefix;
+                    if (physicalQuantity.Unit.SimpleSystem.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent(prefixExponent), out unitPrefix))
                     {
-                        CombinedUnit combinedUnit = (CombinedUnit)physicalQuantity.Unit;
                         return new CombinedUnit(unitPrefix, combinedUnit);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public static Unit GetAsNamedUnit(Quantity physicalQuantity)
+        {
+            Debug.Assert(physicalQuantity != null);
+
+            Double prefixExponentD = Math.Log10(physicalQuantity.Value);
+            SByte prefixExponent = (SByte)Math.Floor(prefixExponentD);
+            if (prefixExponentD - prefixExponent == 0)
+            {
+                SByte newPrefixExponent = prefixExponent;
+                Unit newUnit = physicalQuantity.Unit;
+
+                if (physicalQuantity.Unit.Kind == UnitKind.CombinedUnit)
+                {
+                    CombinedUnit combinedUnit = (CombinedUnit)physicalQuantity.Unit;
+                    Unit namedDerivatedUnit = (Unit)combinedUnit.SomeSimpleSystem.NamedDerivedUnitFromUnit(combinedUnit);
+                    if (namedDerivatedUnit != null)
+                    {
+                        newUnit = namedDerivatedUnit;
+                    }
+                }
+
+                if (physicalQuantity.Unit.Kind == UnitKind.DerivedUnit)
+                {
+                    DerivedUnit derivedUnit = physicalQuantity.Unit as DerivedUnit;
+                    Unit namedDerivatedUnit = (Unit)derivedUnit.SimpleSystem.NamedDerivedUnitFromUnit(derivedUnit);
+                    newUnit = namedDerivatedUnit;
+                }
+
+                if (physicalQuantity.Unit.Kind == UnitKind.PrefixedUnit)
+                {
+                    IPrefixedUnit prefixUnit = physicalQuantity.Unit as PrefixedUnit;
+                    newPrefixExponent = (SByte)(prefixExponent + prefixUnit.Prefix.Exponent);
+                    newUnit = (Unit)prefixUnit.Unit;
+                }
+
+                INamedSymbolUnit namedSymbolUnit = newUnit as INamedSymbolUnit;
+                if (namedSymbolUnit != null)
+                {
+                    if (newPrefixExponent == 0)
+                    {
+                        return (Unit)namedSymbolUnit;
+                    }
+
+                    IUnitPrefix unitPrefix;
+                    if (physicalQuantity.Unit.SimpleSystem.UnitPrefixes.GetUnitPrefixFromExponent(new UnitPrefixExponent(newPrefixExponent), out unitPrefix))
+                    {
+                        return new PrefixedUnit(unitPrefix, namedSymbolUnit);
                     }
                 }
             }
@@ -7059,16 +7127,19 @@ namespace PhysicalMeasure
             return prefixedUnit;
         }
 
-        public Quantity AsNamedUnit()
+        public Quantity AsNamedUnit
         {
-            Unit namedUnit = Unit.AsNamedUnit();
-
-            if (namedUnit != null)
+            get
             {
-                return new Quantity(this.Value, namedUnit);
-            }
+                Unit namedUnit = Unit.AsNamedUnit;
 
-            return this;
+                if (namedUnit != null)
+                {
+                    return new Quantity(this.Value, namedUnit);
+                }
+
+                return this;
+            }
         }
 
         public static Unit operator !(Quantity physicalQuantity) => PureUnit(physicalQuantity);

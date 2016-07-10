@@ -304,7 +304,7 @@ namespace PhysicalMeasure
 
     public interface INamedUnit
     {
-        Unit AsNamedUnit();
+        Unit AsNamedUnit { get; }
     }
 
     public interface IUnit : ISystemUnit, IUnitMath, IUnitConversion, INamedUnit, IAsQuantity /*  : <BaseUnit | DerivedUnit | ConvertibleUnit | CombinedUnit | MixedUnit> */
@@ -444,7 +444,7 @@ namespace PhysicalMeasure
     }
     public interface IQuantityNamedUnit
     {
-        Quantity AsNamedUnit();
+        Quantity AsNamedUnit { get; }
     }
 
 
@@ -473,7 +473,7 @@ namespace PhysicalMeasure
         Unit ScaledUnitFromSymbol(String scaledUnitSymbol);
 
         INamedSymbolUnit NamedDerivedUnitFromUnit(Unit derivedUnit);
-        Unit NamedUnitFromUnit(Unit derivedUnit);
+        // Unit NamedUnitFromUnit(Unit derivedUnit);
 
         Unit UnitFromExponents(SByte[] exponents);
         Unit UnitFromUnitInfo(SByte[] exponents, SByte NoOfNonZeroExponents, SByte NoOfNonOneExponents, SByte FirstNonZeroExponent);

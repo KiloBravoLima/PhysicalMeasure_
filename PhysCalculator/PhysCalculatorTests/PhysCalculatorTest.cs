@@ -304,7 +304,7 @@ namespace PhysCalculatorTests
 
             for (int i = 0; i < ResultLinesExpected.Count; i++)
             {
-                Assert.IsTrue(ResultLine.Contains(ResultLinesExpected[i]), "ResultLine expected to contain " + ResultLinesExpected[i]);
+                Assert.IsTrue(ResultLine.Contains(ResultLinesExpected[i]), "ResultLine expected to contain \"" + ResultLinesExpected[i] + "\"");
             }
 
         }
@@ -842,7 +842,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLine = "if (123 J·S·Ω/m + 0.456 m·Kg·s-2 == 123.456 N) { Print 111 } else { if (1 == 2-1 ) { print 222/0 } else { print 333/0} }";
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = null;
+            string ResultLineExpected = string.Empty; // = null;
             Quantity AccumulatorExpected = new Quantity(111);
             bool expected = true;
             bool actual;
