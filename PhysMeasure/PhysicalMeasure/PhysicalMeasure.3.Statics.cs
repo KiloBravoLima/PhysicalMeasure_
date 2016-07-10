@@ -128,6 +128,7 @@ namespace PhysicalMeasure
 
         // public static readonly IUnit Hz_PQ = SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Time]^-1;
         public static readonly IDerivedUnit Hz = (IDerivedUnit)(SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Time]^-1);
+        //public static readonly IDerivedUnit N  = (IDerivedUnit)(SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Length] * SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Mass] / SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Time]^2);
 
         public static readonly UnitSystem SI_Units 
             = new UnitSystem("SI", UnitPrefixes, SI_BaseUnits,
@@ -158,6 +159,7 @@ namespace PhysicalMeasure
                                                         new ConvertibleUnit("hour", "h", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/3600)), /* [h] = 1/3600 * [s] */
                                                         new ConvertibleUnit("liter", "l", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Length].Pow(3), new ScaledValueConversion(1000) ) }); /* [l] = 1000 * [m3] */
 
+        public static readonly NamedDerivedUnit ConvertToSIBaseUnits = new NamedDerivedUnit(SI_Units, "BaseUnitDimensions", "Dims", new SByte[] { -127, -127, -127, -127, -127, -127, -127});
 
         public static readonly Unit dimensionless = SI_Units.Dimensionless as Unit;
 

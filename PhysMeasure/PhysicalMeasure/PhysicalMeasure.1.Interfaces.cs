@@ -334,6 +334,8 @@ namespace PhysicalMeasure
 
         Quantity Add(Quantity physicalQuantity);
         Quantity Subtract(Quantity physicalQuantity);
+
+        Quantity Abs();
     }
 
     public interface IQuantityConversion
