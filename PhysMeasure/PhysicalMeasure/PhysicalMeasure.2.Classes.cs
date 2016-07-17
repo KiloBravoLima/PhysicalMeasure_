@@ -6727,7 +6727,10 @@ namespace PhysicalMeasure
                 {
                     if (!Double.TryParse(numValueStr, styles, null, out numValue)) // Try  to use Default Format Provider
                     {
-                        numValue = Double.Parse(numValueStr, styles, NumberFormatInfo.InvariantInfo);     // Try  to use invariant Format Provider
+                        if (!Double.TryParse(numValueStr, styles, NumberFormatInfo.InvariantInfo, out numValue))     // Try  to use invariant Format Provider
+                        {
+                            return false;
+                        }
                     }
                 }
 
