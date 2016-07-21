@@ -2956,6 +2956,8 @@ namespace PhysicalMeasure
         public override UnitKind Kind => UnitKind.ConvertibleUnit;
 
         public override SByte[] Exponents => PrimaryUnit.Exponents;
+        public override IUnitSystem ExponentsSystem => PrimaryUnit.ExponentsSystem;
+        public override IUnitSystem SimpleSystem => PrimaryUnit.SimpleSystem;
 
         /// <summary>
         /// String with PrefixedUnitExponent formatted symbol (without system name prefixed).
@@ -3961,7 +3963,7 @@ namespace PhysicalMeasure
                             }
                             Debug.Assert(exponents != null, "CombinedUnit.ConvertToDerivedUnit() are missing base unit and exponents");
                         }
-                        catch
+                        catch (Exception e)
                         {
                             Debug.WriteLine("CombinedUnit.ConvertToBaseUnit() failed and unit are missing exponents");
                             Debug.Assert(false, "CombinedUnit.ConvertToBaseUnit() failed and unit are missing exponents");
@@ -4202,7 +4204,7 @@ namespace PhysicalMeasure
                 if (pq1 != null)
                 {
                     // Simple system DerivedUnit
-                    Debug.Assert(scaledQuantity == 1.0);
+                    // Debug.Assert(scaledQuantity == 1.0);
                     Debug.Assert(pq1.Unit.SimpleSystem != null);
                 }
                 else
@@ -5406,6 +5408,12 @@ namespace PhysicalMeasure
             }
 
             unit = UnitFromName(this.ConvertibleUnits, unitName);
+            if (unit != null)
+            {
+                return unit;
+            }
+
+            unit = UnitFromName(Physics.ExtraTimeUnits, unitName);
             return unit;
         }
 
@@ -5426,6 +5434,13 @@ namespace PhysicalMeasure
             }
 
             unit = UnitFromSymbol(this.ConvertibleUnits, unitSymbol);
+            if (unit != null)
+            {
+                return unit;
+            }
+
+            unit = UnitFromSymbol(Physics.ExtraTimeUnits, unitSymbol);
+
             return unit;
         }
 
@@ -5560,7 +5575,7 @@ namespace PhysicalMeasure
                 Unit derunit = Quantity.PureUnit(pq);
                 SByte[] exponents = derunit.Exponents;
                 int noOfDimensions = exponents.NoOfDimensions();
-                if (noOfDimensions > 1)
+                if (noOfDimensions > 1 && this.NamedDerivedUnits != null)
                 {
                     foreach (NamedDerivedUnit namedderivedunit in this.NamedDerivedUnits)
                     {

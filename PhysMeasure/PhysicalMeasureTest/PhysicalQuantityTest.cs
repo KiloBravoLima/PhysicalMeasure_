@@ -155,7 +155,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitReducedUnitStringTest()
         {
-            IUnit Watt = Physics.SI_Units.NamedDerivedUnits[6];
+            IUnit Watt = Physics.SI_Units["W"];
 
             String expected = "W";
 
@@ -171,7 +171,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void MixedUnitBaseUnitStringTest()
         {
-            IUnit HourMin= new MixedUnit(Physics.SI_Units.ConvertibleUnits[2], ":",  Physics.MGD_Units.ConvertibleUnits[1]);
+            IUnit HourMin= new MixedUnit((Unit)Physics.SI_Units["h"], ":",  (Unit)Physics.MGD_Units["min"]);
 
             String expected = "3600 s";
 

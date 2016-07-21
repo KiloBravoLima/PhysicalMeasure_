@@ -125,43 +125,53 @@ namespace PhysicalMeasure
                                 new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"),
                                 new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd") };
 
+        public static readonly NamedDerivedUnit[] SI_NamedDerivedUnits
+            = new NamedDerivedUnit[] {  new NamedDerivedUnit(null, "hertz",     "Hz",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "radian",    "rad",  new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "steradian", "sr",   new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "newton",    "N",    new SByte[] { 1, 1, -2, 0, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "pascal",    "Pa",   new SByte[] { -1, 1, -2, 0, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "joule",     "J",    new SByte[] { 2, 1, -2, 0, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "watt",      "W",    new SByte[] { 2, 1, -3, 0, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "coulomb",   "C",    new SByte[] { 1, 0, 0, 1, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "volt",      "V",    new SByte[] { 2, 1, -3, -1, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "farad",     "F",    new SByte[] { -2, -1, 4, 2, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "ohm",       "Ω",    new SByte[] { 2, 1, -3, -2, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "siemens",   "S",    new SByte[] { -2, -1, 3, 2, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "weber",     "Wb",   new SByte[] { 2, 1, -2, -1, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "tesla",     "T",    new SByte[] { 0, 1, -2, -1, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "henry",     "H",    new SByte[] { 2, 1, -2, -2, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "lumen",     "lm",   new SByte[] { 0, 0, 0, 0, 0, 0, 1 }),
+                                        new NamedDerivedUnit(null, "lux",       "lx",   new SByte[] { -2, 0, 0, 0, 0, 0, 1 }),
+                                        new NamedDerivedUnit(null, "becquerel", "Bq",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "gray",      "Gy",   new SByte[] { 2, 0, -2, 0, 0, 0, 0 }),
+                                        new NamedDerivedUnit(null, "katal",     "kat",  new SByte[] { 0, 0, -1, 0, 0, 1, 0 })};
+        public static readonly ConvertibleUnit[] SI_ConvertibleUnits
+            = new ConvertibleUnit[] {   new ConvertibleUnit("gram", "g", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Mass], new ScaledValueConversion(1000)),  /* [g] = 1000 * [Kg] */
+                                        new ConvertibleUnit("Celsius", "°C" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ ,
+                                                            SI_BaseUnits[(int)PhysicalBaseQuantityKind.ThermodynamicTemperature], new LinearValueConversion(-273.15, 1)),    /* [°C] = 1 * [K] - 273.15 */
+                                        new ConvertibleUnit("liter", "l", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Length].Pow(3), new ScaledValueConversion(1000) ),  /* [l] = 1000 * [m3] */
+                                        new ConvertibleUnit("hour", "h", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/3600)) }; /* [h] = 1/3600 * [s] */
 
-        // public static readonly IUnit Hz_PQ = SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Time]^-1;
-        public static readonly IDerivedUnit Hz = (IDerivedUnit)(SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Time]^-1);
-        //public static readonly IDerivedUnit N  = (IDerivedUnit)(SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Length] * SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Mass] / SI_BaseUnits[(SByte)PhysicalBaseQuantityKind.Time]^2);
+        public static readonly ConvertibleUnit[] ExtraTimeUnits
+            = new ConvertibleUnit[] {   new ConvertibleUnit("minute", "min", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/60)),                /* [min] = 1/60 * [s] */
+                                        new ConvertibleUnit("day", "d", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/86400)),                  /* [d] = 1/86400 * [s] */
+                                        new ConvertibleUnit("year", "y", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/(86400 * 365.25))),      /* [y]    = 1/365.25 * [d] */
+                                        new ConvertibleUnit("hour", "hour", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new IdentityValueConversion()),                     /* [hour] = 1 * [h] */
+                                        new ConvertibleUnit("day", "day", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/86400)),                /* [day] = 1/86400 * [s] */
+                                        new ConvertibleUnit("year", "year", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/(86400 * 365.25)))    /* [year]    = 1/365.25 * [d] */
+                         };
 
         public static readonly UnitSystem SI_Units 
-            = new UnitSystem("SI", UnitPrefixes, SI_BaseUnits,
-                             new NamedDerivedUnit[] {   new NamedDerivedUnit(SI_Units, "hertz",     "Hz",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "radian",    "rad",  new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "steradian", "sr",   new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "newton",    "N",    new SByte[] { 1, 1, -2, 0, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "pascal",    "Pa",   new SByte[] { -1, 1, -2, 0, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "joule",     "J",    new SByte[] { 2, 1, -2, 0, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "watt",      "W",    new SByte[] { 2, 1, -3, 0, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "coulomb",   "C",    new SByte[] { 1, 0, 0, 1, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "volt",      "V",    new SByte[] { 2, 1, -3, -1, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "farad",     "F",    new SByte[] { -2, -1, 4, 2, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "ohm",       "Ω",    new SByte[] { 2, 1, -3, -2, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "siemens",   "S",    new SByte[] { -2, -1, 3, 2, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "weber",     "Wb",   new SByte[] { 2, 1, -2, -1, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "tesla",     "T",    new SByte[] { 0, 1, -2, -1, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "henry",     "H",    new SByte[] { 2, 1, -2, -2, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "lumen",     "lm",   new SByte[] { 0, 0, 0, 0, 0, 0, 1 }),
-                                                        new NamedDerivedUnit(SI_Units, "lux",       "lx",   new SByte[] { -2, 0, 0, 0, 0, 0, 1 }),
-                                                        new NamedDerivedUnit(SI_Units, "becquerel", "Bq",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "gray",      "Gy",   new SByte[] { 2, 0, -2, 0, 0, 0, 0 }),
-                                                        new NamedDerivedUnit(SI_Units, "katal",     "kat",  new SByte[] { 0, 0, -1, 0, 0, 1, 0 })},
+            = new UnitSystem("SI", UnitPrefixes, SI_BaseUnits, SI_NamedDerivedUnits, SI_ConvertibleUnits);
 
-                             new ConvertibleUnit[] {    new ConvertibleUnit("gram", "g", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Mass], new ScaledValueConversion(1000)),  /* [g] = 1000 * [Kg] */
-                                                        new ConvertibleUnit("Celsius", "°C" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ ,
-                                                                            SI_BaseUnits[(int)PhysicalBaseQuantityKind.ThermodynamicTemperature], new LinearValueConversion(-273.15, 1)),    /* [°C] = 1 * [K] - 273.15 */
-                                                        new ConvertibleUnit("hour", "h", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/3600)), /* [h] = 1/3600 * [s] */
-                                                        new ConvertibleUnit("liter", "l", SI_BaseUnits[(int)PhysicalBaseQuantityKind.Length].Pow(3), new ScaledValueConversion(1000) ) }); /* [l] = 1000 * [m3] */
-
-        public static readonly NamedDerivedUnit ConvertToSIBaseUnits = new NamedDerivedUnit(SI_Units, "BaseUnitDimensions", "Dims", new SByte[] { -127, -127, -127, -127, -127, -127, -127});
 
         public static readonly Unit dimensionless = SI_Units.Dimensionless as Unit;
+        public static readonly NamedDerivedUnit ConvertToSIBaseUnits = new NamedDerivedUnit(SI_Units, "BaseUnitDimensions", "Dims", new SByte[] { -127, -127, -127, -127, -127, -127, -127 });
+
+
+        public static readonly Unit[] MixedTimeUnits
+            = new Unit[] {              new MixedUnit(ExtraTimeUnits[2], "y ", new MixedUnit(ExtraTimeUnits[1], "d ", new MixedUnit(SI_ConvertibleUnits[3], ":", new MixedUnit(ExtraTimeUnits[0], ":", SI_BaseUnits[2]))))};
 
         public static readonly UnitSystem CGS_Units 
             = new UnitSystem("CGS", UnitPrefixes,
@@ -172,7 +182,6 @@ namespace PhysicalMeasure
                                              new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"),
                                              new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"),
                                              new BaseUnit(CGS_Units, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd")});
-
 
         public static readonly BaseUnit[] MGD_BaseUnits
             = new BaseUnit[] {  new BaseUnit(null, (SByte)PhysicalBaseQuantityKind.Length, "meter", "m"),
@@ -189,7 +198,7 @@ namespace PhysicalMeasure
                                                     new ConvertibleUnit("minute", "min", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24 * 60)),       /* [min]  = 24 * 60 * [d] */
                                                     new ConvertibleUnit("hour", "hour", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24)),             /* [hour] = 24 * [d] */
                                                     new ConvertibleUnit("day", "day", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new IdentityValueConversion()),               /* [day]  = 1 * [d] */
-                                                    new ConvertibleUnit("year", "year", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/36.25)),      /* [year] = 1/365.25 * [d] */
+                                                    new ConvertibleUnit("year", "year", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/365.25)),     /* [year] = 1/365.25 * [d] */
                                                     new ConvertibleUnit("year", "y", MGD_BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/365.25)) });     /* [y]    = 1/365.25 * [d] */
 
         public static readonly UnitSystem MGM_Units 
