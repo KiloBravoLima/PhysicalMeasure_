@@ -575,7 +575,7 @@ namespace PhysicalMeasureTest
         {
             String ConvertibleUnitQuantityStr = "1234 ml";
 
-            Quantity expected = new Quantity(1.234, Physics.SI_Units.ConvertibleUnits[3]);
+            Quantity expected = new Quantity(1.234, Physics.SI_Units["l"]);
 
             Quantity actual = Quantity.Parse(ConvertibleUnitQuantityStr);
 
@@ -590,7 +590,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void ConvertibleUnitTestGramEqualsKilogram()
         {
-            Quantity InGram = new Quantity(123, Physics.SI_Units.ConvertibleUnits[0]);
+            Quantity InGram = new Quantity(123, Physics.SI_Units["g"]);
             Quantity InKilogram = new Quantity(0.123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             Assert.AreEqual(InGram, InKilogram);
@@ -603,7 +603,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void ConvertibleUnitTestLitreEqualsCubicMeter()
         {
-            Quantity InLitre = new Quantity(123, Physics.SI_Units.ConvertibleUnits[3]);
+            Quantity InLitre = new Quantity(123, Physics.SI_Units["l"]);
             Quantity InCubicMeter = new Quantity(0.123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Length)].Pow(3));
 
             Assert.AreEqual(InLitre, InCubicMeter);
@@ -617,7 +617,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void ConvertibleUnitTestSomeLitreNotEqualsAnyCubicMeter()
         {
-            Quantity InLitre = new Quantity(123, (Unit)(Physics.SI_Units.ConvertibleUnits[3]));
+            Quantity InLitre = new Quantity(123, (Unit)(Physics.SI_Units["l"]));
             Quantity InCubicMeter = new Quantity(0.1234, (Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Length)].Pow(3)));
 
             Assert.AreNotEqual(InLitre, InCubicMeter);
@@ -636,7 +636,8 @@ namespace PhysicalMeasureTest
         {
             String MixedUnitStr = "d:h:min:s";
 
-            Unit expected = new MixedUnit((Unit)Physics.MGD_Units.UnitFromSymbol("d"), ":" , new MixedUnit((Unit)Physics.SI_Units.UnitFromSymbol("h"), ":" , new MixedUnit((Unit)Physics.MGD_Units.UnitFromSymbol("min"), ":" , SI.s)));
+            //Unit expected = new MixedUnit((Unit)Physics.MGD_Units.UnitFromSymbol("d"), ":" , new MixedUnit((Unit)Physics.SI_Units.UnitFromSymbol("h"), ":" , new MixedUnit((Unit)Physics.MGD_Units.UnitFromSymbol("min"), ":" , SI.s)));
+            Unit expected = new MixedUnit((Unit)Physics.SI_Units.UnitFromSymbol("d"), ":", new MixedUnit((Unit)Physics.SI_Units.UnitFromSymbol("h"), ":", new MixedUnit((Unit)Physics.SI_Units.UnitFromSymbol("min"), ":", SI.s)));
 
             Unit actual = Unit.Parse(MixedUnitStr);
 

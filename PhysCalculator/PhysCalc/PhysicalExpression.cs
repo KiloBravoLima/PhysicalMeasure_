@@ -589,7 +589,7 @@ namespace PhysicalCalculator.Expression
                     {
                         ResultString += ". ";
                     }
-                    ResultString += "The string argument is not in a valid physical expression format. Operand expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
+                    ResultString += errorMessage;
                     errorReported = true;
                 }
                 if (ThrowExceptionOnInvalidInput)

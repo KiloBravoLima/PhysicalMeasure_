@@ -420,7 +420,7 @@ namespace PhysCalculatorTests
             string CommandLine = "123.25 h + 38.920123133333 min + 364.789012 s [d:h:min:s]";
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = "5:03:59:59,9963999999579 MGD.d:h:min:s";
+            string ResultLineExpected = "5:03:59:59,9963999999579 d:h:min:s";
 
             bool expected = true;
             bool actual;
@@ -441,7 +441,7 @@ namespace PhysCalculatorTests
             string CommandLine = "5 d  + 23.25 h + 42.5 min + 149.123 s [d:h:min:s]";
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = "5:23:59:59,1230000000314 MGD.d:h:min:s";
+            string ResultLineExpected = "5:23:59:59,1230000000314 d:h:min:s";
 
             bool expected = true;
             bool actual;
@@ -596,7 +596,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLineExpected = "x"; 
 
             string ResultLine = string.Empty;
-            string ResultLineExpected = "The string argument is not in a valid physical expression format. Operand expected 'x' at position 25\n"
+            string ResultLineExpected = "The string argument is not in a valid physical expression format. Invalid or missing operand at 'x' at position 25\n"
                                          + (1000 * 24 * 356).ToString() + " MW·h";
 
             bool expected = true;
@@ -618,7 +618,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLineExpected = "xx * 356 d/z";
             string ResultLine = string.Empty;
 
-            string ResultLineExpected = "The string argument is not in a valid physical expression format. Operand expected 'xx * 356 d/z' at position 15\n"
+            string ResultLineExpected = "The string argument is not in a valid physical expression format. Invalid or missing operand at 'xx * 356 d/z' at position 15\n"
                                         + (1000 * 24 ).ToString() + " MW·h";
 
             bool expected = true;
@@ -803,6 +803,26 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.AreEqual(ResultLineExpected, ResultLine, "ResultLine not as expected");
             Assert.AreEqual(expected, actual, "CommandSet() return value not as expected");
         }
+
+        /// <summary>
+        ///A test for CommandSet
+        ///</summary>
+        [TestMethod()]
+        public void CommandSet_PeriodInDays_Test()
+        {
+            PhysCalculator target = new PhysCalculator();
+            string CommandLine = "PeriodInDays = 1220 day";
+            string CommandLineExpected = string.Empty;
+            string ResultLine = string.Empty;
+            string ResultLineExpected = "PeriodInDays = " + (1220).ToString() + " day";
+            bool expected = true;
+            bool actual;
+            actual = target.Command(ref CommandLine, out ResultLine);
+            Assert.AreEqual(CommandLineExpected, CommandLine, "commandLine not as expected");
+            Assert.AreEqual(ResultLineExpected, ResultLine, "ResultLine not as expected");
+            Assert.AreEqual(expected, actual, "CommandSet() return value not as expected");
+        }
+
 
         /// <summary>
         ///A test for CommandStore
