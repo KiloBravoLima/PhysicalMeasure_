@@ -7,6 +7,59 @@ using System.Diagnostics;
 
 namespace System
 {
+    public static class ByteExtensions
+    {
+        public static SByte ToSByte(this Byte thisValue)
+        {
+            SByte res;
+            if (thisValue < 128)
+                res = (SByte)thisValue;
+            else
+                res = (SByte)(thisValue - 256);
+            return res;
+        }
+    }
+
+    public static class SByteExtensions
+    {
+        public static Byte ToByte(this SByte thisValue)
+        {
+            Byte res;
+            if (thisValue >= 0)
+                res = (Byte)thisValue;
+            else
+                res = (Byte)(thisValue + 256);
+            return res;
+        }
+    }
+
+    public static class ByteArrayExtensions
+    {
+        static SByte[] ToSBytes(this Byte[] thisValue)
+        {
+            SByte[] res = new SByte[thisValue.Length];
+            for (int i = 0; i < thisValue.Length; i++)
+            {
+                // res[i] = (SByte)thisValue[i];
+                res[i] = thisValue[i].ToSByte();
+            }
+            return res;
+        }
+    }
+
+    public static class SByteArrayExtensions
+    {
+        static Byte[] ToBytes(SByte[] thisValue)
+        {
+            Byte[] res = new Byte[thisValue.Length];
+            for (int i = 0; i < thisValue.Length; i++)
+            {
+                // res[i] = (Byte)thisValue[i];
+                res[i] = thisValue[i].ToByte();
+            }
+            return res;
+        }
+    }
     public static class DoubleExtensions
     {
         public static Int32 EpsilonCompareTo(this Double thisValue, Double otherValue)

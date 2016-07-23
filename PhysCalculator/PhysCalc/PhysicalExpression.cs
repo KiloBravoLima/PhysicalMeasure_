@@ -276,13 +276,15 @@ namespace PhysicalCalculator.Expression
             return pq;
         }
 
+        private static readonly NamedDerivedUnit ConvertToBaseUnits = new NamedDerivedUnit(null, "BaseUnitDimensions", "Dims", new SByte[] { -127, -127, -127, -127, -127, -127, -127 });
+
         public static Quantity ParseOptionalConvertedExpression(Quantity pq, ref String commandLine, ref String resultLine)
         {
             Unit pu = null;
             if (!String.IsNullOrEmpty(commandLine))
             {
                 pu = ParseOptionalConvertToUnit(ref commandLine, ref resultLine);
-                if (Object.ReferenceEquals(pu, Physics.ConvertToSIBaseUnits))
+                if (Object.ReferenceEquals(pu, ConvertToBaseUnits))
                 {
                     pu = new CombinedUnit(pq.Unit.AsPrefixedUnitExponentList());
                 }
@@ -352,7 +354,7 @@ namespace PhysicalCalculator.Expression
                     if (   DimToken.Equals("base", StringComparison.InvariantCultureIgnoreCase) 
                         || DimToken.Equals("dim", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        pu = Physics.ConvertToSIBaseUnits;
+                        pu = ConvertToBaseUnits;
                     }
                     else
                     {
@@ -404,17 +406,18 @@ namespace PhysicalCalculator.Expression
         {
             public String InputString;
             public String ResultString;
-            
+
             public int Pos = 0;
-            
+
             public Unit dimensionless = Physics.dimensionless;
             public List<String> ExpectedFollow = new List<String>(); // The list of words and symbols which will terminate parsing the InputString without signaling an error.
 
             public Boolean ThrowExceptionOnInvalidInput = false;
 
             private Boolean inputRecognized = true;
-            //private String errorMessage;
             private Boolean errorReported = false;
+            private Boolean InvalidPhysicalExpressionFormatErrorReported = false;
+
 
             private Stack<OperatorKind> Operators = new Stack<OperatorKind>();
             private List<token> Tokens = new List<token>();
@@ -435,16 +438,7 @@ namespace PhysicalCalculator.Expression
 
             public string RemainingInput => InputString.Substring(Pos);
 
-            /*
-            public string GetRemainingInput()
-            {
-                return InputString.Substring(Pos);
-            }
-            */
-
             public Boolean InputRecognized => inputRecognized;
-
-            // public string ErrorMessage { get { return errorMessage; } } 
 
             private Boolean PushNewOperator(OperatorKind newOperator)
             {
@@ -459,10 +453,10 @@ namespace PhysicalCalculator.Expression
                     }
                     else
                         if (newOperator == OperatorKind.sub)
-                        {
-                            newOperator = OperatorKind.unaryminus;
-                            NewOperatorValid = true;
-                        }
+                    {
+                        newOperator = OperatorKind.unaryminus;
+                        NewOperatorValid = true;
+                    }
                 }
 
                 if (NewOperatorValid)
@@ -474,11 +468,11 @@ namespace PhysicalCalculator.Expression
                         Boolean KeepPoping = true;
                         while ((Operators.Count > 0) && KeepPoping)
                         {
-                            OperatorKind  NextOperatorsPrecedence = Operators.Peek().Precedence();
-                            KeepPoping = (   (NextOperatorsPrecedence > NewOperatorPrecedence)
-                                          || (   (NextOperatorsPrecedence == NewOperatorPrecedence)
+                            OperatorKind NextOperatorsPrecedence = Operators.Peek().Precedence();
+                            KeepPoping = ((NextOperatorsPrecedence > NewOperatorPrecedence)
+                                          || ((NextOperatorsPrecedence == NewOperatorPrecedence)
                                               && (NewOperatorPrecedence != OperatorKind.unaryplus)));
-                            if (KeepPoping) 
+                            if (KeepPoping)
                             {
                                 Tokens.Add(new token(Operators.Pop()));
                             }
@@ -491,14 +485,7 @@ namespace PhysicalCalculator.Expression
                 }
                 else
                 {
-                    ReportError("The string argument is not in a valid physical expression format. Invalid or missing operand at pos " + Pos.ToString());
-                    /*
-                    ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operand at pos " + Pos.ToString();
-                    if (ThrowExceptionOnInvalidInput)
-                    {
-                        throw new PhysicalUnitFormatException(ResultString);
-                    }
-                    */
+                    ReportInvalidPhysicalExpressionFormatError("Invalid or missing operand at pos " + Pos.ToString());
 
                     return false;
                 }
@@ -509,15 +496,10 @@ namespace PhysicalCalculator.Expression
                 if (LastReadToken == TokenKind.Operand)
                 {
                     // Cannot follow operand
-                    ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operator at pos " + Pos.ToString();
-                    if (ThrowExceptionOnInvalidInput)
-                    {
-                        throw new PhysicalUnitFormatException(ResultString);
-                    }
-
+                    ReportInvalidPhysicalExpressionFormatError("Invalid or missing operator at pos " + Pos.ToString());
                     return false;
-                } 
-                else 
+                }
+                else
                 {
                     // Push opening parenthesis onto stack
                     Operators.Push(OperatorKind.parenbegin);
@@ -531,25 +513,20 @@ namespace PhysicalCalculator.Expression
 
             private Boolean PopUntilParenbegin()
             {
-                if (LastReadToken != TokenKind.Operand)
+                if (ParenCount == 0)
                 {
-                    // Must follow operand
-                    ResultString = "The string argument is not in a valid physical expression format. Invalid or missing operand at pos " + Pos.ToString();
-                    if (ThrowExceptionOnInvalidInput)
+                    if (!ExpectedFollow.Contains(")"))
                     {
-                        throw new PhysicalUnitFormatException(ResultString);
+                        // Must have matching opening parenthesis
+                        ReportInvalidPhysicalExpressionFormatError("Unmatched closing parenthesis at pos " + Pos.ToString());
                     }
 
                     return false;
                 }
-                else if (ParenCount == 0)
+                else if (LastReadToken != TokenKind.Operand)
                 {
-                    // Must have matching opening parenthesis
-                    ResultString = "The string argument is not in a valid physical expression format. Unmatched closing parenthesis at pos " + Pos.ToString();
-                    if (ThrowExceptionOnInvalidInput)
-                    {
-                        throw new PhysicalUnitFormatException(ResultString);
-                    }
+                    // Must follow operand
+                    ReportInvalidPhysicalExpressionFormatError("Invalid or missing operand at pos " + Pos.ToString());
 
                     return false;
                 }
@@ -596,10 +573,17 @@ namespace PhysicalCalculator.Expression
                 {
                     throw new PhysicalUnitFormatException(ResultString);
                 }
-                else
+            }
+
+            public void ReportInvalidPhysicalExpressionFormatError(String errorMessage)
+            {
+                
+                if (!InvalidPhysicalExpressionFormatErrorReported)
                 {
-                    //return null;
+                    errorMessage = "The string argument is not in a valid physical expression format. " + errorMessage;
                 }
+                ReportError(errorMessage);
+                InvalidPhysicalExpressionFormatErrorReported = true;
             }
 
             public token GetToken()
@@ -674,9 +658,6 @@ namespace PhysicalCalculator.Expression
                             {
                                 // End of recognized input; Stop reading and return operator tokens from stack.
                                 // Error signaling already done in PushNewOperator
-                                /*
-                                ReportError("Internal Error: Handling operator '" + NewOperator.ToString() + "' failed at '" + c + "' at pos " + Pos.ToString());
-                                */
                             }
                         }
                         else if (Char.IsDigit(c))
@@ -684,7 +665,7 @@ namespace PhysicalCalculator.Expression
                             if (LastReadToken == TokenKind.Operand)
                             {
                                 // End of recognized input; Stop reading and return operator tokens from stack.
-                                ReportError("The string argument is not in a valid physical unit format. An operator must follow a operand. Invalid operand at '" + c + "' at pos " + Pos.ToString());
+                                ReportInvalidPhysicalExpressionFormatError("An operator must follow a operand. Invalid operand at '" + c + "' at pos " + Pos.ToString());
                             }
                             else
                             {
@@ -721,7 +702,7 @@ namespace PhysicalCalculator.Expression
                                 }
 
                                 // End of recognized input; Stop reading and return operator tokens from stack.
-                                ReportError("The string argument is not in a valid physical expression format. Invalid or missing operand after '" + c + "' at position " + Pos.ToString());
+                                ReportInvalidPhysicalExpressionFormatError("Invalid or missing operand after '" + c + "' at position " + Pos.ToString());
                             }
                         }
                         else if (Char.IsLetter(c) || Char.Equals(c, '_'))
@@ -819,7 +800,7 @@ namespace PhysicalCalculator.Expression
                             }
 
                             // End of recognized input; Stop reading and return operator tokens from stack.
-                            ReportError("The string argument is not in a valid physical expression format. Invalid or missing operand at '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
+                            ReportInvalidPhysicalExpressionFormatError("Invalid or missing operand at '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
                         }
                         else
                         {
@@ -828,7 +809,7 @@ namespace PhysicalCalculator.Expression
 
                             if (!ExpectedFollow.Contains(new String(c,1)))
                             {
-                                ReportError("The string argument is not in a valid physical expression format. Invalid input '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
+                                ReportInvalidPhysicalExpressionFormatError("Invalid input '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
                             }
                         }
                     }
@@ -843,13 +824,13 @@ namespace PhysicalCalculator.Expression
                 if (LastReadToken == TokenKind.Operator)
                 {
                     // End of recognized input; Stop reading and return operator tokens from stack.
-                    ReportError("The string argument is not in a valid physical expression format. Operand expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
+                    ReportInvalidPhysicalExpressionFormatError("Operand expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
                 }
                 // Check for balanced parentheses
                 if (ParenCount > 0)
                 {
                     // End of recognized input; Stop reading and return operator tokens from stack.
-                    ReportError("The string argument is not in a valid physical expression format. Closing parenthesis expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
+                    ReportInvalidPhysicalExpressionFormatError("Closing parenthesis expected '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
                 }
                 // Retrieve remaining operators from stack
                 while (Operators.Count > 0) 
