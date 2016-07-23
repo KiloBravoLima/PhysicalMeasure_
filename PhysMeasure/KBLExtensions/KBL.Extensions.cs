@@ -283,9 +283,10 @@ namespace System.Reflection
 
         public static String AssemblyFileVersionInfo(this System.Reflection.Assembly assembly)
         {
+            String InfoStr;
+#if UseWindosDesktop
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             String AsemVersion = fileVersionInfo.FileVersion;
-            String InfoStr;
 
             if (fileVersionInfo.FileBuildPart != 0)
             {
@@ -296,6 +297,37 @@ namespace System.Reflection
             {
                 InfoStr = AsemVersion;
             }
+#else 
+            // AssemblyVersionAttribute ava =  assembly.GetCustomAttribute<AssemblyVersionAttribute>();
+            AssemblyFileVersionAttribute afva = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
+
+            if (afva != null)
+            {
+                String AsemVersion = afva.Version;
+                String[] parts = AsemVersion.Split('.');
+                if (parts.Length >= 2)
+                {
+                    Int32 FileBuildPart = 0;
+                    Int32 FilePrivatePart = 0;
+
+                    Int32.TryParse(parts[2], out FileBuildPart);
+                    if (parts.Length >= 3)
+                    {
+                        Int32.TryParse(parts[3], out FilePrivatePart);
+                    }
+                    String buildNoString = DateTimeBuildNo.ToBuildDateString(FileBuildPart, FilePrivatePart);
+                    InfoStr = String.Format("{0} {1}", AsemVersion, buildNoString);
+                }
+                else
+                {
+                    InfoStr = afva.Version;
+                }
+            } 
+            else
+            {
+                InfoStr = "null";
+            }
+#endif // UseWindosDesktop
             return InfoStr;
         }
 
