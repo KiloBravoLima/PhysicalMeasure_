@@ -331,6 +331,7 @@ namespace PhysicalCalculator
             Boolean CommandFound =     CheckForCommand("//", CommandComment, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Read", CommandReadFromFile, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Include", CommandReadFromFile, ref commandLine, ref resultLine, ref CommandHandled)
+                                    || CheckForCommand("Load", CommandReadFromFile, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Save", CommandSaveToFile, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Files", CommandListFiles, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Using", CommandUsingConstants, ref commandLine, ref resultLine, ref CommandHandled)
@@ -394,7 +395,7 @@ namespace PhysicalCalculator
             {   //            "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
                 //            "         1         2         3         4         5         6         7         8         9        10        11        12        13        14"
                 resultLine += "Commands:\n"
-                            + "    Include <filename>                                                       Reads commands from file\n"
+                            + "    || Read | Include | Load||  <filename>                                   Reads commands from file and execute them\n"
                             + "    Save [ items | commands ] <filename>                                     Save to file the current variables and functions\n"
                             + "                                                                                 declarations, or the command history\n"
                             + "                                                                                 when 'commands' is specified\n"
@@ -946,8 +947,7 @@ namespace PhysicalCalculator
                     {
                         TryParseToken("=", ref commandLine);
 
-                        List<string> ExpectedFollow = new List<string>();
-                        ExpectedFollow.Add(";");
+                        List<string> ExpectedFollow = new List<string>{",", ";"};
 
                         Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
@@ -978,11 +978,14 @@ namespace PhysicalCalculator
                             OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, out Item);
                             if (OK)
                             {
+                                /*
                                 string SystemName = "";
-                                if (SystemItem != null)
+                                if (UnitSys != null)
                                 {
-                                    SystemName = ((NamedSystem)SystemItem).UnitSystem.Name + ".";
+                                    // SystemName = ((NamedSystem)UnitSys).UnitSystem.Name + ".";
+                                    SystemName = UnitSys.Name + ".";
                                 }
+                                */
                                 if (pq != null)
                                 {
                                     // Defined new local unit as scaled unit

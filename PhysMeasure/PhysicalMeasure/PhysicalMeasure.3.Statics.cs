@@ -167,8 +167,6 @@ namespace PhysicalMeasure
 
 
         public static readonly Unit dimensionless = SI_Units.Dimensionless as Unit;
-        public static readonly NamedDerivedUnit ConvertToSIBaseUnits = new NamedDerivedUnit(SI_Units, "BaseUnitDimensions", "Dims", new SByte[] { -127, -127, -127, -127, -127, -127, -127 });
-
 
         public static readonly Unit[] MixedTimeUnits
             = new Unit[] {              new MixedUnit(ExtraTimeUnits[2], "y ", new MixedUnit(ExtraTimeUnits[1], "d ", new MixedUnit(SI_ConvertibleUnits[3], ":", new MixedUnit(ExtraTimeUnits[0], ":", SI_BaseUnits[2]))))};
