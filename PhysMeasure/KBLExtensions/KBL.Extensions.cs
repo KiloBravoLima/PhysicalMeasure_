@@ -35,7 +35,7 @@ namespace System
 
     public static class ByteArrayExtensions
     {
-        static SByte[] ToSBytes(this Byte[] thisValue)
+        public static SByte[] ToSBytes(this Byte[] thisValue)
         {
             SByte[] res = new SByte[thisValue.Length];
             for (int i = 0; i < thisValue.Length; i++)
@@ -49,7 +49,7 @@ namespace System
 
     public static class SByteArrayExtensions
     {
-        static Byte[] ToBytes(SByte[] thisValue)
+        public static Byte[] ToBytes(this SByte[] thisValue)
         {
             Byte[] res = new Byte[thisValue.Length];
             for (int i = 0; i < thisValue.Length; i++)
@@ -60,6 +60,7 @@ namespace System
             return res;
         }
     }
+
     public static class DoubleExtensions
     {
         public static Int32 EpsilonCompareTo(this Double thisValue, Double otherValue)
@@ -284,7 +285,7 @@ namespace System.Reflection
         public static String AssemblyFileVersionInfo(this System.Reflection.Assembly assembly)
         {
             String InfoStr;
-#if UseWindosDesktop
+#if UseWindowsDesktop
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             String AsemVersion = fileVersionInfo.FileVersion;
 
@@ -327,7 +328,7 @@ namespace System.Reflection
             {
                 InfoStr = "null";
             }
-#endif // UseWindosDesktop
+#endif // UseWindowsDesktop
             return InfoStr;
         }
 

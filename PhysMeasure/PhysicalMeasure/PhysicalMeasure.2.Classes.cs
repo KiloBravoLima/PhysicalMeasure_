@@ -3965,8 +3965,8 @@ namespace PhysicalMeasure
                         }
                         catch (Exception e)
                         {
-                            Debug.WriteLine("CombinedUnit.ConvertToBaseUnit() failed and unit are missing exponents");
-                            Debug.Assert(false, "CombinedUnit.ConvertToBaseUnit() failed and unit are missing exponents");
+                            Debug.WriteLine("CombinedUnit.ConvertToBaseUnit() failed and unit are missing exponents: " + e.Message);
+                            Debug.Assert(false, "CombinedUnit.ConvertToBaseUnit() failed and unit are missing exponents: " + e.Message);
                         }
                     }
                     else
