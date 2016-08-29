@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="Measurements" Class="MeasurementsDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=(LocalDB)\v11.0;AttachDbFilename=&quot;E:\Alle Brugere\Klaus\Programmering\Visual Studio\C#\PhysicalMeasure\LogMeasurement\Database\Measurements.mdf&quot;;Integrated Security=True;Connect Timeout=30" SettingsObjectName="LogMeasurement.Properties.Settings" SettingsPropertyName="MeasurementsConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.Measurements" Member="Measurements">
+    <Type Name="Measurement">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ParentMeasurement" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="LogTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="EventTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="MeasuredValue" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="MeasuredUnit" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Association Name="Measurement_Measurement" Member="Measurements" ThisKey="Id" OtherKey="ParentMeasurement" Type="Measurement" />
+      <Association Name="Measurement_Measurement" Member="Measurement2" ThisKey="ParentMeasurement" OtherKey="Id" Type="Measurement" IsForeignKey="true" />
+      <Association Name="Unit_Measurement" Member="Unit" ThisKey="MeasuredUnit" OtherKey="Id" Type="Unit" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Units" Member="Units">
+    <Type Name="Unit">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="NChar(25)" CanBeNull="true" />
+      <Column Name="Symbol" Type="System.String" DbType="NChar(3)" CanBeNull="true" />
+      <Column Name="Exponents" Type="System.Data.Linq.Binary" DbType="VarBinary(7) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="ConversionFactor" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="ConversionOffset" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Association Name="Unit_Measurement" Member="Measurements" ThisKey="Id" OtherKey="MeasuredUnit" Type="Measurement" />
+      <Association Name="Unit_UnitList" Member="UnitLists" ThisKey="Id" OtherKey="UnitId" Type="UnitList" />
+    </Type>
+  </Table>
+  <Table Name="dbo.InternalErrors" Member="InternalErrors">
+    <Type Name="InternalError">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="LogTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="EventTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="ErrorMessage" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UnitLists" Member="UnitLists">
+    <Type Name="UnitList">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="UnitId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ListId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Unit_UnitList" Member="Unit" ThisKey="UnitId" OtherKey="Id" Type="Unit" IsForeignKey="true" />
+    </Type>
+  </Table>
+</Database>
