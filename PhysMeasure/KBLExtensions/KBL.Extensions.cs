@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
+using System.Text;
 
 namespace System
 {
@@ -134,13 +135,39 @@ namespace System
 
             return textParts;
         }
+
+        public static String AppendSeparated(this String s, string text, string separator = " ")
+        {
+            if (s.Length > 0)
+            {
+                return s + separator + text;
+            }
+
+            return text; 
+        }
     }
 
     public static class DateTimeExtensions
     {
-        public static string ToSortString(this DateTime Me) => Me.ToString("yyyy-MM-dd HH:mm:ss");
+        public static String ToSortString(this DateTime Me) => Me.ToString("yyyy-MM-dd HH:mm:ss");
 
-        public static string ToSortShortDateString(this DateTime Me) => Me.ToString("yyyy-MM-dd");
+        public static String ToSortShortDateString(this DateTime Me) => Me.ToString("yyyy-MM-dd");
+    }
+}
+
+namespace System.Text
+{
+
+    public static class StringBuilderExtensions
+    {
+        public static void AppendSeparated(this StringBuilder sb, String text, String separator = " ")
+        {
+            if (sb.Length > 0)
+            {
+                sb.Append(separator);
+            }
+            sb.Append(text);
+        }
     }
 }
 
