@@ -111,10 +111,12 @@ namespace PhysicalCalculator
 
         private CalculatorEnvironment InitPredefinedSystemContext()
         {
-            CalculatorEnvironment PredefinedSystem = new CalculatorEnvironment("Predefined Identifiers", EnvironmentKind.NamespaceEnv);
-            PredefinedSystem.OutputTracelevel = TraceLevels.None;
-            //
-            PredefinedSystem.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+            CalculatorEnvironment PredefinedSystem = new CalculatorEnvironment("Predefined Identifiers", EnvironmentKind.NamespaceEnv)
+            {
+                OutputTracelevel = TraceLevels.None,
+                //
+                FormatProviderSource = FormatProviderKind.DefaultFormatProvider
+            };
             //PredefinedSystem.FormatProviderSource = FormatProviderKind.InvariantFormatProvider;
 
             FillPredefinedSystemContext(PredefinedSystem);
@@ -124,9 +126,11 @@ namespace PhysicalCalculator
 
         private void InitGlobalContext()
         {
-            GlobalContext = new CalculatorEnvironment(InitPredefinedSystemContext(), "Global", EnvironmentKind.NamespaceEnv);
-            //
-            GlobalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+            GlobalContext = new CalculatorEnvironment(InitPredefinedSystemContext(), "Global", EnvironmentKind.NamespaceEnv)
+            {
+                //
+                FormatProviderSource = FormatProviderKind.DefaultFormatProvider
+            };
             //GlobalContext.FormatProviderSource = FormatProviderKind.InvariantFormatProvider;
 
             CurrentContext = GlobalContext;
@@ -186,7 +190,6 @@ namespace PhysicalCalculator
 
             do
             {
-                String FullCommandLine;
                 String CommandLine;
                 String ResultLine;
 
@@ -198,7 +201,7 @@ namespace PhysicalCalculator
                     ResultLine = "";
 
                     CommandLineFromAccessor = commandLineReader.HasAccessor();
-                    commandLineReader.ReadCommand(ref ResultLine, out FullCommandLine);
+                    commandLineReader.ReadCommand(ref ResultLine, out var FullCommandLine);
                     CommandLineEmpty = String.IsNullOrWhiteSpace(FullCommandLine);
                     ResultLineEmpty = String.IsNullOrWhiteSpace(ResultLine);
                     if (!ResultLineEmpty)
@@ -289,9 +292,10 @@ namespace PhysicalCalculator
         public Boolean ExecuteFunctionCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out Quantity functionResult)
         {
             // Dummy: Never used    funcBodyResult
-            CommandReader functionCommandLineReader = new CommandReader(localContext.Name, funcBodyCommands.ToArray(), CommandLineReader.ResultLineWriter);
-            functionCommandLineReader.ReadFromConsoleWhenEmpty = false; // Return from ExecuteCommands() function when funcBodyCommands are done
-
+            CommandReader functionCommandLineReader = new CommandReader(localContext.Name, funcBodyCommands.ToArray(), CommandLineReader.ResultLineWriter)
+            {
+                ReadFromConsoleWhenEmpty = false // Return from ExecuteCommands() function when funcBodyCommands are done
+            };
             if (localContext.OutputTracelevel.HasFlag(TraceLevels.FunctionEnterLeave))
             {
                 ResultLineWriter.WriteLine("Enter " + localContext.Name);
@@ -308,9 +312,10 @@ namespace PhysicalCalculator
         public Boolean ExecuteCommandsCallback(CalculatorEnvironment localContext, List<String> commands, ref String resultLine, out Quantity commandBlockResult)
         {
             // Dummy: Never used    resultLine
-            CommandReader CommandBlockLineReader = new CommandReader(localContext.Name, commands.ToArray(), CommandLineReader.ResultLineWriter);
-            CommandBlockLineReader.ReadFromConsoleWhenEmpty = false; // Return from ExecuteCommands() function when funcBodyCommands are done
-
+            CommandReader CommandBlockLineReader = new CommandReader(localContext.Name, commands.ToArray(), CommandLineReader.ResultLineWriter)
+            {
+                ReadFromConsoleWhenEmpty = false // Return from ExecuteCommands() function when funcBodyCommands are done
+            };
             if (localContext.OutputTracelevel.HasFlag(TraceLevels.BlockEnterLeave))
             {
                 ResultLineWriter.WriteLine("Enter " + localContext.Name);
@@ -395,7 +400,7 @@ namespace PhysicalCalculator
             {   //            "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
                 //            "         1         2         3         4         5         6         7         8         9        10        11        12        13        14"
                 resultLine += "Commands:\n"
-                            + "    || Read | Include | Load||  <filename>                                   Reads commands from file and execute them\n"
+                            + "    || Read | Include | Load || <filename>                                   Reads commands from file and execute them\n"
                             + "    Save [ items | commands ] <filename>                                     Save to file the current variables and functions\n"
                             + "                                                                                 declarations, or the command history\n"
                             + "                                                                                 when 'commands' is specified\n"
@@ -707,8 +712,7 @@ namespace PhysicalCalculator
         
         public Boolean CommandUsingConstants(ref String commandLine, ref String resultLine)
         {
-            String ConstantGroupName;
-            commandLine = commandLine.ReadIdentifier(out ConstantGroupName);
+            commandLine = commandLine.ReadIdentifier(out var ConstantGroupName);
             if (ConstantGroupName == null)
             {
                 resultLine = "Constant group name expected";
@@ -745,14 +749,13 @@ namespace PhysicalCalculator
 
         public Boolean CommandVar(ref String commandLine, ref String resultLine)
         {
-            String VariableName;
             resultLine = "";
             Boolean OK;
             do
             {
                 OK = false;
 
-                commandLine = commandLine.ReadIdentifier(out VariableName);
+                commandLine = commandLine.ReadIdentifier(out var VariableName);
                 if (VariableName == null)
                 {
                     resultLine = "Variable name expected";
@@ -760,11 +763,7 @@ namespace PhysicalCalculator
                 else
                 {
                     Debug.Assert(VariableName != null);
-
-                    IEnvironment VariableContext;
-                    INametableItem Item;
-
-                    Boolean IdentifierFound = CurrentContext.FindIdentifier(VariableName, out VariableContext, out Item);
+                    Boolean IdentifierFound = CurrentContext.FindIdentifier(VariableName, out var VariableContext, out var Item);
 
                     IEnvironment NewVariableDeclarationNamespace = GetDeclarationEnvironment();
 
@@ -810,17 +809,12 @@ namespace PhysicalCalculator
 
         public Boolean CommandSet(ref String commandLine, ref String resultLine)
         {
-            IEnvironment IdentifierContext;
-            String QualifiedIdentifierName;
-            String VariableName;
-            INametableItem Item;
-
             resultLine = "";
             Boolean OK;
             do
             {
                 OK = false;
-                Boolean IdentifierFound = ParseQualifiedIdentifier(ref commandLine, ref resultLine, out IdentifierContext, out QualifiedIdentifierName, out VariableName, out Item);
+                Boolean IdentifierFound = ParseQualifiedIdentifier(ref commandLine, ref resultLine, out var IdentifierContext, out var QualifiedIdentifierName, out var VariableName, out var Item);
 
                 if (VariableName == null)
                 {
@@ -867,14 +861,13 @@ namespace PhysicalCalculator
 
         public Boolean CommandSystem(ref String commandLine, ref String resultLine)
         {
-            String SystemName;
             resultLine = "";
             Boolean OK;
             do
             {
                 OK = false;
 
-                commandLine = commandLine.ReadIdentifier(out SystemName);
+                commandLine = commandLine.ReadIdentifier(out var SystemName);
                 if (SystemName == null)
                 {
                     resultLine = "System name expected";
@@ -882,11 +875,7 @@ namespace PhysicalCalculator
                 else
                 {
                     Debug.Assert(SystemName != null);
-
-                    IEnvironment SystemContext;
-                    INametableItem Item;
-
-                    Boolean IdentifierFound = CurrentContext.FindIdentifier(SystemName, out SystemContext, out Item);
+                    Boolean IdentifierFound = CurrentContext.FindIdentifier(SystemName, out var SystemContext, out var Item);
 
                     IEnvironment NewSystemDeclarationNamespace = GetDeclarationEnvironment();
 
@@ -917,18 +906,13 @@ namespace PhysicalCalculator
 
         public Boolean CommandUnit(ref String commandLine, ref String resultLine)
         {
-            IEnvironment IdentifierContext;
-            String QualifiedIdentifierName;
-            String UnitName;
-            INametableItem Item;
-
             resultLine = "";
             Boolean OK;
             do
             {
                 OK = false;
 
-                Boolean IdentifierFound = ParseQualifiedIdentifier(ref commandLine, ref resultLine, out IdentifierContext, out QualifiedIdentifierName, out UnitName, out Item);
+                Boolean IdentifierFound = ParseQualifiedIdentifier(ref commandLine, ref resultLine, out var IdentifierContext, out var QualifiedIdentifierName, out var UnitName, out var Item);
 
                 if (UnitName == null)
                 {
@@ -960,9 +944,7 @@ namespace PhysicalCalculator
                         {
 
                             IUnitSystem UnitSys = null;
-                            INametableItem SystemItem = null;
-                            IEnvironment SystemContext;
-                            Boolean SystemIdentifierFound = CurrentContext.FindIdentifier(QualifiedIdentifierName, out SystemContext, out SystemItem);
+                            Boolean SystemIdentifierFound = CurrentContext.FindIdentifier(QualifiedIdentifierName, out var SystemContext, out var SystemItem);
                             if (SystemItem != null && SystemItem.Identifierkind == IdentifierKind.UnitSystem)
                             {
                                 UnitSys = ((NamedSystem)SystemItem).UnitSystem;
@@ -1015,9 +997,8 @@ namespace PhysicalCalculator
         public Boolean CommandStore(ref String commandLine, ref String resultLine)
         {   // Store accumulator value to var
             Boolean OK = false;
-            String VariableName;
             resultLine = "";
-            commandLine = commandLine.ReadIdentifier(out VariableName);
+            commandLine = commandLine.ReadIdentifier(out var VariableName);
 
             if (VariableName == null)
             {
@@ -1041,21 +1022,17 @@ namespace PhysicalCalculator
         public Boolean CommandRemove(ref String commandLine, ref String resultLine)
         {
             Boolean OK = false;
-            String ItemName;
             resultLine = "";
             do
             {
-                commandLine = commandLine.ReadIdentifier(out ItemName);
+                commandLine = commandLine.ReadIdentifier(out var ItemName);
                 if (ItemName == null)
                 {
                     resultLine = "Variable name or unit name or function name expected";
                 }
                 else
                 {
-                    IEnvironment IdentifierContext;
-                    INametableItem Item;
-
-                    Boolean IdentifierFound = CurrentContext.FindIdentifier(ItemName, out IdentifierContext, out Item);
+                    Boolean IdentifierFound = CurrentContext.FindIdentifier(ItemName, out var IdentifierContext, out var Item);
 
                     if (IdentifierFound)
                     {
@@ -1159,13 +1136,11 @@ namespace PhysicalCalculator
 
         public Boolean IdentifierAssumed(ref String commandLine, ref String resultLine)
         {
-            string identifier;
-            int len = commandLine.PeekIdentifier(out identifier);
+            int len = commandLine.PeekIdentifier(out string identifier);
 
             if (len > 0)
             {
-                Char token2;
-                int len2 = commandLine.Substring(len).TrimStart().PeekChar(out token2);
+                int len2 = commandLine.Substring(len).TrimStart().PeekChar(out var token2);
 
                 if (token2 == '=')
                 {
@@ -1184,19 +1159,15 @@ namespace PhysicalCalculator
 
         public Boolean CommandFunc(ref String commandLine, ref String resultLine)
         {
-            String FunctionName;
             resultLine = "";
-            commandLine = commandLine.ReadIdentifier(out FunctionName);
+            commandLine = commandLine.ReadIdentifier(out var FunctionName);
             if (FunctionName == null)
             {
                 resultLine = "Function name expected";
             }
             else
             {
-                IEnvironment IdentifierContext;
-                INametableItem Item;
-
-                Boolean IdentifierFound = CurrentContext.FindIdentifier(FunctionName, out IdentifierContext, out Item);
+                Boolean IdentifierFound = CurrentContext.FindIdentifier(FunctionName, out var IdentifierContext, out var Item);
 
                 IEnvironment NewFunctionDeclarationNamespace = GetDeclarationEnvironment();
 
@@ -1293,13 +1264,12 @@ namespace PhysicalCalculator
         public Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, 
                         out IEnvironment qualifiedIdentifierContext, out String qualifiedIdentifierName, out String identifierName, out INametableItem item)
         {
-            IEnvironment PrimaryContext;
             IdentifierKind identifierkind = IdentifierKind.Unknown;
 
             commandLine = commandLine.ReadIdentifier(out identifierName);
             Debug.Assert(identifierName != null);
 
-            Boolean IdentifierFound = IdentifierItemLookup(identifierName, out PrimaryContext, out item);
+            Boolean IdentifierFound = IdentifierItemLookup(identifierName, out var PrimaryContext, out item);
             if (IdentifierFound)
             {
                 identifierkind = item.Identifierkind;
@@ -1323,9 +1293,7 @@ namespace PhysicalCalculator
 
                 if (identifierkind == IdentifierKind.Environment)
                 {
-                    IEnvironment FoundInContext;
-
-                    IdentifierFound = qualifiedIdentifierContext.FindIdentifier(identifierName, out FoundInContext, out item);
+                    IdentifierFound = qualifiedIdentifierContext.FindIdentifier(identifierName, out var FoundInContext, out item);
                     if (IdentifierFound)
                     {
                         qualifiedIdentifierContext = FoundInContext;
@@ -1402,9 +1370,8 @@ namespace PhysicalCalculator
             if (variableName.IsKeyword("Tracelevel"))
             {
                 SettingFound = true;
-                String tracelevelvaluestr;
                 TraceLevels tl; // = TraceLevels.All ;
-                commandLine = commandLine.ReadToken(out tracelevelvaluestr);
+                commandLine = commandLine.ReadToken(out var tracelevelvaluestr);
                 if (tracelevelvaluestr.IsKeyword("Normal"))
                 {
                     tl = TraceLevels.Normal;
@@ -1439,9 +1406,8 @@ namespace PhysicalCalculator
             else if (variableName.IsKeyword("FormatProvider"))
             {
                 SettingFound = true;
-                String formatProviderValuestr;
                 FormatProviderKind fp; 
-                commandLine = commandLine.ReadToken(out formatProviderValuestr);
+                commandLine = commandLine.ReadToken(out var formatProviderValuestr);
                 if (formatProviderValuestr.IsKeyword("Inherited"))
                 {
                     fp = FormatProviderKind.InheritedFormatProvider;
@@ -1471,10 +1437,9 @@ namespace PhysicalCalculator
             else if (variableName.IsKeyword("System") || variableName.IsKeyword("Default_System"))
             {
                 SettingFound = true;
-                String systemvaluestr;
-                commandLine = commandLine.ReadToken(out systemvaluestr);
+                commandLine = commandLine.ReadToken(out var systemvaluestr);
 
-                IUnitSystem us = Physics.UnitSystems.UnitSystemFromName(systemvaluestr);
+                IUnitSystem us = UnitSystems.Systems.UnitSystemFromName(systemvaluestr);
                 if (us == null)
                 {   // Not a unit system from PhysicalMeasure; Try look for a user defined unit system.
                     // TODO: Look for a user defined unit system with specified name.
@@ -1587,9 +1552,11 @@ namespace PhysicalCalculator
 
             if (commandsEvaluator != null)
             {
-                CalculatorEnvironment LocalContext = new CalculatorEnvironment(CurrentContext, "Commands " + CommandBlockName, EnvironmentKind.FunctionEnv);
-                //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
-                LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
+                CalculatorEnvironment LocalContext = new CalculatorEnvironment(CurrentContext, "Commands " + CommandBlockName, EnvironmentKind.FunctionEnv)
+                {
+                    //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+                    FormatProviderSource = FormatProviderKind.InheritedFormatProvider
+                };
                 CalculatorEnvironment OldCurrentContext = CurrentContext;
 
                 CurrentContext = LocalContext;
@@ -1612,9 +1579,11 @@ namespace PhysicalCalculator
             {
                 CalculatorEnvironment FunctionStaticOuterContext = functionEvaluator.StaticOuterContext;
                 Debug.Assert(FunctionStaticOuterContext != null);
-                CalculatorEnvironment LocalContext = new CalculatorEnvironment(FunctionStaticOuterContext, "Function " + FunctionName, EnvironmentKind.FunctionEnv);
-                //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
-                LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
+                CalculatorEnvironment LocalContext = new CalculatorEnvironment(FunctionStaticOuterContext, "Function " + FunctionName, EnvironmentKind.FunctionEnv)
+                {
+                    //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+                    FormatProviderSource = FormatProviderKind.InheritedFormatProvider
+                };
                 CalculatorEnvironment OldCurrentContext = CurrentContext;
 
                 CurrentContext = LocalContext;
@@ -1634,9 +1603,11 @@ namespace PhysicalCalculator
 
             if (CommandLineReader != null)
             {
-                CalculatorEnvironment LocalContext = new CalculatorEnvironment(GlobalContext, "File Function " + functionName, EnvironmentKind.FunctionEnv);
-                //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
-                LocalContext.FormatProviderSource = FormatProviderKind.InheritedFormatProvider;
+                CalculatorEnvironment LocalContext = new CalculatorEnvironment(GlobalContext, "File Function " + functionName, EnvironmentKind.FunctionEnv)
+                {
+                    //LocalContext.FormatProviderSource = FormatProviderKind.DefaultFormatProvider;
+                    FormatProviderSource = FormatProviderKind.InheritedFormatProvider
+                };
                 CalculatorEnvironment OldCurrentContext = CurrentContext;
 
                 CurrentContext = LocalContext;
@@ -1673,8 +1644,7 @@ namespace PhysicalCalculator
             Boolean IdentifierFound = CurrentContext.FindIdentifier(identifierName, out context, out item);
             if (!IdentifierFound)
             {   // Look for Global system settings and predefined symbols
-                CalculatorEnvironment PrimaryContext;
-                IdentifierFound = PredefinedContextIdentifierLookup(identifierName, out PrimaryContext);
+                IdentifierFound = PredefinedContextIdentifierLookup(identifierName, out var PrimaryContext);
                 context = PrimaryContext;
                 item = PrimaryContext;
             }
@@ -1721,8 +1691,7 @@ namespace PhysicalCalculator
 
         public Boolean IdentifierContextLookup(String IdentifierName, out IEnvironment FoundInContext, out IdentifierKind identifierkind)
         {
-            INametableItem item;
-            Boolean identifierFound = IdentifierItemLookup(IdentifierName, out FoundInContext, out item);
+            Boolean identifierFound = IdentifierItemLookup(IdentifierName, out FoundInContext, out var item);
             if (identifierFound)
             {
                 identifierkind = item.Identifierkind;
@@ -1737,10 +1706,7 @@ namespace PhysicalCalculator
 
         public Boolean QualifiedIdentifierCalculatorContextLookup(IEnvironment LookInContext, String IdentifierName, out IEnvironment FoundInContext, out IdentifierKind identifierkind)
         {
-            INametableItem Item;
-
-            Boolean Found = LookInContext.FindLocalIdentifier(IdentifierName, out Item);
-
+            Boolean Found = LookInContext.FindLocalIdentifier(IdentifierName, out var Item);
             if (Found)
             {
                 identifierkind = Item.Identifierkind;

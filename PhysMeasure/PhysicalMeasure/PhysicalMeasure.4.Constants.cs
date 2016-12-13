@@ -73,7 +73,7 @@ namespace PhysicalMeasure
         public static readonly Quantity re = new Quantity(2.8179402894E-15, SI.m);
         public static readonly Quantity me = new Quantity(9.10938215E-31, SI.Kg);
         /** */
-        public static readonly Quantity GF = new Quantity(1.16639E-5, (Prefix.G * Constants.e * SI.V) ^ -2);
+        public static readonly Quantity GF = new Quantity(1.16639E-5, (Prefixes.G * Constants.e * SI.V) ^ -2);
         /* **/
         public static readonly Quantity alpha = new Quantity(7.2973525376E-3, Physics.dimensionless);
         public static readonly Quantity Eh = new Quantity(4.35974417E-18, SI.J);

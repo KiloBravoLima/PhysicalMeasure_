@@ -1,10 +1,7 @@
 ﻿/*   http://physicalmeasure.codeplex.com                          */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
-using System.Text;
 
 namespace System
 {
@@ -61,6 +58,18 @@ namespace System
             return res;
         }
     }
+
+#if NETCORE
+    public static class Math
+    {
+        // return Math.DivRem(a, b, out result);
+        public static int DivRem(int a, int b, out int result)
+        {
+            result = a % b;
+            return a / b;
+        }
+    }
+#endif
 
     public static class DoubleExtensions
     {
@@ -162,11 +171,14 @@ namespace System.Text
     {
         public static void AppendSeparated(this StringBuilder sb, String text, String separator = " ")
         {
-            if (sb.Length > 0)
+            if (text.Length > 0)
             {
-                sb.Append(separator);
+                if (sb.Length > 0)
+                {
+                    sb.Append(separator);
+                }
+                sb.Append(text);
             }
-            sb.Append(text);
         }
     }
 }
@@ -290,42 +302,35 @@ namespace System.Reflection
 
     public static class AssemblyExtensions
     {
+        public static String VersionInfoStr(String AsemVersion, Int32 FileBuild, Int32 FileRevision)
+        {
+            if (FileBuild == 0)
+            {
+                return AsemVersion;
+            }
+
+            String buildNoString = DateTimeBuildNo.ToBuildDateString(FileBuild, FileRevision);
+            return String.Format("{0} {1}", AsemVersion, buildNoString);
+        }
+
         public static String AssemblyVersionInfo(this System.Reflection.Assembly assembly)
         {
             System.Reflection.AssemblyName AsmName = assembly.GetName();
-
             Version AsemVersion = AsmName.Version;
-            String InfoStr;
-
-            if (AsemVersion.Build != 0)
-            {
-                String buildNoString = DateTimeBuildNo.ToBuildDateString(AsemVersion.Build, AsemVersion.Revision);
-                InfoStr = String.Format("{0} {1}", AsemVersion.ToString(), buildNoString);
-            }
-            else
-            {
-                InfoStr = AsemVersion.ToString();
-            }
-            return InfoStr;
+            return VersionInfoStr(AsemVersion.ToString(), AsemVersion.Build, AsemVersion.Revision);
         }
 
         public static String AssemblyFileVersionInfo(this System.Reflection.Assembly assembly)
         {
             String InfoStr;
-#if UseWindowsDesktop
-            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+
+#if !NETCORE
+            // Windows Desktop
+            System.Diagnostics.FileVersionInfo fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
             String AsemVersion = fileVersionInfo.FileVersion;
 
-            if (fileVersionInfo.FileBuildPart != 0)
-            {
-                String buildNoString = DateTimeBuildNo.ToBuildDateString(fileVersionInfo.FileBuildPart, fileVersionInfo.FilePrivatePart);
-                InfoStr = String.Format("{0} {1}", AsemVersion, buildNoString);
-            }
-            else
-            {
-                InfoStr = AsemVersion;
-            }
-#else 
+            InfoStr = VersionInfoStr(AsemVersion, fileVersionInfo.FileBuildPart, fileVersionInfo.FilePrivatePart);
+#else
             // AssemblyVersionAttribute ava =  assembly.GetCustomAttribute<AssemblyVersionAttribute>();
             AssemblyFileVersionAttribute afva = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
 
@@ -333,29 +338,25 @@ namespace System.Reflection
             {
                 String AsemVersion = afva.Version;
                 String[] parts = AsemVersion.Split('.');
-                if (parts.Length >= 2)
-                {
-                    Int32 FileBuildPart = 0;
-                    Int32 FilePrivatePart = 0;
 
-                    Int32.TryParse(parts[2], out FileBuildPart);
-                    if (parts.Length >= 3)
-                    {
-                        Int32.TryParse(parts[3], out FilePrivatePart);
-                    }
-                    String buildNoString = DateTimeBuildNo.ToBuildDateString(FileBuildPart, FilePrivatePart);
-                    InfoStr = String.Format("{0} {1}", AsemVersion, buildNoString);
-                }
-                else
+                Int32 FileBuildPart = 0;
+                Int32 FilePrivatePart = 0;
+
+                if (parts.Length > 2)
                 {
-                    InfoStr = afva.Version;
+                    Int32.TryParse(parts[2], out FileBuildPart);
                 }
-            } 
+                if (parts.Length > 3)
+                {
+                    Int32.TryParse(parts[3], out FilePrivatePart);
+                }
+                InfoStr = VersionInfoStr(AsemVersion, FileBuildPart, FilePrivatePart);
+            }
             else
             {
                 InfoStr = "null";
             }
-#endif // UseWindowsDesktop
+#endif // 
             return InfoStr;
         }
 

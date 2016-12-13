@@ -30,10 +30,10 @@ namespace PhysicalMeasureExamples
         {
             BaseUnit Euro = new BaseUnit(null, (SByte)MonetaryBaseQuantityKind.Currency, "Euro", "€");
             ConvertibleUnit Cent = new ConvertibleUnit("Euro-cent", "¢", Euro, new ScaledValueConversion(100));  /* [¢] = 100 * [€] */
-            UnitSystem EuroUnitSystem = new UnitSystem("Euros", Physics.UnitPrefixes, Euro, null, new ConvertibleUnit[] { Cent });
+            UnitSystem EuroUnitSystem = new UnitSystem("Euros", Prefixes.UnitPrefixes, Euro, null, new ConvertibleUnit[] { Cent });
             Unit EurosAndCents = new MixedUnit(Euro, " ", Cent, "00", true);
 
-            Unit kWh = Prefix.k * W * SI.h; // Kilo Watt hour
+            Unit kWh = Prefixes.k * W * SI.h; // Kilo Watt hour
 
             Quantity EnergyUnitPrice = 31.75 * Cent / kWh;
 

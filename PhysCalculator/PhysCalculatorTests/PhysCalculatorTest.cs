@@ -239,7 +239,7 @@ namespace PhysCalculatorTests
             ***/
 
             List<String> ResultLineExpected = new List<String>();
-            ResultLineExpected.Add("Include <filename>");
+            ResultLineExpected.Add("|| Read | Include | Load || <filename>");
             ResultLineExpected.Add("Save [ items | commands ] <filename>");
             ResultLineExpected.Add("Files [ -sort=create | write | access ] [ [-path=] <folderpath> ]");
             ResultLineExpected.Add("Using [ universal | electromagnetic | atomic ]");
@@ -914,7 +914,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.AreEqual(USDItem.Identifierkind, IdentifierKind.Unit, "For USD unit item");
             ExpectedUnit = ExpectedUnit.CombineMultiply(((NamedUnit)USDItem).pu);
 
-            CombinedUnit kWh_Unit = SI.W.CombineMultiply(Prefix.k).CombineMultiply(SI.h);
+            CombinedUnit kWh_Unit = SI.W.CombineMultiply(Prefixes.k).CombineMultiply(SI.h);
             ExpectedUnit = ExpectedUnit.CombineDivide(kWh_Unit);
 
             // IPhysicalUnit ExpectedUnit;
@@ -987,8 +987,8 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.AreEqual(IdentifierKind.Variable, PriceEnergyConsumedItem.Identifierkind, " for PriceEnergyConsumed variable item");
             Assert.AreEqual(IdentifierKind.Variable, PriceDKREnergyConsumedItem.Identifierkind, " for PriceDKREnergyConsumed variable item");
 
-            IQuantity EnergyUnitPriceExpected = new Quantity(241.75, ((NamedUnit)OereItem).pu.Divide( SI.W * Prefix.k * SI.h));
-            IQuantity EnergyConsumedExpected = new Quantity( 1234.56, SI.W * Prefix.k * SI.h);
+            IQuantity EnergyUnitPriceExpected = new Quantity(241.75, ((NamedUnit)OereItem).pu.Divide( SI.W * Prefixes.k * SI.h));
+            IQuantity EnergyConsumedExpected = new Quantity( 1234.56, SI.W * Prefixes.k * SI.h);
             IQuantity PriceEnergyConsumedExpected = new Quantity(298454.88, ((NamedUnit)OereItem).pu);
             IQuantity PriceDKREnergyConsumedExpected = new Quantity(2984.5488, ((NamedUnit)DKRItem).pu);
             IQuantity AccumulatorExpected = new Quantity(2.4175 * 1234.56, ((NamedUnit)DKRItem).pu);
@@ -1100,8 +1100,10 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
         static void ShowPhysicalMeasureEval(ResultWriter ResultLineWriter, string str)
         {
-            ResultWriter singleLineWriter = new ResultWriter();
-            singleLineWriter.UseColors = false;
+            ResultWriter singleLineWriter = new ResultWriter()
+            {
+                UseColors = false
+            };
             string res = PhysicalExpressionEval(str, singleLineWriter);
             ResultLineWriter.WriteLine(str + " = " + res);
         }
@@ -1144,10 +1146,12 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         [TestMethod()]
         public void TestShowStartLines()
         {
-            ResultWriter ResultLineWriter = new ResultWriter();
-            ResultLineWriter.ResultLines = new List<string>(); 
+            ResultWriter ResultLineWriter = new ResultWriter()
+            {
+                ResultLines = new List<string>(),
 
-            ResultLineWriter.UseColors = false;
+                UseColors = false
+            };
             ShowStartLines(ResultLineWriter);
 
             if (ResultLineWriter.ResultLines.Count > 2)
@@ -1287,7 +1291,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.IsTrue(GetVarRes);
             Assert.AreEqual<IQuantity>( VarValueExpected, VarValue);
       
-            VarValueExpected = new Quantity(1224, new CombinedUnit() *  new PrefixedUnitExponent(Prefix.K, SI.m, 1) /SI.h);
+            VarValueExpected = new Quantity(1224, new CombinedUnit() *  new PrefixedUnitExponent(Prefixes.K, SI.m, 1) /SI.h);
             GetVarRes = target.VariableGet(target.CurrentContext, "SoundSpeedInKmPrHour", out VarValue, ref ResultLine);
             Assert.IsTrue(GetVarRes);
             Assert.AreEqual<IQuantity>( VarValueExpected, VarValue);

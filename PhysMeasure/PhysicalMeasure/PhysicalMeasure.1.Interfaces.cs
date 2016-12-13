@@ -499,6 +499,16 @@ namespace PhysicalMeasure
         Boolean ContainsSubUnitSystems(IEnumerable<IUnitSystem> unitsystems);
     }
 
+    public interface IUnitSystemUnitAcess 
+    {
+        BaseUnit[] BaseUnits { get; }
+        NamedDerivedUnit[] NamedDerivedUnits { get; }
+        ConvertibleUnit[] ConvertibleUnits { get; }
+
+        Unit Dimensionless { get; }
+
+    }
+
     #endregion Physical Measure Interfaces
 
 }
