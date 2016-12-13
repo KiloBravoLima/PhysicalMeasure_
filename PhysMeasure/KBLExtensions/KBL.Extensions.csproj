@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>KBL.Extensions</RootNamespace>
     <AssemblyName>KBL.Extensions</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SccProjectName>SAK</SccProjectName>
@@ -46,6 +46,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Nuget files3\AssemblyInfo.txt4" />
+    <None Include="Nuget files3\KBL.Extensions.nuspec">
+      <DependentUpon>AssemblyInfo.txt4</DependentUpon>
+    </None>
     <None Include="Properties\AssemblyInfo.txt4" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

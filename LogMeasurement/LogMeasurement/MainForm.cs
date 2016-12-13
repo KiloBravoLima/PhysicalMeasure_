@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 
@@ -28,7 +23,8 @@ namespace LogMeasurement
             // ListViewForm MDIChild_Measurements = CreateMDIChild(ListViewClass.Measurement, ListViewFormWindowState.Maximized);
 
             // Let the first MDI child fill out parent area.
-            ListViewForm firstMDIChild = CreateMDIChild(ListViewClass.All, ListViewFormWindowState.Maximized);
+            // ListViewForm firstMDIChild = CreateMDIChild(ListViewClass.All, ListViewFormWindowState.Maximized);
+            ListViewForm firstMDIChild = CreateMDIChild(ListViewClass.Measurement | ListViewClass.InternalError | ListViewClass.Unit, ListViewFormWindowState.Maximized);
 
             // Display the new form.
             // MDIChild_Units.Show();
@@ -50,7 +46,8 @@ namespace LogMeasurement
                 newMDIChild.WindowState = (FormWindowState)windowState;
             }
 
-            newMDIChild.ViewClass = viewClass;
+            newMDIChild.MeasurementsViewClass = viewClass & (ListViewClass.Measurement | ListViewClass.InternalError);
+            newMDIChild.UnitsViewClass = viewClass & ListViewClass.AnyUnitMask;
 
             return newMDIChild;
         }
@@ -59,7 +56,7 @@ namespace LogMeasurement
         {
             foreach (ListViewForm lwf in this.MdiChildren)
             {
-                if (lwf.ViewClass == viewClass)
+                if (lwf.UnitsViewClass == viewClass)
                 {
                     if (windowState != ListViewFormWindowState.Unspecified)
                     {
@@ -89,9 +86,9 @@ namespace LogMeasurement
 
         private void UpdateListViewFormsForClass(ListViewClass lwc)
         {
-            foreach (ListViewForm lwf in this.MdiChildren.Where(f => (((ListViewForm)f).ViewClass & lwc) != 0))
+            foreach (ListViewForm lwf in this.MdiChildren.Where(f => (((ListViewForm)f).UnitsViewClass & lwc) != 0))
             {
-                Debug.Assert((lwf.ViewClass & lwc) != 0);
+                Debug.Assert((lwf.UnitsViewClass & lwc) != 0);
                 lwf.Load_Data();
             }
         }

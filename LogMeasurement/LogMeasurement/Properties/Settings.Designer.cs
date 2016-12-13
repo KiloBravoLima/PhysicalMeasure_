@@ -27,37 +27,13 @@ namespace LogMeasurement.Properties {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
         [global::System.Configuration.DefaultSettingValueAttribute("Data Source=(LocalDB)\\v11.0;AttachDbFilename=\"E:\\Alle Brugere\\Klaus\\Programmering" +
-            "\\Visual Studio\\C#\\PhysicalMeasure\\LogMeasurement\\Database\\Measurements.mdf\";Inte" +
-            "grated Security=True;Connect Timeout=30")]
-        public string MeasurementsConnectionString {
-            get {
-                return ((string)(this["MeasurementsConnectionString"]));
-            }
-        }
+            "\\Visual Studio\\C#\\PhysicalMeasure\\LogMeasurement\\Database\\Measurements.mdf\";Integrated Security=True;Connect Timeout=30")]
+        public string MeasurementsConnectionString { get { return ((string)(this["MeasurementsConnectionString"])); } }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=SORTE-PC\\KBLSQL;Initial Catalog=MEASUREMENTS;Integrated Security=True" +
-            "")]
-        public string MEASUREMENTSConnectionStringNew {
-            get {
-                return ((string)(this["MEASUREMENTSConnectionStringNew"]));
-            }
-        }
-
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=(LocalDB)\\v12.0;AttachDbFilename=\"E:\\Alle Brugere\\Klaus\\Programmering" +
-            "\\Visual Studio\\C#\\PhysicalMeasure\\LogMeasurement\\Database\\Measurements.mdf\";Integrated Security=True;Connect Timeout=30")]
-        public string MeasurementsConnectionString2
-        {
-            get
-            {
-                return ((string)(this["MeasurementsConnectionString2"]));
-            }
-        }
-
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=SORTE-PC\\KBLSQL;Initial Catalog=MEASUREMENTS;Integrated Security=True")]
+        public string MEASUREMENTSConnectionStringNew { get { return ((string)(this["MEASUREMENTSConnectionStringNew"])); } }
     }
 }

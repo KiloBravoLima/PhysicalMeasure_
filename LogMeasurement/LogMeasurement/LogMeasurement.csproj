@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LogMeasurement</RootNamespace>
     <AssemblyName>LogMeasurement</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
@@ -48,10 +48,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>LogMeasurement.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EntityFramework">
-      <HintPath>..\packages\EntityFramework.5.0.0\lib\net45\EntityFramework.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.AspNetCore.Hosting.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNetCore.Hosting.Abstractions.1.0.0\lib\net451\Microsoft.AspNetCore.Hosting.Abstractions.dll</HintPath>
       <Private>True</Private>
@@ -68,28 +68,28 @@
       <HintPath>..\packages\Microsoft.AspNetCore.Http.Features.1.0.0\lib\net451\Microsoft.AspNetCore.Http.Features.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.EntityFrameworkCore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.EntityFrameworkCore.1.0.0\lib\net451\Microsoft.EntityFrameworkCore.dll</HintPath>
+    <Reference Include="Microsoft.EntityFrameworkCore, Version=1.0.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.EntityFrameworkCore.1.0.1\lib\net451\Microsoft.EntityFrameworkCore.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.EntityFrameworkCore.Design.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.EntityFrameworkCore.Design.Core.1.0.0-preview2-final\lib\net451\Microsoft.EntityFrameworkCore.Design.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.EntityFrameworkCore.Relational, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.EntityFrameworkCore.Relational.1.0.0\lib\net451\Microsoft.EntityFrameworkCore.Relational.dll</HintPath>
+    <Reference Include="Microsoft.EntityFrameworkCore.Relational, Version=1.0.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.EntityFrameworkCore.Relational.1.0.1\lib\net451\Microsoft.EntityFrameworkCore.Relational.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.EntityFrameworkCore.Relational.Design, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.EntityFrameworkCore.Relational.Design.1.0.0\lib\net451\Microsoft.EntityFrameworkCore.Relational.Design.dll</HintPath>
+    <Reference Include="Microsoft.EntityFrameworkCore.Relational.Design, Version=1.0.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.EntityFrameworkCore.Relational.Design.1.0.1\lib\net451\Microsoft.EntityFrameworkCore.Relational.Design.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.EntityFrameworkCore.SqlServer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.EntityFrameworkCore.SqlServer.1.0.0\lib\net451\Microsoft.EntityFrameworkCore.SqlServer.dll</HintPath>
+    <Reference Include="Microsoft.EntityFrameworkCore.SqlServer, Version=1.0.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.EntityFrameworkCore.SqlServer.1.0.1\lib\net451\Microsoft.EntityFrameworkCore.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.EntityFrameworkCore.SqlServer.Design, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.EntityFrameworkCore.SqlServer.Design.1.0.0\lib\net451\Microsoft.EntityFrameworkCore.SqlServer.Design.dll</HintPath>
+    <Reference Include="Microsoft.EntityFrameworkCore.SqlServer.Design, Version=1.0.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.EntityFrameworkCore.SqlServer.Design.1.0.1\lib\net451\Microsoft.EntityFrameworkCore.SqlServer.Design.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.EntityFrameworkCore.Tools, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
@@ -169,6 +169,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Transactions" />
+    <Reference Include="System.ValueTuple, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.0.0-rc3-24212-01\lib\netstandard1.1\System.ValueTuple.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -185,13 +189,16 @@
     <Compile Include="AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="DatabaseClasses.cs" />
+    <Compile Include="DataManagement\DataManagement.5.DatabaseModel.cs" />
+    <Compile Include="DataManagement\DataManagement.2.PersistableDataItems.cs" />
+    <Compile Include="DataManagement\DataManagement.DatabaseMapping.cs" />
+    <Compile Include="DataManagement\DataManagement.1.DataItems.cs" />
     <Compile Include="EFCoreCommandsAndComments.cs" />
-    <Compile Include="ListViewFoundation.cs" />
-    <Compile Include="ListViewForm.cs">
+    <Compile Include="DataViews\ListViewFoundation.cs" />
+    <Compile Include="DataViews\ListViewForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ListViewForm.Designer.cs">
+    <Compile Include="DataViews\ListViewForm.Designer.cs">
       <DependentUpon>ListViewForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainForm.cs">
@@ -200,58 +207,50 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Measurements.cs">
-      <DependentUpon>Measurements.dbml</DependentUpon>
-    </Compile>
-    <Compile Include="Measurements.designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Measurements.dbml</DependentUpon>
-    </Compile>
-    <Compile Include="DisplayableDataItem.cs" />
-    <Compile Include="Migrations\20160804232957_CreateDatabaseInstanceMigration_2016_08_05_01_30.cs" />
-    <Compile Include="Migrations\20160804232957_CreateDatabaseInstanceMigration_2016_08_05_01_30.designer.cs">
+    <Compile Include="DataManagement\DataManagement.3.DisplayableDataItem.cs" />
+    <Compile Include="DataManagement\Migrations\20160804232957_CreateDatabaseInstanceMigration_2016_08_05_01_30.cs" />
+    <Compile Include="DataManagement\Migrations\20160804232957_CreateDatabaseInstanceMigration_2016_08_05_01_30.designer.cs">
       <DependentUpon>20160804232957_CreateDatabaseInstanceMigration_2016_08_05_01_30.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\20160805020510_UpdateDatabaseForUnitExponents.cs" />
-    <Compile Include="Migrations\20160805020510_UpdateDatabaseForUnitExponents.designer.cs">
+    <Compile Include="DataManagement\Migrations\20160805020510_UpdateDatabaseForUnitExponents.cs" />
+    <Compile Include="DataManagement\Migrations\20160805020510_UpdateDatabaseForUnitExponents.designer.cs">
       <DependentUpon>20160805020510_UpdateDatabaseForUnitExponents.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\20160805034231_UpdateDatabaseForUnitIdInsert.cs" />
-    <Compile Include="Migrations\20160805034231_UpdateDatabaseForUnitIdInsert.designer.cs">
+    <Compile Include="DataManagement\Migrations\20160805034231_UpdateDatabaseForUnitIdInsert.cs" />
+    <Compile Include="DataManagement\Migrations\20160805034231_UpdateDatabaseForUnitIdInsert.designer.cs">
       <DependentUpon>20160805034231_UpdateDatabaseForUnitIdInsert.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\20160805035618_UpdateDatabaseForUnitIdInsert2.cs" />
-    <Compile Include="Migrations\20160805035618_UpdateDatabaseForUnitIdInsert2.designer.cs">
+    <Compile Include="DataManagement\Migrations\20160805035618_UpdateDatabaseForUnitIdInsert2.cs" />
+    <Compile Include="DataManagement\Migrations\20160805035618_UpdateDatabaseForUnitIdInsert2.designer.cs">
       <DependentUpon>20160805035618_UpdateDatabaseForUnitIdInsert2.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\20160828122354_UpdateDatabaseForUnitListElementIndex_2016_08_28_14_20.cs" />
-    <Compile Include="Migrations\20160828122354_UpdateDatabaseForUnitListElementIndex_2016_08_28_14_20.designer.cs">
+    <Compile Include="DataManagement\Migrations\20160828122354_UpdateDatabaseForUnitListElementIndex_2016_08_28_14_20.cs" />
+    <Compile Include="DataManagement\Migrations\20160828122354_UpdateDatabaseForUnitListElementIndex_2016_08_28_14_20.designer.cs">
       <DependentUpon>20160828122354_UpdateDatabaseForUnitListElementIndex_2016_08_28_14_20.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\20160828132212_MissingUnitsDiscriminator.cs" />
-    <Compile Include="Migrations\20160828132212_MissingUnitsDiscriminator.designer.cs">
+    <Compile Include="DataManagement\Migrations\20160828132212_MissingUnitsDiscriminator.cs" />
+    <Compile Include="DataManagement\Migrations\20160828132212_MissingUnitsDiscriminator.designer.cs">
       <DependentUpon>20160828132212_MissingUnitsDiscriminator.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\20160828145316_UpdateDatabaseForMeasurmentLoggedEventTimeStamps_2016_08_28_16_50.cs" />
-    <Compile Include="Migrations\20160828145316_UpdateDatabaseForMeasurmentLoggedEventTimeStamps_2016_08_28_16_50.designer.cs">
+    <Compile Include="DataManagement\Migrations\20160828145316_UpdateDatabaseForMeasurmentLoggedEventTimeStamps_2016_08_28_16_50.cs" />
+    <Compile Include="DataManagement\Migrations\20160828145316_UpdateDatabaseForMeasurmentLoggedEventTimeStamps_2016_08_28_16_50.designer.cs">
       <DependentUpon>20160828145316_UpdateDatabaseForMeasurmentLoggedEventTimeStamps_2016_08_28_16_50.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\LoggingContextModelSnapshot.cs" />
+    <Compile Include="DataManagement\Migrations\LoggingContextModelSnapshot.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <DependentUpon>AssemblyInfo.txt4</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ListViewForm.resx">
+    <EmbeddedResource Include="DataViews\ListViewForm.resx">
       <DependentUpon>ListViewForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="Measurements.dbml.layout">
-      <DependentUpon>Measurements.dbml</DependentUpon>
-    </None>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -262,12 +261,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="Measurements.dbml">
-      <Generator>MSLinqToSQLGenerator</Generator>
-      <LastGenOutput>Measurements.designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
+    <None Include="Properties\AssemblyInfo.txt4" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

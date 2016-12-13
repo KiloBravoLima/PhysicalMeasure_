@@ -73,7 +73,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void BaseUnitToStringTest()
         {
-            Unit u = (Unit)(Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Unit u = (Unit)(SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             String expected = "Kg";
 
@@ -88,7 +88,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitToStringTest()
         {
-            Unit u = (Unit)(Physics.SI_Units.NamedDerivedUnits[5]);
+            Unit u = (Unit)(SI.Units.NamedDerivedUnits[5]);
 
             String expected = "J";
 
@@ -103,7 +103,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void DerivedUnitToStringTest()
         {
-            Unit MeterPerSecond2 = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+            Unit MeterPerSecond2 = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
 
             //String expected = "SI.m·s-2";
             String expected = "m·s-2";
@@ -121,7 +121,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void DerivedUnitBaseUnitStringTest()
         {
-            Unit MeterPerSecond2 = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+            Unit MeterPerSecond2 = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
 
             String expected = "m·s-2";
 
@@ -140,7 +140,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitBaseUnitStringTest()
         {
-            IUnit Watt = Physics.SI_Units.NamedDerivedUnits[6];
+            IUnit Watt = SI.Units.NamedDerivedUnits[6];
 
             String expected = "1 m2·Kg·s-3";
 
@@ -155,7 +155,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitReducedUnitStringTest()
         {
-            IUnit Watt = Physics.SI_Units["W"];
+            IUnit Watt = SI.W;
 
             String expected = "W";
 
@@ -171,7 +171,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void MixedUnitBaseUnitStringTest()
         {
-            IUnit HourMin= new MixedUnit((Unit)Physics.SI_Units["h"], ":",  (Unit)Physics.MGD_Units["min"]);
+            IUnit HourMin= new MixedUnit((Unit)SI.Units["h"], ":",  (Unit)MGD_Units.Units["min"]);
 
             String expected = "3600 s";
 
@@ -191,10 +191,10 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_MultBaseunitAndDerivedUnitTest()
         {
-            Unit pu1 = (Unit)Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)];
-            Unit pu2 = (Unit)Physics.SI_Units.UnitFromSymbol("J"); // m2∙kg∙s−2
+            Unit pu1 = (Unit)SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)];
+            Unit pu2 = (Unit)SI.Units.UnitFromSymbol("J"); // m2∙kg∙s−2
 
-            Unit expected = new DerivedUnit(Physics.SI_Units, new SByte[] { 2, 2, -2, 0, 0, 0, 0 });
+            Unit expected = new DerivedUnit(SI.Units, new SByte[] { 2, 2, -2, 0, 0, 0, 0 });
 
             Unit actual = pu1 * pu2;
             Assert.AreEqual(expected, actual);
@@ -206,10 +206,10 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_DivBaseunitAndDerivedUnitTest()
         {
-            Unit pu1 = (Unit)Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)];
-            Unit pu2 = (Unit)Physics.SI_Units.UnitFromSymbol("J"); // m2∙kg∙s−2
+            Unit pu1 = (Unit)SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)];
+            Unit pu2 = (Unit)SI.Units.UnitFromSymbol("J"); // m2∙kg∙s−2
 
-            Unit expected = new DerivedUnit(Physics.SI_Units, new SByte[] { -2, 0, 2, 0, 0, 0, 0 });
+            Unit expected = new DerivedUnit(SI.Units, new SByte[] { -2, 0, 2, 0, 0, 0, 0 });
 
             Unit actual = pu1 / pu2;
             Assert.AreEqual(expected, actual);
@@ -221,10 +221,10 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_DivDerivedunitAndBaseUnitTest()
         {
-            Unit pu1 = (Unit)Physics.SI_Units.UnitFromSymbol("J"); // m2∙kg∙s−2
-            Unit pu2 = (Unit)Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)];
+            Unit pu1 = (Unit)SI.Units.UnitFromSymbol("J"); // m2∙kg∙s−2
+            Unit pu2 = (Unit)SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)];
 
-            Unit expected = new DerivedUnit(Physics.SI_Units, new SByte[] { 2, 0, -2, 0, 0, 0, 0 });
+            Unit expected = new DerivedUnit(SI.Units, new SByte[] { 2, 0, -2, 0, 0, 0, 0 });
 
             Unit actual = pu1 / pu2;
             Assert.AreEqual(expected, actual);
@@ -236,9 +236,9 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_PowerOfBaseUnit()
         {
-            Unit pu = (Unit)Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Length)];
+            Unit pu = (Unit)SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Length)];
 
-            Unit expected = new DerivedUnit(Physics.SI_Units, new SByte[] { 3, 0, 0, 0, 0, 0, 0 });
+            Unit expected = new DerivedUnit(SI.Units, new SByte[] { 3, 0, 0, 0, 0, 0, 0 });
 
             IUnit actual = pu ^ 3;
             Assert.AreEqual(expected, actual);
@@ -250,9 +250,9 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_PowerOfDerivedUnitTest()
         {
-            Unit pu = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
+            Unit pu = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
 
-            Unit expected = new DerivedUnit(Physics.SI_Units, new SByte[] { 3, 0, -3, 0, 0, 0, 0 });
+            Unit expected = new DerivedUnit(SI.Units, new SByte[] { 3, 0, -3, 0, 0, 0, 0 });
 
             IUnit actual = pu ^ 3;
             Assert.AreEqual(expected, actual);
@@ -264,9 +264,9 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_RootOfDerivedUnitTest()
         {
-            Unit pu = new DerivedUnit(Physics.SI_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit pu = new DerivedUnit(SI.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
-            Unit expected = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+            Unit expected = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
 
             IUnit actual = pu % 2;
             Assert.AreEqual(expected, actual);
@@ -278,7 +278,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_KmPrHourUnitTest()
         {
-            Quantity KmPrHour_example1 = Prefix.K * SI.m / SI.h;
+            Quantity KmPrHour_example1 = Prefixes.K * SI.m / SI.h;
 
             Quantity Speed1 = 123 * KmPrHour_example1;
 
@@ -314,7 +314,7 @@ namespace PhysicalMeasureTest
             Unit WattHour_example2 = new ConvertibleUnit("WattHour", "Wh", SI.J, new ScaledValueConversion(1.0 / 3600)); /* [Wh] = 1/3600 * [J] */
 
             Quantity E_1 = new Quantity(1, WattHour_example1 ); // 1 Wh
-            Quantity E_2 = new Quantity(0.001, Prefix.K * WattHour_example2); // 0.001 KWh
+            Quantity E_2 = new Quantity(0.001, Prefixes.K * WattHour_example2); // 0.001 KWh
             //IQuantity actual_1 = E_1.ConvertTo(SI.J);
             //IQuantity actual_2 = E_2.ConvertTo(SI.J);
 
@@ -330,7 +330,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void MultNumberWithUnitTest_KiloMeter()
         {
-            Unit Km = Prefix.K * SI.m;
+            Unit Km = Prefixes.K * SI.m;
             Quantity len = new Quantity(123, Km);
             Quantity len2 = 123 * Km;
 
@@ -366,12 +366,12 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitConvertToUnitSystemMGD()
         {
-            Unit pu = new DerivedUnit(Physics.SI_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit pu = new DerivedUnit(SI.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
-            Unit expectedunit = new DerivedUnit(Physics.MGD_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit expectedunit = new DerivedUnit(MGD_Units.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
             Quantity expected = new Quantity(1/Math.Pow(24*60*60, -4), expectedunit);
 
-            IQuantity actual = pu.ConvertTo(Physics.MGD_Units);
+            IQuantity actual = pu.ConvertTo(MGD_Units.Units);
             Assert.AreEqual(expected, actual);
         }
 
@@ -381,12 +381,12 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitConvertToUnitSystemSI()
         {
-            Unit pu = new DerivedUnit(Physics.SI_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit pu = new DerivedUnit(SI.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
-            Unit expectedunit = new DerivedUnit(Physics.MGD_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit expectedunit = new DerivedUnit(MGD_Units.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
             Quantity expected = new Quantity(1 / Math.Pow(24 * 60 * 60, -4), expectedunit);
 
-            IQuantity actual = pu.ConvertTo(Physics.MGD_Units);
+            IQuantity actual = pu.ConvertTo(MGD_Units.Units);
             Assert.AreEqual(expected, actual);
         }
 
@@ -396,9 +396,9 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitConvertToMGDUnit()
         {
-            Unit pu = new DerivedUnit(Physics.SI_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit pu = new DerivedUnit(SI.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
-            Unit expectedunit = new DerivedUnit(Physics.MGD_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit expectedunit = new DerivedUnit(MGD_Units.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
             Quantity expected = new Quantity(1/Math.Pow(24 * 60 * 60, -4), expectedunit);
 
             IQuantity actual = pu.ConvertTo(expectedunit);
@@ -413,9 +413,9 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitConvertToSIUnit()
         {
-            Unit pu = new DerivedUnit(Physics.MGD_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit pu = new DerivedUnit(MGD_Units.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
-            Unit expectedunit = new DerivedUnit(Physics.SI_Units, pu.Exponents);
+            Unit expectedunit = new DerivedUnit(SI.Units, pu.Exponents);
             Quantity expected = new Quantity( Math.Pow(24 * 60 * 60, -4), expectedunit);
 
             IQuantity actual = pu.ConvertTo(expectedunit);
@@ -431,15 +431,14 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitConvertToThroughOtherUnitSystems()
         {
-            Unit pu = new DerivedUnit(Physics.MGM_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit pu = new DerivedUnit(MGM_Units.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
-            Unit expectedunit = new DerivedUnit(Physics.CGS_Units, pu.Exponents);
+            Unit expectedunit = new DerivedUnit(CGS_Units.Units, pu.Exponents);
             Quantity expected = new Quantity(Math.Pow(100, 2) * Math.Pow(24 * 60 * 60, -4) / Math.Pow(10000, -4), expectedunit);
 
             IQuantity actual = pu.ConvertTo(expectedunit);
             Assert.AreEqual(expected, actual);
         }
-
 
 
         /// <summary>
@@ -448,9 +447,9 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitReversedConvertToThroughOtherUnitSystems()
         {
-            Unit pu = new DerivedUnit(Physics.CGS_Units , new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit pu = new DerivedUnit(CGS_Units.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
-            Unit expectedunit = new DerivedUnit(Physics.MGM_Units, pu.Exponents);
+            Unit expectedunit = new DerivedUnit(MGM_Units.Units, pu.Exponents);
             Quantity expected = new Quantity(1D / (Math.Pow(100, 2) * Math.Pow(24 * 60 * 60, -4) / Math.Pow(10000, -4)), expectedunit);
 
             IQuantity actual = pu.ConvertTo(expectedunit);
@@ -464,9 +463,9 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitReversedConvertToThroughOtherUnitSystems2()
         {
-            Unit pu = new DerivedUnit(Physics.CGS_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit pu = new DerivedUnit(CGS_Units.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
-            Unit expectedunit = new DerivedUnit(Physics.MGM_Units, pu.Exponents);
+            Unit expectedunit = new DerivedUnit(MGM_Units.Units, pu.Exponents);
             
             // VS fails Quantity expected = 1D / new Quantity( (Math.Pow(100, 2) * Math.Pow(24 * 60 * 60, -4) / Math.Pow(10000, -4)), 1D/expectedunit);
             Quantity expected = new Quantity(1D / (Math.Pow(100, 2) * Math.Pow(24 * 60 * 60, -4) / Math.Pow(10000, -4)), expectedunit);
@@ -482,9 +481,9 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitReversedConvertToThroughOtherUnitSystems2SquareOperator()
         {
-            Unit pu = new DerivedUnit(Physics.CGS_Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
+            Unit pu = new DerivedUnit(CGS_Units.Units, new SByte[] { 2, 0, -4, 0, 0, 0, 0 });
 
-            Unit expectedunit = new DerivedUnit(Physics.MGM_Units, pu.Exponents);
+            Unit expectedunit = new DerivedUnit(MGM_Units.Units, pu.Exponents);
 
             // VS fails Quantity expected = 1D / new Quantity( (Math.Pow(100, 2) * Math.Pow(24 * 60 * 60, -4) / Math.Pow(10000, -4)), 1D/expectedunit);
             Quantity expected = new Quantity(1D / (Math.Pow(100, 2) * Math.Pow(24 * 60 * 60, -4) / Math.Pow(10000, -4)), expectedunit);
@@ -505,7 +504,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void BaseUnitTestBaseUnitNumberAccessMass()
         {
-            BaseUnit u = (BaseUnit)(Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            BaseUnit u = (BaseUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             SByte expected = 1;
 
@@ -520,7 +519,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void BaseUnitTestBaseUnitNumberAccessLuminousIntensity()
         {
-            BaseUnit u = (BaseUnit)(Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.LuminousIntensity)]);
+            BaseUnit u = (BaseUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.LuminousIntensity)]);
 
             SByte expected = 6;
 
@@ -536,7 +535,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void BaseUnitTestNameAccessMass()
         {
-            BaseUnit u = (BaseUnit)(Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            BaseUnit u = (BaseUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             String expected = "kilogram";
 
@@ -617,10 +616,10 @@ namespace PhysicalMeasureTest
             String s = "123.000 mg"; 
             NumberStyles styles = NumberStyles.Float;
             IFormatProvider provider = NumberFormatInfo.InvariantInfo;
-            //IQuantity expected = (IQuantity)(new Quantity(0.000123, (IUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)])));
-            //IQuantity expected = (IQuantity)(new Quantity(123, (IUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(-3, PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.Mass)], 1)))));
-            //IQuantity expected = (IQuantity)(new Quantity(123, (IUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(-3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("g"), 1)))));
-            IQuantity expected = new Quantity(123, new CombinedUnit(new PrefixedUnitExponent(Prefix.m, Physics.SI_Units.UnitFromSymbol("g"), 1)));
+            //IQuantity expected = (IQuantity)(new Quantity(0.000123, (IUnit)(PhysicalMeasure.SI.Units.BaseUnits[(int)(MeasureKind.Mass)])));
+            //IQuantity expected = (IQuantity)(new Quantity(123, (IUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(-3, PhysicalMeasure.SI.Units.BaseUnits[(int)(MeasureKind.Mass)], 1)))));
+            //IQuantity expected = (IQuantity)(new Quantity(123, (IUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(-3, PhysicalMeasure.SI.Units.UnitFromSymbol("g"), 1)))));
+            IQuantity expected = new Quantity(123, new CombinedUnit(new PrefixedUnitExponent(Prefixes.m, SI.Units.UnitFromSymbol("g"), 1)));
             IQuantity actual;
             actual = Quantity.Parse(s, styles, provider);
             Assert.AreEqual(expected, actual);
@@ -638,8 +637,8 @@ namespace PhysicalMeasureTest
         public void TestMilligramEqualKilogram()
         {
             //String s = "123.000 mg";
-            IQuantity InKiloGram = new Quantity(0.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]); // In kilogram
-            IQuantity InMilliGram = new Quantity(123, new CombinedUnit(new PrefixedUnitExponent(Prefix.m, Physics.SI_Units.UnitFromSymbol("g"), 1))); // In milli gram
+            IQuantity InKiloGram = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]); // In kilogram
+            IQuantity InMilliGram = new Quantity(123, new CombinedUnit(new PrefixedUnitExponent(Prefixes.m, SI.Units.UnitFromSymbol("g"), 1))); // In milli gram
 
             Assert.AreEqual(InKiloGram, InMilliGram);
         }
@@ -653,11 +652,11 @@ namespace PhysicalMeasureTest
             //String s = "594.15 mK";
             //String s = "3.21 K°C";
             /*
-            IQuantity InMilliKelvin = (IQuantity)(new Quantity(321273.15, (IUnit)(PhysicalMeasure.Physics.SI_Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)]))); // In Kelvin
-            IQuantity InKiloCelsius = (IQuantity)(new Quantity(321, (IUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(3, PhysicalMeasure.Physics.SI_Units.UnitFromSymbol("°C"), 1))))); // In Kilo Celsius
+            IQuantity InMilliKelvin = (IQuantity)(new Quantity(321273.15, (IUnit)(PhysicalMeasure.SI.Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)]))); // In Kelvin
+            IQuantity InKiloCelsius = (IQuantity)(new Quantity(321, (IUnit)(new PhysicalMeasure.CombinedUnit(new PrefixedUnitExponent(3, PhysicalMeasure.SI.Units.UnitFromSymbol("°C"), 1))))); // In Kilo Celsius
             */
-            IQuantity InMilliKelvin = new Quantity(321273.15, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.ThermodynamicTemperature)]); // In Kelvin
-            IQuantity InKiloCelsius = new Quantity(321, new CombinedUnit(new PrefixedUnitExponent(Prefix.k, Physics.SI_Units.UnitFromSymbol("°C"), 1))); // In Kilo Celsius
+            IQuantity InMilliKelvin = new Quantity(321273.15, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.ThermodynamicTemperature)]); // In Kelvin
+            IQuantity InKiloCelsius = new Quantity(321, new CombinedUnit(new PrefixedUnitExponent(Prefixes.k, SI.Units.UnitFromSymbol("°C"), 1))); // In Kilo Celsius
 
             Assert.AreEqual(InMilliKelvin, InKiloCelsius);
         }
@@ -669,9 +668,9 @@ namespace PhysicalMeasureTest
         public void TestAdd2KelvinWithCelsiusSpecificConversion2()
         {
 
-            IQuantity InMilliKelvin = new Quantity(321273150, new CombinedUnit(new PrefixedUnitExponent(Prefix.m, Physics.SI_Units.UnitFromSymbol("K"), 1))); // In miliKelvin
-            IQuantity InKelvin      = new Quantity(321273.15, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.ThermodynamicTemperature)]); // In Kelvin
-            IQuantity InKiloCelsius = new Quantity(321, new CombinedUnit(new PrefixedUnitExponent(Prefix.K, Physics.SI_Units.UnitFromSymbol("°C"), 1))); // In Kilo Celsius
+            IQuantity InMilliKelvin = new Quantity(321273150, new CombinedUnit(new PrefixedUnitExponent(Prefixes.m, SI.Units.UnitFromSymbol("K"), 1))); // In miliKelvin
+            IQuantity InKelvin      = new Quantity(321273.15, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.ThermodynamicTemperature)]); // In Kelvin
+            IQuantity InKiloCelsius = new Quantity(321, new CombinedUnit(new PrefixedUnitExponent(Prefixes.K, SI.Units.UnitFromSymbol("°C"), 1))); // In Kilo Celsius
 
             // Check all quantities in all combinations as first and second:
             Assert.AreEqual(InMilliKelvin, InKelvin, "(InMilliKelvin, InKelvin)");
@@ -789,8 +788,8 @@ namespace PhysicalMeasureTest
         public void QuantityOfConvertibleUnitBasedOnDerivedUnitConvertToDerivedUnit_Wh()
         {
             Unit Wh = new ConvertibleUnit("WattHour", "Wh", SI.J, new ScaledValueConversion(1.0/3600)); /* [Wh] = 1/3600 * [J] */
-            Quantity E_1 = new Quantity(1, Prefix.K * Wh);
-            Quantity E_2 = new Quantity(0.001, Prefix.M * Wh);
+            Quantity E_1 = new Quantity(1, Prefixes.K * Wh);
+            Quantity E_2 = new Quantity(0.001, Prefixes.M * Wh);
             IQuantity actual_1 = E_1.ConvertTo(SI.J);
             IQuantity actual_2 = E_2.ConvertTo(SI.J);
 
@@ -860,10 +859,10 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_CompareOperatorEqualsTest()
         {
-            Quantity pg1 = new Quantity(0.000123, (Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]));
-            Quantity pg2 = new Quantity(456, (Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]));
+            Quantity pg1 = new Quantity(0.000123, (SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]));
+            Quantity pg2 = new Quantity(456, (SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]));
 
-            Quantity expected = new Quantity(456.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity expected = new Quantity(456.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             IQuantity actual = pg1 + pg2;
 
@@ -876,10 +875,10 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_CompareOperatorNotEqualsTest()
         {
-            Quantity pg1 = new Quantity(0.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
-            Quantity pg2 = new Quantity(456, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg1 = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg2 = new Quantity(456, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
-            Quantity expected = new Quantity(456.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity expected = new Quantity(456.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             IQuantity actual = pg1 + pg2;
 
@@ -892,8 +891,8 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_CompareOperatorLessTest()
         {
-            Quantity pg1 = new Quantity(0.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
-            Quantity pg2 = new Quantity(456, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg1 = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg2 = new Quantity(456, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             Assert.IsTrue(pg1 < pg2);
         }
@@ -904,8 +903,8 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_CompareOperatorLessOrEqualsTest()
         {
-            Quantity pg1 = new Quantity(0.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
-            Quantity pg2 = new Quantity(456, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg1 = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg2 = new Quantity(456, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             Assert.IsTrue(pg1 <= pg2);
         }
@@ -916,8 +915,8 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_CompareOperatorLargerTest()
         {
-            Quantity pg1 = new Quantity(0.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
-            Quantity pg2 = new Quantity(456, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg1 = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg2 = new Quantity(456, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             Assert.IsFalse(pg1 > pg2);
         }
@@ -928,8 +927,8 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_CompareOperatorLargerOrEqualTest()
         {
-            Quantity pg1 = new Quantity(0.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
-            Quantity pg2 = new Quantity(456, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg1 = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg2 = new Quantity(456, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             Assert.IsFalse(pg1 > pg2);
         }
@@ -944,10 +943,10 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void AddKiloGramToMilliGram()
         {
-            Quantity pg1 = new Quantity(0.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
-            Quantity pg2 = new Quantity(456, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg1 = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg2 = new Quantity(456, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
-            Quantity expected = new Quantity(456.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity expected = new Quantity(456.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             IQuantity actual = pg1 + pg2;
             Assert.AreEqual(expected, actual);
@@ -959,10 +958,10 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void SubKiloGramFromMilliGram()
         {
-            Quantity pg1 = new Quantity(0.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
-            Quantity pg2 = new Quantity(789, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg1 = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg2 = new Quantity(789, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
-            Quantity expected = new Quantity(0.000123- 789, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity expected = new Quantity(0.000123- 789, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             Quantity actual = pg1 - pg2;
             Assert.AreEqual(expected, actual);
@@ -975,10 +974,10 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void MultKiloGramToMilliGram()
         {
-            Quantity pg1 = new Quantity(0.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
-            Quantity pg2 = new Quantity(456, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg1 = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg2 = new Quantity(456, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
-            Unit MassSquared = new DerivedUnit(Physics.SI_Units, new SByte[] { 0, 2, 0, 0, 0, 0, 0 });
+            Unit MassSquared = new DerivedUnit(SI.Units, new SByte[] { 0, 2, 0, 0, 0, 0, 0 });
 
             Quantity expected = new Quantity(0.000123 * 456 , MassSquared);
 
@@ -992,8 +991,8 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void DivKiloGramFromMilliGram()
         {
-            Quantity pg1 = new Quantity(0.000123, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
-            Quantity pg2 = new Quantity(789, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg1 = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity pg2 = new Quantity(789, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
             Quantity expected = new Quantity(0.000123 / 789, Physics.dimensionless);
 
@@ -1007,12 +1006,12 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void PowerOperatorCalculateEnergyIn1Gram()
         {
-            Quantity m = new Quantity(0.001, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity m = new Quantity(0.001, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
-            Unit MeterPerSecond = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
+            Unit MeterPerSecond = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
             Quantity c = new Quantity(299792458, MeterPerSecond);
 
-            Quantity expected = new Quantity(0.001 * 299792458 * 299792458, Physics.SI_Units.UnitFromSymbol("J"));
+            Quantity expected = new Quantity(0.001 * 299792458 * 299792458, SI.Units.UnitFromSymbol("J"));
 
             Quantity E = m * c.Pow(2);
             Assert.AreEqual(expected, E);
@@ -1029,10 +1028,10 @@ namespace PhysicalMeasureTest
             Quantity h = Quantity.Parse("10 m") as Quantity;
 
             //!!! To do: make this work: Quantity g = Quantity.Parse("9.81 m/s^2");
-            Unit MeterPerSecond2 = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+            Unit MeterPerSecond2 = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
             Quantity g = new Quantity(9.81, MeterPerSecond2);
 
-            Quantity expected = new Quantity(0.001 * 9.81 * 10, Physics.SI_Units.UnitFromSymbol("J"));
+            Quantity expected = new Quantity(0.001 * 9.81 * 10, SI.Units.UnitFromSymbol("J"));
 
             Quantity E = m * g * h;
 
@@ -1050,7 +1049,7 @@ namespace PhysicalMeasureTest
 
             Quantity g = Quantity.Parse("9.81 m/s^2");
 
-            Quantity expected = new Quantity(0.001 * 9.81 * 10, Physics.SI_Units.UnitFromSymbol("J"));
+            Quantity expected = new Quantity(0.001 * 9.81 * 10, SI.Units.UnitFromSymbol("J"));
 
             Quantity E = m * g * h;
 
@@ -1128,7 +1127,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void BaseUnitQuantityToStringTest()
         {
-            Quantity pq = new Quantity(123.4, Physics.SI_Units.UnitFromSymbol("Kg"));
+            Quantity pq = new Quantity(123.4, SI.Units.UnitFromSymbol("Kg"));
 
             //String expected = (123.4).ToString()+" SI.Kg";
             //String expected = (123.4).ToString(CultureInfo.InvariantCulture) + " Kg";
@@ -1145,7 +1144,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitQuantityToStringTest()
         {
-            Quantity pq = new Quantity(0.001 * 9.81 * 10, Physics.SI_Units.UnitFromSymbol("J"));
+            Quantity pq = new Quantity(0.001 * 9.81 * 10, SI.Units.UnitFromSymbol("J"));
 
             //String expected = (0.0981).ToString()+" SI.J";
             //String expected = (0.0981).ToString(CultureInfo.InvariantCulture) + " J";
@@ -1162,7 +1161,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void DerivedUnitQuantityToStringTest()
         {
-            Quantity pq = new Quantity(0.00987654321, new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 }));
+            Quantity pq = new Quantity(0.00987654321, new DerivedUnit(SI.Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 }));
 
             //String expected = (0.00987654321).ToString() + " SI.ms-2";
             //String expected = (0.00987654321).ToString(CultureInfo.InvariantCulture) + " m·s-2";
@@ -1185,7 +1184,7 @@ namespace PhysicalMeasureTest
         public void QuantityTest_QuantityGeVTest()
         {
 
-            Quantity GeV = Prefix.G * (Constants.e * SI.V);
+            Quantity GeV = Prefixes.G * (Constants.e * SI.V);
 
             Quantity GeVPowMinus2 = GeV ^ -2;
             Quantity GF = new Quantity(1.16639E-5 * GeVPowMinus2.Value, GeVPowMinus2.Unit);
@@ -1207,12 +1206,12 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void QuantityTest_QuantityFunctionTest()
         {
-            Quantity m = new Quantity(0.001, Physics.SI_Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity m = new Quantity(0.001, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
 
-            Unit MeterPerSecond = new DerivedUnit(Physics.SI_Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
+            Unit MeterPerSecond = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -1, 0, 0, 0, 0 });
             Quantity c = new Quantity(299792458, MeterPerSecond);
 
-            Quantity expected = new Quantity(0.001 * 299792458 * 299792458, Physics.SI_Units.UnitFromSymbol("J"));
+            Quantity expected = new Quantity(0.001 * 299792458 * 299792458, SI.Units.UnitFromSymbol("J"));
 
             Quantity E = EnergyEquivalentOfMass(m);
             Assert.AreEqual(expected, E);
@@ -1226,7 +1225,7 @@ namespace PhysicalMeasureTest
         public void QuantityHectoLitreTest()
         {
 
-            Unit cubicmeter = new NamedDerivedUnit(Physics.SI_Units, "cubicmeter", "m3", new SByte[] { 3, 0, 0, 0, 0, 0, 0 });
+            Unit cubicmeter = new NamedDerivedUnit(SI.Units, "cubicmeter", "m3", new SByte[] { 3, 0, 0, 0, 0, 0, 0 });
 
             // Unit hl = new ConvertibleUnit("hectolitre", "hl", SI.m3, new ScaledValueConversion(1/10));
             //Unit kWh = (Unit)new ConvertibleUnit("kiloWattHour", "kWh", Wh, new ScaledValueConversion(1.0 / 1000)); /* [kWh] = 1/1000 * [Wh] */
@@ -1237,7 +1236,7 @@ namespace PhysicalMeasureTest
             //IQuantity hektoLiterIncubicmeters = _10_hectolitre.ConvertTo(SI.m3);
             IQuantity _10_hektoLiterIncubicmeters = _10_hectolitre.ConvertTo(cubicmeter);
 
-            Quantity expected = new Quantity(1, Physics.SI_Units.UnitFromSymbol("m").Pow(3));
+            Quantity expected = new Quantity(1, SI.Units.UnitFromSymbol("m").Pow(3));
             Assert.AreEqual(expected, _10_hektoLiterIncubicmeters);
         }
 
