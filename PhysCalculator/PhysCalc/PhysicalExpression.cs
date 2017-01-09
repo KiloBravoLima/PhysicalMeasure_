@@ -180,8 +180,7 @@ namespace PhysicalCalculator.Expression
         public static Boolean FunctionGet(IEnvironment lookInContext, String functionName, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine)
         {
             functionResult = null;
-            IFunctionEvaluator functionevaluator;
-            if (FunctionLookupCallback(lookInContext, functionName, out functionevaluator))
+            if (FunctionLookupCallback(lookInContext, functionName, out var functionevaluator))
             {
                 if (FunctionEvaluateCallback != null)
                 {
@@ -222,8 +221,7 @@ namespace PhysicalCalculator.Expression
             List<String> TempExpectedFollow = ExpectedFollow;
             if (!TempExpectedFollow.Contains(","))
             {
-                TempExpectedFollow = new List<string>(ExpectedFollow);
-                TempExpectedFollow.Add(","); 
+                TempExpectedFollow = new List<string>(ExpectedFollow) { "," };
             }
             do
             {
@@ -264,8 +262,7 @@ namespace PhysicalCalculator.Expression
             List<String> TempExpectedFollow = ExpectedFollow;
             if (!TempExpectedFollow.Contains("["))
             {
-                TempExpectedFollow = new List<string>(ExpectedFollow);
-                TempExpectedFollow.Add("[");
+                TempExpectedFollow = new List<string>(ExpectedFollow) { "[" };
             }
             pq = ParseExpression(ref commandLine, ref resultLine, TempExpectedFollow);
             if (pq != null)
@@ -349,8 +346,7 @@ namespace PhysicalCalculator.Expression
                         UnitString = commandLine.Substring(0, UnitStringLen);
                     }
 
-                    String DimToken;
-                    UnitString.Trim().ReadToken(out DimToken);
+                    UnitString.Trim().ReadToken(out var DimToken);
                     if (   DimToken.Equals("base", StringComparison.InvariantCultureIgnoreCase) 
                         || DimToken.Equals("dim", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -380,20 +376,20 @@ namespace PhysicalCalculator.Expression
             UnaryOperator = 3 */
         }
 
-        class token
+        class Token
         {
             public readonly TokenKind TokenKind;
 
             public readonly Quantity Operand;
             public readonly OperatorKind Operator;
 
-            public token(Quantity Operand)
+            public Token(Quantity Operand)
             {
                 this.TokenKind = TokenKind.Operand;
                 this.Operand = Operand;
             }
 
-            public token(OperatorKind Operator)
+            public Token(OperatorKind Operator)
             {
                 this.TokenKind = TokenKind.Operator;
                 this.Operator = Operator;
@@ -402,7 +398,7 @@ namespace PhysicalCalculator.Expression
             public override string ToString() => TokenKind.ToString() + (TokenKind == TokenKind.None ? "" : " " + (TokenKind == TokenKind.Operand ? Operand.ToString() : Operator.ToString()));
         }
 
-        class expressiontokenizer
+        class ExpressionTokenizer
         {
             public String InputString;
             public String ResultString;
@@ -420,17 +416,17 @@ namespace PhysicalCalculator.Expression
 
 
             private Stack<OperatorKind> Operators = new Stack<OperatorKind>();
-            private List<token> Tokens = new List<token>();
+            private List<Token> Tokens = new List<Token>();
 
             TokenKind LastReadToken = TokenKind.None;
             int ParenCount = 0;
 
-            public expressiontokenizer(String InputString)
+            public ExpressionTokenizer(String InputString)
             {
                 this.InputString = InputString;
             }
 
-            public expressiontokenizer(Unit dimensionless, String InputString)
+            public ExpressionTokenizer(Unit dimensionless, String InputString)
             {
                 this.dimensionless = dimensionless;
                 this.InputString = InputString;
@@ -474,7 +470,7 @@ namespace PhysicalCalculator.Expression
                                               && (NewOperatorPrecedence != OperatorKind.unaryplus)));
                             if (KeepPoping)
                             {
-                                Tokens.Add(new token(Operators.Pop()));
+                                Tokens.Add(new Token(Operators.Pop()));
                             }
                         }
                     }
@@ -536,7 +532,7 @@ namespace PhysicalCalculator.Expression
                     OperatorKind temp = Operators.Pop();
                     while (temp != OperatorKind.parenbegin)
                     {
-                        Tokens.Add(new token(temp));
+                        Tokens.Add(new Token(temp));
                         temp = Operators.Pop();
                     }
 
@@ -548,9 +544,9 @@ namespace PhysicalCalculator.Expression
             }
 
 
-            private token RemoveFirstToken()
+            private Token RemoveFirstToken()
             {   // return first operator from post fix operators
-                token Token = Tokens[0];
+                Token Token = Tokens[0];
                 Tokens.RemoveAt(0);
 
                 return Token;
@@ -586,7 +582,7 @@ namespace PhysicalCalculator.Expression
                 InvalidPhysicalExpressionFormatErrorReported = true;
             }
 
-            public token GetToken()
+            public Token GetToken()
             {
                 Debug.Assert(InputString != null);
 
@@ -669,12 +665,10 @@ namespace PhysicalCalculator.Expression
                             }
                             else
                             {
-                                Double D;
-
                                 String CommandLine = RemainingInput;
                                 int OldLen = CommandLine.Length;
                                 String ResultLine = "";
-                                Boolean OK = ParseDouble(ref CommandLine, ref ResultLine, out D);
+                                Boolean OK = ParseDouble(ref CommandLine, ref ResultLine, out var D);
                                 Pos += OldLen - CommandLine.Length;
                                 if (OK)
                                 {
@@ -698,7 +692,7 @@ namespace PhysicalCalculator.Expression
                                     Quantity pq = new Quantity(D, pu);
 
                                     LastReadToken = TokenKind.Operand;
-                                    return new token(pq);
+                                    return new Token(pq);
                                 }
 
                                 // End of recognized input; Stop reading and return operator tokens from stack.
@@ -707,15 +701,10 @@ namespace PhysicalCalculator.Expression
                         }
                         else if (Char.IsLetter(c) || Char.Equals(c, '_'))
                         {
-                            String IdentifierName;
-
                             String CommandLine = RemainingInput;
                             int OldLen = CommandLine.Length;
                             String ResultLine = "";
-
-                            Quantity pq;
-
-                            Boolean PrimaryIdentifierFound = ParseQualifiedIdentifier(ref CommandLine, ref ResultLine, out IdentifierName, out pq);
+                            Boolean PrimaryIdentifierFound = ParseQualifiedIdentifier(ref CommandLine, ref ResultLine, out var IdentifierName, out var pq);
                             // 2014-09-09 Moved to only be done when PrimaryIdentifierFound or call of .cal file as function : Pos += OldLen - CommandLine.Length;
                             int newPos = Pos + OldLen - CommandLine.Length;
 
@@ -738,7 +727,7 @@ namespace PhysicalCalculator.Expression
                                 if (!InnerIdentifierFound)
                                 {
                                     LastReadToken = TokenKind.Operand;
-                                    return new token(null);
+                                    return new Token(null);
                                 }
                             }
                             else
@@ -796,7 +785,7 @@ namespace PhysicalCalculator.Expression
                             if (pq != null)
                             {
                                 LastReadToken = TokenKind.Operand;
-                                return new token(pq);
+                                return new Token(pq);
                             }
 
                             // End of recognized input; Stop reading and return operator tokens from stack.
@@ -835,7 +824,7 @@ namespace PhysicalCalculator.Expression
                 // Retrieve remaining operators from stack
                 while (Operators.Count > 0) 
                 {
-                    Tokens.Add(new token(Operators.Pop()));
+                    Tokens.Add(new Token(Operators.Pop()));
                 }
 
                 if (Tokens.Count > 0)
@@ -855,13 +844,14 @@ namespace PhysicalCalculator.Expression
             //public static readonly 
             Unit dimensionless = new CombinedUnit();
 
-            expressiontokenizer Tokenizer = new expressiontokenizer(dimensionless, commandLine);
-
-            Tokenizer.ExpectedFollow = ExpectedFollow;
-            Tokenizer.ThrowExceptionOnInvalidInput = false;
+            ExpressionTokenizer Tokenizer = new ExpressionTokenizer(dimensionless, commandLine)
+            {
+                ExpectedFollow = ExpectedFollow,
+                ThrowExceptionOnInvalidInput = false
+            };
             Stack<Quantity> Operands = new Stack<Quantity>();
 
-            token Token = Tokenizer.GetToken();
+            Token Token = Tokenizer.GetToken();
             while (Token != null)
             {
                 // OperatorKind.parenbegin indicates error in Tokenizer.GetToken();
@@ -958,11 +948,11 @@ namespace PhysicalCalculator.Expression
 
                                 if (Token.Operator == OperatorKind.pow)
                                 {
-                                    Token = new token(OperatorKind.root);
+                                    Token = new Token(OperatorKind.root);
                                 }
                                 else
                                 {
-                                    Token = new token(OperatorKind.pow);
+                                    Token = new Token(OperatorKind.pow);
                                 }
                             }
 
@@ -1064,14 +1054,9 @@ namespace PhysicalCalculator.Expression
         public static Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, out String identifierName, out Quantity identifierValue)
         {
             identifierValue = null;
-
-            IEnvironment PrimaryContext;
-
             commandLine = commandLine.ReadIdentifier(out identifierName);
             Debug.Assert(identifierName != null);
-
-            INametableItem PrimaryItem;
-            Boolean PrimaryIdentifierFound = IdentifierItemLookup(identifierName, out PrimaryContext, out PrimaryItem, ref resultLine);
+            Boolean PrimaryIdentifierFound = IdentifierItemLookup(identifierName, out var PrimaryContext, out var PrimaryItem, ref resultLine);
 
             if (PrimaryIdentifierFound)
             {
@@ -1088,9 +1073,8 @@ namespace PhysicalCalculator.Expression
                     commandLine = commandLine.ReadIdentifier(out identifierName);
                     Debug.Assert(identifierName != null);
                     commandLine = commandLine.TrimStart();
-
-                    IEnvironment QualifiedIdentifierInnerContext = IdentifierItem as IEnvironment; // IdentifierItem.InnerContext;
-                    if (QualifiedIdentifierInnerContext != null)
+                    // IdentifierItem.InnerContext;
+                    if (IdentifierItem is IEnvironment QualifiedIdentifierInnerContext)
                     {
                         QualifiedIdentifierContext = QualifiedIdentifierInnerContext;
                     }
@@ -1119,8 +1103,7 @@ namespace PhysicalCalculator.Expression
                             TokenString.ParseChar('(', ref commandLine, ref resultLine);
                             commandLine = commandLine.TrimStart();
 
-                            List<string> ExpectedFollow = new List<string>();
-                            ExpectedFollow.Add(")");
+                            List<string> ExpectedFollow = new List<string> { ")" };
                             List<Quantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow, true);
                             Boolean OK = parameterlist != null;
                             if (OK)
@@ -1157,7 +1140,7 @@ namespace PhysicalCalculator.Expression
             return PrimaryIdentifierFound;  // Indicate if PrimaryIdentifier was found; even if inner identifier was not found
         }
 
-        public static Boolean isValidDigit(Char ch, int numberBase)
+        public static Boolean IsValidDigit(Char ch, int numberBase)
         {
             return    Char.IsDigit(ch)
                    || (numberBase == 0x10) && TokenString.IsHexDigitLetter(ch);
@@ -1216,7 +1199,7 @@ namespace PhysicalCalculator.Expression
                     numberBase = 0x10; // Hexadecimal number expected
                 }
 
-                while ((numLen < maxLen) && isValidDigit(commandLine[numLen], numberBase))
+                while ((numLen < maxLen) && IsValidDigit(commandLine[numLen], numberBase))
                 {
                     numLen++;
                 }
@@ -1226,14 +1209,14 @@ namespace PhysicalCalculator.Expression
                         || (commandLine[numLen] == ','))
                     )
                 {
-                    canParseMore = (numLen+1 < maxLen) && isValidDigit(commandLine[numLen + 1], numberBase);
+                    canParseMore = (numLen+1 < maxLen) && IsValidDigit(commandLine[numLen + 1], numberBase);
                     if (canParseMore)
                     {
                         DecimalCharPos = numLen;
                         numLen++;
                     }
                 }
-                while (canParseMore && (numLen < maxLen) && isValidDigit(commandLine[numLen], numberBase))
+                while (canParseMore && (numLen < maxLen) && IsValidDigit(commandLine[numLen], numberBase))
                 {
                     numLen++;
                 }
@@ -1273,7 +1256,7 @@ namespace PhysicalCalculator.Expression
                         exponentNumberBase = 0x10; // Hexadecimal number expected
                     }
 
-                    while ((numLen < maxLen) && isValidDigit(commandLine[numLen], numberBase))
+                    while ((numLen < maxLen) && IsValidDigit(commandLine[numLen], numberBase))
                     {
                         numLen++;
                     }
@@ -1305,7 +1288,6 @@ namespace PhysicalCalculator.Expression
                         }
                         else
                         {
-                            long baseNumberL = 0;
                             int baseIntegralNumberLen = baseNumberLen - hexNumberPos;
                             if (DecimalCharPos > 0)
                             {
@@ -1313,7 +1295,7 @@ namespace PhysicalCalculator.Expression
                             }
                             
                             System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.AllowHexSpecifier; // HexNumber
-                            OK = long.TryParse(commandLine.Substring(hexNumberPos, baseIntegralNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out baseNumberL);
+                            OK = long.TryParse(commandLine.Substring(hexNumberPos, baseIntegralNumberLen), numberstyle, NumberFormatInfo.InvariantInfo, out long baseNumberL);
                             D = baseNumberL;
 
                             if (DecimalCharPos > 0)
@@ -1343,9 +1325,8 @@ namespace PhysicalCalculator.Expression
                             }
                             else
                             {
-                                long exponentNumber = 0;
                                 System.Globalization.NumberStyles numberstyle = System.Globalization.NumberStyles.AllowHexSpecifier; // HexNumber
-                                OK = long.TryParse(commandLine.Substring(exponentHexNumberPos, numLen - (exponentHexNumberPos-1)), numberstyle, NumberFormatInfo.InvariantInfo, out exponentNumber);
+                                OK = long.TryParse(commandLine.Substring(exponentHexNumberPos, numLen - (exponentHexNumberPos-1)), numberstyle, NumberFormatInfo.InvariantInfo, out long exponentNumber);
                                 exponentNumberD = exponentNumber;
 
                                 if (exponentNumberSignPos > 0 && commandLine[exponentNumberSignPos] == '-')
@@ -1396,16 +1377,12 @@ namespace PhysicalCalculator.Expression
         {
             Unit pu = null;
             Boolean UnitIdentifierFound = false;
-            String IdentifierName;
-            IEnvironment Context;
-
-            String CommandLineRest = commandLine.ReadIdentifier(out IdentifierName);
+            String CommandLineRest = commandLine.ReadIdentifier(out var IdentifierName);
 
             if (IdentifierName != null)
             {
                 // Check for custom defined unit
-                INametableItem Item;
-                UnitIdentifierFound = IdentifierItemLookup(IdentifierName, out Context, out Item, ref resultLine);
+                UnitIdentifierFound = IdentifierItemLookup(IdentifierName, out var Context, out var Item, ref resultLine);
                 if (UnitIdentifierFound)
                 {
                     if (Item.Identifierkind == IdentifierKind.Unit)

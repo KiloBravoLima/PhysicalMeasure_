@@ -160,13 +160,14 @@ namespace PhysCalculatorTests
             PhysCalculator target = new PhysCalculator();
             string CommandLine = "About";
             string ResultLine = string.Empty;
-            string CommandLineExpected = string.Empty; 
-            List<String> ResultLineExpected = new List<String>();
-            ResultLineExpected.Add("PhysCalculator");
-            ResultLineExpected.Add("PhysCalc");
-            ResultLineExpected.Add("PhysicalMeasure");
-            ResultLineExpected.Add("codeplex");
-
+            string CommandLineExpected = string.Empty;
+            List<String> ResultLineExpected = new List<String>
+            {
+                "PhysCalculator",
+                "PhysCalc",
+                "PhysicalMeasure",
+                "codeplex"
+            };
             bool expected = true;
             bool actual;
             actual = target.Command(ref CommandLine, out ResultLine);
@@ -238,23 +239,24 @@ namespace PhysCalculatorTests
             ResultLineExpected.Add("Clear");
             ***/
 
-            List<String> ResultLineExpected = new List<String>();
-            ResultLineExpected.Add("|| Read | Include | Load || <filename>");
-            ResultLineExpected.Add("Save [ items | commands ] <filename>");
-            ResultLineExpected.Add("Files [ -sort=create | write | access ] [ [-path=] <folderpath> ]");
-            ResultLineExpected.Add("Using [ universal | electromagnetic | atomic ]");
-            ResultLineExpected.Add("Var [ <contextname> . ] <varname> [ = <expression> ] [, <var> ]*");
-            ResultLineExpected.Add("Set <varname> [ = ] <expression> [, <varname> [ = ] <expression> ]*");
-            ResultLineExpected.Add("System <systemname>");
-            ResultLineExpected.Add("Unit [ <systemname> . ] <unitname> [ [ = ] <expression> ]");
-            ResultLineExpected.Add("[ Print ] <expression> [, <expression> ]*");
-            ResultLineExpected.Add("List [ items ] [ settings ] [ commands ] ");
-            ResultLineExpected.Add("Store <varname>");
-            ResultLineExpected.Add("Remove <varname> [, <varname> ]*");
-            ResultLineExpected.Add("Clear [ items | commands ]");
-            ResultLineExpected.Add("Func <functionname> ( <paramlist> )  { <commands> }");
-            ResultLineExpected.Add("Help [ expression | parameter | commands | setting | all ]");
-
+            List<String> ResultLineExpected = new List<String>
+            {
+                "|| Read | Include | Load || <filename>",
+                "Save [ items | commands ] <filename>",
+                "Files [ -sort=create | write | access ] [ [-path=] <folderpath> ]",
+                "Using [ universal | electromagnetic | atomic ]",
+                "Var [ <contextname> . ] <varname> [ = <expression> ] [, <var> ]*",
+                "Set <varname> [ = ] <expression> [, <varname> [ = ] <expression> ]*",
+                "System <systemname>",
+                "Unit [ <systemname> . ] <unitname> [ [ = ] <expression> ]",
+                "[ Print ] <expression> [, <expression> ]*",
+                "List [ items ] [ settings ] [ commands ] ",
+                "Store <varname>",
+                "Remove <varname> [, <varname> ]*",
+                "Clear [ items | commands ]",
+                "Func <functionname> ( <paramlist> )  { <commands> }",
+                "Help [ expression | parameter | commands | setting | all ]"
+            };
             bool expected = true; 
             bool actual;
             actual = target.CommandHelp(ref CommandLine, ref ResultLine);
@@ -291,11 +293,12 @@ namespace PhysCalculatorTests
             CommandLineExpected = string.Empty; 
             ResultLine = string.Empty;
             //ResultLineExpected = " Global:\r\nvar varname = 12 m2·Kg·s-2";
-            List<String> ResultLinesExpected = new List<String>();
-            ResultLinesExpected.Add("Global:");
-            //ResultLinesExpected.Add("var varname = 12 m2·Kg·s-2");
-            ResultLinesExpected.Add("var varname = 12 J");
-
+            List<String> ResultLinesExpected = new List<String>
+            {
+                "Global:",
+                //ResultLinesExpected.Add("var varname = 12 m2·Kg·s-2");
+                "var varname = 12 J"
+            };
             expected = true;
             actual = target.CommandList(ref CommandLine, ref ResultLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
@@ -866,11 +869,10 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Quantity AccumulatorExpected = new Quantity(111);
             bool expected = true;
             bool actual;
-            Quantity AccumulatorActual;
             actual = target.Command(ref CommandLine, out ResultLine);
             string AccumulatorAccessResultLineExpected = "";
 
-            Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
+            Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out var AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
             Assert.AreEqual(AccumulatorExpected, AccumulatorActual, "for accumulator");
 
             Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
@@ -900,16 +902,10 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             ResultWriter resultLineWriter = new ResultWriter(ResultLines);
             CommandReader commandLineReader = new CommandReader(CommandLines, resultLineWriter) ;
             target.ExecuteCommands(localContext, commandLineReader, resultLineWriter);
-
-            Quantity AccumulatorActual;
             // actual = target.Command(ref CommandLine, out ResultLine);
             string AccumulatorAccessResultLineExpected = "";
-
-            PhysicalCalculator.Expression.IEnvironment context;
-            INametableItem USDItem;
-
-            Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
-            Assert.AreEqual(true, target.IdentifierItemLookup("USD", out context, out USDItem), "for accumulator access");
+            Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out var AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("USD", out var context, out var USDItem), "for accumulator access");
             CombinedUnit ExpectedUnit = new CombinedUnit();
             Assert.AreEqual(USDItem.Identifierkind, IdentifierKind.Unit, "For USD unit item");
             ExpectedUnit = ExpectedUnit.CombineMultiply(((NamedUnit)USDItem).pu);
@@ -959,26 +955,15 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             ResultWriter resultLineWriter = new ResultWriter(ResultLines);
             CommandReader commandLineReader = new CommandReader(CommandLines, resultLineWriter);
             target.ExecuteCommands(localContext, commandLineReader, resultLineWriter);
-
-            Quantity AccumulatorActual;
             // actual = target.Command(ref CommandLine, out ResultLine);
             string AccumulatorAccessResultLineExpected = "";
-
-            PhysicalCalculator.Expression.IEnvironment context;
-            INametableItem DKRItem;
-            INametableItem OereItem;
-            INametableItem EnergyUnitPriceItem;
-            INametableItem EnergyConsumedItem;
-            INametableItem PriceEnergyConsumedItem;
-            INametableItem PriceDKREnergyConsumedItem;
-
-            Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
-            Assert.AreEqual(true, target.IdentifierItemLookup("DKR", out context, out DKRItem), "for DKR access");
-            Assert.AreEqual(true, target.IdentifierItemLookup("Øre", out context, out OereItem), "for Øre access");
-            Assert.AreEqual(true, target.IdentifierItemLookup("EnergyUnitPrice", out context, out EnergyUnitPriceItem), "for EnergyUnitPrice access");
-            Assert.AreEqual(true, target.IdentifierItemLookup("EnergyConsumed", out context, out EnergyConsumedItem), "for EnergyConsumed access");
-            Assert.AreEqual(true, target.IdentifierItemLookup("PriceEnergyConsumed", out context, out PriceEnergyConsumedItem), "for PriceEnergyConsumed access");
-            Assert.AreEqual(true, target.IdentifierItemLookup("PriceDKREnergyConsumed", out context, out PriceDKREnergyConsumedItem), "for PriceDKREnergyConsumedItem access");
+            Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out var AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("DKR", out var context, out var DKRItem), "for DKR access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("Øre", out context, out var OereItem), "for Øre access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("EnergyUnitPrice", out context, out var EnergyUnitPriceItem), "for EnergyUnitPrice access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("EnergyConsumed", out context, out var EnergyConsumedItem), "for EnergyConsumed access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("PriceEnergyConsumed", out context, out var PriceEnergyConsumedItem), "for PriceEnergyConsumed access");
+            Assert.AreEqual(true, target.IdentifierItemLookup("PriceDKREnergyConsumed", out context, out var PriceDKREnergyConsumedItem), "for PriceDKREnergyConsumedItem access");
 
             Assert.AreEqual(IdentifierKind.Unit, DKRItem.Identifierkind, " for DKR unit item");
             Assert.AreEqual(IdentifierKind.Unit, OereItem.Identifierkind, " for Øre unit item");
@@ -1283,11 +1268,9 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.IsNotNull(target);
 
             target.Run();
-
-            Quantity VarValue;
             Quantity VarValueExpected = new Quantity(340, SI.m/SI.s);
             String ResultLine = null;
-            bool GetVarRes = target.VariableGet(target.CurrentContext, "SoundSpeed", out VarValue, ref ResultLine);
+            bool GetVarRes = target.VariableGet(target.CurrentContext, "SoundSpeed", out var VarValue, ref ResultLine);
             Assert.IsTrue(GetVarRes);
             Assert.AreEqual<IQuantity>( VarValueExpected, VarValue);
       

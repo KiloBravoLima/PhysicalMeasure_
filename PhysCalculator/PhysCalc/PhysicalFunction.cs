@@ -512,8 +512,7 @@ namespace PhysicalCalculator.Function
 
         public static PhysicalQuantityFunctionParam ParseFunctionParam(ref String commandLine, ref String resultLine)
         {
-            String ParamName;
-            commandLine = commandLine.ReadIdentifier(out ParamName);
+            commandLine = commandLine.ReadIdentifier(out var ParamName);
             Debug.Assert(ParamName != null);
 
             Unit ParamUnit = PhysicalCalculator.Expression.PhysicalExpression.ParseOptionalConvertToUnit(ref commandLine, ref resultLine);

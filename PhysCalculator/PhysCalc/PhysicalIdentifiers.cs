@@ -677,10 +677,7 @@ namespace PhysicalCalculator.Identifiers
 
         public Boolean FunctionFind(String functionName, out IFunctionEvaluator functionEvaluator)
         {
-            IEnvironment context;
-            INametableItem Item;
-
-            Boolean Found = FindIdentifier(functionName, out context, out Item) && Item.Identifierkind == IdentifierKind.Function;
+            Boolean Found = FindIdentifier(functionName, out var context, out var Item) && Item.Identifierkind == IdentifierKind.Function;
             if (Found)
             {
                 functionEvaluator = Item as IFunctionEvaluator;
@@ -700,8 +697,7 @@ namespace PhysicalCalculator.Identifiers
         public Boolean SystemSet(String systemName, out INametableItem systemItem)
         {
             // Find identifier 
-            IEnvironment context;
-            Boolean Found = FindIdentifier(systemName, out context, out systemItem);
+            Boolean Found = FindIdentifier(systemName, out var context, out systemItem);
 
             if (Found && (context == this) && (systemItem.Identifierkind != IdentifierKind.UnitSystem))
             {   // Found locally but is not a system; Can't set as system
@@ -725,8 +721,7 @@ namespace PhysicalCalculator.Identifiers
         public Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, out INametableItem unitItem)
         {
             // Find identifier 
-            IEnvironment context;
-            Boolean Found = FindIdentifier(unitName, out context, out unitItem);
+            Boolean Found = FindIdentifier(unitName, out var context, out unitItem);
 
             if (Found && (context == this) && (unitItem.Identifierkind != IdentifierKind.Unit))
             {   // Found locally but is not a unit; Can't set as unit
@@ -749,8 +744,7 @@ namespace PhysicalCalculator.Identifiers
 
                 if (unitSystem == null)
                 {   // Is first unit in a new system
-                    INametableItem SystemItem;
-                    if (SystemSet(unitName + "_system", out SystemItem))
+                    if (SystemSet(unitName + "_system", out var SystemItem))
                     {
                         unitSystem = ((NamedSystem)SystemItem).UnitSystem;
                     }
@@ -764,9 +758,7 @@ namespace PhysicalCalculator.Identifiers
         public Boolean UnitGet(String unitName, out Unit unitValue, ref String resultLine)
         {
             // Find identifier 
-            IEnvironment context;
-            INametableItem Item;
-            Boolean Found = FindIdentifier(unitName, out context, out Item);
+            Boolean Found = FindIdentifier(unitName, out var context, out var Item);
             if (Found && Item.Identifierkind == IdentifierKind.Unit)
             {   // Identifier is a unit in some context; Get it
                 NamedUnit nu = Item as NamedUnit;
@@ -789,8 +781,7 @@ namespace PhysicalCalculator.Identifiers
         public Boolean VariableSetLocal(String variableName, Quantity variableValue)
         {
             // Find identifier 
-            INametableItem Item;
-            Boolean Found = FindLocalIdentifier(variableName, out Item);
+            Boolean Found = FindLocalIdentifier(variableName, out var Item);
             if (Found && Item.Identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in local context; set it to specified value
                 SetLocalIdentifier(variableName, new NamedVariable(variableValue, this));
@@ -813,9 +804,7 @@ namespace PhysicalCalculator.Identifiers
         public Boolean VariableSet(String variableName, Quantity variableValue)
         {
             // Find identifier 
-            IEnvironment context;
-            INametableItem Item;
-            Boolean Found = FindIdentifier(variableName, out context, out Item);
+            Boolean Found = FindIdentifier(variableName, out var context, out var Item);
             if (Found && Item.Identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in some context; set it to specified value
                 context.SetLocalIdentifier(variableName, new NamedVariable(variableValue, context as CalculatorEnvironment));
@@ -838,9 +827,7 @@ namespace PhysicalCalculator.Identifiers
         public Boolean VariableGet(String variableName, out Quantity variableValue, ref String resultLine)
         {
             // Find identifier 
-            IEnvironment context;
-            INametableItem Item;
-            Boolean Found = FindIdentifier(variableName, out context, out Item);
+            Boolean Found = FindIdentifier(variableName, out var context, out var Item);
             if (Found && ((Item.Identifierkind == IdentifierKind.Variable) || (Item.Identifierkind == IdentifierKind.Constant)))
             {   // Identifier is a variable or constant in some context; Get it
                 variableValue = Item as Quantity;
