@@ -146,7 +146,7 @@ namespace PhysicalCalculator
         private FormatProviderKind FormatProviderSrc = FormatProviderKind.InheritedFormatProvider; 
         public int LinesRead = 0;
 
-        public String Name { get { return (_name != null ? _name : ""); } set { _name = value;  } }
+        public String Name { get { return (_name ?? ""); } set { _name = value;  } }
         public TraceLevels OutputTracelevel { get { return OutTracelevel; } set { OutTracelevel = value; } }
         public FormatProviderKind FormatProviderSource { get { return FormatProviderSrc; } set { FormatProviderSrc = value; } }
 

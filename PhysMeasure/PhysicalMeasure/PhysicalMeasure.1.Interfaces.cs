@@ -176,6 +176,7 @@ namespace PhysicalMeasure
         String ValueString(Double value, String format, IFormatProvider formatProvider);
 
         String ValueAndUnitString(Double value);
+        String ValueAndUnitString(Double value, String format);
         String ValueAndUnitString(Double value, String format, IFormatProvider formatProvider);
 
         Double FactorValue { get; }
@@ -212,6 +213,11 @@ namespace PhysicalMeasure
 
         Unit Pow(SByte exponent);
         Unit Rot(SByte exponent);
+
+        /*
+        Unit operator *(Unit physicalUnit);
+        Unit operator /(Unit physicalUnit);
+        */
     }
 
     public interface ICombinedUnitMath
@@ -304,6 +310,8 @@ namespace PhysicalMeasure
 
     public interface INamedUnit
     {
+        String UnitName { get; }
+        String UnitSymbol { get; }
         Unit AsNamedUnit { get; }
     }
 
@@ -472,7 +480,8 @@ namespace PhysicalMeasure
 
         Unit ScaledUnitFromSymbol(String scaledUnitSymbol);
 
-        INamedSymbolUnit NamedDerivedUnitFromUnit(Unit derivedUnit);
+        //INamedSymbolUnit NamedDerivedUnitFromUnit(Unit derivedUnit);
+        (INamedSymbolUnit, Double) NamedDerivedUnitFromUnit(Unit derivedUnit);
         // Unit NamedUnitFromUnit(Unit derivedUnit);
 
         Unit UnitFromExponents(SByte[] exponents);
@@ -506,10 +515,8 @@ namespace PhysicalMeasure
         ConvertibleUnit[] ConvertibleUnits { get; }
 
         Unit Dimensionless { get; }
-
     }
 
     #endregion Physical Measure Interfaces
-
 }
 

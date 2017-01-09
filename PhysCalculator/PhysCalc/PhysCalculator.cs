@@ -774,9 +774,10 @@ namespace PhysicalCalculator
                     {
                         TryParseToken("=", ref commandLine);
 
-                        List<string> ExpectedFollow = new List<string>();
-                        ExpectedFollow.Add(";");
-
+                        List<string> ExpectedFollow = new List<string>
+                        {
+                            ";"
+                        };
                         Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                         if (!ALocalIdentifier || pq != null)
@@ -834,9 +835,7 @@ namespace PhysicalCalculator
                         Boolean IsCalculatorSetting = CheckForCalculatorSetting(IdentifierContext, VariableName, ref commandLine, ref resultLine);
                         if (!IsCalculatorSetting)
                         {
-                            List<string> ExpectedFollow = new List<string>();
-                            ExpectedFollow.Add(";");
-
+                            List<string> ExpectedFollow = new List<string> { ";" };
                             Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                             if (pq != null)
@@ -1108,10 +1107,7 @@ namespace PhysicalCalculator
         {
             resultLine = "";
 
-            List<string> ExpectedFollow = new List<string>();
-            ExpectedFollow.Add(";");
-            ExpectedFollow.Add(",");
-
+            List<string> ExpectedFollow = new List<string> { ";", "," };
             do
             {
                 Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
@@ -1196,10 +1192,11 @@ namespace PhysicalCalculator
         public Boolean CommandIf(ref String commandLine, ref String resultLine)
         {
             resultLine = "";
-            List<string> ExpectedFollow = new List<string>();
-            // ExpectedFollow.Add("//");
-            ExpectedFollow.Add("{");
-
+            List<string> ExpectedFollow = new List<string>
+            {   
+                // ExpectedFollow.Add("//"),
+                "{"
+            };
             Boolean testResult = GetBoolean(ref commandLine, ref resultLine, ExpectedFollow);
             CurrentContext.BeginParsingCommandBlock();
             ICommandsEvaluator thenBlock = ParseCommandBlockDeclaration(ref commandLine, ref resultLine);
@@ -1612,9 +1609,10 @@ namespace PhysicalCalculator
 
                 CurrentContext = LocalContext;
 
+                #pragma warning disable IDE0017 // Simplify object initialization
                 CommandReader functionCommandLineReader = new CommandReader(functionName + ".cal", CommandLineReader.ResultLineWriter);
-
                 functionCommandLineReader.ReadFromConsoleWhenEmpty = false; // Return from ExecuteCommands() function when file commands are done
+                #pragma warning restore IDE0017 // Simplify object initialization
 
                 if (LocalContext.OuterContext.OutputTracelevel.HasFlag(TraceLevels.FunctionEnterLeave))
                 {
