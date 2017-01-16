@@ -166,8 +166,6 @@ namespace PhysicalMeasure
 
         String UnitString();
 
-        String UnitPrintString();
-
         String ToPrintString();
 
         String ReducedUnitString();

@@ -240,7 +240,7 @@ namespace PhysicalMeasure
 
         #endregion Physical Measure Constants
 
-        public static readonly Unit dimensionless = SI.Units.Dimensionless as Unit;
+        public static readonly Unit dimensionless = SI.Units.Dimensionless;
 
         public static UnitSystemStack CurrentUnitSystems = new UnitSystemStack();
     }

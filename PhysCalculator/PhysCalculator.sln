@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.25302.0
+VisualStudioVersion = 15.0.26020.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysCalc", "PhysCalc\PhysCalc.csproj", "{74C979DF-C059-4DC4-BCA7-FC904F131B37}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -40,6 +40,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionsTests", "..\PhysMeasure\KBLExtensionsTests\ExtensionsTests.csproj", "{51533EFE-2004-4123-8099-6A8226470F91}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KBL.Extensions", "..\PhysMeasure\KBLExtensions\KBL.Extensions.csproj", "{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasureTests", "..\PhysMeasure\PhysicalMeasureTests\PhysicalMeasureTests.csproj", "{07983938-B989-4B6B-929D-17386C72C774}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,6 +121,18 @@ Global
 		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|x86.ActiveCfg = Release|Any CPU
 		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|x86.Build.0 = Release|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Debug|x86.Build.0 = Debug|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Release|x86.ActiveCfg = Release|Any CPU
+		{07983938-B989-4B6B-929D-17386C72C774}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -129,7 +143,7 @@ Global
 		{51533EFE-2004-4123-8099-6A8226470F91} = {7EFECBE3-80D2-46D0-93EE-CEEF9971C067}
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 4
+		SccNumberOfProjects = 5
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs12
 		SccProjectUniqueName0 = ..\\PhysMeasure\\PhysicalMeasure\\PhysicalMeasure.csproj
@@ -154,6 +168,11 @@ Global
 		SccAuxPath3 = https://tfs.codeplex.com/tfs/tfs12
 		SccLocalPath3 = PhysCalculatorTests
 		SccProvider3 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccProjectUniqueName4 = ..\\PhysMeasure\\KBLExtensions\\KBL.Extensions.csproj
+		SccProjectName4 = ../PhysMeasure/KBLExtensions
+		SccAuxPath4 = https://tfs.codeplex.com/tfs/tfs12
+		SccLocalPath4 = ..\\PhysMeasure\\KBLExtensions
+		SccProvider4 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = PhysCalculator.vsmdi

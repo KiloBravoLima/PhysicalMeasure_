@@ -1472,37 +1472,49 @@ namespace PhysicalMeasure
             return unitStr;
         }
 
-
-
-        /// <summary>
-        /// String with PrefixedUnitExponent formatted symbol (without system name prefixed).
-        /// without debug asserts.
-        /// </summary>
-        public virtual String UnitPrintString() => this.UnitString();
-
-        public virtual String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
+        public override string ToString()
         {
-            Debug.Assert(invertExponents == false, "The invertExponents must be false");
-            return this.UnitString();
+            return this.ToString(null);
         }
-
-        /// <summary>
-        /// String formatted by use of named derived unit symbols when possible(without system name prefixed).
-        /// without debug asserts.2
-        /// </summary>
-        public virtual String ReducedUnitString() => this.UnitString();
 
         /// <summary>
         /// IFormattable.ToString implementation.
         /// Eventually with system name prefixed.
         /// </summary>
-        public override String ToString()
+        public String ToString(string format)
         {
-            String unitName = this.UnitString();
-            IUnitSystem system = this.ExponentsSystem; // this.SimpleSystem;
-            if ((!String.IsNullOrEmpty(unitName))
-                && (system != null)
-                && (system != Physics.CurrentUnitSystems.Default)
+            // return this.ToString(format, null);
+            if (String.IsNullOrEmpty(format)) format = "G";
+
+            bool showUnitName = format.Contains("N");
+            bool showUnitBaseExponents = format.Contains("B") || format.Contains("E");
+            bool mayUseSlash = !format.Contains("!/");
+            bool invertExponents = format.Contains("-/");
+            bool showUnitSymbol = !showUnitName && !showUnitBaseExponents;
+            bool forceShowSystem = format.Contains("Y");
+            bool forcePrintStr = format.Contains("P");
+
+            String unitStr;
+            if (showUnitName && this is INamedUnit namedUnit)
+            {   // Show unit's name
+                unitStr = namedUnit.UnitName;
+            }
+            else
+            if (showUnitBaseExponents)
+            {
+                // show unit's base unit exponents
+                unitStr = CombinedUnitString(mayUseSlash, invertExponents);
+            }
+            else
+            {   // General or Symbol
+                unitStr = UnitSymbol;
+            }
+
+            IUnitSystem system; //  = this.ExponentsSystem; // this.SimpleSystem;
+
+            if ((!String.IsNullOrEmpty(unitStr))
+                && ((system = this.ExponentsSystem) != null)
+                && (forceShowSystem || system != Physics.CurrentUnitSystems.Default)
                 && (!system.IsIsolatedUnitSystem)
                  /*
                  && (!(    Physics.SI_Units == Physics.Default_UnitSystem 
@@ -1511,11 +1523,24 @@ namespace PhysicalMeasure
                   */
                  )
             {
-                unitName = system.Name + "." + unitName;
+                unitStr = system.Name + "." + unitStr;
             }
 
-            return unitName;
+            if (forcePrintStr && String.IsNullOrEmpty(unitStr))
+            {
+                unitStr = "dimensionless";
+            }
+
+            return unitStr;
         }
+
+        public abstract String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false);
+
+        /// <summary>
+        /// String formatted by use of named derived unit symbols when possible(without system name prefixed).
+        /// without debug asserts.2
+        /// </summary>
+        public virtual String ReducedUnitString() => this.UnitString();
 
         /// <summary>
         /// IUnit.ToPrintString implementation.
@@ -1523,10 +1548,10 @@ namespace PhysicalMeasure
         /// </summary>
         public virtual String ToPrintString()
         {
-            String unitName = this.UnitPrintString();
-            if (String.IsNullOrEmpty(unitName))
+            String unitStr = UnitString(); 
+            if (String.IsNullOrEmpty(unitStr))
             {
-                unitName = "dimensionless";
+                unitStr = "dimensionless";
             }
             else
             {
@@ -1534,15 +1559,52 @@ namespace PhysicalMeasure
                 if ((system != null)
                     && (system != Physics.CurrentUnitSystems.Default))
                 {
-                    unitName = system.Name + "." + unitName;
+                    unitStr = system.Name + "." + unitStr;
                 }
             }
-            return unitName;
+            return unitStr;
         }
 
-        public virtual string ValueString(double value) => value.ToString();
+        /* 
+         * https://www.codeproject.com/articles/611731/working-with-units-and-amounts
+         
+The Amount class has several overloads of the ToString() method and implements IFormattable:
 
-        public virtual string ValueString(double value, String format, IFormatProvider formatProvider)
+.ToString()
+.ToString(string format)
+.ToString(IFormatProvider formatProvider)
+.ToString(string format, IFormatProvider formatProvider)
+
+The formatProvider would typically be a CultureInfo object and will determine the decimal separator and group separator.
+The format string either a constant formatting string “GG’”, “GN”, “GS”, “NG”, “NN” or “NS” where the first letter stands for General or Numeric formatting of the value part, and the second letter stands for General, Name or Symbol rendering of the unit (General and Symbol are the same).
+But the format string can also specify a custom format, followed by “UG”, “UN” or “US”, where these stand for General, Name or Symbol rendering of the unit.
+Finally, the format string can also contain a “|” sign followed by the name of a unit to convert to (the unit should be registered with the UnitManager), or followed by “?” to let the UnitManager search for the matching unit.
+When no or null format string is given, “GG” is assumed.
+
+As a result, following format strings are valid; an example is given of their output:
+"GG"                1234.56789 km
+"NG"                1234.57 km
+"GN"                1234.56789 kilometer
+"#,##0.0 US"        1,234.6 km
+"#,##0.0 UN"        1,234.6 kilometer
+"#,##0.0 US|meter"  1,234,567.9 m
+
+
+Especially this last form is interesting, because it forces conversion to a known unit and ensures the value is not expressed in some weird dynamic unit.
+Since Amount implements IFormattable, you can also use these formatting options in format strings of the String or Console methods. For instance:
+
+Console.WriteLine("The result is {0:#,##0.00 US|liter}", amount);
+The Amount class also defines static ToString() methods for convenience. The advantages of the static methods is that they also support null amounts (for which they return an empty string). For instance, the following will not throw an exception:
+
+Amount x = null;
+String s = "The result is ";
+s = s + Amount.ToString(x, "#,##0.00 US|meter");            
+             
+         */
+
+        public virtual String ValueString(Double value) => value.ToString();
+
+        public virtual String ValueString(Double value, String format, IFormatProvider formatProvider)
         {
             String valStr = null;
             try
@@ -1556,7 +1618,7 @@ namespace PhysicalMeasure
             return valStr;
         }
 
-        public virtual string ValueString(double value, String format)
+        public virtual String ValueString(Double value, String format)
         {
             String valStr = null;
             try
@@ -1570,10 +1632,9 @@ namespace PhysicalMeasure
             return valStr;
         }
 
-
-        public virtual string ValueAndUnitString(String valStr)
+        public virtual String ValueAndUnitString(String valStr, String unitFormat = null)
         {
-            String unitStr = this.ToString();
+            String unitStr = this.ToString(unitFormat);
             if (String.IsNullOrEmpty(unitStr))
             {
                 return valStr;
@@ -1584,22 +1645,34 @@ namespace PhysicalMeasure
             }
         }
 
-        public virtual string ValueAndUnitString(double value) 
+        public virtual String ValueAndUnitString(Double value) 
         {
             String valStr = ValueString(value);
             return ValueAndUnitString(valStr);
         }
 
-        public virtual string ValueAndUnitString(double value, String format)
+        public virtual String ValueAndUnitString(Double value, String format)
         {
-            String valStr = ValueString(value, format);
-            return ValueAndUnitString(valStr);
+            return ValueAndUnitString(value, format, null);
         }
 
-        public virtual string ValueAndUnitString(double value, String format, IFormatProvider formatProvider)
+        public virtual String ValueAndUnitString(Double value, String format, IFormatProvider formatProvider)
         {
-            String valStr = ValueString(value, format, formatProvider);
-            return ValueAndUnitString(valStr);
+            String valueFormat = format;
+            String unitFormat = null;
+            if (format != null)
+            {   // Check for <ValueFormat>" U"<UnitFormat>
+                int unitFormatIndex = format.IndexOf(" U");
+                if (unitFormatIndex >= 0)
+                {
+                    // vaue format in front of " U"
+                    valueFormat = unitFormatIndex - 1 >= 0 ? format.Substring(0, unitFormatIndex - 1) : null;
+                    // unit format follows after " U"
+                    unitFormat = format.Length > unitFormatIndex + 2 ? format.Substring(unitFormatIndex + 2) : null;
+                }
+            }
+            String valStr = ValueString(value, valueFormat, formatProvider);
+            return ValueAndUnitString(valStr, unitFormat);
         }
 
         public virtual Double FactorValue => 1;
@@ -2604,6 +2677,16 @@ namespace PhysicalMeasure
 
         public override Unit GetAsNamedUnit() => this;
 
+        public override String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
+        {
+            String combinedUnitString = Symbol;
+            if (invertExponents)
+            {
+                combinedUnitString += "-1";
+            }
+            return combinedUnitString;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -2646,44 +2729,111 @@ namespace PhysicalMeasure
         /// </summary>
         public override String PureUnitString()
         {
+            return CombinedUnitString(mayUseSlash: true, invertExponents: false);
+        }
+
+        public override String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false) // , Boolean mayUseNegativeExponents = true)
+        {
             Debug.Assert(this.Kind == UnitKind.DerivedUnit, "The 'this.Kind' must be UnitKind.DerivedUnit");
 
             String ExponentsStr = "";
+
+            IUnitSystem thisExponentsSystem = this.ExponentsSystem;
+
 #if DEBUG // Error traces only included in debug build
-            Boolean UnitIsMissingSystem = false;
+            Boolean UnitIsMissingSystem = thisExponentsSystem == null;
 #endif
+            Boolean someNominatorExponents = false;
+            Boolean someDenominatorExponents = false;
+            Boolean isFirstShownExponent = true;
             int index = 0;
+
+            void AddExponent(SByte shownExponent) 
+            {
+                if (!isFirstShownExponent)
+                {
+                    ExponentsStr += '·'; // center dot '\0x0B7' (Char)183 U+00B7
+                }
+                // IUnitSystem thisExponentsSystem = this.ExponentsSystem;
+                if (thisExponentsSystem != null)
+                {
+                    ExponentsStr += thisExponentsSystem.BaseUnits[index].Symbol;
+                }
+                else
+                {
+#if DEBUG // Error traces only included in debug build
+                    // UnitIsMissingSystem = true;
+#endif
+                    ExponentsStr += "<" + index.ToString() + ">";
+                }
+                if (shownExponent != 1)
+                {
+                    ExponentsStr += shownExponent.ToString();
+                }
+                isFirstShownExponent = false;
+            }
+
             foreach (SByte exponent in Exponents)
             {
                 if (exponent != 0)
                 {
-                    if (!String.IsNullOrEmpty(ExponentsStr))
+                    SByte shownExponent = exponent;
+                    if (invertExponents)
                     {
-                        ExponentsStr += '·'; // center dot '\0x0B7' (Char)183 U+00B7
+                        shownExponent = (SByte)(-shownExponent); 
                     }
-                    IUnitSystem thisExponentsSystem = this.ExponentsSystem;
-                    if (thisExponentsSystem != null)
+
+                    if (shownExponent > 0 || !mayUseSlash) //  || mayUseNegativeExponents)
                     {
-                        ExponentsStr += thisExponentsSystem.BaseUnits[index].Symbol;
+                        someNominatorExponents = true;
+                        AddExponent(shownExponent);
                     }
                     else
                     {
-#if DEBUG // Error traces only included in debug build
-                        UnitIsMissingSystem = true;
-#endif
-                        ExponentsStr += "<" + index.ToString() + ">";
-                    }
-                    if (exponent != 1)
-                    {
-                        ExponentsStr += exponent.ToString();
+                        someDenominatorExponents = true;
                     }
                 }
 
                 index++;
             }
 
+            if (someDenominatorExponents)
+            {
+                // if (someNominatorExponents) || !mayUseNegativeExponents)
+                {
+                    if (String.IsNullOrEmpty(ExponentsStr))
+                    {
+                        ExponentsStr = "1";
+                    }
+                    ExponentsStr += "/";
+
+                    invertExponents = !invertExponents;
+                }
+
+                isFirstShownExponent = true;
+                index = 0;
+                foreach (SByte exponent in Exponents)
+                {
+                    if (exponent != 0)
+                    {
+                        SByte shownExponent = exponent;
+                        if (invertExponents)
+                        {
+                            shownExponent = (SByte)(-shownExponent);
+                        }
+
+                        if (shownExponent > 0)
+                        {
+                            AddExponent(shownExponent);
+                        }
+                    }
+
+                    index++;
+                }
+            }
+
 #if DEBUG // Error traces only included in debug build
-            if (UnitIsMissingSystem)
+            if (UnitIsMissingSystem && (someNominatorExponents || someDenominatorExponents))
             {
                 // Do some trace of error    
                 Debug.WriteLine(global::System.Reflection.Assembly.GetExecutingAssembly().ToString() + " Unit " + this.Kind.ToString() + " { " + ExponentsStr + "} missing unit system.");
@@ -2834,6 +2984,8 @@ namespace PhysicalMeasure
             return new PrefixedUnit(up, u);
         }
 
+        public override String UnitName { get { return Name; } }
+
         /// <summary>
         /// String PrefixedUnitExponent formatted symbol (without system name prefixed).
         /// </summary>
@@ -2959,6 +3111,16 @@ namespace PhysicalMeasure
             return this.namedSymbol.Symbol;
         }
 
+        public override String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
+        {
+            String combinedUnitString = Symbol;
+            if (invertExponents)
+            {
+                combinedUnitString += "-1";
+            }
+            return combinedUnitString;
+        }
+
         public override Unit GetAsNamedUnit() => this;
 
         /// <summary>
@@ -3075,6 +3237,16 @@ namespace PhysicalMeasure
         public override String UnitName { get { return this.PureUnitString(); } }
         public override String UnitSymbol { get { return this.PureUnitString(); } }
 
+        public override String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
+        {
+            String combinedUnitString = Prefix.PrefixChar + Unit.Symbol;
+            if (invertExponents)
+            {
+                combinedUnitString += "-1";
+            }
+            return combinedUnitString;
+        }
+
         public override Unit GetAsNamedUnit() => this;
 
         public PrefixedUnit(IUnitPrefix somePrefix, INamedSymbolUnit someUnit)
@@ -3137,12 +3309,6 @@ namespace PhysicalMeasure
             return pq;
         }
 
-        public override String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
-        {
-            String combinedUnitString = Prefix.PrefixChar + Unit.Symbol;
-
-            return combinedUnitString;
-        }
 
     }
 
@@ -3318,7 +3484,6 @@ namespace PhysicalMeasure
                 {
                     Str += expo.ToString();
                 }
-
             }
             else
             {
@@ -3352,7 +3517,6 @@ namespace PhysicalMeasure
             }
             return pue_pq;
         }
-
 
         public PrefixedUnitExponent CombinePrefixAndExponents(SByte outerPUE_PrefixExponent, SByte outerPUE_Exponent, out SByte scaleExponent, out Double scaleFactor)
         {
@@ -3417,6 +3581,15 @@ namespace PhysicalMeasure
         /// </summary>
         public String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
         {
+            /*
+            // Debug.Assert(mayUseSlash == false, "The mayUseSlash must be false");
+
+            IEnumerable<IPrefixedUnitExponent> denominators = this.Where(ue => ue.Exponent < 0);
+            Boolean nextLevelMayUseSlash = mayUseSlash && !denominators.Any();
+            */
+
+            Boolean nextLevelMayUseSlash = false;
+
             String str = "";
 
             foreach (IPrefixedUnitExponent ue in this)
@@ -3427,7 +3600,7 @@ namespace PhysicalMeasure
                     str += '·';  // center dot '\0x0B7' (Char)183 U+00B7
                 }
 
-                str += ue.CombinedUnitString(mayUseSlash, invertExponents);
+                str += ue.CombinedUnitString(nextLevelMayUseSlash, invertExponents);
             }
             return str;
         }
@@ -5058,13 +5231,6 @@ namespace PhysicalMeasure
             {
                 unitName = Numerators.CombinedUnitString(nextLevelMayUseSlash, invertExponents);
             }
-            else
-            {
-                if (Denominators.Any())
-                {
-                    //UnitName = "1";
-                }
-            }
 
             if (Denominators.Any())
             {
@@ -5076,17 +5242,14 @@ namespace PhysicalMeasure
                 {
                     if (!String.IsNullOrWhiteSpace(unitName))
                     {
-                        // center dot '\0x0B7' (Char)183 U+00B7
-                        unitName += '·' + Denominators.CombinedUnitString(false, !invertExponents);
+                        unitName += '·'; // center dot '\0x0B7' (Char)183 U+00B7
                     }
-                    else
-                    {
-                        unitName = Denominators.CombinedUnitString(false, !invertExponents);
-                    }
+                    unitName += Denominators.CombinedUnitString(false, !invertExponents);
                 }
             }
             return unitName;
         }
+
         public override String ToString() => UnitString();
 
     }
@@ -5103,7 +5266,6 @@ namespace PhysicalMeasure
         protected readonly String separator;
         protected readonly String fractionalValueFormat;
         protected readonly Boolean inlineUnitFormat;
-
 
         public Unit MainUnit
         {
@@ -5236,6 +5398,14 @@ namespace PhysicalMeasure
 
         public override String UnitName { get { return this.PureUnitString(); } }
         public override String UnitSymbol { get { return this.PureUnitString(); } }
+
+        public override String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
+        {
+            Debug.Assert(mainUnit != null);
+
+            String combinedUnitString = MainUnit.CombinedUnitString(mayUseSlash, invertExponents);
+            return combinedUnitString;
+        }
 
         public override string ValueString(Double value) => ValueString(value, null, null);
 
@@ -7707,7 +7877,6 @@ namespace PhysicalMeasure
             return GetIntermediateUnitSystemConversion(UnitSystemConversions, oldUnitsystems1, newUnitSystemsConvertableToUnitsystems1, oldUnitsystems2, newUnitSystemsConvertableToUnitsystems2);
         }
 
-
         public UnitSystemConversion GetIntermediateUnitSystemConversion(IList<UnitSystemConversion> unitSystemConversions,
                                                                         IList<IUnitSystem> oldUnitsystems1, IList<IUnitSystem> newUnitSystemsConvertableToUnitsystems1,
                                                                         IList<IUnitSystem> oldUnitsystems2, IList<IUnitSystem> newUnitSystemsConvertableToUnitsystems2)
@@ -7903,5 +8072,3 @@ namespace PhysicalMeasure
 
     #endregion Physical Measure Classes
 }
-
-
