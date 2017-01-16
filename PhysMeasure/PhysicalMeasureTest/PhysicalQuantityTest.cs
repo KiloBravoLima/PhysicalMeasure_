@@ -65,7 +65,7 @@ namespace PhysicalMeasureTest
         //
         #endregion
 
-        #region Unit StringTo tests
+        #region Unit ToString tests
 
         /// <summary>
         ///A test for base unit ToString
@@ -106,7 +106,7 @@ namespace PhysicalMeasureTest
             Unit MeterPerSecond2 = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
 
             //String expected = "SI.m·s-2";
-            String expected = "m·s-2";
+            String expected = "m/s2";
 
             String actual = MeterPerSecond2.ToString();
 
@@ -123,7 +123,7 @@ namespace PhysicalMeasureTest
         {
             Unit MeterPerSecond2 = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
 
-            String expected = "m·s-2";
+            String expected = "m/s2";
 
             IQuantity pq = MeterPerSecond2.ConvertToBaseUnit();
 
@@ -142,7 +142,7 @@ namespace PhysicalMeasureTest
         {
             IUnit Watt = SI.Units.NamedDerivedUnits[6];
 
-            String expected = "1 m2·Kg·s-3";
+            String expected = "1 m2·Kg/s3";
 
             String actual = Watt.ConvertToBaseUnit().ToString();
 
@@ -172,6 +172,207 @@ namespace PhysicalMeasureTest
         public void MixedUnitBaseUnitStringTest()
         {
             IUnit HourMin= new MixedUnit((Unit)SI.Units["h"], ":",  (Unit)MGD_Units.Units["min"]);
+
+            String expected = "3600 s";
+
+            String actual = HourMin.ConvertToBaseUnit().ToString();
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        #endregion Unit ToStringo tests
+
+        #region Unit StringToFormat tests
+
+
+        /// <summary>
+        ///A test for base unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void BaseUnitToStringFormatTest()
+        {
+            Unit u = (Unit)(SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+
+            String expected = "Kg";
+            String actual = u.ToString("G");
+            Assert.AreEqual(expected, actual);
+
+            expected = "Kg";
+            actual = u.ToString("S");
+            Assert.AreEqual(expected, actual);
+
+            expected = "kilogram";
+            actual = u.ToString("N");
+            Assert.AreEqual(expected, actual);
+
+            expected = "SI.Kg";
+            actual = u.ToString("Y");
+            Assert.AreEqual(expected, actual);
+
+            expected = "Kg";
+            actual = u.ToString("B");
+            Assert.AreEqual(expected, actual);
+
+            expected = "Kg";
+            actual = u.ToString("E");
+            Assert.AreEqual(expected, actual);
+
+            expected = "Kg";
+            actual = u.ToString("BE!/");
+            Assert.AreEqual(expected, actual);
+
+            expected = "Kg-1";
+            actual = u.ToString("BE-/");
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for named derived unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void NamedDerivedUnitToStringFormatTest()
+        {
+            Unit u = (Unit)(SI.Units.NamedDerivedUnits[5]);
+
+            String expected = "J";
+            String actual = u.ToString();
+            Assert.AreEqual(expected, actual);
+
+            expected = "J";
+            actual = u.ToString("S");
+            Assert.AreEqual(expected, actual);
+
+            expected = "joule";
+            actual = u.ToString("N");
+            Assert.AreEqual(expected, actual);
+
+            expected = "SI.J";
+            actual = u.ToString("Y");
+            Assert.AreEqual(expected, actual);
+
+            expected = "m2·Kg/s2";
+            actual = u.ToString("B");
+            Assert.AreEqual(expected, actual);
+
+            expected = "m2·Kg/s2";
+            actual = u.ToString("E");
+            Assert.AreEqual(expected, actual);
+
+            expected = "m2·Kg·s-2";
+            actual = u.ToString("BE!/");
+            Assert.AreEqual(expected, actual);
+
+            expected = "s2/m2·Kg";
+            actual = u.ToString("BE-/");
+            Assert.AreEqual(expected, actual);
+            
+            expected = "SI.m-2·Kg-1·s2";
+            actual = u.ToString("YSBE-/!/");
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for (unnamed) derived unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void DerivedUnitToStringFormatTest()
+        {
+            Unit MeterPerSecond2 = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+            Unit u = MeterPerSecond2;
+
+            //String expected = "SI.m·s-2";
+            String expected = "m/s2";
+            String actual = MeterPerSecond2.ToString();
+            Assert.AreEqual(expected, actual);
+
+            expected = "m/s2";
+            actual = u.ToString("S");
+            Assert.AreEqual(expected, actual);
+
+            expected = "m/s2";
+            actual = u.ToString("N");
+            Assert.AreEqual(expected, actual);
+
+            expected = "SI.m/s2";
+            actual = u.ToString("Y");
+            Assert.AreEqual(expected, actual);
+
+            expected = "m/s2";
+            actual = u.ToString("B");
+            Assert.AreEqual(expected, actual);
+
+            expected = "m/s2";
+            actual = u.ToString("E");
+            Assert.AreEqual(expected, actual);
+
+            expected = "m·s-2";
+            actual = u.ToString("BE!/");
+            Assert.AreEqual(expected, actual);
+
+            expected = "s2/m";
+            actual = u.ToString("BE-/");
+            Assert.AreEqual(expected, actual);
+
+            expected = "SI.m-1·s2";
+            actual = u.ToString("YSBE-/!/");
+            Assert.AreEqual(expected, actual);
+        }
+
+
+
+        /// <summary>
+        ///A test for (unnamed) derived unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void DerivedUnitBaseUnitStringFormatTest()
+        {
+            Unit MeterPerSecond2 = new DerivedUnit(SI.Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 });
+
+            String expected = "m/s2";
+            IQuantity pq = MeterPerSecond2.ConvertToBaseUnit();
+            Assert.AreEqual(pq.Value, 1d);
+
+            String actual = pq.Unit.ToString();
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for (unnamed) derived unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void NamedDerivedUnitBaseUnitStringFormatTest()
+        {
+            IUnit Watt = SI.Units.NamedDerivedUnits[6];
+
+            String expected = "1 m2·Kg/s3";
+            String actual = Watt.ConvertToBaseUnit().ToString();
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        ///A test for (unnamed) derived unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void NamedDerivedUnitReducedUnitStringFormatTest()
+        {
+            IUnit Watt = SI.W;
+
+            String expected = "W";
+
+            String actual = Watt.ReducedUnitString().ToString();
+
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        /// <summary>
+        ///A test for (unnamed) derived unit ToString
+        ///</summary>
+        [TestMethod()]
+        public void MixedUnitBaseUnitStringFormatTest()
+        {
+            IUnit HourMin = new MixedUnit((Unit)SI.Units["h"], ":", (Unit)MGD_Units.Units["min"]);
 
             String expected = "3600 s";
 
@@ -1129,8 +1330,6 @@ namespace PhysicalMeasureTest
         {
             Quantity pq = new Quantity(123.4, SI.Units.UnitFromSymbol("Kg"));
 
-            //String expected = (123.4).ToString()+" SI.Kg";
-            //String expected = (123.4).ToString(CultureInfo.InvariantCulture) + " Kg";
             String expected = (123.4).ToString() + " Kg";
 
             String actual = pq.ToString();
@@ -1146,8 +1345,6 @@ namespace PhysicalMeasureTest
         {
             Quantity pq = new Quantity(0.001 * 9.81 * 10, SI.Units.UnitFromSymbol("J"));
 
-            //String expected = (0.0981).ToString()+" SI.J";
-            //String expected = (0.0981).ToString(CultureInfo.InvariantCulture) + " J";
             String expected = (0.0981).ToString() + " J";
 
             String actual = pq.ToString();
@@ -1163,15 +1360,12 @@ namespace PhysicalMeasureTest
         {
             Quantity pq = new Quantity(0.00987654321, new DerivedUnit(SI.Units, new SByte[] { 1, 0, -2, 0, 0, 0, 0 }));
 
-            //String expected = (0.00987654321).ToString() + " SI.ms-2";
-            //String expected = (0.00987654321).ToString(CultureInfo.InvariantCulture) + " m·s-2";
-            String expected = (0.00987654321).ToString() + " m·s-2";
+            String expected = (0.00987654321).ToString() + " m/s2";
 
             String actual = pq.ToString();
 
             Assert.AreEqual(expected, actual);
         }
-
 
         #endregion Quantity ToString test
 
