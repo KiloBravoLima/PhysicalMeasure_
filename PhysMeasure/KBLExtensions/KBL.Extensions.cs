@@ -324,7 +324,7 @@ namespace System.Reflection
         {
             String InfoStr;
 
-#if !NETCORE
+#if !NETCORE && !NETSTANDARD1_0
             // Windows Desktop
             System.Diagnostics.FileVersionInfo fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
             String AsemVersion = fileVersionInfo.FileVersion;
