@@ -185,8 +185,8 @@ namespace PhysicalMeasure
                                         new ConvertibleUnit("year", "y", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/(86400 * 365.25))),      /* [y]    = 1/365.25 * [d] */
                                         new ConvertibleUnit("hour", "hour", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new IdentityValueConversion()),                     /* [hour] = 1 * [h] */
                                         new ConvertibleUnit("day", "day", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/86400)),                /* [day] = 1/86400 * [s] */
-                                        new ConvertibleUnit("year", "year", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/(86400 * 365.25)))    /* [year]    = 1/365.25 * [d] */
-                         };
+                                        new ConvertibleUnit("year", "year", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/(86400 * 365.25))) }; /* [year]    = 1/365.25 * [d] */
+
 
         public static readonly Unit[] MixedTimeUnits
             = new Unit[] { new MixedUnit(SI.AdditionalTimeUnits[2], "y ", new MixedUnit(SI.AdditionalTimeUnits[1], "d ", new MixedUnit(ConvertibleUnits[3], ":", new MixedUnit(AdditionalTimeUnits[0], ":", BaseUnits[2])))) };
@@ -230,6 +230,11 @@ namespace PhysicalMeasure
         public static readonly ConvertibleUnit Ce = (ConvertibleUnit)Units["°C"];
         public static readonly ConvertibleUnit h = (ConvertibleUnit)Units["h"];
         public static readonly ConvertibleUnit l = (ConvertibleUnit)Units["l"];
+
+        /* Additional time units */
+        public static readonly ConvertibleUnit min = (ConvertibleUnit)Units["min"];
+        public static readonly ConvertibleUnit d   = (ConvertibleUnit)Units["d"];
+        public static readonly ConvertibleUnit y   = (ConvertibleUnit)Units["y"];
     }
 
     public static /* partial */ class Physics

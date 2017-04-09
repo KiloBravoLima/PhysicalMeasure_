@@ -1227,7 +1227,6 @@ namespace PhysicalMeasure
                             }
                             else
                             {
-                                // return null;
                                 inputRecognized = false;
                             }
                         }
@@ -1268,7 +1267,6 @@ namespace PhysicalMeasure
                                 }
                                 else
                                 {
-                                    // return null;
                                     inputRecognized = false;
                                 }
                             }
@@ -1331,7 +1329,7 @@ namespace PhysicalMeasure
                     }
 
                     if (tokens.Any())
-                    {   // return first operator from post fix operators
+                    {   // Return first operator from post fix operators
                         return RemoveFirstToken();
                     }
                 };
@@ -1351,7 +1349,7 @@ namespace PhysicalMeasure
                 }
 
                 if (tokens.Any())
-                {   // return first operator from post fix operators
+                {   // Return first operator from post fix operators
                     return RemoveFirstToken();
                 }
 
@@ -1472,7 +1470,7 @@ namespace PhysicalMeasure
             return unitStr;
         }
 
-        public override string ToString()
+        public override String ToString()
         {
             return this.ToString(null);
         }
@@ -1481,7 +1479,7 @@ namespace PhysicalMeasure
         /// IFormattable.ToString implementation.
         /// Eventually with system name prefixed.
         /// </summary>
-        public String ToString(string format)
+        public String ToString(String format)
         {
             // return this.ToString(format, null);
             if (String.IsNullOrEmpty(format)) format = "G";
@@ -2742,8 +2740,8 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
 #if DEBUG // Error traces only included in debug build
             Boolean UnitIsMissingSystem = thisExponentsSystem == null;
-#endif
             Boolean someNominatorExponents = false;
+#endif
             Boolean someDenominatorExponents = false;
             Boolean isFirstShownExponent = true;
             int index = 0;
@@ -2785,7 +2783,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
                     if (shownExponent > 0 || !mayUseSlash) //  || mayUseNegativeExponents)
                     {
+#if DEBUG // Error traces only included in debug build
                         someNominatorExponents = true;
+#endif
                         AddExponent(shownExponent);
                     }
                     else
@@ -3210,7 +3210,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         }
     }
 
-    #region Combined Unit Classes
+#region Combined Unit Classes
 
     public class PrefixedUnit : Unit, IPrefixedUnit
     {
@@ -3897,15 +3897,13 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public override String UnitName 
         { get {
                 IUnit temp = GetAsNamedUnit();
-                if (temp != this) return temp.UnitName;
-                return this.UnitString();
+                return Object.ReferenceEquals(temp, this) ? this.UnitString() : temp.UnitName;
             }
         }
         public override String UnitSymbol
         { get {
                 IUnit temp = GetAsNamedUnit();
-                if (temp != this) return temp.UnitSymbol;
-                return this.UnitString();
+                return Object.ReferenceEquals(temp, this) ? this.UnitString() : temp.UnitSymbol;
             }
         }
 
@@ -4572,7 +4570,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return pq_unit;
         }
 
-        #region IPhysicalUnitMath Members
+#region IPhysicalUnitMath Members
 
         public override Unit Dimensionless => new CombinedUnit();
 
@@ -4734,9 +4732,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             }
         }
 
-        #endregion IPhysicalUnitMath Members
+#endregion IPhysicalUnitMath Members
 
-        #region Combine IPhysicalUnitMath Members
+#region Combine IPhysicalUnitMath Members
 
 
         public override CombinedUnit CombineMultiply(double quantity)
@@ -5197,9 +5195,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return cu1;
         }
 
-        #endregion IPhysicalUnitMath Members
+#endregion IPhysicalUnitMath Members
 
-        #region IEquatable<IPhysicalUnit> Members
+#region IEquatable<IPhysicalUnit> Members
 
         public override Int32 GetHashCode() => numerators.GetHashCode() + denominators.GetHashCode();
 
@@ -5216,7 +5214,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return this.Equals(otherIPU);
         }
 
-        #endregion IEquatable<IPhysicalUnit> Members
+#endregion IEquatable<IPhysicalUnit> Members
 
         /// <summary>
         /// String with PrefixedUnitExponent formatted symbol (without system name prefixed).
@@ -5254,9 +5252,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
     }
 
-    #endregion Combined Unit Classes
+#endregion Combined Unit Classes
 
-    #region Mixed Unit Classes
+#region Mixed Unit Classes
 
     public class MixedUnit : Unit, IMixedUnit
     {
@@ -5492,11 +5490,11 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         }
     }
 
-    #endregion Mixed Unit Classes
+#endregion Mixed Unit Classes
 
-    #endregion Physical Unit Classes
+#endregion Physical Unit Classes
 
-    #region Physical Unit System Classes
+#region Physical Unit System Classes
 
     public abstract class AbstractUnitSystem : NamedObject, IUnitSystem
     {
@@ -5625,16 +5623,20 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                     {   // Found both a prefix and an unit; Must be the right unit. 
                         if (symbolUnit != null)
                         {
-                            // symbolUnit = SI.Kg         <-> symbolUnit2 = SI_prefix.K·SI.g    Prefer (non-prefixed) symbolUnit, discharged symbolUnit2
-                            // symbolUnit = SI.K (Kelvin) <-> symbolUnit2 = SI_prefix.K·...     Prefer (prefixed) symbolUnit2, discharged symbolUnit
+                            // symbolUnit = SI.Kg         <-> symbolUnit2 = SI_prefix.K·SI.g        Prefer (non-prefixed) symbolUnit, discharge symbolUnit2
+                            // symbolUnit = SI.K (Kelvin) <-> symbolUnit2 = SI_prefix.K·...         Prefer (prefixed) symbolUnit2, discharge symbolUnit
+                            // symbolUnit = SI.Gy         <-> symbolUnit2 = SI_prefix.G·SI.y (year) Prefer (non-prefixed) symbolUnit, discharge symbolUnit2
+                            // symbolUnit = SI.cd         <-> symbolUnit2 = SI_prefix.c·SI.d (day)  Prefer (non-prefixed) symbolUnit, discharge symbolUnit2
 
-                            if (ReferenceEquals(symbolUnit, SI.Kg) && prefixchar == 'K' && ReferenceEquals(symbolUnit2, SI.g))  
-                            {   // Prefer (non-prefixed) symbolUnit, discharged symbolUnit2
+                            if (   (ReferenceEquals(symbolUnit, SI.Kg) && prefixchar == 'K' && ReferenceEquals(symbolUnit2, SI.g))
+                                || (ReferenceEquals(symbolUnit, SI.Gy) && prefixchar == 'G' && ReferenceEquals(symbolUnit2, SI.y))
+                                || (ReferenceEquals(symbolUnit, SI.cd) && prefixchar == 'c' && ReferenceEquals(symbolUnit2, SI.d)))  
+                            {   // Prefer (non-prefixed) symbolUnit, discharge symbolUnit2
 
                                 //Debug.Assert(symbolUnit == null); // For debug. Manually check if the discharged symbolUnit2 is a better choice than the returned symbolUnit.
                                 return (Unit)symbolUnit;
                             }
-                            // Prefer (prefixed) symbolUnit2, discharged symbolUnit
+                            // Prefer (prefixed) symbolUnit2, discharge symbolUnit
                             // Discharged symbolUnit even if set by non-prefixed unit (first call to UnitFromSymbol())
                             Debug.Assert(symbolUnit == null); // For debug. Manually check if the discharged symbolUnit could be a better choice than the returned symbolUnit2.
                         }
@@ -6534,9 +6536,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public Boolean Equals(ICombinedUnitSystem other) => Equals(this.UnitSystemes, other.UnitSystemes);
     }
 
-    #endregion Physical Unit System Classes
+#endregion Physical Unit System Classes
 
-    #region Physical Unit System Conversion Classes
+#region Physical Unit System Conversion Classes
 
     public class UnitSystemConversion
     {
@@ -6680,9 +6682,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         }
     }
 
-    #endregion Physical Unit System Conversions
+#endregion Physical Unit System Conversions
 
-    #region Physical Quantity Classes
+#region Physical Quantity Classes
 
     public class Quantity : IQuantity
     {
@@ -6843,10 +6845,10 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                     return value.EpsilonCompareTo(tempconverted.Value);
                 }
 
-                throw new ArgumentException("object's physical unit " + temp.Unit.ToPrintString() + " is not convertible to a " + this.Unit.ToPrintString());
+                throw new ArgumentException("Quantity's physical unit " + temp.Unit.ToPrintString() + " is not convertible to a " + this.Unit.ToPrintString());
             }
 
-            throw new ArgumentException("object is not a IQuantity");
+            throw new ArgumentException("object is not a Quantity");
         }
 
         /// <summary>
@@ -7493,7 +7495,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return pq1.CompareTo(pq2) >= 0;
         }
 
-        #region Physical Quantity static operator methods
+#region Physical Quantity static operator methods
 
         protected delegate Double CombineValuesFunc(Double v1, Double v2);
         protected delegate IUnit CombineUnitsFunc(IUnit u1, IUnit u2);
@@ -7503,7 +7505,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             if (pq1.Unit != pq2.Unit)
             {
                 Quantity temp_pq2 = pq2.ConvertTo(pq1.Unit);
-                pq2 = temp_pq2 ?? throw new ArgumentException("object's physical unit " + pq2.Unit.ToPrintString() + " is not convertible to unit " + pq1.Unit.ToPrintString());
+                pq2 = temp_pq2 ?? throw new ArgumentException("Quantity's physical unit " + pq2.Unit.ToPrintString() + " is not convertible to unit " + pq1.Unit.ToPrintString());
             }
             return new Quantity(cvf(pq1.Value, pq2.Value), pq1.Unit);
         }
@@ -7618,7 +7620,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public static Quantity operator |(Quantity pq, SByte exponent) => pq.Root(exponent);
 
-        #endregion Physical Quantity static operator methods
+#endregion Physical Quantity static operator methods
 
         public Quantity Power(SByte exponent)
         {
@@ -7644,7 +7646,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return new Quantity(value, pu_rot);
         }
 
-        #region Physical Quantity IPhysicalUnitMath implementation
+#region Physical Quantity IPhysicalUnitMath implementation
 
         public Quantity Add(Quantity physicalQuantity) => CombineValues(this, physicalQuantity, (Double v1, Double v2) => v1 + v2);
 
@@ -7722,10 +7724,10 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return pq;
         }
 
-        #endregion Physical Quantity IPhysicalUnitMath implementation        
+#endregion Physical Quantity IPhysicalUnitMath implementation        
     }
 
-    #endregion Physical Quantity Classes
+#endregion Physical Quantity Classes
 
 
     public class UnitSystemStack
@@ -8070,5 +8072,5 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         }
     }
 
-    #endregion Physical Measure Classes
+#endregion Physical Measure Classes
 }

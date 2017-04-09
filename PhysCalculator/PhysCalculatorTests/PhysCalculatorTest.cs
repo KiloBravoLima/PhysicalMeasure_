@@ -1280,6 +1280,40 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.AreEqual<IQuantity>( VarValueExpected, VarValue);
         }
 
+        /// <summary>
+        ///A test for ParseExpressionList
+        ///</summary>
+        [TestMethod()]
+        public void RunArgCommands2Test()
+        {
+
+            string[] PhysCalculatorConfig_args =
+            {
+                "set SoundSpeed = 340 m/s",
+                "set SoundSpeedInKmPrHour = SoundSpeed [ Km/h ]",
+                "list;",
+                "files",
+                "// cd subFolder",
+                "files ..",
+                "// cd ..",
+                "files"
+            };
+            PhysCalculator target = new PhysCalculator(PhysCalculatorConfig_args);
+            Assert.IsNotNull(target);
+
+            target.Run();
+            Quantity VarValueExpected = new Quantity(340, SI.m / SI.s);
+            String ResultLine = null;
+            bool GetVarRes = target.VariableGet(target.CurrentContext, "SoundSpeed", out var VarValue, ref ResultLine);
+            Assert.IsTrue(GetVarRes);
+            Assert.AreEqual<IQuantity>(VarValueExpected, VarValue);
+
+            VarValueExpected = new Quantity(1224, new CombinedUnit() * new PrefixedUnitExponent(Prefixes.K, SI.m, 1) / SI.h);
+            GetVarRes = target.VariableGet(target.CurrentContext, "SoundSpeedInKmPrHour", out VarValue, ref ResultLine);
+            Assert.IsTrue(GetVarRes);
+            Assert.AreEqual<IQuantity>(VarValueExpected, VarValue);
+        }
+
         /*****************
         /// <summary>
         ///A test for ParseFactor
