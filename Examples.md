@@ -2,7 +2,7 @@
 
 The PhysicalMeasure library can be used to represent and handle physical measures and calculations of physical properties:
 
-{code:c#}
+```
 using PhysicalMeasure;
 
 public void CalculateEnergyIn1Gram()
@@ -15,11 +15,11 @@ public void CalculateEnergyIn1Gram()
    PhysicalQuantity expected = new PhysicalQuantity(0.001 * 299792458 * 299792458, SI.J);
    Assert.AreEqual(expected, E);
 }
-{code:c#}
+```
 
 PhysicalMeasure also supports user defined units and unit systems:
 
-{code:c#}
+```
 using PhysicalMeasure;
 using static PhysicalMeasure.SI;
 
@@ -47,5 +47,5 @@ public void CalculatePriceInEuroForEnergiConsumed()
    String PriceInEuroForEnergyConsumedStr = PriceEnergyConsumedEurosAndCents.ToString();
    Assert.AreEqual(PriceInEuroForEnergyConsumedStr, "391 € 97 ¢");
 }
-{code:c#}
+```
 
