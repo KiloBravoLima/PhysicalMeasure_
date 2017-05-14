@@ -1,3 +1,4 @@
+
 # PhysicalMeasure_
 
 **Project Description**
@@ -13,6 +14,7 @@ Requries .NET framework 4.6.
 
 PhysicalMeasure can be used to represent and handle physical measures and calculations of physical properties. like this:
 
+```
 using PhysicalMeasure;
 using static PhysicalMeasure.SI;
 
@@ -28,10 +30,11 @@ public Quantity CalculateEnergyIn1Gram()
    Debug.Assert(expected == E);
    return E;
 }
+```
 
 PhysicalMeasure also supports user defined units and unit systems:
 
-
+```
 using PhysicalMeasure;
 using static PhysicalMeasure.SI;
 
@@ -60,7 +63,7 @@ public String CalculatePriceInEuroForEnergiConsumed()
 
    return PriceInEuroForEnergyConsumedStr;
 }
-
+```
 
 **PhysCalc console application**
 
