@@ -78,6 +78,30 @@ namespace PhysicalMeasureTest
             Assert.AreEqual((int)PhysicalBaseQuantityKind.LuminousIntensity, 6);
         }
 
+        public Boolean ExponentsValuesEquals(SByte[] actual, SByte[] expected)
+        {
+            Boolean equals = true;
+            int index = 0;
+            while (equals && (actual.Length > index || expected.Length > index))
+            {
+                if (actual.Length > index && expected.Length > index)
+                {
+                    equals = actual[index] == expected[index];
+                }
+                else if (actual.Length > index)
+                {
+                    equals = actual[index] == 0;
+                }
+                else // if (expected.Length > index)
+                {
+                    equals = expected[index] == 0;
+                }
+                index++;
+            }
+
+            return equals;
+        }
+
         /// <summary>
         ///A test for UnitFromSymbol
         ///</summary>
@@ -88,36 +112,43 @@ namespace PhysicalMeasureTest
             SByte[] expected0 = new SByte[7] { 1, 0, 0, 0, 0, 0, 0 };
             SByte[] actual0 = unit0.Exponents;
             Assert.AreEqual(actual0[0], expected0[0]);
+            Assert.AreEqual(ExponentsValuesEquals(actual0, expected0), true);
 
             IUnit unit1 = (IUnit)(SI.Units.BaseUnits[1]);
             SByte[] expected1 = new SByte[7] { 0, 1, 0, 0, 0, 0, 0 };
             SByte[] actual1 = unit1.Exponents;
             Assert.AreEqual(actual1[1], expected1[1]);
+            Assert.AreEqual(ExponentsValuesEquals(actual1, expected1), true);
 
             IUnit unit2 = (IUnit)(SI.Units.BaseUnits[2]);
             SByte[] expected2 = new SByte[7] { 0, 0, 1, 0, 0, 0, 0 };
             SByte[] actual2 = unit2.Exponents;
             Assert.AreEqual(actual2[2], expected2[2]);
+            Assert.AreEqual(ExponentsValuesEquals(actual2, expected2), true);
 
             IUnit unit3 = (IUnit)(SI.Units.BaseUnits[3]);
             SByte[] expected3 = new SByte[7] { 0, 0, 0, 1, 0, 0, 0 };
             SByte[] actual3 = unit3.Exponents;
             Assert.AreEqual(actual3[3], expected3[3]);
+            Assert.AreEqual(ExponentsValuesEquals(actual3, expected3), true);
 
             IUnit unit4 = (IUnit)(SI.Units.BaseUnits[4]);
             SByte[] expected4 = new SByte[7] { 0, 0, 0, 0, 1, 0, 0 };
             SByte[] actual4 = unit4.Exponents;
             Assert.AreEqual(actual4[4], expected4[4]);
+            Assert.AreEqual(ExponentsValuesEquals(actual4, expected4), true);
 
             IUnit unit5 = (IUnit)(SI.Units.BaseUnits[5]);
             SByte[] expected5 = new SByte[7] { 0, 0, 0, 0, 0, 1, 0 };
             SByte[] actual5 = unit5.Exponents;
             Assert.AreEqual(actual5[5], expected5[5]);
+            Assert.AreEqual(ExponentsValuesEquals(actual5, expected5), true);
 
             IUnit unit6 = (IUnit)(SI.Units.BaseUnits[6]);
             SByte[] expected6 = new SByte[7] { 0, 0, 0, 0, 0, 0, 1 };
             SByte[] actual6 = unit6.Exponents;
             Assert.AreEqual(actual6[6], expected6[6]);
+            Assert.AreEqual(ExponentsValuesEquals(actual6, expected6), true);
 
         }
 

@@ -20,7 +20,7 @@ namespace PhysicalMeasure
          */
         public static readonly Quantity c = new Quantity(299792458, SI.m / SI.s);
         public static readonly Quantity G = new Quantity(6.67428E-11, (SI.m^3) / (SI.Kg * (SI.s ^ 2)));
-        public static readonly Quantity h = new Quantity(6.62E-34, SI.J * SI.s);
+        public static readonly Quantity h = new Quantity(6.626068962E-34, SI.J * SI.s);
         public static readonly Quantity h_bar = new Quantity(1.054571628E-34, SI.J * SI.s);
 
         /*
