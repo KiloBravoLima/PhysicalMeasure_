@@ -31,7 +31,7 @@ namespace PhysicalCalculator.Expression
         Boolean SystemSet(String systemName, out INametableItem systemItem);
 
         Boolean UnitGet(String unitName, out Unit unitValue, ref String resultLine);
-        Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, out INametableItem unitItem);
+        Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem);
 
         Boolean VariableGet(String variableName, out Quantity variableValue, ref String resultLine);
         Boolean VariableSet(String variableName, Quantity variableValue);

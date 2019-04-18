@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
 using System.IO;
-
+using System.Linq;
 using System.Reflection;
+using System.Text;
+
+using CommandParser;
+
+using PhysicalCalculator.CommandBlock;
+using PhysicalCalculator.Expression;
+using PhysicalCalculator.Function;
+using PhysicalCalculator.Identifiers;
+
 using PhysicalMeasure;
 
 using TokenParser;
-using CommandParser;
 
-using PhysicalCalculator.Identifiers;
-using PhysicalCalculator.CommandBlock;
-using PhysicalCalculator.Function;
-using PhysicalCalculator.Expression;
 
 namespace PhysicalCalculator
 {
@@ -140,7 +142,7 @@ namespace PhysicalCalculator
         {
             IEnvironment NewItemDeclarationNamespace;
 
-            if (CurrentContext.DefaultDeclarationEnvironment == VariableDeclarationEnvironment.Global)
+            if (CurrentContext.DefaultDeclarationEnvironment == DeclarationEnvironmentKind.Global)
             {
                 NewItemDeclarationNamespace = GlobalContext;
             }
@@ -956,7 +958,16 @@ namespace PhysicalCalculator
                                     UnitSys = Default_UnitSystem;
                                 }
                             }
-                            OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, out Item);
+
+                            // unit symbol
+                            String unitSymbol = null; 
+                            if (commandLine.StartsWithKeywordPrefix("sym") == 3)
+                            {
+                                commandLine = commandLine.ReadToken(out string dummySymbolKeywordToken);
+                                commandLine = commandLine.ReadToken(out unitSymbol);
+                            } 
+
+                            OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, unitSymbol, out Item);
                             if (OK)
                             {
                                 /*
@@ -975,7 +986,7 @@ namespace PhysicalCalculator
                                 else
                                 {
                                     // Defined new local base unit 
-                                    resultLine = "Unit '" + UnitName + "' declared.";
+                                    resultLine = "Unit '" + Item.ToListString(UnitName) + "' declared.";
                                 }
                             }
                             else
@@ -1534,7 +1545,7 @@ namespace PhysicalCalculator
         //return context.SystemSet(systemName, unitValue, out systemItem);
         public Boolean SystemSet(IEnvironment context, String systemName, IQuantity unitValue, out INametableItem systemItem) => context.SystemSet(systemName, out systemItem);
 
-        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, Quantity unitValue, out INametableItem unitItem) => context.UnitSet(unitSystem, unitName, unitValue, out unitItem);
+        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem) => context.UnitSet(unitSystem, unitName, unitValue, unitSymbol, out unitItem);
 
         #endregion  Custom Unit  access
 

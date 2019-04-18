@@ -802,10 +802,12 @@ namespace PhysicalMeasureTest
             // using static PhysicalMeasure.SI;
             // using static Prefix;
 
-            BaseUnit Euro = new BaseUnit(null, (SByte)MonetaryBaseQuantityKind.Currency, "Euro", "€");
-            ConvertibleUnit Cent = new ConvertibleUnit("Euro-cent", "¢", Euro, new ScaledValueConversion(100));  /* [¢] = 100 * [€] */
-
-            UnitSystem EuroUnitSystem = new UnitSystem("Euros", Prefixes.UnitPrefixes, Euro, null, new ConvertibleUnit[] { Cent } );
+            BaseUnit Euro = null;
+            ConvertibleUnit Cent = null;
+            UnitSystem EuroUnitSystem = new UnitSystem("Euros", Prefixes.UnitPrefixes,
+                (us) => { Euro = new BaseUnit(us, (SByte)MonetaryBaseQuantityKind.Currency, "Euro", "€"); return new BaseUnit[] { Euro }; },
+                null,
+                (us) => { Cent = new ConvertibleUnit("Euro-cent", "¢", us.BaseUnits[0], new ScaledValueConversion(100)); return new ConvertibleUnit[] { Cent }; /* [¢] = 100 * [€] */ });
 
             Unit EurosAndCents = new MixedUnit(Euro, " ", Cent,"00", true);
 

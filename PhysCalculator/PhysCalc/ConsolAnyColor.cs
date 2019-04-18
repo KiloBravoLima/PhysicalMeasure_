@@ -11,7 +11,7 @@ using System.Diagnostics;                // for Debug
 
 namespace ConsolAnyColor
 {
-    class ConsolAnyColorClass
+    static class ConsolNativeMethods
     {
         [StructLayout(LayoutKind.Sequential)]
         internal struct COORD
@@ -116,102 +116,54 @@ namespace ConsolAnyColor
         }
 
 
-        const int STD_OUTPUT_HANDLE = -11;                                        // per WinBase.h
+        internal const int STD_OUTPUT_HANDLE = -11;                               // per WinBase.h
         internal static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);    // per WinBase.h
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern IntPtr GetStdHandle(int nStdHandle);
+        internal static extern IntPtr GetStdHandle(Int32 nStdHandle);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         // private static extern bool GetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX csbe);
-        private static extern bool GetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY csbe);
+        internal static extern Boolean GetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY csbe);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         // private static extern bool SetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX csbe);
-        private static extern bool SetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY csbe);
+        internal static extern Boolean SetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY csbe);
+    }
+
+    class ConsolAnyColorClass
+    {
+        // using ConsolNativeMethods;
 
         // Set a specific console color to an RGB color
         // The default console colors used are gray (foreground) and black (background)
-        public static int SetColor(ConsoleColor colorToSet, Color targetColor) => SetColor(colorToSet, new COLORREF(targetColor));
+        public static int SetColor(ConsoleColor colorToSet, Color targetColor) => SetColor(colorToSet, new ConsolNativeMethods.COLORREF(targetColor));
 
-        public static int SetColor(ConsoleColor colorToSet, uint r, uint g, uint b) => SetColor(colorToSet, new COLORREF(r, g, b));
+        public static int SetColor(ConsoleColor colorToSet, uint r, uint g, uint b) => SetColor(colorToSet, new ConsolNativeMethods.COLORREF(r, g, b));
 
-        public static int SetColor(ConsoleColor colorToSet, COLORREF targetColor)
+        public static int SetColor(ConsoleColor colorToSet, ConsolNativeMethods.COLORREF targetColor)
         {
             // CONSOLE_SCREEN_BUFFER_INFO_EX csbe = new CONSOLE_SCREEN_BUFFER_INFO_EX();
-            CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY csbe = new CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY();
+            ConsolNativeMethods.CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY csbe = new ConsolNativeMethods.CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY();
             csbe.cbSize = (int)Marshal.SizeOf(csbe);                    // 96 = 0x60
 
 
-            IntPtr hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);    // 7
-            if (hConsoleOutput == INVALID_HANDLE_VALUE)
+            IntPtr hConsoleOutput = ConsolNativeMethods.GetStdHandle(ConsolNativeMethods.STD_OUTPUT_HANDLE);    // 7
+            if (hConsoleOutput == ConsolNativeMethods.INVALID_HANDLE_VALUE)
             {
                 return Marshal.GetLastWin32Error();
             }
-            bool brc = GetConsoleScreenBufferInfoEx(hConsoleOutput, ref csbe);
+            bool brc = ConsolNativeMethods.GetConsoleScreenBufferInfoEx(hConsoleOutput, ref csbe);
             if (!brc)
             {
                 return Marshal.GetLastWin32Error();
             }
 
             csbe.colors[(int)colorToSet] = targetColor;
-            /*
-            switch (colorToSet)
-            {
-                case ConsoleColor.Black:
-                    csbe.black = targetColor;
-                    break;
-                case ConsoleColor.DarkBlue:
-                    csbe.darkBlue = targetColor;
-                    break;
-                case ConsoleColor.DarkGreen:
-                    csbe.darkGreen = targetColor;
-                    break;
-                case ConsoleColor.DarkCyan:
-                    csbe.darkCyan = targetColor;
-                    break;
-                case ConsoleColor.DarkRed:
-                    csbe.darkRed = targetColor;
-                    break;
-                case ConsoleColor.DarkMagenta:
-                    csbe.darkMagenta = targetColor;
-                    break;
-                case ConsoleColor.DarkYellow:
-                    csbe.darkYellow = targetColor;
-                    break;
-                case ConsoleColor.Gray:
-                    csbe.gray = targetColor;
-                    break;
-                case ConsoleColor.DarkGray:
-                    csbe.darkGray = targetColor;
-                    break;
-                case ConsoleColor.Blue:
-                    csbe.blue = targetColor;
-                    break;
-                case ConsoleColor.Green:
-                    csbe.green = targetColor;
-                    break;
-                case ConsoleColor.Cyan:
-                    csbe.cyan = targetColor;
-                    break;
-                case ConsoleColor.Red:
-                    csbe.red = targetColor;
-                    break;
-                case ConsoleColor.Magenta:
-                    csbe.magenta = targetColor;
-                    break;
-                case ConsoleColor.Yellow:
-                    csbe.yellow = targetColor;
-                    break;
-                case ConsoleColor.White:
-                    csbe.white = targetColor;
-                    break;
-            }
-            */ 
 
             ++csbe.srWindow.Bottom;
             ++csbe.srWindow.Right;
-            brc = SetConsoleScreenBufferInfoEx(hConsoleOutput, ref csbe);
+            brc = ConsolNativeMethods.SetConsoleScreenBufferInfoEx(hConsoleOutput, ref csbe);
             if (!brc)
             {
                 return Marshal.GetLastWin32Error();

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
+using System.Text;
+
+using PhysicalCalculator.Identifiers;
 
 using PhysicalMeasure;
 
 using TokenParser;
-
-using PhysicalCalculator.Identifiers;
 
 namespace PhysicalCalculator.CommandBlock
 {
@@ -32,8 +32,7 @@ namespace PhysicalCalculator.CommandBlock
 
     class PhysicalQuantityCommandsBlock : PhysicalQuantityCommandBlock, ICommandsEvaluator
     {
-        private List<String> _commands;
-        public List<String> Commands { get { return _commands; } set { _commands = value; } }
+        public List<String> Commands { get; set; } = new List<String>(); // it is readonly now **/
 
         override public String ToListString(String name)
         {
@@ -43,17 +42,17 @@ namespace PhysicalCalculator.CommandBlock
             if (Commands.Count <= 1)
             {
                 // Single line func
-                ListStringBuilder.AppendFormat("Commands {0} {{ {1} }}", name, Commands.Count > 0 ? Commands[0] : "");
+                ListStringBuilder.Append($"Commands {name} {{ {(Commands?.Count > 0 ? Commands[0] : "")} }}");
             }
             else
             {
                 // Multi line func
-                ListStringBuilder.AppendFormat("Commands {0}", name);
+                ListStringBuilder.Append($"Commands {name}");
                 ListStringBuilder.AppendLine();
                 ListStringBuilder.AppendLine("{");
                 foreach (String CommandLine in Commands)
                 {
-                    ListStringBuilder.AppendFormat("\t{0}", CommandLine);
+                    ListStringBuilder.Append($"\t{CommandLine}");
                     ListStringBuilder.AppendLine();
                 }
                 ListStringBuilder.Append("}");
@@ -182,8 +181,9 @@ namespace PhysicalCalculator.CommandBlock
                         {
                             if (localContext.CommandBlockToParseInfo.CommandBlock.Commands == null)
                             {
-                                localContext.CommandBlockToParseInfo.CommandBlock.Commands = new List<String>();
+                                /** */ localContext.CommandBlockToParseInfo.CommandBlock.Commands = new List<String>(); // it is readonly now **/
                             }
+                            Debug.Assert(localContext.CommandBlockToParseInfo.CommandBlock.Commands != null);
                             localContext.CommandBlockToParseInfo.CommandBlock.Commands.Add(commandLine.Substring(0, indexCommandEnd));
                             commandLine = commandLine.Substring(indexCommandEnd);
                         }

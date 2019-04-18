@@ -487,8 +487,9 @@ namespace PhysicalCalculator.Function
                                 {
                                     if (localContext.FunctionToParseInfo.Function.Commands == null)
                                     {
-                                        localContext.FunctionToParseInfo.Function.Commands = new List<String>();
+                                        /** localContext.FunctionToParseInfo.Function.Commands = new List<String>(); // It is read only now **/
                                     }
+                                    Debug.Assert(localContext.FunctionToParseInfo.Function.Commands != null);
                                     localContext.FunctionToParseInfo.Function.Commands.Add(commandLine.Substring(0, indexCommandEnd));
                                     commandLine = commandLine.Substring(indexCommandEnd);
                                 }

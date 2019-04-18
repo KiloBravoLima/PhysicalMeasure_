@@ -7,7 +7,7 @@ using PhysicalMeasure;
 
 
 namespace PhysicalMeasureTest
-{
+{ 
 
     /// <summary>
     ///This is a test class for UnitTest and is intended

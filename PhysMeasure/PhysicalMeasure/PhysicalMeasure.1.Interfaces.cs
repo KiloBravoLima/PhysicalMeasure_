@@ -448,6 +448,7 @@ namespace PhysicalMeasure
         Unit FractionalUnit { get; }
         String Separator { get; }
     }
+
     public interface IQuantityNamedUnit
     {
         Quantity AsNamedUnit { get; }
