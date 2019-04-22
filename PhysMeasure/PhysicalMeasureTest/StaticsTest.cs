@@ -69,13 +69,13 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void MeasureKindValues()
         {
-            Assert.AreEqual((int)PhysicalBaseQuantityKind.Length, 0);
-            Assert.AreEqual((int)PhysicalBaseQuantityKind.Mass, 1);
-            Assert.AreEqual((int)PhysicalBaseQuantityKind.Time, 2);
-            Assert.AreEqual((int)PhysicalBaseQuantityKind.ElectricCurrent, 3);
-            Assert.AreEqual((int)PhysicalBaseQuantityKind.ThermodynamicTemperature, 4);
-            Assert.AreEqual((int)PhysicalBaseQuantityKind.AmountOfSubstance, 5);
-            Assert.AreEqual((int)PhysicalBaseQuantityKind.LuminousIntensity, 6);
+            Assert.AreEqual((int)PhysicalBaseUnitKind.Length, 0);
+            Assert.AreEqual((int)PhysicalBaseUnitKind.Mass, 1);
+            Assert.AreEqual((int)PhysicalBaseUnitKind.Time, 2);
+            Assert.AreEqual((int)PhysicalBaseUnitKind.ElectricCurrent, 3);
+            Assert.AreEqual((int)PhysicalBaseUnitKind.ThermodynamicTemperature, 4);
+            Assert.AreEqual((int)PhysicalBaseUnitKind.AmountOfSubstance, 5);
+            Assert.AreEqual((int)PhysicalBaseUnitKind.LuminousIntensity, 6);
         }
 
         public Boolean ExponentsValuesEquals(SByte[] actual, SByte[] expected)
@@ -237,8 +237,8 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitsMustDifferTestLengthMass()
         {
-            IUnit LengthUnit = (IUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Length)]);
-            IUnit MassUnit = (IUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            IUnit LengthUnit = (IUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Length)]);
+            IUnit MassUnit = (IUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Mass)]);
 
             Assert.AreNotEqual(LengthUnit, MassUnit);
         }
@@ -249,7 +249,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitsMustDifferTestLengthElectricCharge()
         {
-            IUnit LengthUnit = (IUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Length)]);
+            IUnit LengthUnit = (IUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Length)]);
             IUnit ElectricChargeUnit  = (IUnit)(SI.Units.NamedDerivedUnits[7]);
 
             Assert.AreNotEqual(LengthUnit, ElectricChargeUnit);
@@ -261,7 +261,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitsMustDifferTestKilogramGram()
         {
-            IUnit MassUnit = (IUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            IUnit MassUnit = (IUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Mass)]);
             IUnit CelsiusTemperatureUnit = (IUnit)(SI.Units.ConvertibleUnits[1]);
 
             Assert.AreNotEqual(MassUnit, CelsiusTemperatureUnit);
@@ -273,7 +273,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void UnitsMustDifferTestMassCelsius()
         {
-            IUnit MassUnit = (IUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            IUnit MassUnit = (IUnit)(SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Mass)]);
             IUnit CelsiusTemperatureUnit = (IUnit)(SI.Units.ConvertibleUnits[1]);
 
             Assert.AreNotEqual(MassUnit, CelsiusTemperatureUnit);
@@ -512,7 +512,7 @@ namespace PhysicalMeasureTest
             String ScaledSymbolStr = "mK";
             //Quantity expected = (Quantity)(new Quantity(0.001, (Unit)(PhysicalMeasure.SI.Units.BaseUnits[(int)(MeasureKind.ThermodynamicTemperature)])));
             //Quantity actual;
-            Unit expected = new CombinedUnit(new PrefixedUnitExponent(Prefixes.m, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.ThermodynamicTemperature)], 1));
+            Unit expected = new CombinedUnit(new PrefixedUnitExponent(Prefixes.m, SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.ThermodynamicTemperature)], 1));
             Unit actual;
             actual = UnitSystems.Systems.ScaledUnitFromSymbol(ScaledSymbolStr);
             Assert.AreEqual(expected, actual);
@@ -543,7 +543,7 @@ namespace PhysicalMeasureTest
             String ScaledSymbolStr = "Kg";
             //Quantity expected = (Quantity)(new Quantity(1, (Unit)(PhysicalMeasure.SI.Units.BaseUnits[(int)(MeasureKind.Mass)])));
             //Quantity actual;
-            Unit expected = SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)];
+            Unit expected = SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Mass)];
             Unit actual;
             actual = UnitSystems.Systems.ScaledUnitFromSymbol(ScaledSymbolStr);
             Assert.AreEqual(expected, actual);
@@ -576,7 +576,7 @@ namespace PhysicalMeasureTest
         public void ConvertibleUnitTestCelsiusEqualsKelvin()
         {
             Quantity InCelsius = new Quantity(-173, SI.Units.ConvertibleUnits[1]); // °C
-            Quantity InKelvin = new Quantity(100.15, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.ThermodynamicTemperature)]); // K
+            Quantity InKelvin = new Quantity(100.15, SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.ThermodynamicTemperature)]); // K
 
             Assert.AreEqual(InCelsius, InKelvin);
         }
@@ -621,7 +621,7 @@ namespace PhysicalMeasureTest
         public void ConvertibleUnitTestGramEqualsKilogram()
         {
             Quantity InGram = new Quantity(123, SI.Units["g"]);
-            Quantity InKilogram = new Quantity(0.123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Mass)]);
+            Quantity InKilogram = new Quantity(0.123, SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Mass)]);
 
             Assert.AreEqual(InGram, InKilogram);
         }
@@ -634,7 +634,7 @@ namespace PhysicalMeasureTest
         public void ConvertibleUnitTestLitreEqualsCubicMeter()
         {
             Quantity InLitre = new Quantity(123, SI.Units["l"]);
-            Quantity InCubicMeter = new Quantity(0.123, SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Length)].Pow(3));
+            Quantity InCubicMeter = new Quantity(0.123, SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Length)].Pow(3));
 
             Assert.AreEqual(InLitre, InCubicMeter);
         }
@@ -648,7 +648,7 @@ namespace PhysicalMeasureTest
         public void ConvertibleUnitTestSomeLitreNotEqualsAnyCubicMeter()
         {
             Quantity InLitre = new Quantity(123, (Unit)(SI.Units["l"]));
-            Quantity InCubicMeter = new Quantity(0.1234, (SI.Units.BaseUnits[(int)(PhysicalBaseQuantityKind.Length)].Pow(3)));
+            Quantity InCubicMeter = new Quantity(0.1234, (SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Length)].Pow(3)));
 
             Assert.AreNotEqual(InLitre, InCubicMeter);
         }
@@ -805,7 +805,7 @@ namespace PhysicalMeasureTest
             BaseUnit Euro = null;
             ConvertibleUnit Cent = null;
             UnitSystem EuroUnitSystem = new UnitSystem("Euros", Prefixes.UnitPrefixes,
-                (us) => { Euro = new BaseUnit(us, (SByte)MonetaryBaseQuantityKind.Currency, "Euro", "€"); return new BaseUnit[] { Euro }; },
+                (us) => { Euro = new BaseUnit(us, (SByte)MonetaryBaseUnitKind.Currency, "Euro", "€"); return new BaseUnit[] { Euro }; },
                 null,
                 (us) => { Cent = new ConvertibleUnit("Euro-cent", "¢", us.BaseUnits[0], new ScaledValueConversion(100)); return new ConvertibleUnit[] { Cent }; /* [¢] = 100 * [€] */ });
 

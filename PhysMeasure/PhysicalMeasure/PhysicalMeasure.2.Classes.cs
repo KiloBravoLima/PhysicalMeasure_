@@ -5567,7 +5567,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunctionType someConvertibleUnitsBuilder)
             : this(someName, someUnitPrefixes, (unitsystem) => new BaseUnit[] { someBaseUnit }, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder)
         {
-            this.IsIsolatedUnitSystem = someBaseUnit.BaseUnitNumber == (SByte)MonetaryBaseQuantityKind.Currency;
+            this.IsIsolatedUnitSystem = someBaseUnit.BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
         }
 
         protected void CheckBaseUnitSystem()
@@ -6362,7 +6362,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             : this(someName, someUnitPrefixes)
         {
             this.baseUnits = someBaseUnitsBuilder?.Invoke(this);
-            this.IsIsolatedUnitSystem = this.baseUnits.Count() == 1 && this.baseUnits[0].BaseUnitNumber == (SByte)MonetaryBaseQuantityKind.Currency;
+            this.IsIsolatedUnitSystem = this.baseUnits.Count() == 1 && this.baseUnits[0].BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
         }
 
         public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunctionType someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder)

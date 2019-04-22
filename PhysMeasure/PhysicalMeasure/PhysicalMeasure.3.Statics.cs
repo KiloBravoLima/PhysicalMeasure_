@@ -144,13 +144,13 @@ namespace PhysicalMeasure
         public static readonly UnitSystem Units
             = new UnitSystem("SI", Prefixes.UnitPrefixes,
                 (unitsystem) => new BaseUnit[] 
-                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.Length, "meter", "m"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.Mass, "kilogram", "Kg"), /* kg */
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.Time, "second", "s"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd") },
+                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), /* kg */
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "second", "s"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd") },
                 (unitsystem) => new NamedDerivedUnit[] 
                                     { new NamedDerivedUnit(unitsystem, "hertz",     "Hz",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
                                       new NamedDerivedUnit(unitsystem, "radian",    "rad",  new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
@@ -173,11 +173,11 @@ namespace PhysicalMeasure
                                       new NamedDerivedUnit(unitsystem, "gray",      "Gy",   new SByte[] { 2, 0, -2, 0, 0, 0, 0 }),
                                       new NamedDerivedUnit(unitsystem, "katal",     "kat",  new SByte[] { 0, 0, -1, 0, 0, 1, 0 })},
                 (unitsystem) => new ConvertibleUnit[] 
-                                    { new ConvertibleUnit("gram", "g", unitsystem.BaseUnits[(int)PhysicalBaseQuantityKind.Mass], new ScaledValueConversion(1000)),  /* [g] = 1000 * [Kg] */
+                                    { new ConvertibleUnit("gram", "g", unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.Mass], new ScaledValueConversion(1000)),  /* [g] = 1000 * [Kg] */
                                       new ConvertibleUnit("Celsius", "°C" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ ,
-                                                            unitsystem.BaseUnits[(int)PhysicalBaseQuantityKind.ThermodynamicTemperature], new LinearValueConversion(-273.15, 1)),    /* [°C] = 1 * [K] - 273.15 */
-                                      new ConvertibleUnit("liter", "l", unitsystem.BaseUnits[(int)PhysicalBaseQuantityKind.Length].Pow(3), new ScaledValueConversion(1000) ),  /* [l] = 1000 * [m3] */
-                                      new ConvertibleUnit("hour", "h", unitsystem.BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/3600)) } /* [h] = 1/3600 * [s] */ 
+                                                            unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.ThermodynamicTemperature], new LinearValueConversion(-273.15, 1)),    /* [°C] = 1 * [K] - 273.15 */
+                                      new ConvertibleUnit("liter", "l", unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.Length].Pow(3), new ScaledValueConversion(1000) ),  /* [l] = 1000 * [m3] */
+                                      new ConvertibleUnit("hour", "h", unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(1.0/3600)) } /* [h] = 1/3600 * [s] */ 
                            );
 
         public static readonly BaseUnit[] BaseUnits = Units.BaseUnits;
@@ -185,12 +185,12 @@ namespace PhysicalMeasure
         public static readonly ConvertibleUnit[] ConvertibleUnits = Units.ConvertibleUnits;
 
         public static readonly ConvertibleUnit[] AdditionalTimeUnits
-            = new ConvertibleUnit[] {   new ConvertibleUnit("minute", "min", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/60)),                /* [min] = 1/60 * [s] */
-                                        new ConvertibleUnit("day", "d", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/86400)),                  /* [d] = 1/86400 * [s] */
-                                        new ConvertibleUnit("year", "y", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/(86400 * 365.25))),      /* [y]    = 1/365.25 * [d] */
-                                        new ConvertibleUnit("hour", "hour", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/3600)),               /* [hour] = 1/3600 * [s] */
-                                        new ConvertibleUnit("day", "day", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/86400)),                /* [day] = 1/86400 * [s] */
-                                        new ConvertibleUnit("year", "year", BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/(86400 * 365.25))) }; /* [year]    = 1/365.25 * [d] */
+            = new ConvertibleUnit[] {   new ConvertibleUnit("minute", "min", BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(1.0/60)),                /* [min] = 1/60 * [s] */
+                                        new ConvertibleUnit("day", "d", BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(1.0/86400)),                  /* [d] = 1/86400 * [s] */
+                                        new ConvertibleUnit("year", "y", BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(1.0/(86400 * 365.25))),      /* [y]    = 1/365.25 * [d] */
+                                        new ConvertibleUnit("hour", "hour", BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(1.0/3600)),               /* [hour] = 1/3600 * [s] */
+                                        new ConvertibleUnit("day", "day", BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(1.0/86400)),                /* [day] = 1/86400 * [s] */
+                                        new ConvertibleUnit("year", "year", BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(1.0/(86400 * 365.25))) }; /* [year]    = 1/365.25 * [d] */
 
         public static readonly Unit[] MixedTimeUnits
             = new Unit[] { new MixedUnit(SI.AdditionalTimeUnits[2], "y ", new MixedUnit(SI.AdditionalTimeUnits[1], "d ", new MixedUnit(ConvertibleUnits[3], ":", new MixedUnit(AdditionalTimeUnits[0], ":", BaseUnits[2])))) };
@@ -257,13 +257,13 @@ namespace PhysicalMeasure
         public static readonly UnitSystem Units 
             = new UnitSystem("CGS", Prefixes.UnitPrefixes,
                              (unitsystem) =>  new BaseUnit[] 
-                                { new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.Length, "centimeter", "cm"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.Mass, "gram", "g"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.Time, "second", "s"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd")});
+                                { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "centimeter", "cm"),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "gram", "g"),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "second", "s"),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A"),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K"),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol"),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd")});
     }
 
     public static class MGD_Units
@@ -271,21 +271,21 @@ namespace PhysicalMeasure
         public static readonly UnitSystem Units 
             = new UnitSystem("MGD", Prefixes.UnitPrefixes,
                 (unitsystem) => new BaseUnit[] 
-                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.Length, "meter", "m"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.Mass, "kilogram", "Kg"), /* kg */
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.Time, "day", "d"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd") }
+                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), /* kg */
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "day", "d"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd") }
                 , null,
                 (unitsystem) => new ConvertibleUnit[] 
-                                    { new ConvertibleUnit("second", "sec", unitsystem.BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24 * 60 * 60)),  /* [sec]  = 24 * 60 * 60 * [d] */
-                                      new ConvertibleUnit("minute", "min", unitsystem.BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24 * 60)),       /* [min]  = 24 * 60 * [d] */
-                                      new ConvertibleUnit("hour", "hour", unitsystem.BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(24)),             /* [hour] = 24 * [d] */
-                                      new ConvertibleUnit("day", "day", unitsystem.BaseUnits[(int)PhysicalBaseQuantityKind.Time], new IdentityValueConversion()),               /* [day]  = 1 * [d] */
-                                      new ConvertibleUnit("year", "year", unitsystem.BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/365.25)),     /* [year] = 1/365.25 * [d] */
-                                      new ConvertibleUnit("year", "y", unitsystem.BaseUnits[(int)PhysicalBaseQuantityKind.Time], new ScaledValueConversion(1.0/365.25)) });     /* [y]    = 1/365.25 * [d] */
+                                    { new ConvertibleUnit("second", "sec", unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(24 * 60 * 60)),  /* [sec]  = 24 * 60 * 60 * [d] */
+                                      new ConvertibleUnit("minute", "min", unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(24 * 60)),       /* [min]  = 24 * 60 * [d] */
+                                      new ConvertibleUnit("hour", "hour", unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(24)),             /* [hour] = 24 * [d] */
+                                      new ConvertibleUnit("day", "day", unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.Time], new IdentityValueConversion()),               /* [day]  = 1 * [d] */
+                                      new ConvertibleUnit("year", "year", unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(1.0/365.25)),     /* [year] = 1/365.25 * [d] */
+                                      new ConvertibleUnit("year", "y", unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(1.0/365.25)) });     /* [y]    = 1/365.25 * [d] */
     }
 
     public static class MGM_Units
@@ -293,13 +293,13 @@ namespace PhysicalMeasure
         public static readonly UnitSystem Units 
             = new UnitSystem("MGM", Prefixes.UnitPrefixes,
                 (unitsystem) => new BaseUnit[] 
-                                    { new BaseUnit(Units, (SByte)PhysicalBaseQuantityKind.Length, "meter", "m"),
-                                      new BaseUnit(Units, (SByte)PhysicalBaseQuantityKind.Mass, "kilogram", "Kg"), 
-                                      new BaseUnit(Units, (SByte)PhysicalBaseQuantityKind.Time, "moment", "ø"),
-                                      new BaseUnit(Units, (SByte)PhysicalBaseQuantityKind.ElectricCurrent, "ampere", "A"),
-                                      new BaseUnit(Units, (SByte)PhysicalBaseQuantityKind.ThermodynamicTemperature, "kelvin", "K"),
-                                      new BaseUnit(Units, (SByte)PhysicalBaseQuantityKind.AmountOfSubstance, "mol", "mol"),
-                                      new BaseUnit(Units, (SByte)PhysicalBaseQuantityKind.LuminousIntensity, "candela", "cd") });
+                                    { new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
+                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), 
+                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.Time, "moment", "ø"),
+                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A"),
+                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K"),
+                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol"),
+                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd") });
     }
 
     public static /* partial */ class UnitSystems

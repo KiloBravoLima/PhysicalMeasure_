@@ -14,16 +14,16 @@ namespace PhysicalMeasure
     /**
     public static partial class Physics
     {
-        public const int NoOfBaseQuanties = 7;
+        public const int NoOfBaseUnits = 7;
     }
     
     public static partial class Economics
     {
-        public const int NoOfBaseQuanties = 1;
+        public const int NoOfBaseUnits = 1;
     }
     **/
 
-    public enum PhysicalBaseQuantityKind
+    public enum PhysicalBaseUnitKind
     {
         Length,
         Mass,
@@ -34,7 +34,7 @@ namespace PhysicalMeasure
         LuminousIntensity
     }
 
-    public enum MonetaryBaseQuantityKind
+    public enum MonetaryBaseUnitKind
     {
         Currency // Monetary unit
     }

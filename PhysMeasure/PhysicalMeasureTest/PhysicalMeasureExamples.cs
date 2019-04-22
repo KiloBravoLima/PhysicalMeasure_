@@ -31,7 +31,7 @@ namespace PhysicalMeasureExamples
             BaseUnit Euro = null;
             ConvertibleUnit Cent = null;
             UnitSystem EuroUnitSystem = new UnitSystem("Euros", Prefixes.UnitPrefixes,
-                (us) => { Euro = new BaseUnit(us, (SByte)MonetaryBaseQuantityKind.Currency, "Euro", "€"); return new BaseUnit[] { Euro }; },
+                (us) => { Euro = new BaseUnit(us, (SByte)MonetaryBaseUnitKind.Currency, "Euro", "€"); return new BaseUnit[] { Euro }; },
                 null,
                 (us) => { Cent = new ConvertibleUnit("Euro-cent", "¢", us.BaseUnits[0], new ScaledValueConversion(100)); return new ConvertibleUnit[] { Cent }; /* [¢] = 100 * [€] */
             });
