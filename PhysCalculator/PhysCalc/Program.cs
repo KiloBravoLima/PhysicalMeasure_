@@ -1,10 +1,9 @@
-﻿﻿using System;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
-using System.Drawing; 
+using System.Drawing;
+using System.Linq;
 
 using ConsolAnyColor;
-using CommandParser;
 
 
 // Assembly marked as compliant to CLS.
@@ -14,6 +13,15 @@ namespace PhysicalCalculator
 {
     class Program
     {
+
+        /*
+            Start options:
+                Command Line arguments: "//read ShortenFractions" "// read AllTestFiles" "// expression()" "include EpotFunc"
+
+                Special test 1 
+                Command Line arguments: "E:\Alle Brugere\Klaus\Programmering\Git_Repositories\KiloBravoLima\2019\PhysicalMeasure_\PhysCalculator\TestResults\Klaus_SORTE-PC 2019-04-22 19_59_29\Out\unittest_1.cal"
+
+        */
         public static void Main(string[] args)
         {
             ConsolAnyColorClass.SetColor(ConsoleColor.Blue, Color.FromArgb(50, 50, 255));  // Slightly light blue
@@ -40,10 +48,15 @@ namespace PhysicalCalculator
                 PhysCalculator Calculator = new PhysCalculator(CommandLineReader, ResultLineWriter);
                 if (Calculator == null)
                 {
-                    ResultLineWriter.WriteErrorLine(String.Format("PhysCalculator failed to load with {0} arguments: \"{1}\" ", args.Count(), args.ToString()));
+                    ResultLineWriter.WriteErrorLine($"PhysCalculator failed to load with {args.Count()} arguments: \"{args.ToString()}\" ");
                 }
                 else
                 {
+
+// #if DEBUG 
+                    ResultLineWriter.WriteErrorLine($"PhysCalculator called with {args.Count()} arguments: \"{args.ToStringList()}\" ");
+// #endif 
+
                     ResultLineWriter.ForegroundColor = ConsoleColor.Blue;
                     ResultLineWriter.WriteLine("PhysCalculator ready");
                     ResultLineWriter.ResetColor();

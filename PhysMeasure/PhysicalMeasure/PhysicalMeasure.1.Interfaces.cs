@@ -11,15 +11,23 @@ namespace PhysicalMeasure
 
     #region Physical Measure Constants
 
+    public enum UnitSystemKind
+    {
+        Unknown,
+        PhysicalUnitSystem,
+        MonetaryUnitSystem,
+        CombinedUnitSystem
+    }
+
     /**
     public static partial class Physics
     {
-        public const int NoOfBaseUnits = 7;
+        public const int PhysicalUnitSystem_NoOfBaseUnits = 7;
     }
     
     public static partial class Economics
     {
-        public const int NoOfBaseUnits = 1;
+        public const int MonetaryUnitSystem_NoOfBaseUnits = 1;
     }
     **/
 
@@ -31,12 +39,15 @@ namespace PhysicalMeasure
         ElectricCurrent,
         ThermodynamicTemperature,
         AmountOfSubstance,
-        LuminousIntensity
+        LuminousIntensity,
+
+        PhysicalUnitSystem_NoOfBaseUnits = 7
     }
 
     public enum MonetaryBaseUnitKind
     {
-        Currency // Monetary unit
+        Currency, // Monetary unit
+        MonetaryUnitSystem_NoOfBaseUnits = 1
     }
 
     public enum UnitKind
@@ -454,7 +465,6 @@ namespace PhysicalMeasure
         Quantity AsNamedUnit { get; }
     }
 
-
     public interface IQuantity : IFormattable, IQuantityMath, IQuantityConversion, IQuantityNamedUnit
     {
         Double Value { get; }
@@ -465,6 +475,7 @@ namespace PhysicalMeasure
 
     public interface IUnitSystem : INamed
     {
+        UnitSystemKind UnitSystemKind { get; }
         bool IsIsolatedUnitSystem { get; }
         bool IsCombinedUnitSystem { get; }
 

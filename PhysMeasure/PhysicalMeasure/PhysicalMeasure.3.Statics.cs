@@ -243,7 +243,7 @@ namespace PhysicalMeasure
     {
         #region Physical Measure Constants
 
-        public const int NoOfBaseQuanties = 7;
+        public const int NoOfBaseUnits = (int)PhysicalBaseUnitKind.PhysicalUnitSystem_NoOfBaseUnits; // = 7;
 
         #endregion Physical Measure Constants
 

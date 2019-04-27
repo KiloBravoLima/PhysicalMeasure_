@@ -132,7 +132,7 @@ namespace PhysicalMeasure
             SByte MinNoOfBaseUnits = (SByte)Math.Min(exponents1.Length, exponents2.Length);
             SByte MaxNoOfBaseUnits = (SByte)Math.Max(exponents1.Length, exponents2.Length);
 
-            Debug.Assert(MaxNoOfBaseUnits <= Physics.NoOfBaseQuanties + 1, "Too many base units:" + MaxNoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfBaseQuanties + 1) + " expected.");
+            Debug.Assert(MaxNoOfBaseUnits <= Physics.NoOfBaseUnits + 1, "Too many base units:" + MaxNoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfBaseUnits + 1) + " expected.");
 
             Boolean equal = true;
             SByte i = 0;
@@ -165,7 +165,7 @@ namespace PhysicalMeasure
             Debug.Assert(exponents != null, "Parameter needed");
 
             SByte NoOfBaseUnits = (SByte)exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseQuanties + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfBaseQuanties + 1) + " expected.");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseUnits + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfBaseUnits + 1) + " expected.");
 
             Boolean isDimensionless = true;
             SByte i = 0;
@@ -184,7 +184,7 @@ namespace PhysicalMeasure
             Debug.Assert(exponents != null, "Parameter needed");
 
             SByte NoOfBaseUnits = (SByte)exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseQuanties + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfBaseQuanties + 1) + " expected.");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseUnits + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfBaseUnits + 1) + " expected.");
 
             SByte noOfDimensions = 0;
             SByte i = 0;
@@ -220,8 +220,8 @@ namespace PhysicalMeasure
             SByte MaxNoOfBaseUnits = (SByte)Math.Max(NoOfBaseUnits1, NoOfBaseUnits2);
             SByte MinNoOfBaseUnits = (SByte)Math.Min(NoOfBaseUnits1, NoOfBaseUnits2);
 
-            Debug.Assert(NoOfBaseUnits1 <= Physics.NoOfBaseQuanties + 1, "exponents1 has too many base units:" + NoOfBaseUnits1.ToString() + ". No more than " + (Physics.NoOfBaseQuanties + 1) + " expected.");
-            Debug.Assert(NoOfBaseUnits2 <= Physics.NoOfBaseQuanties + 1, "exponents2 has too many base units:" + NoOfBaseUnits2.ToString() + ". No more than " + (Physics.NoOfBaseQuanties + 1) + " expected.");
+            Debug.Assert(NoOfBaseUnits1 <= Physics.NoOfBaseUnits + 1, "exponents1 has too many base units:" + NoOfBaseUnits1.ToString() + ". No more than " + (Physics.NoOfBaseUnits + 1) + " expected.");
+            Debug.Assert(NoOfBaseUnits2 <= Physics.NoOfBaseUnits + 1, "exponents2 has too many base units:" + NoOfBaseUnits2.ToString() + ". No more than " + (Physics.NoOfBaseUnits + 1) + " expected.");
 
             SByte[] NewExponents = new SByte[MaxNoOfBaseUnits];
             SByte i = 0;
@@ -267,7 +267,7 @@ namespace PhysicalMeasure
             Debug.Assert(exponent != 0, "Parameter needed");
 
             SByte NoOfBaseUnits = (SByte)exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseQuanties + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfBaseQuanties + 1) + " expected.");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseUnits + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfBaseUnits + 1) + " expected.");
 
             SByte[] NewExponents = new SByte[NoOfBaseUnits];
             SByte i = 0;
@@ -288,7 +288,7 @@ namespace PhysicalMeasure
             Debug.Assert(exponent != 0, "Parameter needed");
 
             SByte NoOfBaseUnits = (SByte)exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseQuanties + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfBaseQuanties + 1) + " expected.");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseUnits + 1, "Too many base units:" + NoOfBaseUnits.ToString() + ". No more than " + (Physics.NoOfBaseUnits + 1) + " expected.");
 
             SByte[] NewExponents = new SByte[NoOfBaseUnits];
             SByte i = 0;
@@ -2128,7 +2128,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             SByte u1ExponentsLen = (SByte)u1_pq.Unit.Exponents.Length;
             SByte u2ExponentsLen = (SByte)u2_pq.Unit.Exponents.Length;
             int NoOfBaseUnits = Math.Max(u1ExponentsLen, u2ExponentsLen);
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseQuanties, "The 'NoOfBaseUnits' must be <= Physics.NoOfBaseQuanties");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseUnits, "The 'NoOfBaseUnits' must be <= Physics.NoOfBaseQuanties");
 
             SByte[] combinedExponents = new SByte[NoOfBaseUnits];
 
@@ -2155,7 +2155,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
             SByte[] exponents = u.Exponents;
             int NoOfBaseUnits = exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseQuanties, "The 'NoOfBaseUnits' must be <= Physics.NoOfBaseQuanties");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseUnits, "The 'NoOfBaseUnits' must be <= Physics.NoOfBaseQuanties");
 
             SByte[] someExponents = new SByte[NoOfBaseUnits];
 
@@ -2173,7 +2173,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
             SByte[] exponents = u.Exponents;
             int NoOfBaseUnits = exponents.Length;
-            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseQuanties, "The 'NoOfBaseUnits' must be <= Physics.NoOfBaseQuanties");
+            Debug.Assert(NoOfBaseUnits <= Physics.NoOfBaseUnits, "The 'NoOfBaseUnits' must be <= Physics.NoOfBaseQuanties");
 
             // Not valid during SI system initialization: Debug.Assert(u.System != null);
             Unit pu = new DerivedUnit(u.ExponentsSystem, exponents);
@@ -2692,6 +2692,41 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public override Quantity ConvertToBaseUnit(Double value) => new Quantity(value, this);
 
         public override Quantity ConvertToBaseUnit(Quantity physicalQuantity) => physicalQuantity.ConvertTo(this);
+    }
+
+    public static class BaseUnitArrayExtensions
+    {
+        public static bool IsPhysicalUnitSystemBaseUnits(this BaseUnit[] baseUnits)
+        {
+            if (baseUnits.Length != (int)PhysicalBaseUnitKind.PhysicalUnitSystem_NoOfBaseUnits)
+            {
+                return false;
+            }
+            for(int index = 0; index < baseUnits.Length; index ++)
+            {
+                if (baseUnits[index].BaseUnitNumber != index)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static bool IsMonetaryUnitSystemBaseUnits(this BaseUnit[] baseUnits)
+        {
+            if (baseUnits.Length != (int)MonetaryBaseUnitKind.MonetaryUnitSystem_NoOfBaseUnits)
+            {
+                return false;
+            }
+            for (int index = 0; index < baseUnits.Length; index++)
+            {
+                if (baseUnits[index].BaseUnitNumber != index)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     public class DerivedUnit : SystemUnit, IDerivedUnit
@@ -5501,6 +5536,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public abstract NamedDerivedUnit[] NamedDerivedUnits { get; set; }
         public abstract ConvertibleUnit[] ConvertibleUnits { get; set; }
 
+        public abstract UnitSystemKind UnitSystemKind { get; set; }
         public abstract Boolean IsIsolatedUnitSystem { get; set; }
         public abstract Boolean IsCombinedUnitSystem { get; set; }
 
@@ -6321,6 +6357,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
         }
 
+        public override UnitSystemKind UnitSystemKind { get; set; } = UnitSystemKind.MonetaryUnitSystem;
         public override Boolean IsIsolatedUnitSystem { get; set; } = false;
         public override Boolean IsCombinedUnitSystem { get; set; } = false;
     }
@@ -6338,13 +6375,13 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public override NamedDerivedUnit[] NamedDerivedUnits { get { return namedDerivedUnits; } /** */ set { throw new NotImplementedException(); } /* **/ }
         public override ConvertibleUnit[] ConvertibleUnits { get { return convertibleUnits; } /** */ set { throw new NotImplementedException(); } /* **/ }
 
+        public override UnitSystemKind UnitSystemKind { get; set; } // = UnitSystemKind.PhysicalUnitSystem;
         public override Boolean IsIsolatedUnitSystem { get; set; } = false;
         public override Boolean IsCombinedUnitSystem { get; set; } = false;
 
         public UnitSystem(String someName, Boolean someIsIsolatedUnitSystem)
-            : base(someName)
+            : base(someName, someIsIsolatedUnitSystem)
         {
-            this.IsIsolatedUnitSystem = someIsIsolatedUnitSystem;
         }
 
         public UnitSystem(String someName)
@@ -6362,7 +6399,13 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             : this(someName, someUnitPrefixes)
         {
             this.baseUnits = someBaseUnitsBuilder?.Invoke(this);
-            this.IsIsolatedUnitSystem = this.baseUnits.Count() == 1 && this.baseUnits[0].BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
+            int noOfBaseUnits = this.baseUnits.Length;
+            UnitSystemKind = this.baseUnits.IsPhysicalUnitSystemBaseUnits() ? UnitSystemKind.PhysicalUnitSystem 
+                          : this.baseUnits.IsMonetaryUnitSystemBaseUnits() ? UnitSystemKind.MonetaryUnitSystem
+                          : UnitSystemKind.CombinedUnitSystem;
+
+            // Not correct: Two MonetaryBaseUnits with each own Monetary UnitSystem can still have a UnitSystemConversion between them, and therefore none of them are an IsolatedUnitSystem.
+            this.IsIsolatedUnitSystem = noOfBaseUnits == 1 && this.baseUnits[0].BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
         }
 
         public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunctionType someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder)
@@ -6406,6 +6449,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public override Unit Dimensionless => UnitSystemes[0].Dimensionless;
 
+        public override UnitSystemKind UnitSystemKind { get { return UnitSystemKind.CombinedUnitSystem; } set { throw new NotImplementedException(); } } 
         public override Boolean IsIsolatedUnitSystem { get { return UnitSystemes.All(us => us.IsIsolatedUnitSystem); } set { throw new NotImplementedException(); } }
         public override Boolean IsCombinedUnitSystem { get { return true; } set { throw new NotImplementedException(); } }
 
@@ -7597,9 +7641,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
             SByte minNoOfBaseUnits = (SByte)Math.Min(pq1.Unit.Exponents.Length, pq2.Unit.Exponents.Length);
             SByte maxNoOfBaseUnits = (SByte)Math.Max(pq1.Unit.Exponents.Length, pq2.Unit.Exponents.Length);
-            Debug.Assert(maxNoOfBaseUnits <= Physics.NoOfBaseQuanties);
+            Debug.Assert(maxNoOfBaseUnits <= Physics.NoOfBaseUnits);
 
-            SByte[] someexponents = new SByte[Physics.NoOfBaseQuanties];
+            SByte[] someexponents = new SByte[Physics.NoOfBaseUnits];
 
             for (int i = 0; i < minNoOfBaseUnits; i++)
             {
