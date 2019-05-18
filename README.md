@@ -1,6 +1,6 @@
 
 # PhysicalMeasure_
-![](/PhysMeasure/PhysicalMeasure/PhysicalMeasure.ico)
+![](/PhysMeasure/PhysicalMeasure/PhysicalMeasure.png)
 
 **Project Description**
 
