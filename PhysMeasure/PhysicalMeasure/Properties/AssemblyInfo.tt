@@ -330,9 +330,9 @@ fileTemplateManager.StartNewFile("PhysicalMeasure.nuspec", "PhysicalMeasure", "N
     <authors><#=developerName#></authors>
     <owners><#=developerName#></owners>
 
-    <licenseUrl>http://physicalmeasure.codeplex.com/license</licenseUrl>
-    <projectUrl>http://physicalmeasure.codeplex.com/</projectUrl>
-    <iconUrl>http://download-codeplex.sec.s-msft.com/Download/SourceControlFileDownload.ashx?ProjectName=physicalmeasure&amp;changeSetId=40664&amp;itemId=707533</iconUrl>
+    <licenseUrl>http://github.com/KiloBravoLima/PhysicalMeasure_/blob/master/license.md</licenseUrl>
+    <projectUrl>http://github.com/KiloBravoLima/PhysicalMeasure_/</projectUrl>
+    <iconUrl>http://github.com/KiloBravoLima/PhysicalMeasure_/PhysMeasure/PhysicalMeasure/PhysicalMeasure.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description><#=productDescription#></description>
 
