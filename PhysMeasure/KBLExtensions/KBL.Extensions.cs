@@ -161,6 +161,10 @@ namespace System
         public static String ToSortString(this DateTime Me) => Me.ToString("yyyy-MM-dd HH:mm:ss");
 
         public static String ToSortShortDateString(this DateTime Me) => Me.ToString("yyyy-MM-dd");
+
+        public static String ToSortString(this DateTimeOffset Me) => Me.ToString("yyyy-MM-dd HH:mm:ss");
+
+        public static String ToSortShortDateString(this DateTimeOffset Me) => Me.ToString("yyyy-MM-dd");
     }
 }
 
@@ -183,7 +187,7 @@ namespace System.Text
     }
 }
 
-namespace System.Collections.Generic 
+namespace System.Collections.Generic
 {
 
     public static class IEnumerableExtensions

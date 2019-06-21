@@ -293,13 +293,13 @@ namespace PhysicalMeasure
         public static readonly UnitSystem Units 
             = new UnitSystem("MGM", Prefixes.UnitPrefixes,
                 (unitsystem) => new BaseUnit[] 
-                                    { new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
-                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), 
-                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.Time, "moment", "ø"),
-                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A"),
-                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K"),
-                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol"),
-                                      new BaseUnit(Units, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd") });
+                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), 
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "moment", "ø"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol"),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd") });
     }
 
     public static /* partial */ class UnitSystems

@@ -19,18 +19,6 @@ namespace PhysicalMeasure
         CombinedUnitSystem
     }
 
-    /**
-    public static partial class Physics
-    {
-        public const int PhysicalUnitSystem_NoOfBaseUnits = 7;
-    }
-    
-    public static partial class Economics
-    {
-        public const int MonetaryUnitSystem_NoOfBaseUnits = 1;
-    }
-    **/
-
     public enum PhysicalBaseUnitKind
     {
         Length,
@@ -513,7 +501,7 @@ namespace PhysicalMeasure
         SByte[] UnitExponents(CombinedUnit cu);
         Quantity ConvertToBaseUnit(CombinedUnit cu);
 
-        IUnitSystem[] UnitSystemes { get; }
+        IUnitSystem[] UnitSystems { get; }
         Boolean ContainsSubUnitSystem(IUnitSystem unitsystem);
         Boolean ContainsSubUnitSystems(IEnumerable<IUnitSystem> unitsystems);
     }

@@ -448,7 +448,7 @@ namespace PhysicalCalculator.Expression
                         NewOperatorValid = true;
                     }
                     else
-                        if (newOperator == OperatorKind.sub)
+                    if (newOperator == OperatorKind.sub)
                     {
                         newOperator = OperatorKind.unaryminus;
                         NewOperatorValid = true;

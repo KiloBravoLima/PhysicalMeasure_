@@ -529,7 +529,7 @@ namespace PhysicalMeasureTest
         ///A test for mult operator
         ///</summary>
         [TestMethod()]
-        public void MultNumberWithUnitTest_KiloMeter()
+        public void QuantityTest_MultNumberWithUnit_KiloMeter_UnitTest()
         {
             Unit Km = Prefixes.K * SI.m;
             Quantity len = new Quantity(123, Km);
