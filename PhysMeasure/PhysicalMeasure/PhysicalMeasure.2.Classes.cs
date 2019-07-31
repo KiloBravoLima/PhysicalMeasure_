@@ -5,12 +5,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.Serialization;
 
 using static PhysicalMeasure.DimensionExponentsExtension;
+using static PhysicalMeasure.Prefixes;
 
 namespace PhysicalMeasure
 {
@@ -82,28 +83,20 @@ namespace PhysicalMeasure
 
         public override int GetHashCode()
         {
-            if (exponents == null)
-            {
-                return base.GetHashCode();
-            }
-            return exponents.GetHashCode();
+            return exponents == null ? base.GetHashCode() : exponents.GetHashCode();
         }
 
         public override Boolean Equals(Object obj)
         {
-            if (obj is DimensionExponents)
-            {
-                DimensionExponents DimensionExponentsObj = (DimensionExponents)obj;
-                return this.Equals(DimensionExponentsObj);
-            }
-            return false;
+            return // !(obj is null)   &&
+                   (obj is DimensionExponents DimensionExponentsObj)
+                && this.Equals(DimensionExponentsObj);
         }
 
         public Boolean Equals(DimensionExponents other)
         {
-            return Equals(this.exponents, other.exponents);
+            return other == null ? false : Equals(this.exponents, other.exponents);
         }
-
         
         public static Boolean operator ==(DimensionExponents e1, DimensionExponents e2)
         {
@@ -147,14 +140,7 @@ namespace PhysicalMeasure
             // Check tail of longest array to contain only zeros
             while (equal && i < MaxNoOfBaseUnits)
             {
-                if (exponents1.Length > exponents2.Length)
-                {
-                    equal = exponents1[i] == 0;
-                }
-                else
-                {
-                    equal = exponents2[i] == 0;
-                }
+                equal = exponents1.Length > exponents2.Length ? exponents1[i] == 0 : exponents2[i] == 0;
                 i++;
             }
             return equal;
@@ -235,14 +221,9 @@ namespace PhysicalMeasure
 
             while (i < MaxNoOfBaseUnits)
             {
-                if (NoOfBaseUnits1 > NoOfBaseUnits2)
-                {
-                    NewExponents[i] = exponents1[i];
-                }
-                else
-                {
-                    NewExponents[i] = cef(0, exponents2[i]);
-                }
+                NewExponents[i] = NoOfBaseUnits1 > NoOfBaseUnits2 
+                                    ? exponents1[i] 
+                                    : cef(0, exponents2[i]);
 
                 i++;
             }
@@ -344,11 +325,11 @@ namespace PhysicalMeasure
             {
                 if (i > 0)
                 {
-                    str = str + ", ";
+                    str += ", ";
                 }
-                str = str + exponents[i].ToString();
+                str += exponents[i].ToString();
             }
-            str = str + "]";
+            str += "]";
 
             return str;
         }
@@ -455,41 +436,33 @@ namespace PhysicalMeasure
         public IUnitPrefixExponent Multiply(IUnitPrefixExponent prefix)
         {
             IUnitPrefixExponent resultExponent = this.prefixExponent.Multiply(prefix);
-            if (!unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix))
-            {
-                return resultExponent;
-            }
-            return unitPrefix;
+            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix) 
+                ? resultExponent 
+                : unitPrefix;
         }
 
         public IUnitPrefixExponent Divide(IUnitPrefixExponent prefix)
         {
             IUnitPrefixExponent resultExponent = this.prefixExponent.Divide(prefix);
-            if (!unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix))
-            {
-                return resultExponent;
-            }
-            return unitPrefix;
+            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix) 
+                ? resultExponent 
+                : unitPrefix;
         }
 
         public IUnitPrefixExponent Power(SByte someExponent)
         {
             IUnitPrefixExponent resultExponent = this.prefixExponent.Power(someExponent);
-            if (!unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix))
-            {
-                return resultExponent;
-            }
-            return unitPrefix;
+            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix) 
+                ? resultExponent 
+                : unitPrefix;
         }
 
         public IUnitPrefixExponent Root(SByte someExponent)
         {
             IUnitPrefixExponent resultExponent = this.prefixExponent.Root(someExponent);
-            if (!unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix))
-            {
-                return resultExponent;
-            }
-            return unitPrefix;
+            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix) 
+                ? resultExponent 
+                : unitPrefix;
         }
 
         public IPrefixedUnit Multiply(INamedSymbolUnit symbolUnit) => new PrefixedUnit(this, symbolUnit);
@@ -644,14 +617,7 @@ namespace PhysicalMeasure
         // Conversion value is specified. Must assume Specific conversion e.g. specific temperature.
         public Double Convert(Double value, Boolean backwards = false)
         {
-            if (backwards)
-            {
-                return ConvertToPrimaryUnit(value);
-            }
-            else
-            {
-                return ConvertFromPrimaryUnit(value);
-            }
+            return backwards ? ConvertToPrimaryUnit(value) : ConvertFromPrimaryUnit(value);
         }
 
         public abstract Double ConvertFromPrimaryUnit(Double value);
@@ -660,14 +626,7 @@ namespace PhysicalMeasure
         // No Conversion value is specified. Must assume relative conversion e.g. temperature interval.
         public Double Convert(Boolean backwards = false)
         {
-            if (backwards)
-            {
-                return ConvertToPrimaryUnit();
-            }
-            else
-            {
-                return ConvertFromPrimaryUnit();
-            }
+            return backwards ? ConvertToPrimaryUnit() : ConvertFromPrimaryUnit();
         }
 
         public abstract Double ConvertFromPrimaryUnit();
@@ -745,11 +704,11 @@ namespace PhysicalMeasure
 
     public class CombinedValueConversion : ValueConversion
     {
-        private IValueConversion firstValueConversion;
-        private IValueConversion secondValueConversion;
+        private readonly IValueConversion firstValueConversion;
+        private readonly IValueConversion secondValueConversion;
 
-        private Boolean firstValueConversionDirectionInverted;
-        private Boolean secondValueConversionDirectionInverted;
+        private readonly Boolean firstValueConversionDirectionInverted;
+        private readonly Boolean secondValueConversionDirectionInverted;
 
         public override Double LinearOffset => firstValueConversion.LinearOffset + secondValueConversion.LinearOffset;
 
@@ -785,7 +744,8 @@ namespace PhysicalMeasure
 
     public class NamedSymbol : NamedItem, INamedSymbol
     {
-        public  String Symbol { get; /* set; */ }
+        public String Symbol { get; /* set; */ }
+        public String SymbolOrName { get { return !string.IsNullOrEmpty(Symbol) ? Symbol : Name; } }
 
         public NamedSymbol(String someName, String someSymbol)
             : base(someName)
@@ -810,14 +770,10 @@ namespace PhysicalMeasure
             Unit res_unit = system.UnitFromExponents(exponents);
             if (ConversionFactor != 1 || ConversionOffset != 0)
             {
-                if (ConversionOffset == 0)
-                {
-                    res_unit = new ConvertibleUnit(null, res_unit, new ScaledValueConversion(ConversionFactor));
-                }
-                else
-                {
-                    res_unit = new ConvertibleUnit(null, res_unit, new LinearValueConversion(ConversionOffset, ConversionFactor));
-                }
+                ValueConversion conversion = ConversionOffset == 0
+                    ? new ScaledValueConversion(ConversionFactor)
+                    : new LinearValueConversion(ConversionOffset, ConversionFactor);
+                res_unit = new ConvertibleUnit(null, res_unit, conversion);
             }
 
             Debug.Assert(res_unit != null, "res_unit must be found");
@@ -829,14 +785,7 @@ namespace PhysicalMeasure
             IUnitSystem us = this.ExponentsSystem;
             PrefixedUnitExponentList res = new PrefixedUnitExponentList(this.Exponents.Select((exp, i) =>
             {
-                if (exp != 0)
-                {
-                    return new PrefixedUnitExponent(us.BaseUnits[i], exp);
-                }
-                else
-                {
-                    return null; 
-                } 
+                return exp != 0 ? new PrefixedUnitExponent(us.BaseUnits[i], exp) : null;
             }));
             return res;
         }
@@ -961,7 +910,7 @@ namespace PhysicalMeasure
                     unitStrCount++;
                     string unitFieldString = unitString.Substring(unitStrStartCharIndex, unitStrLen).Trim();
 
-                    Unit tempPU = ParseUnit(null, ref unitFieldString);
+                    Unit tempPU = ParseUnit(/* null, */ ref unitFieldString);
 
                     if (tempPU == null)
                     {
@@ -1087,16 +1036,16 @@ namespace PhysicalMeasure
 
         private class ExpressionTokenizer
         {
-            private String inputString;
+            private readonly String inputString;
             private int pos = 0;
             private int afterLastOperandPos = 0;
             private int lastValidPos = 0;
             private Boolean inputRecognized = true;
-            private IUnit dimensionless = Physics.dimensionless;
-            private Boolean throwExceptionOnInvalidInput = false;
+            // private readonly IUnit dimensionless = Physics.dimensionless;
+            private readonly Boolean throwExceptionOnInvalidInput = false;
 
-            private Stack<OperatorKind> operators = new Stack<OperatorKind>();
-            private List<Token> tokens = new List<Token>();
+            private readonly Stack<OperatorKind> operators = new Stack<OperatorKind>();
+            private readonly List<Token> tokens = new List<Token>();
 
             private TokenKind lastReadToken = TokenKind.None;
 
@@ -1105,15 +1054,17 @@ namespace PhysicalMeasure
                 this.inputString = inputStr;
             }
 
+            /* 
             public ExpressionTokenizer(IUnit someDimensionless, String someInputStr)
             {
-                this.dimensionless = someDimensionless;
+                // this.dimensionless = someDimensionless;
                 this.inputString = someInputStr;
             }
+            */
 
-            public ExpressionTokenizer(IUnit someDimensionless, Boolean someThrowExceptionOnInvalidInput, String someInputStr)
+            public ExpressionTokenizer(/* IUnit someDimensionless, */ Boolean someThrowExceptionOnInvalidInput, String someInputStr)
             {
-                this.dimensionless = someDimensionless;
+                // this.dimensionless = someDimensionless;
                 this.throwExceptionOnInvalidInput = someThrowExceptionOnInvalidInput;
                 this.inputString = someInputStr;
             }
@@ -1345,23 +1296,21 @@ namespace PhysicalMeasure
                     tokens.Add(new Token(operators.Pop()));
                 }
 
-                if (tokens.Any())
-                {   // Return first operator from post fix operators
-                    return RemoveFirstToken();
-                }
-
-                return null;
+                // Return first operator from post fix operators
+                return tokens.Any() ? RemoveFirstToken() : null;
             }
         }
 
-        public static Unit ParseUnit(IUnit dimensionless, ref String inputString)
+        public static Unit ParseUnit(/* IUnit dimensionless, */ ref String inputString)
         {
+            /*
             if (dimensionless == null)
             {
                 dimensionless = Physics.dimensionless;
             }
+            */
 
-            ExpressionTokenizer tokenizer = new ExpressionTokenizer(dimensionless, /* someThrowExceptionOnInvalidInput: */ false, inputString);
+            ExpressionTokenizer tokenizer = new ExpressionTokenizer(/* dimensionless, */ /* someThrowExceptionOnInvalidInput: */ false, inputString);
 
             Stack<Unit> operands = new Stack<Unit>();
 
@@ -1487,6 +1436,7 @@ namespace PhysicalMeasure
             bool invertExponents = format.Contains("-/");
             bool showUnitSymbol = !showUnitName && !showUnitBaseExponents;
             bool forceShowSystem = format.Contains("Y");
+            bool showUnitSystemList = format.Contains("L");
             bool forcePrintStr = format.Contains("P");
 
             String unitStr;
@@ -1518,7 +1468,14 @@ namespace PhysicalMeasure
                   */
                  )
             {
-                unitStr = system.Name + "." + unitStr;
+                if (showUnitSystemList)
+                {
+                    unitStr = unitStr + " " + system.Name;    
+                }
+                else
+                {
+                    unitStr = system.Name + "." + unitStr;
+                }
             }
 
             if (forcePrintStr && String.IsNullOrEmpty(unitStr))
@@ -1630,14 +1587,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public virtual String ValueAndUnitString(String valStr, String unitFormat = null)
         {
             String unitStr = this.ToString(unitFormat);
-            if (String.IsNullOrEmpty(unitStr))
-            {
-                return valStr;
-            }
-            else
-            {
-                return valStr + " " + unitStr;
-            }
+            return String.IsNullOrEmpty(unitStr) 
+                ? valStr 
+                : valStr + " " + unitStr;
         }
 
         public virtual String ValueAndUnitString(Double value) 
@@ -1651,10 +1603,10 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return ValueAndUnitString(value, format, null);
         }
 
-        public virtual String ValueAndUnitString(Double value, String format, IFormatProvider formatProvider)
+        public virtual void SplitValueAndUnitFormatString(String format, out String valueFormat, out String unitFormat)
         {
-            String valueFormat = format;
-            String unitFormat = null;
+            valueFormat = format;
+            unitFormat = null;
             if (format != null)
             {   // Check for <ValueFormat>" U"<UnitFormat>
                 int unitFormatIndex = format.IndexOf(" U");
@@ -1666,6 +1618,13 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                     unitFormat = format.Length > unitFormatIndex + 2 ? format.Substring(unitFormatIndex + 2) : null;
                 }
             }
+        }
+
+        public virtual String ValueAndUnitString(Double value, String format, IFormatProvider formatProvider)
+        {
+            String valueFormat;
+            String unitFormat;
+            SplitValueAndUnitFormatString(format, out valueFormat, out unitFormat);
             String valStr = ValueString(value, valueFormat, formatProvider);
             return ValueAndUnitString(valStr, unitFormat);
         }
@@ -1676,7 +1635,10 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public virtual Unit AsNamedUnit { get { return GetAsNamedUnit(); } }
         public virtual Unit GetAsNamedUnit() => null;
-       
+
+        public virtual Unit AsShortnedUnit { get { return GetAsShortnedUnit(); } }
+        public virtual Unit GetAsShortnedUnit() => null;
+
         #endregion Unit print string methods
 
         #region Unit conversion methods
@@ -1835,7 +1797,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             Debug.Assert(other != null, "The 'other' parameter must be specified");
             */
 
-            if ((Object)other == null)
+            if (other is null)
             {
                 quotient = 0;
                 return false;
@@ -1876,7 +1838,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 }
 
                 pq2 = other.ConvertTo(this.ExponentsSystem);
-                if (Object.ReferenceEquals(null, pq2))
+                if (pq2 is null)
                 {
                     quotient = 0;
                     return false;
@@ -1938,56 +1900,36 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             {
                 IPrefixedUnit this_pu = (IPrefixedUnit)this;
                 Boolean equivalent = this_pu.Unit.Equivalent(other, out Double tempQuotient);
-                if (equivalent)
-                {
-                    quotient = this_pu.Prefix.Value * tempQuotient;
-                }
-                else
-                {
-                    quotient = 0;
-                }
+                quotient = equivalent ? this_pu.Prefix.Value * tempQuotient : 0;
                 return equivalent;
             }
             else if (other.Kind == UnitKind.PrefixedUnit)
             {
                 IPrefixedUnit other_pu = (IPrefixedUnit)other;
                 Boolean equivalent = this.Equivalent((Unit)other_pu.Unit, out Double tempQuotient);
-                if (equivalent)
-                {
-                    quotient = tempQuotient / other_pu.Prefix.Value;
-                }
-                else
-                {
-                    quotient = 0;
-                }
+                quotient = equivalent ? tempQuotient / other_pu.Prefix.Value : 0;
                 return equivalent;
             }
             else if (this.Kind == UnitKind.PrefixedUnitExponent)
             {
                 IPrefixedUnitExponent this_pue = (IPrefixedUnitExponent)this;
-                Boolean equivalent = this_pue.Unit.Equivalent(other, out Double tempQuotient);
-                if (equivalent)
-                {
-                    quotient = tempQuotient / this_pue.Prefix.Value;
-                }
-                else
-                {
-                    quotient = 0;
-                }
+
+                IPrefixedUnit this_pu = new PrefixedUnit(this_pue.Prefix, this_pue.Unit);
+                Unit other_u = other.Root(this_pue.Exponent);
+
+                Boolean equivalent = this_pu.Equivalent(other_u, out Double tempQuotient);
+                quotient = equivalent ? Math.Pow(tempQuotient, this_pue.Exponent) : 0;
                 return equivalent;
             }
             else if (other.Kind == UnitKind.PrefixedUnitExponent)
             {
-                PrefixedUnitExponent other_pue = (PrefixedUnitExponent)other;
-                Boolean equivalent = this.Equivalent((Unit)other_pue.Unit, out Double tempQuotient);
-                if (equivalent)
-                {
-                    quotient = tempQuotient / other_pue.Prefix.Value;
-                }
-                else
-                {
-                    quotient = 0;
-                }
+                IPrefixedUnitExponent other_pue = (IPrefixedUnitExponent)other;
+
+                PrefixedUnit other_pu = new PrefixedUnit(other_pue.Prefix, other_pue.Unit);
+                Unit this_u = this.Root(other_pue.Exponent);
+
+                Boolean equivalent = this_u.Equivalent(other_pu, out Double tempQuotient);
+                quotient = equivalent ? Math.Pow(tempQuotient, other_pue.Exponent) : 0;
                 return equivalent;
             }
             else if (this.Kind == UnitKind.CombinedUnit)
@@ -2054,7 +1996,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             Debug.Assert(other != null, "The 'other' parameter must be specified");
             */
 
-            if ((Object)other == null)
+            if (other is null)
             {
                 return false;
             }
@@ -2082,24 +2024,24 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public static Boolean operator ==(Unit unit1, Unit unit2)
         {
-            if ((Object)unit1 == null)
+            if (unit1 is null)
             {
-                return (Object)unit2 == null;
+                return unit2 is null;
             }
 
-            Debug.Assert((Object)unit1 != null, "The 'unit1' parameter must be specified");
+            Debug.Assert(!(unit1 is null), "The 'unit1' parameter must be specified");
 
             return unit1.Equals(unit2);
         }
 
         public static Boolean operator !=(Unit unit1, Unit unit2)
         {
-            if ((Object)unit1 == null)
+            if (unit1 is null)
             {
-                return (Object)unit2 != null;
+                return !(unit2 is null);
             }
 
-            Debug.Assert((Object)unit1 != null, "The 'unit1' parameter must be specified");
+            Debug.Assert(!(unit1 is null), "The 'unit1' parameter must be specified");
 
             return !unit1.Equals(unit2);
         }
@@ -2165,6 +2107,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             }
 
             // Not valid during SI system initialization: Debug.Assert(u.System != null);
+
             Unit pu = new DerivedUnit(u.ExponentsSystem, someExponents);
             return pu;
         }
@@ -2207,100 +2150,102 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public static Unit operator *(Unit u1, Unit u2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u1), "The " + nameof(u1) + " parameter must be specified");
+            Debug.Assert(!(u1 is null), "The " + nameof(u1) + " parameter must be specified");
 
             return u1.Multiply(u2);
         }
 
         public static Unit operator /(Unit u1, Unit u2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u1), "The " + nameof(u1) + " parameter must be specified");
+            Debug.Assert(!(u1 is null), "The " + nameof(u1) + " parameter must be specified");
 
             return u1.Divide(u2);
         }
 
         public static Unit operator *(Unit u1, IUnit u2) 
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u1), "The " + nameof(u1) + " parameter must be specified");
+            Debug.Assert(!(u1 is null), "The " + nameof(u1) + " parameter must be specified");
 
             return u1.Multiply(u2);
         }
 
         public static Unit operator /(Unit u1, IUnit u2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u1), "The " + nameof(u1) + " parameter must be specified");
+            Debug.Assert(!(u1 is null), "The " + nameof(u1) + " parameter must be specified");
 
             return u1.Divide(u2);
         }
 
         public static Unit operator *(IUnit u1, Unit u2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u1), "The " + nameof(u1) + " parameter must be specified");
+            Debug.Assert(!(u1 is null), "The " + nameof(u1) + " parameter must be specified");
 
             return u1.Multiply(u2);
         }
 
         public static Unit operator /(IUnit u1, Unit u2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u1), "The " + nameof(u1) + " parameter must be specified");
+            Debug.Assert(!(u1 is null), "The " + nameof(u1) + " parameter must be specified");
 
             return u1.Divide(u2);
         }
 
         public static Unit operator *(Unit u1, PrefixedUnitExponent pue2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u1), "The " + nameof(u1) + " parameter must be specified");
+            Debug.Assert(!(u1 is null), "The " + nameof(u1) + " parameter must be specified");
 
             return u1.Multiply((IPrefixedUnitExponent)pue2);
         }
 
         public static Unit operator /(Unit u1, PrefixedUnitExponent pue2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u1), "The " + nameof(u1) + " parameter must be specified");
+            Debug.Assert(!(u1 is null), "The " + nameof(u1) + " parameter must be specified");
 
             return u1.Divide((IPrefixedUnitExponent)pue2);
         }
 
         public static Unit operator *(Unit u1, IPrefixedUnitExponent pue2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u1), "The " + nameof(u1) + " parameter must be specified");
+            Debug.Assert(!(u1 is null), "The " + nameof(u1) + " parameter must be specified");
 
             return u1.Multiply(pue2);
         }
 
         public static Unit operator /(Unit u1, IPrefixedUnitExponent pue2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u1), "The " + nameof(u1) + " parameter must be specified");
+            Debug.Assert(!(u1 is null), "The " + nameof(u1) + " parameter must be specified");
 
             return u1.Divide(pue2);
         }
 
         public static Unit operator ^(Unit u, SByte exponent)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u), "The " + nameof(u) + " parameter must be specified");
+            Debug.Assert(!(u is null), "The " + nameof(u) + " parameter must be specified");
 
             return u.Pow(exponent);
         }
 
         public static Unit operator %(Unit u, SByte exponent)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u), "The "+ nameof(u) +" parameter must be specified");
+            Debug.Assert(!(u is null), "The " + nameof(u) + " parameter must be specified");
             return u.Rot(exponent);
         }
+
         /*
         public static Quantity operator ^(Unit u, SByte exponent)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u), "The " + nameof(u) + " parameter must be specified");
+            Debug.Assert(!(u is null), "The " + nameof(u) + " parameter must be specified");
 
             return new Quantity(u.Pow(exponent));
         }
 
         public static Quantity operator %(Unit u, SByte exponent)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, u), "The " + nameof(u) + " parameter must be specified");
+            Debug.Assert(!(u is null), "The " + nameof(u) + " parameter must be specified");
             return new Quantity(u.Rot(exponent));
         }
         */
+
         #endregion Unit static operator methods
 
         public virtual Quantity AsQuantity() => AsPhysicalQuantity(1);
@@ -2610,10 +2555,11 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
     public class BaseUnit : SystemUnit, INamedSymbol, IBaseUnit //, IPrefixedUnit
     {
-        private NamedSymbol namedSymbol;
+        private readonly NamedSymbol namedSymbol;
 
         public String Name => this.namedSymbol.Name;
         public String Symbol => this.namedSymbol.Symbol;
+        public String SymbolOrName => !String.IsNullOrEmpty(Symbol) ? Symbol : Name;
 
         public override String UnitName { get { return Name; } }
         public override String UnitSymbol { get { return Symbol; } }
@@ -2666,7 +2612,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         /// <summary>
         /// String with PrefixedUnitExponent formatted symbol (without system name prefixed).
         /// </summary>
-        public override String PureUnitString() => this.Symbol;
+        public override String PureUnitString() => this.SymbolOrName;
 
         public override Unit GetAsNamedUnit() => this;
 
@@ -2692,6 +2638,20 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public override Quantity ConvertToBaseUnit(Double value) => new Quantity(value, this);
 
         public override Quantity ConvertToBaseUnit(Quantity physicalQuantity) => physicalQuantity.ConvertTo(this);
+
+        public static Unit operator *(IUnitPrefix up, BaseUnit u)
+        {
+            Debug.Assert(up != null, "The " + nameof(up) + " parameter must be specified");
+
+            return new PrefixedUnit(up, u);
+        }
+
+        public static Unit operator *(BaseUnit u, IUnitPrefix up)
+        {                             
+            Debug.Assert(up != null, "The " + nameof(up) + " parameter must be specified");
+
+            return new PrefixedUnit(up, u);
+        }
     }
 
     public static class BaseUnitArrayExtensions
@@ -2982,6 +2942,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public String Name => this.namedSymbol.Name;
         public String Symbol => this.namedSymbol.Symbol;
+        public String SymbolOrName => !String.IsNullOrEmpty(Symbol) ? Symbol : Name;
 
         public NamedDerivedUnit(IUnitSystem someSystem, NamedSymbol someNamedSymbol, SByte[] someExponents = null)
             : base(someSystem, someExponents)
@@ -3068,6 +3029,8 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public String Name => this.namedSymbol.Name;
         public String Symbol => this.namedSymbol.Symbol;
 
+        public String SymbolOrName => !String.IsNullOrEmpty(Symbol) ? Symbol : Name;
+
         public override String UnitName { get { return Name; } }
         public override String UnitSymbol { get { return Symbol; } }
 
@@ -3096,16 +3059,16 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                     name = this.primaryunit.ToPrintString();
                     if (someConversion.LinearScale != 1)
                     {
-                        name = name + "/" + someConversion.LinearScale;
+                        name += "/" + someConversion.LinearScale;
                     }
 
                     if (someConversion.LinearOffset >= 0)
                     {
-                        name = name + " - " + someConversion.LinearOffset;
+                        name += " - " + someConversion.LinearOffset;
                     }
                     else
                     {
-                        name = name + " + " + -someConversion.LinearOffset;
+                        name += " + " + -someConversion.LinearOffset;
                     }
                 }
                 this.namedSymbol = new NamedSymbol(name, name);
@@ -3284,6 +3247,12 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             this.unit = someUnit;
         }
 
+        public override Unit Power(sbyte exponent)
+        {
+            Unit resPUE = new PrefixedUnitExponent(this, exponent);
+            return resPUE;
+        }
+
         public override Quantity AsPhysicalQuantity(Double value) => new Quantity(value, this);
 
         public override Boolean IsLinearConvertible() => unit.IsLinearConvertible();
@@ -3408,11 +3377,12 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public override String PureUnitString()
         {
             IUnit pu = prefixedUnit;
+            String unitString = pu.PureUnitString();
             if (exponent != 1)
             {
-                pu = pu.Pow(exponent);
+                unitString += exponent.ToString();
             }
-            String unitString = pu.PureUnitString();
+            
             return unitString;
         }
 
@@ -3483,7 +3453,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public override String CombinedUnitString(Boolean mayUseSlash = true, Boolean invertExponents = false)
         {
             String Str = "";
-            Debug.Assert(exponent != 0, "The '_Exponent' must be valid and not zero");
+            Debug.Assert(exponent != 0, "The 'Exponent' must be valid and not zero");
             if (prefixedUnit.Unit != null)
             {
                 string UnitStr = prefixedUnit.Unit.UnitString();
@@ -3500,14 +3470,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                     expo = (SByte)(-expo);
                 }
 
-                if ((UnitStr.Contains('·') || UnitStr.Contains('/') || UnitStr.Contains('^')) && (expo != 1))
-                {
-                    Str = "(" + UnitStr + ")";
-                }
-                else
-                {
-                    Str = UnitStr;
-                }
+                Str = (UnitStr.Contains('·') || UnitStr.Contains('/') || UnitStr.Contains('^')) && (expo != 1) 
+                            ? "(" + UnitStr + ")" 
+                            : UnitStr;
 
                 if (expo != 1)
                 {
@@ -3646,7 +3611,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 if (pue.Prefix != null && pue.Prefix.Exponent != 0)
                 {
                     newPrefixExponent = pue.Prefix.Exponent;
-                    Debug.Assert((pue.Prefix.Exponent == 0) || (exponent == 1) || (exponent == -1), "Power: pue.Prefix.PrefixExponent must be 0. " + pue.CombinedUnitString() + "^" + exponent);
+                    // Why should this be true? (cm)^3 could be ok with pue.Prefix.Exponent == -2, exponent = 3:   Debug.Assert((pue.Prefix.Exponent == 0) || (exponent == 1) || (exponent == -1), "Power: pue.Prefix.PrefixExponent must be 0. " + pue.CombinedUnitString() + "^" + exponent);
                 }
 
                 IUnitPrefix newUnitPrefix = null;
@@ -3683,7 +3648,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 if (pue.Prefix != null && pue.Prefix.Exponent != 0)
                 {
                     newPrefixExponent = pue.Prefix.Exponent;
-                    Debug.Assert((pue.Prefix.Exponent == 0) || (someExponent == 1) || (someExponent == -1), "Root: pue.Prefix.PrefixExponent must be 0. " + pue.CombinedUnitString() + "^(1/" + someExponent + ")");
+                    // Why should this be true ? (cm^3) ^(1/ 3) could be ok with pue.Prefix.Exponent == -2, exponent = 3:   Debug.Assert((pue.Prefix.Exponent == 0) || (someExponent == 1) || (someExponent == -1), "Root: pue.Prefix.PrefixExponent must be 0. " + pue.CombinedUnitString() + "^(1/" + someExponent + ")");
                 }
 
                 IUnitPrefix newUnitPrefix = null;
@@ -3705,10 +3670,10 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
     public class CombinedUnit : Unit, ICombinedUnit
     {
-        private Double scaleFactor = 1;
+        private readonly Double scaleFactor = 1;
 
-        private IPrefixedUnitExponentList numerators;
-        private IPrefixedUnitExponentList denominators;
+        private readonly IPrefixedUnitExponentList numerators;
+        private readonly IPrefixedUnitExponentList denominators;
 
         public IPrefixedUnitExponentList Numerators => numerators as IPrefixedUnitExponentList;
         public IPrefixedUnitExponentList Denominators => denominators as IPrefixedUnitExponentList;
@@ -4232,6 +4197,11 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return this;
         }
 
+        public override Unit GetAsShortnedUnit()
+        {
+            CombinedUnit shortnedUnit = new CombinedUnit();
+            return shortnedUnit.CombineMultiply(this, shortenScaledUnits: true);
+        }
 
         /// <summary>
         /// 
@@ -4330,14 +4300,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 Quantity pq_baseunit = pue.ConvertToBaseUnit();
                 value *= pq_baseunit.Value;
                 Unit baseunit = pq_baseunit.Unit;
-                if (unit == null)
-                {
-                    unit = baseunit;
-                }
-                else
-                {
-                    unit = unit.Multiply(baseunit);
-                }
+                unit = unit == null ? baseunit : unit.Multiply(baseunit);
             }
 
             foreach (IPrefixedUnitExponent pue in Denominators)
@@ -4345,14 +4308,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 Quantity pq_baseunit = pue.ConvertToBaseUnit();
                 value *= pq_baseunit.Value;
                 Unit baseunit = pq_baseunit.Unit;
-                if (unit == null)
-                {
-                    unit = baseunit.CombinePow(-1);
-                }
-                else
-                {
-                    unit = unit.Divide(baseunit);
-                }
+                unit = unit == null ? baseunit.CombinePow(-1) : unit.Divide(baseunit);
             }
 
             return new Quantity(value, unit);
@@ -4480,11 +4436,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 CombinedUnit convertToUnit_cu = convertToUnit as CombinedUnit;
                 CombinedUnit relativeUnit_cu = this.CombineDivide(convertToUnit_cu);
                 Quantity pq = relativeUnit_cu.ConvertToDerivedUnit();
-                if (pq.IsDimensionless)
-                {
-                    return new Quantity(pq.Value, convertToUnit);
-                }
-                return null;
+                return pq.IsDimensionless ? new Quantity(pq.Value, convertToUnit) : null;
             }
             else
             {
@@ -4525,7 +4477,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 }
                 else
                 {
-                    var e = pue_pq.Unit.Exponents;
+                    // SByte[] e = pue_pq.Unit.Exponents;
                     unit = unit.CombineMultiply(pue_pq.Unit);
                 }
             }
@@ -4540,14 +4492,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
                 value /= pue_pq.Value;
 
-                if (unit == null)
-                {
-                    unit = pue_pq.Unit.CombinePow(-1);
-                }
-                else
-                {
-                    unit = unit.CombineDivide(pue_pq.Unit);
-                }
+                unit = unit == null ? pue_pq.Unit.CombinePow(-1) : unit.CombineDivide(pue_pq.Unit);
             }
 
             if (unit == null)
@@ -4603,17 +4548,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public override Unit Dimensionless => new CombinedUnit();
 
-        public override Boolean IsDimensionless
-        {
-            get
-            {
-                if (!Numerators.Any() && !Denominators.Any())
-                {
-                    return true;
-                }
-                return base.IsDimensionless;
-            }
-        }
+        public override Boolean IsDimensionless => !Numerators.Any() && !Denominators.Any() ? true : base.IsDimensionless;
 
         private void MultiplyPUEL(IPrefixedUnitExponent prefixedUnitExponent, CombineExponentsFunc cef, IPrefixedUnitExponentList inPuel, ref IPrefixedUnitExponentList outPuel1,
                   ref Boolean primaryUnitFound, ref SByte prefixExponent, ref SByte prefixedUnitExponentScaleing,
@@ -4723,7 +4658,8 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public override Quantity Divide(double quantity) => this / quantity;
 
-        public override Unit Power(SByte exponent) => new CombinedUnit(Numerators.Power(exponent), Denominators.Power(exponent));
+        public override Unit Power(SByte exponent) => new CombinedUnit(Math.Pow(FactorValue, exponent), Numerators.Power(exponent), Denominators.Power(exponent));
+
 
         public override Unit Root(SByte exponent)
         {
@@ -4735,9 +4671,10 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 tempDenominators = Denominators.Root(exponent);
             }
 
+            Double factor = Math.Pow(FactorValue, 1/exponent);
             if ((tempNumerators != null) && (tempDenominators != null))
             {
-                CombinedUnit cu = new CombinedUnit(tempNumerators, tempDenominators);
+                CombinedUnit cu = new CombinedUnit(factor, tempNumerators, tempDenominators);
                 return cu;
             }
             else
@@ -4747,7 +4684,14 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 {
                     newExponents = newExponents.Root(exponent);
                     Debug.Assert(this.ExponentsSystem != null);
+
                     DerivedUnit du = new DerivedUnit(this.ExponentsSystem, newExponents);
+
+                    if (factor != 1.0)
+                    {
+                        CombinedUnit cu = new CombinedUnit(factor, du);
+                        return cu;
+                    }
                     return du;
                 }
                 else
@@ -4779,21 +4723,26 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             CombinedUnit result = new CombinedUnit(factor, this.Numerators, this.Denominators);
             return result;
         }
+
         public override CombinedUnit CombineMultiply(IUnitPrefixExponent prefixExponent) => this.CombineMultiply(prefixExponent.Value);
 
         public override CombinedUnit CombineDivide(IUnitPrefixExponent prefixExponent) => this.CombineDivide(prefixExponent.Value);
 
-        private void CombineFactorPUEL(IPrefixedUnitExponent prefixedUnitExponent, CombineExponentsFunc cef, IPrefixedUnitExponentList inPuel, ref IPrefixedUnitExponentList outPuel1, ref IPrefixedUnitExponentList outPuel2, 
-                  ref Boolean primaryUnitFound, ref SByte pue_prefixExp, ref sbyte scalingPrefixExponent, ref SByte scalingExponent,
+        private void CombineFactorPUEL(IPrefixedUnitExponent prefixedUnitExponent, CombineExponentsFunc cef, bool shortenScaledUnits, IPrefixedUnitExponentList inPuel, ref IPrefixedUnitExponentList outPuel1, ref IPrefixedUnitExponentList outPuel2, 
+                  ref Boolean primaryUnitFound, ref SByte pue_prefixExp, ref sbyte scalingPrefixExponent, ref SByte scalingExponent, ref Double scalingFactor,
                   ref SByte multPrefixExponent, ref SByte multExponent, ref Boolean ChangedExponentSign)
         {
             foreach (IPrefixedUnitExponent ue in inPuel)
             {
-                if (!primaryUnitFound && prefixedUnitExponent.Unit != null && ue.Unit != null && prefixedUnitExponent.Unit.Equals(ue.Unit))
+                // bool shortenScaledUnits = false;     // Do not shorten scaled units yet/here. Should be shortned just before presentation of final result. 
+                Double quotient = 1;
+                // if (!primaryUnitFound && prefixedUnitExponent.Unit != null && ue.Unit != null && prefixedUnitExponent.Unit.Equals(ue.Unit))
+                if (!primaryUnitFound && prefixedUnitExponent.Unit != null && ue.Unit != null && (  !shortenScaledUnits && ue.Unit.Equals(prefixedUnitExponent.Unit as Unit)
+                                                                                                  || shortenScaledUnits && ue.Unit.Equivalent(prefixedUnitExponent.Unit as Unit, out quotient)))
                 {
                     primaryUnitFound = true;
 
-                    // Reduce the found CombinedUnit exponent with ue2´s exponent; 
+                    // Reduce the found CombinedUnit exponent with ue2´s exponent;
                     SByte newExponent = (SByte)(cef(ue.Exponent, prefixedUnitExponent.Exponent));
 
                     SByte ue_prefixExp = 0; // 10^0 = 1
@@ -4802,10 +4751,12 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                         ue_prefixExp = ue.Prefix.Exponent;
                     }
 
+                    scalingFactor = quotient;
                     if (!pue_prefixExp.Equals(ue_prefixExp))
                     {   // Convert prefixedUnitExponent to have same PrefixExponent as ue; Move difference in scaling to prefixedUnitExponentScaleing
                         scalingPrefixExponent = (SByte)(pue_prefixExp - ue_prefixExp);
                         scalingExponent = prefixedUnitExponent.Exponent;
+                        scalingFactor = Math.Pow(quotient, scalingPrefixExponent);
                     }
 
                     if (newExponent > 0)
@@ -4839,6 +4790,12 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public override CombinedUnit CombineMultiply(PrefixedUnitExponent prefixedUnitExponent)
         {
             Debug.Assert(prefixedUnitExponent != null);
+            return CombineMultiply( prefixedUnitExponent,  shortenScaledUnits: false);
+        }
+
+        public CombinedUnit CombineMultiply(IPrefixedUnitExponent prefixedUnitExponent, bool shortenScaledUnits)
+        {
+            Debug.Assert(prefixedUnitExponent != null);
 
             if (prefixedUnitExponent.Unit != null && prefixedUnitExponent.Unit.Kind == UnitKind.CombinedUnit)
             {
@@ -4858,6 +4815,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
             SByte scalingPrefixExponent = 0;  // 10^0 = 1
             SByte scalingExponent = 1;
+            Double scalingFactor = 1;
 
             SByte pue_prefixExp = 0; // 10^0 = 1
             if (prefixedUnitExponent.Prefix != null)
@@ -4871,11 +4829,11 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             Boolean primaryUnitFound = false;
             Boolean changedExponentSign = false;
 
-            CombineFactorPUEL(prefixedUnitExponent, SByte_Sub, Denominators, ref tempDenominators, ref tempNumerators,
-                  ref primaryUnitFound, ref pue_prefixExp, ref scalingPrefixExponent, ref scalingExponent,
+            CombineFactorPUEL(prefixedUnitExponent, SByte_Sub, shortenScaledUnits, Denominators, ref tempDenominators, ref tempNumerators,
+                  ref primaryUnitFound, ref pue_prefixExp, ref scalingPrefixExponent, ref scalingExponent, ref scalingFactor,
                   ref multPrefixExponent, ref multExponent, ref changedExponentSign);
-            CombineFactorPUEL(prefixedUnitExponent, SByte_Add, Numerators, ref tempNumerators, ref tempDenominators,
-                  ref primaryUnitFound, ref pue_prefixExp, ref scalingPrefixExponent, ref scalingExponent,
+            CombineFactorPUEL(prefixedUnitExponent, SByte_Add, shortenScaledUnits, Numerators, ref tempNumerators, ref tempDenominators,
+                  ref primaryUnitFound, ref pue_prefixExp, ref scalingPrefixExponent, ref scalingExponent, ref scalingFactor,
                   ref multPrefixExponent, ref multExponent, ref changedExponentSign);
 
             if (!primaryUnitFound || changedExponentSign)
@@ -4909,12 +4867,12 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 }
             }
 
-            Double resScaleFactor = scaleFactor;
+            Double resScaleFactor = scaleFactor * scalingFactor;
             if (scalingPrefixExponent != 0 && scalingExponent != 0)
             {   // Add scaling factor without unit
                 sbyte exp = (sbyte)(scalingPrefixExponent * scalingExponent);
 
-                resScaleFactor = scaleFactor * Math.Pow(10, exp);
+                resScaleFactor *= Math.Pow(10, exp);
             }
 
             CombinedUnit cu = new CombinedUnit(resScaleFactor, tempNumerators, tempDenominators);
@@ -4930,7 +4888,14 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return this.CombineMultiply(temp_pue);
         }
 
+        public CombinedUnit CombineDivide(IPrefixedUnitExponent prefixedUnitExponent, bool shortenScaledUnits)
+        {
+            Debug.Assert(prefixedUnitExponent != null);
 
+            SByte newExponent = (SByte)(-prefixedUnitExponent.Exponent);
+            IPrefixedUnitExponent temp_pue = new PrefixedUnitExponent(prefixedUnitExponent.Prefix, prefixedUnitExponent.Unit, newExponent);
+            return this.CombineMultiply(temp_pue, shortenScaledUnits);
+        }
 
         public override CombinedUnit CombineMultiply(PrefixedUnit prefixedUnit)
         {
@@ -5185,9 +5150,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             }
         }
 
-        public CombinedUnit CombineMultiply(ICombinedUnit cu2)
+        public CombinedUnit CombineMultiply(ICombinedUnit cu2, bool shortenScaledUnits = false)
         {
-            if (this.IsDimensionless)
+            if (this.IsDimensionless && !shortenScaledUnits)
             {
                 return cu2.CombineMultiply(this.FactorValue);
             }
@@ -5196,12 +5161,12 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
             foreach (IPrefixedUnitExponent pue in cu2.Numerators)
             {
-                cu1 = cu1.CombineMultiply(pue);
+                cu1 = cu1.CombineMultiply(pue, shortenScaledUnits);
             }
 
             foreach (IPrefixedUnitExponent pue in cu2.Denominators)
             {
-                cu1 = cu1.CombineDivide(pue);
+                cu1 = cu1.CombineDivide(pue, shortenScaledUnits);
             }
 
             return cu1;
@@ -5443,24 +5408,13 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
             Debug.Assert(mainUnit != null);
 
-            string valStr;
-            if (FractionalUnit == null)
-            {
-                valStr = MainUnit.ValueString(value, format, formatProvider);
-            }
-
             Double integralValue = Math.Truncate(value);
             Double fractionalValue = value - integralValue;
             Quantity fracPQ = new Quantity(fractionalValue, this.MainUnit);
             Quantity fracPQConv = fracPQ.ConvertTo(this.FractionalUnit);
-            if (fracPQConv != null)
-            {
-                valStr = MainUnit.ValueString(integralValue, format, formatProvider) + separator + FractionalUnit.ValueString(fracPQConv.Value, fractionalValueFormat, null);
-            }
-            else
-            {
-                valStr = MainUnit.ValueString(value, format, formatProvider);
-            }
+            String valStr = fracPQConv != null  && (FractionalUnit != null)
+                ? MainUnit.ValueString(integralValue, format, formatProvider) + separator + FractionalUnit.ValueString(fracPQConv.Value, fractionalValueFormat, null)
+                : MainUnit.ValueString(value, format, formatProvider);
             return valStr;
         }
 
@@ -5484,39 +5438,24 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
             if (inlineUnitFormat)
             {
-                if (fracPQConv != null)
-                {
-                    resultStr = MainUnit.ValueAndUnitString(integralValue, format, formatProvider)
+                resultStr = fracPQConv != null
+                    ? MainUnit.ValueAndUnitString(integralValue, format, formatProvider)
                                 + separator
-                                + FractionalUnit.ValueAndUnitString(fracPQConv.Value, fractionalValueFormat, null);
-                }
-                else
-                {
-                    resultStr = MainUnit.ValueAndUnitString(value, format, formatProvider);
-                }
+                                + FractionalUnit.ValueAndUnitString(fracPQConv.Value, fractionalValueFormat, null)
+                    : MainUnit.ValueAndUnitString(value, format, formatProvider);
 
                 return resultStr;
             }
 
-            String valStr;
-            if (fracPQConv != null)
-            {
-                valStr = MainUnit.ValueString(integralValue, format, formatProvider) + separator + FractionalUnit.ValueString(fracPQConv.Value, fractionalValueFormat, null);
-            }
-            else
-            {
-                valStr = MainUnit.ValueString(value, format, formatProvider);
-            }
+            String valueFormat;
+            String unitFormat;
+            SplitValueAndUnitFormatString(format, out valueFormat, out unitFormat);
 
-            String unitStr = this.ToString();
-            if (String.IsNullOrEmpty(unitStr))
-            {
-                resultStr = valStr;
-            }
-            else
-            {
-                resultStr = valStr + " " + unitStr;
-            }
+            String valStr = fracPQConv != null
+                ? MainUnit.ValueString(integralValue, valueFormat, formatProvider) + separator + FractionalUnit.ValueString(fracPQConv.Value, fractionalValueFormat, null)
+                : MainUnit.ValueString(value, valueFormat, formatProvider);
+            String unitStr = this.ToString(unitFormat);
+            resultStr = String.IsNullOrEmpty(unitStr) ? valStr : valStr + " " + unitStr;
 
             return resultStr;
         }
@@ -5530,15 +5469,14 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
     public abstract class AbstractUnitSystem : NamedItem, IUnitSystem
     {
-        public abstract UnitPrefixTable UnitPrefixes { get; set; }
+        public UnitPrefixTable UnitPrefixes { get; }
+        public BaseUnit[] BaseUnits { get; /* */ set; /* */ }
+        public NamedDerivedUnit[] NamedDerivedUnits { get; /* */ set; /* */ }
+        public ConvertibleUnit[] ConvertibleUnits { get; /* */ set; /* */ }
 
-        public abstract BaseUnit[] BaseUnits { get; set; }
-        public abstract NamedDerivedUnit[] NamedDerivedUnits { get; set; }
-        public abstract ConvertibleUnit[] ConvertibleUnits { get; set; }
-
-        public abstract UnitSystemKind UnitSystemKind { get; set; }
-        public abstract Boolean IsIsolatedUnitSystem { get; set; }
-        public abstract Boolean IsCombinedUnitSystem { get; set; }
+        public virtual UnitSystemKind UnitSystemKind { get; /* set; */ }
+        public virtual Boolean IsIsolatedUnitSystem { get; } = false;
+        public virtual Boolean IsCombinedUnitSystem { get; } = false;
 
         protected Unit dimensionless;
         public virtual Unit Dimensionless
@@ -5553,9 +5491,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             }
         }
 
-        public delegate BaseUnit[] BaseUnitsBuilderFunctionType(AbstractUnitSystem unitSystem);
-        public delegate NamedDerivedUnit[] NamedDerivedUnitsBuilderFunctionType(AbstractUnitSystem unitSystem);
-        public delegate ConvertibleUnit[] ConvertibleUnitsBuilderFunctionType(AbstractUnitSystem unitSystem);
+        public delegate BaseUnit[] BaseUnitsBuilderFunction(AbstractUnitSystem unitSystem);
+        public delegate NamedDerivedUnit[] NamedDerivedUnitsBuilderFunction(AbstractUnitSystem unitSystem);
+        public delegate ConvertibleUnit[] ConvertibleUnitsBuilderFunction(AbstractUnitSystem unitSystem);
 
         public AbstractUnitSystem(String someName, bool isIsolatedUnitSystem)
             : base(someName)
@@ -5564,27 +5502,34 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         }
 
         public AbstractUnitSystem(String someName)
-            // : this(someName, false)
             : base(someName)
         {
         }
 
-
         public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes)
-            : this(someName) // , false)
+            : this(someName , false)
         {
             this.UnitPrefixes = someUnitPrefixes;
         }
 
-        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunctionType someBaseUnitsBuilder)
+        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder)
             : this(someName, someUnitPrefixes)
         {
             this.BaseUnits = someBaseUnitsBuilder?.Invoke(this);
 
             CheckBaseUnitSystem();
+
+
+            int noOfBaseUnits = this.BaseUnits.Length;
+            UnitSystemKind = this.BaseUnits.IsPhysicalUnitSystemBaseUnits() ? UnitSystemKind.PhysicalUnitSystem
+                          : this.BaseUnits.IsMonetaryUnitSystemBaseUnits() ? UnitSystemKind.MonetaryUnitSystem
+                          : UnitSystemKind.CombinedUnitSystem;
+
+            // Not correct: Two MonetaryBaseUnits with each own Monetary UnitSystem can still have a UnitSystemConversion between them, and therefore none of them are an IsolatedUnitSystem.
+            this.IsIsolatedUnitSystem = noOfBaseUnits == 1 && this.BaseUnits[0].BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
         }
 
-        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunctionType someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder)
+        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder)
             : this(someName, someUnitPrefixes, someBaseUnitsBuilder)
         {
             this.NamedDerivedUnits = someNamedDerivedUnitsBuilder?.Invoke(this);
@@ -5592,7 +5537,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             CheckNamedDerivedUnitSystem();
         }
 
-        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunctionType someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunctionType someConvertibleUnitsBuilder)
+        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder)
             : this(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder)
         {
             this.ConvertibleUnits = someConvertibleUnitsBuilder?.Invoke(this);
@@ -5600,78 +5545,18 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             CheckConvertibleUnitSystem();
         }
 
-        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunctionType someConvertibleUnitsBuilder)
+        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder)
             : this(someName, someUnitPrefixes, (unitsystem) => new BaseUnit[] { someBaseUnit }, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder)
         {
             this.IsIsolatedUnitSystem = someBaseUnit.BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
         }
 
-        protected void CheckBaseUnitSystem()
-        {
-            Debug.Assert(this.BaseUnits != null);
 
-            foreach (BaseUnit aBaseUnit in this.BaseUnits)
-            {
-                Debug.Assert(aBaseUnit.Kind == UnitKind.BaseUnit);
-                if (aBaseUnit.Kind != UnitKind.BaseUnit)
-                {
-                    throw new ArgumentException("Must only contain units with Kind = UnitKind.BaseUnit", "BaseUnits");
-                }
-                if (aBaseUnit.SimpleSystem != this)
-                {
-                    Debug.Assert(aBaseUnit.SimpleSystem == null);
-                    /** aBaseUnit.SimpleSystem = this; // It is readonly now **/
-                }
+        protected abstract void CheckBaseUnitSystem();
 
-                Debug.Assert(aBaseUnit.SimpleSystem == this);
-            }
-        }
+        protected abstract void CheckNamedDerivedUnitSystem();
 
-        protected void CheckNamedDerivedUnitSystem()
-        {
-            if (this.NamedDerivedUnits != null)
-            {
-                foreach (NamedDerivedUnit namedderivedunit in this.NamedDerivedUnits)
-                {
-                    Debug.Assert(namedderivedunit.Kind == UnitKind.DerivedUnit);
-                    if (namedderivedunit.Kind != UnitKind.DerivedUnit)
-                    {
-                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someNamedDerivedUnits");
-                    }
-                    if (namedderivedunit.SimpleSystem != this)
-                    {
-                        /** namedderivedunit.SimpleSystem = this; // It is readonly now **/
-                    }
-                    Debug.Assert(namedderivedunit.SimpleSystem == this);
-                }
-            }
-        }
-
-        protected void CheckConvertibleUnitSystem()
-        {
-            if (this.ConvertibleUnits != null)
-            {
-                foreach (ConvertibleUnit convertibleunit in this.ConvertibleUnits)
-                {
-                    Debug.Assert(convertibleunit.Kind == UnitKind.ConvertibleUnit);
-                    if (convertibleunit.Kind != UnitKind.ConvertibleUnit)
-                    {
-                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someConvertibleUnits");
-                    }
-                    if (convertibleunit.SimpleSystem != this)
-                    {
-                        /** convertibleunit.SimpleSystem = this; // It is readonly now **/
-                    }
-                    if (convertibleunit.PrimaryUnit.SimpleSystem == null)
-                    {
-                        /** (convertibleunit.PrimaryUnit as Unit).SimpleSystem = this; // It is readonly now **/
-                    }
-
-                    Debug.Assert(convertibleunit.SimpleSystem == this);
-                    Debug.Assert(convertibleunit.PrimaryUnit.SimpleSystem == this);
-                }
-            }
-        }
+        protected abstract void CheckConvertibleUnitSystem();
 
         public override String ToString() => this.Name;
 
@@ -5852,7 +5737,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 if (NamedDerivedUnits != null)
                 {
                     // NamedDerivedUnit 
-                    unit = NamedDerivedUnits.FirstOrNull(namedDerivedUnit => namedDerivedUnit.Exponents.DimensionEquals(exponents));
+                    unit = NamedDerivedUnits.FirstOrDefault(namedDerivedUnit => namedDerivedUnit.Exponents.DimensionEquals(exponents));
                 }
                 if (unit == null)
                 {
@@ -5870,7 +5755,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             int noOfDimensions = exponents.NoOfDimensions();
             if (noOfDimensions > 1 && this.NamedDerivedUnits != null)
             {
-                INamedSymbolUnit dimensionEqualsNamedDerivedUnit = NamedDerivedUnits.FirstOrNull(namedderivedunit => exponents.DimensionEquals(namedderivedunit.Exponents));
+                INamedSymbolUnit dimensionEqualsNamedDerivedUnit = NamedDerivedUnits.FirstOrDefault(namedderivedunit => exponents.DimensionEquals(namedderivedunit.Exponents));
                 if (dimensionEqualsNamedDerivedUnit != null)
                 {
                     if (derivedUnit.Equivalent((Unit)dimensionEqualsNamedDerivedUnit, out Double qoutient))
@@ -5901,7 +5786,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 int noOfDimensions = exponents.NoOfDimensions();
                 if (noOfDimensions > 1 && this.NamedDerivedUnits != null)
                 {
-                    INamedSymbolUnit dimensionEqualsNamedDerivedUnit = NamedDerivedUnits.FirstOrNull(namedderivedunit => exponents.DimensionEquals(namedderivedunit.Exponents));
+                    INamedSymbolUnit dimensionEqualsNamedDerivedUnit = NamedDerivedUnits.FirstOrDefault(namedderivedunit => exponents.DimensionEquals(namedderivedunit.Exponents));
                     if (derivedUnit.Equivalent((Unit)dimensionEqualsNamedDerivedUnit, out Double qoutient))
                     {
                         // && qoutient.EpsilonCompareTo(1.00) == 0);
@@ -6007,11 +5892,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                     PrefixedUnitExponent pue = (PrefixedUnitExponent)convertToUnit;
                     Quantity pue_derivedUnit = pue.ConvertToDerivedUnit();
                     Quantity converted_fromunit = convertFromUnit.ConvertTo(pue_derivedUnit.Unit);
-                    if (converted_fromunit != null)
-                    {
-                        return new Quantity(converted_fromunit.Value / pue_derivedUnit.Value, convertToUnit);
-                    }
-                    return null;
+                    return converted_fromunit != null 
+                        ? new Quantity(converted_fromunit.Value / pue_derivedUnit.Value, convertToUnit) 
+                        : null;
                 }
                 else if (convertFromUnit.Kind == UnitKind.CombinedUnit)
                 {
@@ -6068,7 +5951,6 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 return null;
             }
         }
-
 
         public virtual Quantity ConvertTo(Unit convertFromUnit, IUnitSystem convertToUnitSystem)
         {
@@ -6340,48 +6222,12 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         }
     }
 
-    public class ExtentableUnitSystem : AbstractUnitSystem
-    {
-        private UnitPrefixTable unitPrefixes;
-        private BaseUnit[] baseUnits;
-        private NamedDerivedUnit[] namedDerivedUnits;
-        private ConvertibleUnit[] convertibleUnits;
-
-        public override UnitPrefixTable UnitPrefixes { get { return unitPrefixes; }   set { unitPrefixes = value; } }
-        public override BaseUnit[] BaseUnits { get { return baseUnits; } set { baseUnits = (BaseUnit[])value; CheckBaseUnitSystem(); } }
-        public override NamedDerivedUnit[] NamedDerivedUnits { get { return namedDerivedUnits; } set { namedDerivedUnits = value; CheckNamedDerivedUnitSystem(); } }
-        public override ConvertibleUnit[] ConvertibleUnits { get { return convertibleUnits; } set { convertibleUnits = value; CheckConvertibleUnitSystem(); } }
-
-        public ExtentableUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunctionType someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunctionType someConvertibleUnitsBuilder)
-            : base(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder)
-        {
-        }
-
-        public override UnitSystemKind UnitSystemKind { get; set; } = UnitSystemKind.MonetaryUnitSystem;
-        public override Boolean IsIsolatedUnitSystem { get; set; } = false;
-        public override Boolean IsCombinedUnitSystem { get; set; } = false;
-    }
-
     public class UnitSystem : AbstractUnitSystem
     {
-        private readonly UnitPrefixTable unitPrefixes;
-        private readonly BaseUnit[] baseUnits;
-        private readonly NamedDerivedUnit[] namedDerivedUnits;
-        private readonly ConvertibleUnit[] convertibleUnits;
-
-        public override UnitPrefixTable UnitPrefixes { get { return unitPrefixes; } /** */ set { throw new NotImplementedException(); } /* **/  }
-
-        public override BaseUnit[] BaseUnits { get { return baseUnits; }  /** */ set { throw new NotImplementedException(); } /* **/ }
-        public override NamedDerivedUnit[] NamedDerivedUnits { get { return namedDerivedUnits; } /** */ set { throw new NotImplementedException(); } /* **/ }
-        public override ConvertibleUnit[] ConvertibleUnits { get { return convertibleUnits; } /** */ set { throw new NotImplementedException(); } /* **/ }
-
-        public override UnitSystemKind UnitSystemKind { get; set; } // = UnitSystemKind.PhysicalUnitSystem;
-        public override Boolean IsIsolatedUnitSystem { get; set; } = false;
-        public override Boolean IsCombinedUnitSystem { get; set; } = false;
-
-        public UnitSystem(String someName, Boolean someIsIsolatedUnitSystem)
-            : base(someName, someIsIsolatedUnitSystem)
+         public UnitSystem(String someName, Boolean someIsIsolated)
+            : base(someName, someIsIsolated)
         {
+           
         }
 
         public UnitSystem(String someName)
@@ -6390,74 +6236,207 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         }
 
         public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes)
-            : this(someName, false)
+            : base(someName, someUnitPrefixes)
         {
-            this.unitPrefixes = someUnitPrefixes;
         }
 
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunctionType someBaseUnitsBuilder)
-            : this(someName, someUnitPrefixes)
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder)
+            : base(someName, someUnitPrefixes, someBaseUnitsBuilder)
         {
-            this.baseUnits = someBaseUnitsBuilder?.Invoke(this);
-            int noOfBaseUnits = this.baseUnits.Length;
-            UnitSystemKind = this.baseUnits.IsPhysicalUnitSystemBaseUnits() ? UnitSystemKind.PhysicalUnitSystem 
-                          : this.baseUnits.IsMonetaryUnitSystemBaseUnits() ? UnitSystemKind.MonetaryUnitSystem
-                          : UnitSystemKind.CombinedUnitSystem;
-
-            // Not correct: Two MonetaryBaseUnits with each own Monetary UnitSystem can still have a UnitSystemConversion between them, and therefore none of them are an IsolatedUnitSystem.
-            this.IsIsolatedUnitSystem = noOfBaseUnits == 1 && this.baseUnits[0].BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
         }
 
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunctionType someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder)
-            : this(someName, someUnitPrefixes, someBaseUnitsBuilder)
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder)
+            : base(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder)
         {
-            this.namedDerivedUnits = someNamedDerivedUnitsBuilder?.Invoke(this);
-
-            CheckNamedDerivedUnitSystem();
         }
 
 
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunctionType someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunctionType someConvertibleUnitsBuilder)
-            : this(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder)
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder)
+            : base(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder)
         {
-            convertibleUnits = someConvertibleUnitsBuilder?.Invoke(this);
-
-            CheckConvertibleUnitSystem();
         }
 
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunctionType someConvertibleUnitsBuilder)
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder)
             : this(someName, someUnitPrefixes, (unitsystem) =>  new BaseUnit[] { someBaseUnit }, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder)
         {
+        }
+
+        protected override void CheckBaseUnitSystem()
+        {
+            Debug.Assert(this.BaseUnits != null);
+
+            int baseUnitNumber = 0;
+            foreach (BaseUnit aBaseUnit in this.BaseUnits)
+            {
+                Debug.Assert(aBaseUnit.Kind == UnitKind.BaseUnit);
+                if (aBaseUnit.Kind != UnitKind.BaseUnit)
+                {
+                    throw new ArgumentException("Must only contain units with Kind = UnitKind.BaseUnit", "BaseUnits");
+                }
+
+                // SimpleSystem is readonly now; must be build for this system 
+                Debug.Assert(aBaseUnit.SimpleSystem == this);
+
+                if (aBaseUnit.BaseUnitNumber != baseUnitNumber)
+                {
+                    Debug.Assert(aBaseUnit.BaseUnitNumber == baseUnitNumber);
+
+                    throw new ArgumentException($"Base unit's BaseUnitNumber must be same as index into BaseUnits[]: {aBaseUnit.Name} at index {baseUnitNumber} has {aBaseUnit.BaseUnitNumber}", "BaseUnits");
+                }
+
+                if (this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() > 1)
+                {
+                    Debug.Assert(this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() == 1);
+
+                    IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                    throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at index {baseUnitNumbers.ToStringList()}", "BaseUnits");
+                }
+
+                if (this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() > 1)
+                {
+                    Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() == 1);
+
+                    IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                    throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at index {baseUnitNumbers.ToStringList()}", "BaseUnits");
+                }
+
+                baseUnitNumber++;
+            }
+        }
+
+        protected override void CheckNamedDerivedUnitSystem()
+        {
+            if (this.NamedDerivedUnits != null)
+            {
+                foreach (NamedDerivedUnit namedDerivedunit in this.NamedDerivedUnits)
+                {
+                    Debug.Assert(namedDerivedunit.Kind == UnitKind.DerivedUnit);
+                    if (namedDerivedunit.Kind != UnitKind.DerivedUnit)
+                    {
+                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someNamedDerivedUnits");
+                    }
+                    // SimpleSystem is readonly now; must be build for this system 
+                    Debug.Assert(namedDerivedunit.SimpleSystem == this);
+ 
+                    if (this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+
+                    if (this.NamedDerivedUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == namedDerivedunit.Name).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == namedDerivedunit.Name).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {namedDerivedUnitNames.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.NamedDerivedUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == namedDerivedunit.Symbol).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == namedDerivedunit.Symbol).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"Base unit's Symbol must be unique for the unit system: {namedDerivedunit.Symbol} is at {namedDerivedUnitNames.ToStringList()}", "someNamedDerivedUnits");
+                    }
+                }
+            }
+        }
+
+        protected override void CheckConvertibleUnitSystem()
+        {
+            if (this.ConvertibleUnits != null)
+            {
+                foreach (ConvertibleUnit convertibleUnit in this.ConvertibleUnits)
+                {
+                    Debug.Assert(convertibleUnit.Kind == UnitKind.ConvertibleUnit);
+                    if (convertibleUnit.Kind != UnitKind.ConvertibleUnit)
+                    {
+                        throw new ArgumentException("Must only contain units with Kind = UnitKind.ConvertibleUnit", "someConvertibleUnits");
+                    }
+                    // SimpleSystem is readonly now; must be build for this system 
+                    Debug.Assert(convertibleUnit.SimpleSystem == this);
+                    Debug.Assert(convertibleUnit.PrimaryUnit.SimpleSystem == this);
+
+                    if (this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.NamedDerivedUnits?.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+
+                    if (this.NamedDerivedUnits?.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Symbol} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+
+                    if (this.ConvertibleUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
+
+                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+
+                    if (this.ConvertibleUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
+
+                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+                }
+            }
         }
     }
 
 
     public class CombinedUnitSystem : AbstractUnitSystem, ICombinedUnitSystem
     {
-        private readonly UnitPrefixTable unitPrefixes;
-        private readonly BaseUnit[] baseUnits;
-        private readonly NamedDerivedUnit[] namedDerivedUnits;
-        private readonly ConvertibleUnit[] convertibleUnits;
-
         public IUnitSystem[] UnitSystemes { get; private set; }
-
-        public override UnitPrefixTable UnitPrefixes { get { return unitPrefixes; } /** */ set { throw new NotImplementedException(); } /* **/  }
-
-        public override BaseUnit[] BaseUnits { get { return baseUnits; }  /** */ set { throw new NotImplementedException(); } /* **/ }
-        public override NamedDerivedUnit[] NamedDerivedUnits { get { return namedDerivedUnits; } /** */ set { throw new NotImplementedException(); } /* **/ }
-        public override ConvertibleUnit[] ConvertibleUnits { get { return convertibleUnits; } /** */ set { throw new NotImplementedException(); } /* **/ }
 
         public override Unit Dimensionless => UnitSystemes[0].Dimensionless;
 
-        public override UnitSystemKind UnitSystemKind { get { return UnitSystemKind.CombinedUnitSystem; } set { throw new NotImplementedException(); } } 
-        public override Boolean IsIsolatedUnitSystem { get { return UnitSystemes.All(us => us.IsIsolatedUnitSystem); } set { throw new NotImplementedException(); } }
-        public override Boolean IsCombinedUnitSystem { get { return true; } set { throw new NotImplementedException(); } }
+        public override UnitSystemKind UnitSystemKind { get { return UnitSystemKind.CombinedUnitSystem; } } 
+        public override Boolean IsIsolatedUnitSystem { get { return UnitSystemes.All(us => us.IsIsolatedUnitSystem); } }
+        public override Boolean IsCombinedUnitSystem { get { return true; } }
 
         public Boolean ContainsSubUnitSystem(IUnitSystem unitsystem) => UnitSystemes.Contains(unitsystem);
 
         public Boolean ContainsSubUnitSystems(IEnumerable<IUnitSystem> someUnitSystems) => UnitSystemes.Union(someUnitSystems).Count() == UnitSystemes.Count();
 
-        private static List<ICombinedUnitSystem> combinedUnitSystems = new List<ICombinedUnitSystem>();
+        private static readonly List<ICombinedUnitSystem> combinedUnitSystems = new List<ICombinedUnitSystem>();
 
         public static ICombinedUnitSystem GetCombinedUnitSystem(IUnitSystem[] subUnitSystems)
         {
@@ -6502,29 +6481,183 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public CombinedUnitSystem(String someName, IUnitSystem[] someSubUnitSystems)
             //: base(someName ?? "<" + someSubUnitSystems.ToStringList.Aggregate("", ((str, us) => String.IsNullOrWhiteSpace(str) ? us.Name : str + ", " + us.Name)) + ">")
-            : base(someName ?? "<" + someSubUnitSystems.Select(us => us.Name).ToStringList() + ">")
+            : base(someName ?? "<" + someSubUnitSystems.Select(us => us.Name).ToStringList() + ">"
+                   , new UnitPrefixTable(someSubUnitSystems.Where(us => !(us.UnitPrefixes is null)).SelectMany(us => us.UnitPrefixes?.UnitPrefixes)
+                                                           .Distinct().ToArray())  
+                   , (aus => someSubUnitSystems.Where(us => !(us.BaseUnits is null)).Select(us => us.BaseUnits)
+                                               .Aggregate((buslist, bus) => ArrayExtensions.Concat<BaseUnit>(buslist, bus)))
+                   , (aus => someSubUnitSystems.Where(us => !(us.NamedDerivedUnits is null)).Select(us => us.NamedDerivedUnits)
+                                               .Aggregate((nduslist, ndus) => ArrayExtensions.Concat<NamedDerivedUnit>(nduslist, ndus)))
+                   , (aus => someSubUnitSystems.Where(us => !(us.ConvertibleUnits is null)).Select(us => us.ConvertibleUnits)
+                                               .Aggregate((cuslist, cus) => ArrayExtensions.Concat<ConvertibleUnit>(cuslist, cus)))  )
         {
-            UnitSystemes = someSubUnitSystems.OrderByDescending(us => us.BaseUnits.Length).ToArray();
+            UnitSystemes = someSubUnitSystems; // .OrderByDescending(us => us.BaseUnits.Length).ToArray();
+        }
 
-            UnitPrefix[] tempUnitprefixes = null;
-            BaseUnit[] tempBaseUnits = null;
-            NamedDerivedUnit[] tempNamedDerivedUnits = null;
-            ConvertibleUnit[] tempConvertibleUnits = null;
+        protected override void CheckBaseUnitSystem()
+        {
+            Debug.Assert(this.BaseUnits != null);
 
-            foreach (IUnitSystem us in UnitSystemes)
+            int baseUnitNumber = 0;
+            foreach (BaseUnit aBaseUnit in this.BaseUnits)
             {
-                tempUnitprefixes = ArrayExtensions.Concat<UnitPrefix>(tempUnitprefixes, us.UnitPrefixes?.UnitPrefixes);
+                Debug.Assert(aBaseUnit.Kind == UnitKind.BaseUnit);
+                if (aBaseUnit.Kind != UnitKind.BaseUnit)
+                {
+                    throw new ArgumentException("Must only contain units with Kind = UnitKind.BaseUnit", "BaseUnits");
+                }
 
-                tempBaseUnits = ArrayExtensions.Concat<BaseUnit>(tempBaseUnits, us.BaseUnits);
-                tempNamedDerivedUnits = ArrayExtensions.Concat<NamedDerivedUnit>(tempNamedDerivedUnits, us.NamedDerivedUnits);
-                tempConvertibleUnits = ArrayExtensions.Concat<ConvertibleUnit>(tempConvertibleUnits, us.ConvertibleUnits);
+                /**
+                // SimpleSystem is readonly now; must be build for this system 
+                Debug.Assert(aBaseUnit.SimpleSystem == this);
+
+                if (aBaseUnit.BaseUnitNumber != baseUnitNumber)
+                {
+                    Debug.Assert(aBaseUnit.BaseUnitNumber == baseUnitNumber);
+
+                    throw new ArgumentException($"Base unit's BaseUnitNumber must be same as index into BaseUnits[]: {aBaseUnit.Name} at index {baseUnitNumber} has {aBaseUnit.BaseUnitNumber}", "BaseUnits");
+                }
+                **/
+
+
+                if (this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() > 1)
+                {
+                    Debug.Assert(this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() == 1);
+
+                    List<String> baseUnitNames = this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Select(bu2 => bu2.Name).ToList();
+                    throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at base unit {baseUnitNames.ToStringList()}", "BaseUnits");
+                }
+
+                if (this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() > 1)
+                {
+                    Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() == 1);
+
+                    List<String> baseUnitNames = this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Select(bu2 => bu2.Name).ToList();
+                    throw new ArgumentException($"Base unit's Symbol must be unique for the unit system: {aBaseUnit.Symbol} is at base unit {baseUnitNames.ToStringList()}", "BaseUnits");
+                }
+
+                baseUnitNumber++;
             }
+        }
 
-            unitPrefixes = new UnitPrefixTable(tempUnitprefixes);
+        protected override void CheckNamedDerivedUnitSystem()
+        {
+            if (this.NamedDerivedUnits != null)
+            {
+                foreach (NamedDerivedUnit namedDerivedunit in this.NamedDerivedUnits)
+                {
+                    Debug.Assert(namedDerivedunit.Kind == UnitKind.DerivedUnit);
+                    if (namedDerivedunit.Kind != UnitKind.DerivedUnit)
+                    {
+                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someNamedDerivedUnits");
+                    }
+                    // SimpleSystem is readonly now; must be build for this system 
+                    // Debug.Assert(namedDerivedunit.SimpleSystem == this);   // Not for CombinedUnitSystem
 
-            baseUnits = tempBaseUnits;
-            namedDerivedUnits = tempNamedDerivedUnits;
-            convertibleUnits = tempConvertibleUnits;
+
+                    if (this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+
+                    if (this.NamedDerivedUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == namedDerivedunit.Name).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == namedDerivedunit.Name).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {namedDerivedUnitNames.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.NamedDerivedUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == namedDerivedunit.Symbol).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == namedDerivedunit.Symbol).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"Base unit's Symbol must be unique for the unit system: {namedDerivedunit.Symbol} is at {namedDerivedUnitNames.ToStringList()}", "someNamedDerivedUnits");
+                    }
+                }
+            }
+        }
+
+        protected override void CheckConvertibleUnitSystem()
+        {
+            if (this.ConvertibleUnits != null)
+            {
+                foreach (ConvertibleUnit convertibleUnit in this.ConvertibleUnits)
+                {
+                    Debug.Assert(convertibleUnit.Kind == UnitKind.ConvertibleUnit);
+                    if (convertibleUnit.Kind != UnitKind.ConvertibleUnit)
+                    {
+                        throw new ArgumentException("Must only contain units with Kind = UnitKind.ConvertibleUnit", "someConvertibleUnits");
+                    }
+
+                    /** Not for CombinedUnitSystem
+                    // SimpleSystem is readonly now; must be build for this system 
+                    Debug.Assert(convertibleUnit.SimpleSystem == this);
+                    Debug.Assert(convertibleUnit.PrimaryUnit.SimpleSystem == this);
+                    **/
+
+                    if (this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.NamedDerivedUnits?.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+
+                    if (this.NamedDerivedUnits?.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Symbol} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+
+                    if (this.ConvertibleUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
+
+                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+
+                    if (this.ConvertibleUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
+
+                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+                }
+            }
         }
 
         public SByte[] UnitExponents(CombinedUnit cu)
@@ -6625,8 +6758,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             if (obj == null)
                 return false;
 
-            ICombinedUnitSystem ICombinedUnitSystemObj = obj as ICombinedUnitSystem;
-            if (ICombinedUnitSystemObj == null)
+            if (!(obj is ICombinedUnitSystem ICombinedUnitSystemObj))
                 return false;
             else
                 return Equals(ICombinedUnitSystemObj);
@@ -6687,7 +6819,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                     {
                         Double baseunitconvertedvalue = vc.Convert(1, backwards);
                         Double baseunitfactor = Math.Pow(baseunitconvertedvalue, exponent);
-                        convertproduct = convertproduct * baseunitfactor;
+                        convertproduct *= baseunitfactor;
                     }
                     else
                     {
@@ -6812,98 +6944,37 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
             this.Value = somevalue;
 
-            if (someunit != null)
-            {
-                this.Unit = someunit;
-            }
-            else
-            {
-                this.Unit = Physics.dimensionless;
-            }
+            this.Unit = someunit ?? Physics.dimensionless;
         }
 
         public Quantity(Double somevalue, BaseUnit someunit)
+            : this(somevalue, (Unit) someunit)
         {
-            this.Value = somevalue;
-
-            if (someunit != null)
-            {
-                this.Unit = someunit;
-            }
-            else
-            {
-                this.Unit = Physics.dimensionless;
-            }
         }
 
         public Quantity(Double somevalue, DerivedUnit someunit)
+            : this(somevalue, (Unit)someunit)
         {
-            this.Value = somevalue;
-
-            if (someunit != null)
-            {
-                this.Unit = someunit;
-            }
-            else
-            {
-                this.Unit = Physics.dimensionless;
-            }
         }
 
         public Quantity(Double somevalue, NamedDerivedUnit someunit)
+            : this(somevalue, (Unit)someunit)
         {
-            this.Value = somevalue;
-
-            if (someunit != null)
-            {
-                this.Unit = someunit;
-            }
-            else
-            {
-                this.Unit = Physics.dimensionless;
-            }
         }
 
         public Quantity(Double somevalue, INamedSymbolUnit someunit)
+            : this(somevalue, (Unit)someunit)
         {
-            this.Value = somevalue;
-
-            if (someunit != null)
-            {
-                this.Unit = (Unit)someunit;
-            }
-            else
-            {
-                this.Unit = Physics.dimensionless;
-            }
         }
 
         public Quantity(Double somevalue, ConvertibleUnit someunit)
+            : this(somevalue, (Unit)someunit)
         {
-            this.Value = somevalue;
-
-            if (someunit != null)
-            {
-                this.Unit = someunit;
-            }
-            else
-            {
-                this.Unit = Physics.dimensionless;
-            }
         }
 
         public Quantity(Double somevalue, CombinedUnit someunit)
+            : this(somevalue, (Unit)someunit)
         {
-            this.Value = somevalue;
-
-            if (someunit != null)
-            {
-                this.Unit = someunit;
-            }
-            else
-            {
-                this.Unit = Physics.dimensionless;
-            }
         }
 
         public Quantity(Quantity somephysicalquantity)
@@ -6975,14 +7046,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             String valStr = pureUnit.ValueString(this.Value * unitValue);
             String unitStr = pureUnit.ToString();
 
-            if (String.IsNullOrEmpty(unitStr))
-            {
-                return valStr;
-            }
-            else
-            {
-                return valStr + " " + unitStr;
-            }
+            return String.IsNullOrEmpty(unitStr) ? valStr : valStr + " " + unitStr;
         }
 
         /// <summary>
@@ -7417,12 +7481,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             {
                 Unit namedUnit = Unit.AsNamedUnit;
 
-                if (namedUnit != null)
-                {
-                    return new Quantity(this.Value, namedUnit);
-                }
-
-                return this;
+                return namedUnit != null ? new Quantity(this.Value, namedUnit) : (this);
             }
         }
 
@@ -7436,14 +7495,14 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             Debug.Assert(this.Unit != null);
             Debug.Assert(other.Unit != null);
 
-            if (Object.ReferenceEquals(null, other))
+            if (other is null)
             {
                 quotient = 0;
                 return false;
             }
 
             Quantity other2 = other.ConvertTo(this.Unit);
-            if (Object.ReferenceEquals(null, other2))
+            if (other2 is null)
             {
                 quotient = 0;
                 return false;
@@ -7460,7 +7519,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public Boolean Equals(Quantity other)
         {
-            if (Object.ReferenceEquals(null, other))
+            if (other is null)
             {
                 return false;
             }
@@ -7470,11 +7529,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             // Debug.Assert(other.Unit != null);
 
             Quantity other2 = other.ConvertTo(this.Unit);
-            if (Object.ReferenceEquals(null, other2))
-            {
-                return false;
-            }
-            return this.Value.EpsilonCompareTo(other2.Value) == 0;
+            return other2 is null ? false : this.Value.EpsilonCompareTo(other2.Value) == 0;
         }
 
 
@@ -7513,24 +7568,24 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public static Boolean operator ==(Quantity pq1, Quantity pq2)
         {
-            if ((Object)pq1 == null)
+            if (pq1 is null)
             {
-                return (Object)pq2 == null;
+                return pq2 is null;
             }
 
-            Debug.Assert(!Object.ReferenceEquals(null, pq1));
+            Debug.Assert(!(pq1 is null));
 
             return pq1.Equals(pq2);
         }
 
         public static Boolean operator ==(Quantity pq1, IQuantity pq2)
         {
-            if ((Object)pq1 == null)
+            if (pq1 is null)
             {
-                return (Object)pq2 == null;
+                return pq2 is null;
             }
 
-            Debug.Assert(!Object.ReferenceEquals(null, pq1));
+            Debug.Assert(!(pq1 is null));
 
             return pq1.Equals(pq2);
         }
@@ -7538,52 +7593,52 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public static Boolean operator !=(Quantity pq1, Quantity pq2)
         {
-            if ((Object)pq1 == null)
+            if (pq1 is null)
             {
-                return (Object)pq2 != null;
+                return !(pq2 is null);
             }
 
-            Debug.Assert(!Object.ReferenceEquals(null, pq1));
+            Debug.Assert(!(pq1 is null));
 
             return !pq1.Equals(pq2);
         }
 
         public static Boolean operator !=(Quantity pq1, IQuantity pq2)
         {
-            if ((Object)pq1 == null)
+            if (pq1 is null)
             {
-                return (Object)pq2 != null;
+                return !(pq2 is null);
             }
 
-            Debug.Assert(!Object.ReferenceEquals(null, pq1));
+            Debug.Assert(!(pq1 is null));
 
             return !pq1.Equals(pq2);
         }
 
         public static Boolean operator <(Quantity pq1, Quantity pq2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, pq1));
+            Debug.Assert(!(pq1 is null));
 
             return pq1.CompareTo(pq2) < 0;
         }
 
         public static Boolean operator <=(Quantity pq1, Quantity pq2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, pq1));
+            Debug.Assert(!(pq1 is null));
 
             return pq1.CompareTo(pq2) <= 0;
         }
 
         public static Boolean operator >(Quantity pq1, Quantity pq2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, pq1));
+            Debug.Assert(!(pq1 is null));
 
             return pq1.CompareTo(pq2) > 0;
         }
 
         public static Boolean operator >=(Quantity pq1, Quantity pq2)
         {
-            Debug.Assert(!Object.ReferenceEquals(null, pq1));
+            Debug.Assert(!(pq1 is null));
 
             return pq1.CompareTo(pq2) >= 0;
         }
@@ -7639,27 +7694,23 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 Debug.Assert(pq2 != null);
             }
 
-            SByte minNoOfBaseUnits = (SByte)Math.Min(pq1.Unit.Exponents.Length, pq2.Unit.Exponents.Length);
-            SByte maxNoOfBaseUnits = (SByte)Math.Max(pq1.Unit.Exponents.Length, pq2.Unit.Exponents.Length);
+            SByte[] e1 = pq1.Unit.Exponents;
+            SByte[] e2 = pq2.Unit.Exponents;
+
+            SByte minNoOfBaseUnits = (SByte)Math.Min(e1.Length, e2.Length);
+            SByte maxNoOfBaseUnits = (SByte)Math.Max(e1.Length, e2.Length);
             Debug.Assert(maxNoOfBaseUnits <= Physics.NoOfBaseUnits);
 
             SByte[] someexponents = new SByte[Physics.NoOfBaseUnits];
 
             for (int i = 0; i < minNoOfBaseUnits; i++)
             {
-                someexponents[i] = cef(pq1.Unit.Exponents[i], pq2.Unit.Exponents[i]);
+                someexponents[i] = cef(e1[i], e2[i]);
             }
 
             for (int i = minNoOfBaseUnits; i < maxNoOfBaseUnits; i++)
             {
-                if (pq1.Unit.Exponents.Length > pq2.Unit.Exponents.Length)
-                {
-                    someexponents[i] = cef(pq1.Unit.Exponents[i], 0);
-                }
-                else
-                {
-                    someexponents[i] = cef(0, pq2.Unit.Exponents[i]);
-                }
+                someexponents[i] = cef((e1.Length > i ? e1[i] : (SByte)0), (e2.Length > i ? e2[i] : (SByte)0));
             }
 
             Debug.Assert(pq1.Unit.ExponentsSystem != null);
@@ -7831,14 +7882,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
             get
             {
-                if (default_UnitSystem_Stack == null || default_UnitSystem_Stack.Count <= 0)
-                {
-                    return SI.Units;
-                }
-                else
-                {
-                    return default_UnitSystem_Stack.Peek();
-                }
+                return default_UnitSystem_Stack == null || default_UnitSystem_Stack.Count <= 0 
+                        ? SI.Units
+                        : default_UnitSystem_Stack.Peek();
             }
         }
 
@@ -7918,7 +7964,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public IUnitSystem UnitSystemFromName(String UnitSystemsymbolstr)
         {
-            IUnitSystem result_us = unitSystems.FirstOrNull<IUnitSystem>(us => us.Name == UnitSystemsymbolstr);
+            IUnitSystem result_us = unitSystems.FirstOrDefault<IUnitSystem>(us => us.Name == UnitSystemsymbolstr);
             return result_us;
         }
     }
@@ -8086,14 +8132,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                         UnitSystemConversion firstUnitSystemConversion = GetIntermediateUnitSystemConversion(unitsystems1Conversions, new List<IUnitSystem>() { }, unitsystems1, new List<IUnitSystem>() { }, new List<IUnitSystem>() { combinedUnitSystemConversionIntermedierUnitSystem });
                         Boolean firstValueConversionDirectionInverted = firstUnitSystemConversion.BaseUnitSystem == combinedUnitSystemConversionIntermedierUnitSystem;
 
-                        if (!firstValueConversionDirectionInverted)
-                        {
-                            combinedUnitSystemConversionBaseUnitSystem = firstUnitSystemConversion.BaseUnitSystem;
-                        }
-                        else
-                        {
-                            combinedUnitSystemConversionBaseUnitSystem = firstUnitSystemConversion.ConvertedUnitSystem;
-                        }
+                        combinedUnitSystemConversionBaseUnitSystem = !firstValueConversionDirectionInverted
+                            ? firstUnitSystemConversion.BaseUnitSystem
+                            : firstUnitSystemConversion.ConvertedUnitSystem;
 
                         // Make the Combined unit system conversion
                         ValueConversion[] CombinedValueConversions = new ValueConversion[] {  new CombinedValueConversion(firstUnitSystemConversion.BaseUnitConversions[0], firstValueConversionDirectionInverted, secondUnitSystemConversion.BaseUnitConversions[0], secondValueConversionDirectionInverted),
@@ -8136,14 +8177,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                         UnitSystemConversion secondUnitSystemConversion = GetIntermediateUnitSystemConversion(unitsystems2Conversions, new List<IUnitSystem>() { }, new List<IUnitSystem>() { combinedUnitSystemConversionIntermedierUnitSystem }, new List<IUnitSystem>() { }, unitsystems2);
                         Boolean secondValueConversionDirectionInverted = secondUnitSystemConversion.ConvertedUnitSystem == combinedUnitSystemConversionIntermedierUnitSystem;
 
-                        if (!secondValueConversionDirectionInverted)
-                        {
-                            combinedUnitSystemConversionConvertedUnitSystem = secondUnitSystemConversion.ConvertedUnitSystem;
-                        }
-                        else
-                        {
-                            combinedUnitSystemConversionConvertedUnitSystem = secondUnitSystemConversion.BaseUnitSystem;
-                        }
+                        combinedUnitSystemConversionConvertedUnitSystem = !secondValueConversionDirectionInverted
+                            ? secondUnitSystemConversion.ConvertedUnitSystem
+                            : secondUnitSystemConversion.BaseUnitSystem;
 
                         // Make the Combined unit system conversion
                         ValueConversion[] combinedValueConversions = new ValueConversion[] {  new CombinedValueConversion(firstUnitSystemConversion.BaseUnitConversions[0], firstValueConversionDirectionInverted, secondUnitSystemConversion.BaseUnitConversions[0], secondValueConversionDirectionInverted),

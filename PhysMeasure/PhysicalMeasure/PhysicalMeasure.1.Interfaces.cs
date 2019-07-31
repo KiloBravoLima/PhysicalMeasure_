@@ -74,6 +74,7 @@ namespace PhysicalMeasure
     public interface INamedSymbol : INamed
     {
         String Symbol { get; }
+        String SymbolOrName { get; /* { return !string.IsNullOrEmpty(Symbol) ? Symbol : Name; } */ }
     }
 
     public interface ISystemItem
@@ -326,6 +327,7 @@ namespace PhysicalMeasure
 
     public interface IUnit : ISystemUnit, IUnitMath, IUnitConversion, INamedUnit, IAsQuantity /*  : <BaseUnit | DerivedUnit | ConvertibleUnit | CombinedUnit | MixedUnit> */
     {
+        Unit AsShortnedUnit { get; }
     }
 
     public interface IQuantityFactorMath

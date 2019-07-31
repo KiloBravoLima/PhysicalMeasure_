@@ -44,9 +44,9 @@ using System.Runtime.InteropServices;
 //  build:    7056
 //  revision: 19500
 
-[assembly: AssemblyVersion("3.0")]
-[assembly: AssemblyFileVersion("3.0.7056.19500")]
-[assembly: AssemblyInformationalVersion("3.0.7056.19500")]
+[assembly: AssemblyVersion("4.0.7151.502")]
+[assembly: AssemblyFileVersion("4.0.7151.502")]
+[assembly: AssemblyInformationalVersion("4.0.7151")]
 
 
 [assembly: InternalsVisibleTo("PhysCalculatorTests")]

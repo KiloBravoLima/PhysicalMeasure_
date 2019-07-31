@@ -734,7 +734,8 @@ namespace PhysicalMeasureTest
             Quantity E_in_TJ = E.ConvertTo(TJ);
             String E_in_TJ_as_String = E_in_TJ.ToString();
 
-            String expected_E_formatedAsTJ = "89,8755178736818 TJ";
+            // String expected_E_formatedAsTJ = "89,87551787368176 TJ";  // For ,Net Core
+            String expected_E_formatedAsTJ = "89,8755178736818 TJ";  // For .Net Framework
 
             Assert.AreEqual(expected_E_formatedAsTJ, E_in_TJ_as_String);
         }

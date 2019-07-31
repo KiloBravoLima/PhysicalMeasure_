@@ -1,10 +1,60 @@
 ﻿/*   http://physicalmeasure.codeplex.com                          */
 
-using System.Collections.Generic;
-using System.Linq;
-
 namespace System
 {
+    using System.Collections.Generic;
+
+    public static class BitTools
+    {
+        public static Byte RotateLeft(this Byte value, Byte NoOfBits) => (Byte)(value << NoOfBits | value >> (8 - NoOfBits));
+
+        public static Byte RotateRight(this Byte value, Byte NoOfBits) => (Byte)(value >> NoOfBits | value << (8 - NoOfBits));
+
+        /*
+        public static  Byte operator <<( Byte value, Byte NoOfBits)
+        {
+            return (Byte)(value << NoOfBits | value >> (8 - NoOfBits));
+        }
+
+        public static Byte operator >>( Byte value, Byte NoOfBits)
+        {
+            return (Byte)(value >> NoOfBits | value << (8 - NoOfBits));
+        }
+        */
+
+        public static Int16 RotateLeft(this Int16 value, Byte NoOfBits) => (Int16)(value << NoOfBits | value >> (16 - NoOfBits));
+
+        public static Int16 RotateRight(this Int16 value, Byte NoOfBits) => (Int16)(value >> NoOfBits | value << (16 - NoOfBits));
+
+        /*
+        public static  Byte operator <<( Byte value, Byte NoOfBits)
+        {
+            return (Byte)(value << NoOfBits | value >> (8 - NoOfBits));
+        }
+
+        public static Byte operator >>( Byte value, Byte NoOfBits)
+        {
+            return (Byte)(value >> NoOfBits | value << (8 - NoOfBits));
+        }
+        */
+
+        public static UInt16 RotateLeft(this UInt16 value, Byte NoOfBits) => (UInt16)(value << NoOfBits | value >> (16 - NoOfBits));
+
+        public static UInt16 RotateRight(this UInt16 value, Byte NoOfBits) => (UInt16)(value >> NoOfBits | value << (16 - NoOfBits));
+
+        /*
+        public static  Byte operator <<( Byte value, Byte NoOfBits)
+        {
+            return (Byte)(value << NoOfBits | value >> (8 - NoOfBits));
+        }
+
+        public static Byte operator >>( Byte value, Byte NoOfBits)
+        {
+            return (Byte)(value >> NoOfBits | value << (8 - NoOfBits));
+        }
+        */
+    }
+
     public static class ByteExtensions
     {
         public static SByte ToSByte(this Byte thisValue)
@@ -14,6 +64,12 @@ namespace System
                 res = (SByte)thisValue;
             else
                 res = (SByte)(thisValue - 256);
+            return res;
+        }
+
+        public static Char ToChar(this Byte thisValue)
+        {
+            Char res = (Char)thisValue;
             return res;
         }
     }
@@ -40,6 +96,63 @@ namespace System
             {
                 // res[i] = (SByte)thisValue[i];
                 res[i] = thisValue[i].ToSByte();
+            }
+            return res;
+        }
+
+        public static Char[] ToCharArray(this Byte[] thisValue)
+        {
+            Char[] res = new Char[thisValue.Length];
+            for (int i = 0; i < thisValue.Length; i++)
+            {
+                // res[i] = (Char)thisValue[i];
+                res[i] = thisValue[i].ToChar();
+            }
+            return res;
+        }
+
+        public static Byte[] MaskAnd(this Byte[] thisValue, Byte[] otherArray)
+        {
+            int MinLen = Math.Min(thisValue.Length, otherArray.Length);
+            int MaxLen = Math.Max(thisValue.Length, otherArray.Length);
+            Byte[] res = new Byte[MaxLen];
+            for (int i = 0; i < MinLen; i++)
+            {
+                res[i] = (Byte)(thisValue[i] & otherArray[i]);
+            }
+            for (int i = MinLen; i < thisValue.Length; i++)
+            {
+                res[i] = thisValue[i];
+            }
+            for (int i = MinLen; i < otherArray.Length; i++)
+            {
+                res[i] = otherArray[i];
+            }
+            return res;
+        }
+
+        public static Byte[] MaskXor(this Byte[] thisValue, Byte[] otherArray)
+        {
+            int MinLen = Math.Min(thisValue.Length, otherArray.Length);
+            int MaxLen = Math.Max(thisValue.Length, otherArray.Length);
+            Byte[] res = new Byte[MaxLen];
+            for (int i = 0; i < MinLen; i++)
+            {
+                res[i] = (Byte)(thisValue[i] ^ otherArray[i]);
+            }
+            for (int i = MinLen; i < MaxLen; i++)
+            {
+                res[i] = 0xFF;
+            }
+            return res;
+        }
+
+        public static Byte[] MaskNot(this Byte[] thisValue)
+        {
+            Byte[] res = new Byte[thisValue.Length];
+            for (int i = 0; i < thisValue.Length; i++)
+            {
+                res[i] = (Byte)(~thisValue[i] & 0xFF);
             }
             return res;
         }
@@ -76,11 +189,25 @@ namespace System
         public static Int32 EpsilonCompareTo(this Double thisValue, Double otherValue)
         {   /* Limited precision handling */
             double RelativeDiff = (thisValue - otherValue) / thisValue;
-            if (RelativeDiff < -1e-15)
+            if (RelativeDiff < -1e-14)
             {
                 return -1;
             }
-            if (RelativeDiff > 1e-15)
+            if (RelativeDiff > 1e-14)
+            {
+                return 1;
+            }
+            return 0;
+        }
+
+        public static Int32 EpsilonCompareTo(this Double thisValue, Double otherValue, Double relativeDiffPrecision)
+        {   /* Limited precision handling */
+            double RelativeDiff = (thisValue - otherValue) / thisValue;
+            if (RelativeDiff < -relativeDiffPrecision)
+            {
+                return -1;
+            }
+            if (RelativeDiff > relativeDiffPrecision)
             {
                 return 1;
             }
@@ -94,7 +221,7 @@ namespace System
         public static String Tail(this String text, int Length = 1)
         {
             int FullLen = text.Length;
-            return text.Substring(FullLen - Length , Length);
+            return text.Substring(FullLen - Length, Length);
         }
 
         public static String Head(this String text, int Length = 1)
@@ -152,7 +279,16 @@ namespace System
                 return s + separator + text;
             }
 
-            return text; 
+            return text;
+        }
+    }
+
+    public static class PathExtensions
+    {
+        public static string ToValidFilePath(this String path)
+        {
+
+            return path.Replace(':', '_').Replace(" ", "__");
         }
     }
 
@@ -183,8 +319,9 @@ namespace System.Text
     }
 }
 
-namespace System.Collections.Generic 
+namespace System.Collections.Generic
 {
+    using System.Linq;
 
     public static class IEnumerableExtensions
     {
@@ -219,9 +356,9 @@ namespace System.Collections.Generic
             return null;
         }
 
-        public static String ToStringList<Object>(this IEnumerable<Object> sequence, String separator = ", ") 
+        public static String ToStringList<Object>(this IEnumerable<Object> sequence, String separator = ", ")
         {
-            return sequence.Select(item => item.ToString()).Aggregate((current , next) => current + separator + next);
+            return sequence.Select(item => item.ToString()).Aggregate((current, next) => current + separator + next);
         }
 
     }
@@ -310,12 +447,13 @@ namespace System.Reflection
             }
 
             String buildNoString = DateTimeBuildNo.ToBuildDateString(FileBuild, FileRevision);
-            return String.Format("{0} {1}", AsemVersion, buildNoString);
+            return $"{AsemVersion} {buildNoString}";
         }
 
         public static String AssemblyVersionInfo(this System.Reflection.Assembly assembly)
         {
             System.Reflection.AssemblyName AsmName = assembly.GetName();
+
             Version AsemVersion = AsmName.Version;
             return VersionInfoStr(AsemVersion.ToString(), AsemVersion.Build, AsemVersion.Revision);
         }
@@ -325,12 +463,13 @@ namespace System.Reflection
             String InfoStr;
 
 #if !NETCORE && !NETSTANDARD1_0
-            // Windows Desktop
+            // For Windows Desktop
             System.Diagnostics.FileVersionInfo fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
             String AsemVersion = fileVersionInfo.FileVersion;
 
             InfoStr = VersionInfoStr(AsemVersion, fileVersionInfo.FileBuildPart, fileVersionInfo.FilePrivatePart);
 #else
+            // For NETCORE, NETSTANDARD1_0
             // AssemblyVersionAttribute ava =  assembly.GetCustomAttribute<AssemblyVersionAttribute>();
             AssemblyFileVersionAttribute afva = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
 
@@ -356,7 +495,7 @@ namespace System.Reflection
             {
                 InfoStr = "null";
             }
-#endif // 
+#endif // UseWindowsDesktop
             return InfoStr;
         }
 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.25920.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.452
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasure", "PhysicalMeasure\PhysicalMeasure.csproj", "{4A1384AC-58AA-4758-822F-25CCC6123F51}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasureTest", "PhysicalMeasureTest\PhysicalMeasureTest.csproj", "{3D655BBE-CBDC-4023-ACD4-6B5F65AF01FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KBL.Extensions", "KBLExtensions\KBL.Extensions.csproj", "{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionsTests", "KBLExtensionsTests\ExtensionsTests.csproj", "{51533EFE-2004-4123-8099-6A8226470F91}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,24 +37,16 @@ Global
 		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7139B888-5CE1-4604-B2E8-19FD45BC8B0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51533EFE-2004-4123-8099-6A8226470F91}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 4
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs12
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = PhysicalMeasure\\PhysicalMeasure.csproj
-		SccProjectName1 = PhysicalMeasure
-		SccLocalPath1 = PhysicalMeasure
-		SccProjectUniqueName2 = PhysicalMeasureTest\\PhysicalMeasureTest.csproj
-		SccProjectName2 = PhysicalMeasureTest
-		SccLocalPath2 = PhysicalMeasureTest
-		SccProjectUniqueName3 = KBLExtensions\\KBL.Extensions.csproj
-		SccProjectName3 = KBLExtensions
-		SccLocalPath3 = KBLExtensions
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {24D1403E-FB47-4265-961B-638A3E46F78C}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = PhysicalMeasure.vsmdi

@@ -7,7 +7,7 @@ using PhysicalMeasure;
 
 
 namespace PhysicalMeasureTest
-{ 
+{
 
     /// <summary>
     ///This is a test class for UnitTest and is intended
@@ -473,6 +473,42 @@ namespace PhysicalMeasureTest
             Assert.AreEqual(expected, actual);
         }
 
+        // Added from MartinOSchmidt
+        /// <summary> 
+        ///A test for power operator (for CombinedUnit having a prefix) 
+        ///</summary> 
+        [TestMethod()]
+        public void QuantityTest_PowerOfCombinedUnitTest()
+        {
+            Unit cm = Prefixes.c * SI.m;
+
+            Assert.AreEqual((cm ^ 3) * 1000000, 1 * SI.m ^ 3);
+            
+            Unit cm3 = cm * cm * cm;
+
+            Assert.AreEqual(cm3 * 1000000, 1 * SI.m ^ 3);
+        }
+
+        // Added from MartinOSchmidt
+        /// <summary> 
+        ///A test for power operator (for PrefixedUnit) 
+        ///</summary> 
+        [TestMethod()]
+        public void QuantityTest_PowerOfPrefixedUnitTest()
+        {
+            Unit MHz = Prefixes.M * SI.Hz;
+            Unit microSec = Prefixes.my * SI.s;
+
+            Unit invertedMhz = MHz.Pow(-1);
+
+            Assert.AreEqual(1 * invertedMhz, 1e-6 * SI.s);
+            Assert.AreEqual(invertedMhz, microSec);
+
+            Unit invertedMhzSquared = MHz.Pow(-2);
+
+            Assert.AreEqual((invertedMhzSquared * 1).ConvertToBaseUnit(), (SI.s ^ 2) * 1e-12); // throws and Debug.Assert() in  
+        }
+
         /// <summary>
         ///A test for mult and div operator
         ///</summary>
@@ -548,12 +584,14 @@ namespace PhysicalMeasureTest
             Assert.AreEqual(len2.Value, len_value);
             Assert.AreSame(len2.Unit, Km);
 
+            /**
             System.Reflection.Assembly assembly = typeof(Quantity).Assembly;
             String VerStr = System.Reflection.AssemblyExtensions.AssemblyInfo(assembly);
 
 
             System.Diagnostics.Debug.WriteLine("AssemblyExtensions.AssemblyInfo(assembly):" + VerStr);
             // Assert.AreEqual(VerStr, ".");
+            **/
         }
 
         #endregion Unit math tests

@@ -1,11 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-
-namespace ExtensionsTests
+namespace KBL.ExtensionsTest
 {
-
-
     /// <summary>
     ///This is a test class for DateTimeSortStringTest and is intended
     ///to contain all DateTimeSortStringTest Unit Tests
