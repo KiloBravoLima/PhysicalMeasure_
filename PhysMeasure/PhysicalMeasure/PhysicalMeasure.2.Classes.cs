@@ -5544,12 +5544,179 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             this.IsIsolatedUnitSystem = someBaseUnit.BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
         }
 
+        protected virtual void CheckUnitsSystem(SystemUnit aSystemUnit)
+        {
+            // SimpleSystem is readonly now; must be build for this system 
+            Debug.Assert(aSystemUnit.SimpleSystem == this);
+        }
 
-        protected abstract void CheckBaseUnitSystem();
+        protected virtual void CheckUnitsSystem(ConvertibleUnit convertibleUnit)
+        {
+            // SimpleSystem is readonly now; must be build for this system 
+            Debug.Assert(convertibleUnit.SimpleSystem == this);
+            Debug.Assert(convertibleUnit.PrimaryUnit.SimpleSystem == this);
+        }
 
-        protected abstract void CheckNamedDerivedUnitSystem();
+        protected virtual void CheckBaseUnitsNumber(int baseUnitNumber, BaseUnit aBaseUnit)
+        {
+            if (aBaseUnit.BaseUnitNumber != baseUnitNumber)
+            {
+                Debug.Assert(aBaseUnit.BaseUnitNumber == baseUnitNumber);
 
-        protected abstract void CheckConvertibleUnitSystem();
+                throw new ArgumentException($"Base unit's BaseUnitNumber must be same as index into BaseUnits[]: {aBaseUnit.Name} at index {baseUnitNumber} has {aBaseUnit.BaseUnitNumber}", "BaseUnits");
+            }
+        }
+
+        protected void CheckBaseUnitSystem()
+        {
+            Debug.Assert(this.BaseUnits != null);
+
+            int baseUnitNumber = 0;
+            foreach (BaseUnit aBaseUnit in this.BaseUnits)
+            {
+                Debug.Assert(aBaseUnit.Kind == UnitKind.BaseUnit);
+                if (aBaseUnit.Kind != UnitKind.BaseUnit)
+                {
+                    throw new ArgumentException("Must only contain units with Kind = UnitKind.BaseUnit", "BaseUnits");
+                }
+
+                CheckUnitsSystem(aBaseUnit);
+                CheckBaseUnitsNumber(baseUnitNumber, aBaseUnit);
+
+                if (this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() > 1)
+                {
+                    Debug.Assert(this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() == 1);
+
+                    IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                    throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at index {baseUnitNumbers.ToStringList()}", "BaseUnits");
+                }
+
+                if (this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() > 1)
+                {
+                    Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() == 1);
+
+                    IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                    throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at index {baseUnitNumbers.ToStringList()}", "BaseUnits");
+                }
+
+                baseUnitNumber++;
+            }
+        }
+
+        protected void CheckNamedDerivedUnitSystem()
+        {
+            if (this.NamedDerivedUnits != null)
+            {
+                foreach (NamedDerivedUnit namedDerivedunit in this.NamedDerivedUnits)
+                {
+                    Debug.Assert(namedDerivedunit.Kind == UnitKind.DerivedUnit);
+                    if (namedDerivedunit.Kind != UnitKind.DerivedUnit)
+                    {
+                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someNamedDerivedUnits");
+                    }
+
+                    CheckUnitsSystem(namedDerivedunit);
+
+                    if (this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+
+                    if (this.NamedDerivedUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == namedDerivedunit.Name).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == namedDerivedunit.Name).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {namedDerivedUnitNames.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.NamedDerivedUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == namedDerivedunit.Symbol).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == namedDerivedunit.Symbol).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"Base unit's Symbol must be unique for the unit system: {namedDerivedunit.Symbol} is at {namedDerivedUnitNames.ToStringList()}", "someNamedDerivedUnits");
+                    }
+                }
+            }
+        }
+
+        protected void CheckConvertibleUnitSystem()
+        {
+            if (this.ConvertibleUnits != null)
+            {
+                foreach (ConvertibleUnit convertibleUnit in this.ConvertibleUnits)
+                {
+                    Debug.Assert(convertibleUnit.Kind == UnitKind.ConvertibleUnit);
+                    if (convertibleUnit.Kind != UnitKind.ConvertibleUnit)
+                    {
+                        throw new ArgumentException("Must only contain units with Kind = UnitKind.ConvertibleUnit", "someConvertibleUnits");
+                    }
+                    // SimpleSystem is readonly now; must be build for this system 
+                    CheckUnitsSystem(convertibleUnit);
+
+                    if (this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                    }
+
+                    if (this.NamedDerivedUnits?.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+
+                    if (this.NamedDerivedUnits?.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
+
+                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Select(ndu2 => ndu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Symbol} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+
+                    if (this.ConvertibleUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
+
+                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+
+                    if (this.ConvertibleUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
+
+                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
+                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
+                    }
+                }
+            }
+        }
 
         public override String ToString() => this.Name;
 
@@ -6217,24 +6384,14 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
     public class ExtentableUnitSystem : AbstractUnitSystem
     {
-        private UnitPrefixTable unitPrefixes;
-        private BaseUnit[] baseUnits;
-        private NamedDerivedUnit[] namedDerivedUnits;
-        private ConvertibleUnit[] convertibleUnits;
-
-        public override UnitPrefixTable UnitPrefixes { get { return unitPrefixes; } set { unitPrefixes = value; } }
-        public override BaseUnit[] BaseUnits { get { return baseUnits; } set { baseUnits = (BaseUnit[])value; CheckBaseUnitSystem(); } }
-        public override NamedDerivedUnit[] NamedDerivedUnits { get { return namedDerivedUnits; } set { namedDerivedUnits = value; CheckNamedDerivedUnitSystem(); } }
-        public override ConvertibleUnit[] ConvertibleUnits { get { return convertibleUnits; } set { convertibleUnits = value; CheckConvertibleUnitSystem(); } }
-
-        public ExtentableUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunctionType someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunctionType someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunctionType someConvertibleUnitsBuilder)
+        public ExtentableUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder)
              : base(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder)
         {
         }
 
-        public override UnitSystemKind UnitSystemKind { get; set; } = UnitSystemKind.MonetaryUnitSystem;
-        public override Boolean IsIsolatedUnitSystem { get; set; } = false;
-        public override Boolean IsCombinedUnitSystem { get; set; } = false;
+        public override UnitSystemKind UnitSystemKind { get; /* set; */ } = UnitSystemKind.MonetaryUnitSystem;
+        public override Boolean IsIsolatedUnitSystem { get; /* set; */ } = false;
+        public override Boolean IsCombinedUnitSystem { get; /* set; */ } = false;
     }   
 
     public class UnitSystem : AbstractUnitSystem
@@ -6275,176 +6432,17 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             : this(someName, someUnitPrefixes, (unitsystem) =>  new BaseUnit[] { someBaseUnit }, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder)
         {
         }
-
-        protected override void CheckBaseUnitSystem()
-        {
-            Debug.Assert(this.BaseUnits != null);
-
-            int baseUnitNumber = 0;
-            foreach (BaseUnit aBaseUnit in this.BaseUnits)
-            {
-                Debug.Assert(aBaseUnit.Kind == UnitKind.BaseUnit);
-                if (aBaseUnit.Kind != UnitKind.BaseUnit)
-                {
-                    throw new ArgumentException("Must only contain units with Kind = UnitKind.BaseUnit", "BaseUnits");
-                }
-
-                // SimpleSystem is readonly now; must be build for this system 
-                Debug.Assert(aBaseUnit.SimpleSystem == this);
-
-                if (aBaseUnit.BaseUnitNumber != baseUnitNumber)
-                {
-                    Debug.Assert(aBaseUnit.BaseUnitNumber == baseUnitNumber);
-
-                    throw new ArgumentException($"Base unit's BaseUnitNumber must be same as index into BaseUnits[]: {aBaseUnit.Name} at index {baseUnitNumber} has {aBaseUnit.BaseUnitNumber}", "BaseUnits");
-                }
-
-                if (this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() > 1)
-                {
-                    Debug.Assert(this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() == 1);
-
-                    IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                    throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at index {baseUnitNumbers.ToStringList()}", "BaseUnits");
-                }
-
-                if (this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() > 1)
-                {
-                    Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() == 1);
-
-                    IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                    throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at index {baseUnitNumbers.ToStringList()}", "BaseUnits");
-                }
-
-                baseUnitNumber++;
-            }
-        }
-
-        protected override void CheckNamedDerivedUnitSystem()
-        {
-            if (this.NamedDerivedUnits != null)
-            {
-                foreach (NamedDerivedUnit namedDerivedunit in this.NamedDerivedUnits)
-                {
-                    Debug.Assert(namedDerivedunit.Kind == UnitKind.DerivedUnit);
-                    if (namedDerivedunit.Kind != UnitKind.DerivedUnit)
-                    {
-                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someNamedDerivedUnits");
-                    }
-                    // SimpleSystem is readonly now; must be build for this system 
-                    Debug.Assert(namedDerivedunit.SimpleSystem == this);
- 
-                    if (this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() == 1);
-
-                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-                    if (this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() == 1);
-
-                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-
-                    if (this.NamedDerivedUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == namedDerivedunit.Name).Count() == 1);
-
-                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == namedDerivedunit.Name).Select(ndu2 => ndu2.Name).ToList();
-                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {namedDerivedUnitNames.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-                    if (this.NamedDerivedUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == namedDerivedunit.Symbol).Count() == 1);
-
-                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == namedDerivedunit.Symbol).Select(ndu2 => ndu2.Name).ToList();
-                        throw new ArgumentException($"Base unit's Symbol must be unique for the unit system: {namedDerivedunit.Symbol} is at {namedDerivedUnitNames.ToStringList()}", "someNamedDerivedUnits");
-                    }
-                }
-            }
-        }
-
-        protected override void CheckConvertibleUnitSystem()
-        {
-            if (this.ConvertibleUnits != null)
-            {
-                foreach (ConvertibleUnit convertibleUnit in this.ConvertibleUnits)
-                {
-                    Debug.Assert(convertibleUnit.Kind == UnitKind.ConvertibleUnit);
-                    if (convertibleUnit.Kind != UnitKind.ConvertibleUnit)
-                    {
-                        throw new ArgumentException("Must only contain units with Kind = UnitKind.ConvertibleUnit", "someConvertibleUnits");
-                    }
-                    // SimpleSystem is readonly now; must be build for this system 
-                    Debug.Assert(convertibleUnit.SimpleSystem == this);
-                    Debug.Assert(convertibleUnit.PrimaryUnit.SimpleSystem == this);
-
-                    if (this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() == 1);
-
-                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-                    if (this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() == 1);
-
-                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-                    if (this.NamedDerivedUnits?.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
-
-                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Select(ndu2 => ndu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-
-                    if (this.NamedDerivedUnits?.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
-
-                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Select(ndu2 => ndu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Symbol} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-
-                    if (this.ConvertibleUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
-
-                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-
-                    if (this.ConvertibleUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
-
-                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-                }
-            }
-        }
     }
 
 
     public class CombinedUnitSystem : AbstractUnitSystem, ICombinedUnitSystem
     {
-        public IUnitSystem[] UnitSystemes { get; private set; }
+        public IUnitSystem[] UnitSystems { get; private set; }
 
-        public override Unit Dimensionless => UnitSystemes[0].Dimensionless;
+        public override Unit Dimensionless => UnitSystems[0].Dimensionless;
 
         public override UnitSystemKind UnitSystemKind { get { return UnitSystemKind.CombinedUnitSystem; } } 
-        public override Boolean IsIsolatedUnitSystem { get { return UnitSystemes.All(us => us.IsIsolatedUnitSystem); } }
+        public override Boolean IsIsolatedUnitSystem { get { return UnitSystems.All(us => us.IsIsolatedUnitSystem); } }
         public override Boolean IsCombinedUnitSystem { get { return true; } }
 
         public Boolean ContainsSubUnitSystem(IUnitSystem unitSystem) => UnitSystems.Contains(unitSystem);
@@ -6506,175 +6504,24 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                    , (aus => someSubUnitSystems.Where(us => !(us.ConvertibleUnits is null)).Select(us => us.ConvertibleUnits)
                                                .Aggregate((cuslist, cus) => ArrayExtensions.Concat<ConvertibleUnit>(cuslist, cus)))  )
         {
-            UnitSystemes = someSubUnitSystems; // .OrderByDescending(us => us.BaseUnits.Length).ToArray();
+            UnitSystems = someSubUnitSystems; // .OrderByDescending(us => us.BaseUnits.Length).ToArray();
         }
 
-        protected override void CheckBaseUnitSystem()
+        protected override void CheckUnitsSystem(SystemUnit aSystemUnit)
         {
-            Debug.Assert(this.BaseUnits != null);
-
-            int baseUnitNumber = 0;
-            foreach (BaseUnit aBaseUnit in this.BaseUnits)
-            {
-                Debug.Assert(aBaseUnit.Kind == UnitKind.BaseUnit);
-                if (aBaseUnit.Kind != UnitKind.BaseUnit)
-                {
-                    throw new ArgumentException("Must only contain units with Kind = UnitKind.BaseUnit", "BaseUnits");
-                }
-
-                /**
-                // SimpleSystem is readonly now; must be build for this system 
-                Debug.Assert(aBaseUnit.SimpleSystem == this);
-
-                if (aBaseUnit.BaseUnitNumber != baseUnitNumber)
-                {
-                    Debug.Assert(aBaseUnit.BaseUnitNumber == baseUnitNumber);
-
-                    throw new ArgumentException($"Base unit's BaseUnitNumber must be same as index into BaseUnits[]: {aBaseUnit.Name} at index {baseUnitNumber} has {aBaseUnit.BaseUnitNumber}", "BaseUnits");
-                }
-                **/
-
-
-                if (this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() > 1)
-                {
-                    Debug.Assert(this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() == 1);
-
-                    List<String> baseUnitNames = this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Select(bu2 => bu2.Name).ToList();
-                    throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at base unit {baseUnitNames.ToStringList()}", "BaseUnits");
-                }
-
-                if (this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() > 1)
-                {
-                    Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() == 1);
-
-                    List<String> baseUnitNames = this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Select(bu2 => bu2.Name).ToList();
-                    throw new ArgumentException($"Base unit's Symbol must be unique for the unit system: {aBaseUnit.Symbol} is at base unit {baseUnitNames.ToStringList()}", "BaseUnits");
-                }
-
-                baseUnitNumber++;
-            }
+            // SimpleSystem is readonly now; must be build for this system 
+            Debug.Assert(UnitSystems.Contains(aSystemUnit.SimpleSystem));
         }
 
-        protected override void CheckNamedDerivedUnitSystem()
+        protected override void CheckUnitsSystem(ConvertibleUnit convertibleUnit)
+        {                                        
+            Debug.Assert(UnitSystems.Contains(convertibleUnit.SimpleSystem));
+            Debug.Assert(UnitSystems.Contains(convertibleUnit.PrimaryUnit.SimpleSystem));
+        }
+        protected override void CheckBaseUnitsNumber(int baseUnitNumber, BaseUnit aBaseUnit)
         {
-            if (this.NamedDerivedUnits != null)
-            {
-                foreach (NamedDerivedUnit namedDerivedunit in this.NamedDerivedUnits)
-                {
-                    Debug.Assert(namedDerivedunit.Kind == UnitKind.DerivedUnit);
-                    if (namedDerivedunit.Kind != UnitKind.DerivedUnit)
-                    {
-                        throw new ArgumentException("Must only contain units with Kind = UnitKind.DerivedUnit", "someNamedDerivedUnits");
-                    }
-                    // SimpleSystem is readonly now; must be build for this system 
-                    // Debug.Assert(namedDerivedunit.SimpleSystem == this);   // Not for CombinedUnitSystem
-
-
-                    if (this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() == 1);
-
-                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-                    if (this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() == 1);
-
-                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-
-                    if (this.NamedDerivedUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == namedDerivedunit.Name).Count() == 1);
-
-                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == namedDerivedunit.Name).Select(ndu2 => ndu2.Name).ToList();
-                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {namedDerivedUnitNames.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-                    if (this.NamedDerivedUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == namedDerivedunit.Symbol).Count() == 1);
-
-                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == namedDerivedunit.Symbol).Select(ndu2 => ndu2.Name).ToList();
-                        throw new ArgumentException($"Base unit's Symbol must be unique for the unit system: {namedDerivedunit.Symbol} is at {namedDerivedUnitNames.ToStringList()}", "someNamedDerivedUnits");
-                    }
-                }
-            }
+            // Debug.Assert(aBaseUnit.BaseUnitNumber == baseUnitNumber);
         }
-
-        protected override void CheckConvertibleUnitSystem()
-        {
-            if (this.ConvertibleUnits != null)
-            {
-                foreach (ConvertibleUnit convertibleUnit in this.ConvertibleUnits)
-                {
-                    Debug.Assert(convertibleUnit.Kind == UnitKind.ConvertibleUnit);
-                    if (convertibleUnit.Kind != UnitKind.ConvertibleUnit)
-                    {
-                        throw new ArgumentException("Must only contain units with Kind = UnitKind.ConvertibleUnit", "someConvertibleUnits");
-                    }
-
-                    /** Not for CombinedUnitSystem
-                    // SimpleSystem is readonly now; must be build for this system 
-                    Debug.Assert(convertibleUnit.SimpleSystem == this);
-                    Debug.Assert(convertibleUnit.PrimaryUnit.SimpleSystem == this);
-                    **/
-
-                    if (this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() == 1);
-
-                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-                    if (this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() == 1);
-
-                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-                    if (this.NamedDerivedUnits?.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
-
-                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Select(ndu2 => ndu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-
-                    if (this.NamedDerivedUnits?.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
-
-                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Select(ndu2 => ndu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Symbol} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-
-                    if (this.ConvertibleUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
-
-                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-
-                    if (this.ConvertibleUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
-
-                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-                }
-            }
-        }
-
         public SByte[] UnitExponents(CombinedUnit cu)
         {
             int noOfSubUnitSystems = UnitSystems.Length;
@@ -6959,7 +6806,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
             this.Value = someValue;
 
-            this.Unit = someunit ?? Physics.dimensionless;
+            this.Unit = someUnit ?? Physics.dimensionless;
         }
 
         public Quantity(Double somevalue, BaseUnit someunit)
@@ -7720,12 +7567,12 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
             for (int i = 0; i < minNoOfBaseUnits; i++)
             {
-                someexponents[i] = cef(e1[i], e2[i]);
+                someExponents[i] = cef(e1[i], e2[i]);
             }
 
             for (int i = minNoOfBaseUnits; i < maxNoOfBaseUnits; i++)
             {
-                someexponents[i] = cef((e1.Length > i ? e1[i] : (SByte)0), (e2.Length > i ? e2[i] : (SByte)0));
+                someExponents[i] = cef((e1.Length > i ? e1[i] : (SByte)0), (e2.Length > i ? e2[i] : (SByte)0));
             }
 
             Debug.Assert(pq1.Unit.ExponentsSystem != null);
