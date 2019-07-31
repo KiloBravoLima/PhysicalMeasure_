@@ -1,3 +1,4 @@
 unit microsec = 1 탎
 unit celcius = 1 캜
-unit microcelsius = 1 탎럭C
+unit microcelsius = 1 뎔C
+unit microSecCelsius = 1 탎럭C

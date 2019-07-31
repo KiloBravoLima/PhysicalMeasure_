@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.Serialization;
 using System.Text;
-
-using PhysicalCalculator.CommandBlock;
-using PhysicalCalculator.Expression;
-using PhysicalCalculator.Function;
+using System.Globalization;
+using System.Diagnostics;
 
 using PhysicalMeasure;
 
+using PhysicalCalculator.Expression;
+using PhysicalCalculator.CommandBlock;
+using PhysicalCalculator.Function;
+using System.Runtime.Serialization;
 
 namespace PhysicalCalculator.Identifiers
 {
@@ -42,7 +41,7 @@ namespace PhysicalCalculator.Identifiers
 
     public interface ICommands
     {
-        List<String> Commands { get; /** */ set; /*  **/ }
+        List<String> Commands { get; set; }
     }
 
     public interface ICommandsEvaluator : ICommands, IEvaluator
@@ -72,7 +71,7 @@ namespace PhysicalCalculator.Identifiers
     {
         public abstract IdentifierKind Identifierkind { get; }
 
-        public virtual String ToListString(String name) => $"{Identifierkind.ToString()} {name}";
+        public virtual String ToListString(String name) => $"{Identifierkind} {name}";
     }
 
     class NamedSystem : NametableItem 
@@ -86,7 +85,7 @@ namespace PhysicalCalculator.Identifiers
             UnitSystem = new UnitSystem(name, true);
         }
 
-        public override String ToListString(String name) => $"system {name}" ;
+        public override String ToListString(String name) => $"system {name}";
     }
 
     class NamedUnit : NametableItem 
@@ -110,29 +109,87 @@ namespace PhysicalCalculator.Identifiers
             }
         }
 
-        public NamedUnit(IUnitSystem unitSystem, String name, String unitSymbol, Quantity physicalQuantity, CalculatorEnvironment environment /* = null */)
+        public NamedUnit(IUnitSystem unitSystem, String name, String unitSymbol, Quantity unitValue, CalculatorEnvironment environment /* = null */)
         {
             this.Environment = environment;
-            if (physicalQuantity != null)
+            if (unitValue != null)
             {
-                if ((unitSystem == null) && (physicalQuantity.Unit != null))
+                if ((unitSystem == null) && (unitValue.Unit != null))
                 {
-                    unitSystem = physicalQuantity.Unit.ExponentsSystem;
+                    unitSystem = unitValue.Unit.ExponentsSystem;
                 }
 
-                if (physicalQuantity.Value != 0 && physicalQuantity.Value != 1)
+                if (unitValue.Value != 0 && unitValue.Value != 1)
                 {
-                    this.pu = MakeScaledUnit(name, unitSymbol, unitSystem, physicalQuantity.Unit, physicalQuantity.Value);
+                    this.pu = MakeScaledUnit(name, unitSymbol, unitSystem, unitValue.Unit, unitValue.Value);
                 }
                 else
                 {
-                    this.pu = physicalQuantity.Unit;
+                    this.pu = unitValue.Unit;
                 }
             }
             else
             {
                 this.pu = MakeBaseUnit(name, unitSymbol, unitSystem);
             }
+        }
+
+        public (bool, String) UpdateUnit(String unitName, Quantity unitValue)
+        {
+
+            bool wasBaseUnit = this.pu.Kind == UnitKind.BaseUnit;
+            bool isBaseUnit = (unitValue == null || (unitValue.Unit?.Kind == UnitKind.BaseUnit && (unitValue.Value == 0 || unitValue.Value == 1)));
+
+            if (wasBaseUnit && isBaseUnit)
+            {
+                // OK: Nothing to update
+                return (true, "");
+            }
+
+            if (wasBaseUnit || isBaseUnit)
+            {
+                // Error:  Can't update to or from BaseUnit
+                return (false, "Can't update to or from BaseUnit");
+            }
+
+            bool wasScaledUnit = this.pu.Kind == UnitKind.ConvertibleUnit;
+            bool isScaledUnit = (unitValue != null && (unitValue.Value != 0 && unitValue.Value != 1));
+
+            if (!wasScaledUnit && !isScaledUnit)
+            {
+                // OK:  Update pu to new unit
+                this.pu = unitValue.Unit;
+                return (true, "");
+            }
+
+            // Update of ConvertibleUnit 
+            ConvertibleUnit cu = (ConvertibleUnit)this.pu;
+            bool isSameCoversion = (unitValue.Unit == cu.PrimaryUnit) && (unitValue.Value == 1.0/cu.Conversion.LinearScale);
+
+            if (isSameCoversion)
+            {
+                // OK: Nothing to update
+                return (true, "");
+            }
+
+            // Error:  Can't update to or from ScaledUnit
+            return (false, "Can't update to or from ScaledUnit");
+
+
+            /***
+            if (!wasScaledUnit || !isScaledUnit)
+            {
+                // Error:  Can't update to or from ScaledUnit
+                return (false, "Can't update to or from ScaledUnit");
+            }
+
+            // OK:  Update pu with new PrimaryUnit and LinearScale
+            ConvertibleUnit cu = (ConvertibleUnit)this.pu;
+            cu.PrimaryUnit = unitValue.Unit;               Readonly!!
+            cu.Conversion.LinearScale = unitValue.Value;   Readonly!!
+
+            return (true, "");
+            ***/
         }
 
         private static BaseUnit MakeBaseUnit(String name) => MakeBaseUnit(name, null, null);
@@ -158,7 +215,6 @@ namespace PhysicalCalculator.Identifiers
                 }
                 baseunitarray[NoOfBaseUnits] = new BaseUnit(unitSystem, (sbyte)(NoOfBaseUnits), name, unitSymbol);
                 UnitSystem uso = unitSystem as UnitSystem;
-                // bool test = uso.BaseUnits.IsFixedSize;
                 uso.BaseUnits = baseunitarray;
                 return baseunitarray[NoOfBaseUnits];
             }
@@ -194,7 +250,7 @@ namespace PhysicalCalculator.Identifiers
 
         public override String ToListString(String name)
         {
-            String Unitname = name;// String.Format("{0}", name);
+            String Unitname = name;
 
             if ((pu == null) || (pu.Kind == UnitKind.BaseUnit))
             {
@@ -215,11 +271,11 @@ namespace PhysicalCalculator.Identifiers
                             cultureInfo = Environment.CurrentCultureInfo;
                         }
 
-                        return $"unit {Unitname} = {val.ToString(cultureInfo)} {cu.PrimaryUnit.ToString()}";
+                        return $"unit {Unitname} = {val.ToString(cultureInfo)} {cu.PrimaryUnit}";
                     }
                 }
 
-                return $"unit {Unitname} = {pu.ToString()}";
+                return $"unit {Unitname} = {pu}";
             } 
         }
     }
@@ -248,7 +304,7 @@ namespace PhysicalCalculator.Identifiers
             this.Environment = environment;
         }
 
-        public virtual String ToListString(String name) => $"var {name} = {this.ToString(null, CultureInfo)}";
+        public virtual String ToListString(String name) => $"var {name} = {this.ToString(" UL", CultureInfo)}";
 
         public void WriteToTextFile(String name, System.IO.StreamWriter file)
         {
@@ -400,16 +456,14 @@ namespace PhysicalCalculator.Identifiers
             }
             catch (Exception e)
             {
-                String Message = $"{e.GetType().ToString()} Exception Source: {e.Source} - {e.ToString()}";
+                String Message = $"{e.GetType()} Exception Source: {e.Source} - {e}";
                 ListStringBuilder.AppendLine();
                 ListStringBuilder.Append(Message);
                 ListStringBuilder.AppendLine();
-
             }
 
             return ListStringBuilder.ToString();
         }
-
     }
 
     public class CalculatorEnvironment : NametableItem, IEnvironment
@@ -692,7 +746,7 @@ namespace PhysicalCalculator.Identifiers
 
         #region Unit Identifier access
 
-        public Boolean SystemSet(String systemName, out INametableItem systemItem)
+        public Boolean SystemSet(String systemName, bool setAsDefault, out INametableItem systemItem)
         {
             // Find identifier 
             Boolean Found = FindIdentifier(systemName, out var context, out systemItem);
@@ -710,19 +764,21 @@ namespace PhysicalCalculator.Identifiers
             // Either identifier is a system in some context; set it to specified value
             // or identifier not found; No local identifier with that name, Declare local system
             systemItem = new NamedSystem(systemName);
-            Physics.CurrentUnitSystems.Use((systemItem as NamedSystem).UnitSystem);  
+            if (setAsDefault)
+            {
+                Physics.CurrentUnitSystems.Use((systemItem as NamedSystem).UnitSystem);
+            }
             return context.SetLocalIdentifier(systemName, systemItem);
         }
 
-
-
-        public Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem)
+        public Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem, out string errorMessage)
         {
             // Find identifier 
             Boolean Found = FindIdentifier(unitName, out IEnvironment context, out unitItem);
 
             if (Found && (context == this) && (unitItem.Identifierkind != IdentifierKind.Unit))
             {   // Found locally, but is not a unit; Can't set as unit
+                errorMessage = unitName + " is found locally but is not a unit; Can't set as unit";
                 return false;
             }
 
@@ -731,27 +787,43 @@ namespace PhysicalCalculator.Identifiers
                 context = this;
             }
 
-            // Either is identifier an unit in some context; set it to specified value
-            // or identifier not found; No local identifier with that name, Declare local unit
-            if (unitSystem == null)
+            (bool OK, String errormessage) updateRes;
+            if (unitItem == null)
             {
-                if (unitValue != null && unitValue.Unit != null)
-                {   // Is same system as values unit
-                    unitSystem = unitValue.Unit.ExponentsSystem;
-                }
-
-                /**
+                // Either is identifier an unit in some context; set it to specified value
+                // or identifier not found; No local identifier with that name, Declare local unit
                 if (unitSystem == null)
-                {   // Is first unit in a new system
-                    if (SystemSet(unitName + "_system", out INametableItem SystemItem))
-                    {
-                        unitSystem = ((NamedSystem)SystemItem).UnitSystem;
+                {
+                    if (unitValue != null && unitValue.Unit != null)
+                    {   // Is same system as values unit
+                        unitSystem = unitValue.Unit.ExponentsSystem;
                     }
+
+                    /**
+                    if (unitSystem == null)
+                    {   // Is first unit in a new system
+                        if (SystemSet(unitName + "_system", out INametableItem SystemItem))
+                        {
+                            unitSystem = ((NamedSystem)SystemItem).UnitSystem;
+                        }
+                    }
+                    **/
                 }
-                **/
+                unitItem = new NamedUnit(unitSystem, unitName, unitSymbol, unitValue, this);
+                updateRes = (true, "");
+            }
+            else
+            {
+                NamedUnit nui = (NamedUnit)unitItem;
+                updateRes = nui.UpdateUnit(unitName, unitValue);
+                
+            }
+            errorMessage = updateRes.errormessage;
+            if (!updateRes.OK)
+            {
+                return false;
             }
 
-            unitItem = new NamedUnit(unitSystem, unitName, unitSymbol, unitValue, this);
             return context.SetLocalIdentifier(unitName, unitItem);
         }
 

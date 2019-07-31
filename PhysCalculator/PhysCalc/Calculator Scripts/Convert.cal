@@ -1,0 +1,14 @@
+﻿// Saved 2019-07-15 23:00:00 to Convert.cal
+
+Set EperOneDay = 60 GJ
+
+set DaysperYear = 365,25 day/year
+set EperOneYear = EperOneDay * DaysperYear
+
+set EperOneYearInTJ = EperOneYear [TJ]
+
+Set EperDay = 60 GJ/day
+
+set EperYear = EperDay * DaysperYear
+
+set EperYearInTJ = EperYear [TJ/year]

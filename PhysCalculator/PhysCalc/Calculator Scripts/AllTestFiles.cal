@@ -1,8 +1,15 @@
 ﻿// 2012-02-12 18:00 AllTestFiles.cal  
 Read Expression.cal  
 Read Valuta.cal 
+Read MicroCelsius.cal
 set Default_system = SI
 Read SecInYear.cal 
 Read TestFunc.cal  
 Read EPotFunc.cal 
 Read ShortenFractions.cal
+Read Convert.cal
+Read DownLoadSpeed.cal
+// Text codings
+Read ANSI.cal
+Read UTF8.cal
+Read Unicode.cal

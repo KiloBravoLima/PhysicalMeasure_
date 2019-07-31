@@ -131,28 +131,35 @@ namespace TokenParser
             token = commandLine.Substring(0, i);
             return i;
         }
+                             
+        public static Boolean IsIdentifierStartChar(char c) => (Char.IsLetter(c) || Char.Equals(c, '_')); 
+        public static Boolean IsIdentifierSecondaryChar(char c) => (Char.IsLetterOrDigit(c) || Char.Equals(c, '_') );
+        public static Boolean IsStartOfIdentifier(this String commandLine) => (!String.IsNullOrEmpty(commandLine) && IsIdentifierStartChar(commandLine[0]));
 
-        public static int PeekIdentifier(this String commandLine, out String token)
+        public static int PeekIdentifier(this String commandLine, out String identifier)
         {
-            int i = commandLine.TakeWhile(c => Char.IsLetterOrDigit(c) || Char.Equals(c, '_')).Count();
-            token = commandLine.Substring(0, i);
-            return i;
-        }
-
-        public static Boolean IsIdentifier(this String commandLine) => (!String.IsNullOrEmpty(commandLine)) && (Char.IsLetter(commandLine[0]) || Char.Equals(commandLine[0], '_'));
-
-        public static String ReadIdentifier(this String commandLine, out String identifier)
-        {
-            if (IsIdentifier(commandLine))
+            int i = 0;
+            if (commandLine.IsStartOfIdentifier,())
             {
-                int i = commandLine.TakeWhile(c => Char.IsLetterOrDigit(c) || Char.Equals(c, '_')).Count();
+                i = 1 + commandLine.Substring(1).TakeWhile(c => IsIdentifierSecondaryChar(c)).Count();
                 identifier = commandLine.Substring(0, i);
-
-                return commandLine.Substring(i).TrimStart();
             }
             else
             {
                 identifier = null;
+            }
+            return i;
+        }
+
+        public static String ReadIdentifier(this String commandLine, out String identifier)
+        {
+            int i = PeekIdentifier(commandLine, out identifier);
+            if (i > 0)
+            {
+                return commandLine.Substring(i).TrimStart();
+            }
+            else
+            {
                 return commandLine;
             }
         }

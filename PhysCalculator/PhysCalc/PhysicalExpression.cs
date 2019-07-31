@@ -28,10 +28,10 @@ namespace PhysicalCalculator.Expression
         Boolean FindLocalIdentifier(String identifierName, out INametableItem item);
         Boolean FindIdentifier(String identifierName, out IEnvironment foundInContext, out INametableItem item);
 
-        Boolean SystemSet(String systemName, out INametableItem systemItem);
+        Boolean SystemSet(String systemName, bool setAsDefaultSystem, out INametableItem systemItem);
 
         Boolean UnitGet(String unitName, out Unit unitValue, ref String resultLine);
-        Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem);
+        Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem, out string errorMessage);
 
         Boolean VariableGet(String variableName, out Quantity variableValue, ref String resultLine);
         Boolean VariableSet(String variableName, Quantity variableValue);
@@ -300,7 +300,7 @@ namespace PhysicalCalculator.Expression
             }
             else
             {
-                // No unit specified to convert to; Check if pq can shown as a NamedDerivedUnit
+                // No unit specified to convert to; Check if pq can be shown as a NamedDerivedUnit
                 pqRes = CheckForNamedDerivedUnit(pq);
             }
             return pqRes;
@@ -311,10 +311,22 @@ namespace PhysicalCalculator.Expression
             Quantity pqRes = pq;
             if (pqRes != null)
             {
-                Unit namedDerivedUnit = pqRes.Unit?.AsNamedUnit;
-                if (namedDerivedUnit != null)
+                Unit pqUnit = pqRes.Unit;
+                if (pqUnit != null)
                 {
-                    pqRes = new Quantity(pqRes.Value, namedDerivedUnit);
+                    Unit namedDerivedUnit = pqUnit.AsNamedUnit;
+                    if (namedDerivedUnit != null && !ReferenceEquals(namedDerivedUnit, pqUnit))
+                    {
+                        pqRes = new Quantity(pqRes.Value, namedDerivedUnit);
+                    }
+                    else
+                    {   // Try shorten converted units
+                        Unit shortnedConvertedUnit = pqUnit.AsShortnedUnit;
+                        if (shortnedConvertedUnit != null && !ReferenceEquals(shortnedConvertedUnit, pqUnit))
+                        {
+                            pqRes = new Quantity(pqRes.Value, shortnedConvertedUnit);
+                        }
+                    }
                 }
             }
 
@@ -677,7 +689,7 @@ namespace PhysicalCalculator.Expression
                                     {   // Parse optional unit
                                         OldLen = CommandLine.Length;
                                         CommandLine = CommandLine.TrimStart();
-                                        if (!String.IsNullOrEmpty(CommandLine) && (Char.IsLetter(CommandLine[0])))
+                                        if (!String.IsNullOrEmpty(CommandLine) && (Char.IsLetter(CommandLine[0]) || Char.Equals(CommandLine[0], '°') ))     // Need '°' to read "°C" as unit name
                                         {
                                             ResultLine = "";
                                             pu = ParsePhysicalUnit(ref CommandLine, ref ResultLine);
@@ -1402,7 +1414,7 @@ namespace PhysicalCalculator.Expression
 
                 // Parse unit
                 commandLine = commandLine.TrimStart();
-                if (!String.IsNullOrEmpty(commandLine) && (Char.IsLetter(commandLine[0])))
+                if (!String.IsNullOrEmpty(commandLine) && (Char.IsLetter(commandLine[0]) || Char.Equals(commandLine[0], '°')))        // Need '°' to read "°C" as unit name
                 {
                     int UnitStringLen = commandLine.IndexOfAny(new Char[] { ' ' });  // ' '
                     if (UnitStringLen < 0 )

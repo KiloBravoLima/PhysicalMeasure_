@@ -1,0 +1,8 @@
+// 2019-07-17 12:53:10 Saved to DownLoadSpeed.cal
+unit Byte
+unit KB = 1024 Byte
+unit MB = 1024 KB
+var size = 500 MB
+var speed = 200 KB/s
+var time = size / speed
+

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
-
-using PhysicalCalculator.Identifiers;
+using System.Diagnostics;
 
 using PhysicalMeasure;
 
 using TokenParser;
+
+using PhysicalCalculator.Identifiers;
 
 namespace PhysicalCalculator.CommandBlock
 {
@@ -32,7 +32,7 @@ namespace PhysicalCalculator.CommandBlock
 
     class PhysicalQuantityCommandsBlock : PhysicalQuantityCommandBlock, ICommandsEvaluator
     {
-        public List<String> Commands { get; set; } = new List<String>(); // it is readonly now **/
+        public List<String> Commands { get; set; } = new List<String>(); 
 
         override public String ToListString(String name)
         {
@@ -181,7 +181,7 @@ namespace PhysicalCalculator.CommandBlock
                         {
                             if (localContext.CommandBlockToParseInfo.CommandBlock.Commands == null)
                             {
-                                /** */ localContext.CommandBlockToParseInfo.CommandBlock.Commands = new List<String>(); // it is readonly now **/
+                                localContext.CommandBlockToParseInfo.CommandBlock.Commands = new List<String>();
                             }
                             Debug.Assert(localContext.CommandBlockToParseInfo.CommandBlock.Commands != null);
                             localContext.CommandBlockToParseInfo.CommandBlock.Commands.Add(commandLine.Substring(0, indexCommandEnd));

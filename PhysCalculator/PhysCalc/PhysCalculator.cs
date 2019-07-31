@@ -1,26 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
+
 using System.Reflection;
-using System.Text;
-
-using CommandParser;
-
-using PhysicalCalculator.CommandBlock;
-using PhysicalCalculator.Expression;
-using PhysicalCalculator.Function;
-using PhysicalCalculator.Identifiers;
-
 using PhysicalMeasure;
 
 using TokenParser;
+using CommandParser;
 
+using PhysicalCalculator.Identifiers;
+using PhysicalCalculator.CommandBlock;
+using PhysicalCalculator.Function;
+using PhysicalCalculator.Expression;
 
 namespace PhysicalCalculator
 {
-    class PhysCalculator : Commandhandler
+    class PhysCalculator : CommandHandler
     {
         CommandReader CommandLineReader = null;
         ResultWriter ResultLineWriter = null;
@@ -109,7 +107,19 @@ namespace PhysicalCalculator
         
         private void UsingAtomicAndNuclearPhysicalConstants(CalculatorEnvironment someEnvironment)
         {
-        }
+             // PhysicalMeasure.Constants  Table of atomic and nuclear constants
+            someEnvironment.NamedItems.AddItem("a0", new NamedConstant(PhysicalMeasure.Constants.a0));
+            someEnvironment.NamedItems.AddItem("re", new NamedConstant(PhysicalMeasure.Constants.re));
+            someEnvironment.NamedItems.AddItem("me", new NamedConstant(PhysicalMeasure.Constants.me));
+            someEnvironment.NamedItems.AddItem("ke", new NamedConstant(PhysicalMeasure.Constants.ke));
+            someEnvironment.NamedItems.AddItem("alpha", new NamedConstant(PhysicalMeasure.Constants.alpha));
+            someEnvironment.NamedItems.AddItem("Eh", new NamedConstant(PhysicalMeasure.Constants.Eh));
+            someEnvironment.NamedItems.AddItem("mp", new NamedConstant(PhysicalMeasure.Constants.mp));
+            someEnvironment.NamedItems.AddItem("h2me", new NamedConstant(PhysicalMeasure.Constants.h2me));
+            someEnvironment.NamedItems.AddItem("Rinf", new NamedConstant(PhysicalMeasure.Constants.Rinf));
+            someEnvironment.NamedItems.AddItem("tcs", new NamedConstant(PhysicalMeasure.Constants.tcs));
+            someEnvironment.NamedItems.AddItem("ThetaW", new NamedConstant(PhysicalMeasure.Constants.ThetaW));
+       }
 
         private CalculatorEnvironment InitPredefinedSystemContext()
         {
@@ -203,7 +213,7 @@ namespace PhysicalCalculator
                     ResultLine = "";
 
                     CommandLineFromAccessor = commandLineReader.HasAccessor();
-                    commandLineReader.ReadCommand(ref ResultLine, out var FullCommandLine);
+                    String FullCommandLine = commandLineReader.ReadCommand(ref ResultLine);
                     CommandLineEmpty = String.IsNullOrWhiteSpace(FullCommandLine);
                     ResultLineEmpty = String.IsNullOrWhiteSpace(ResultLine);
                     if (!ResultLineEmpty)
@@ -498,7 +508,8 @@ namespace PhysicalCalculator
 
             resultLine = "PhysCalculator" + "\n";
             resultLine += PhysCaclAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo() + "\n";
-            resultLine += "http://physicalmeasure.codeplex.com";
+            // resultLine += "http://physicalmeasure.codeplex.com";
+            resultLine += "https://github.com/KiloBravoLima/PhysicalMeasure_";
 
             commandLine = "";
             return true;
@@ -715,36 +726,47 @@ namespace PhysicalCalculator
         public Boolean CommandUsingConstants(ref String commandLine, ref String resultLine)
         {
             commandLine = commandLine.ReadIdentifier(out var ConstantGroupName);
-            if (ConstantGroupName == null)
+            do
             {
-                resultLine = "Constant group name expected";
-            }
-            else
-            {
-                Debug.Assert(ConstantGroupName != null);
-
-                if (ConstantGroupName.StartsWithKeywordPrefix("Universal") > 0)
-                {   // PhysicalMeasure.Constants  Table of universal constants
-                    UsingUniversalPhysicalConstants(CurrentContext);
-                    resultLine = "Using universal constants";
-                }
-                else if (ConstantGroupName.StartsWithKeywordPrefix("Electromagnetic") > 0)
-                {   // PhysicalMeasure.Constants  Table of electromagnetic constants
-                    UsingElectromagneticPhysicalConstants(CurrentContext);
-                    resultLine = "Using electromagnetic constants";
-                }
-                /*
-                else if (ConstantGroupName.StartsWithKeywordPrefix("Atomic")  > 0)
-                {   // PhysicalMeasure.Constants  Table of atomic and nuclear constants
-                    UsingAtomicAndNuclearPhysicalConstants(CurrentContext);
-                    resultLine = "Using atomic and nuclear constants";
-                }
-                 */
-                else 
+                if (ConstantGroupName == null)
                 {
-                    resultLine = "Unknown Constant group name";
+                    resultLine = "Constant group name expected";
+                }
+                else
+                {
+                    Debug.Assert(ConstantGroupName != null);
+
+                    if (ConstantGroupName.StartsWithKeywordPrefix("All") > 0)
+                    {   // PhysicalMeasure.Constants  Table of universal constants
+                        UsingUniversalPhysicalConstants(CurrentContext);
+                        UsingElectromagneticPhysicalConstants(CurrentContext);
+                        UsingAtomicAndNuclearPhysicalConstants(CurrentContext);
+                        resultLine = "Using all physical constants";
+                    }
+                    else if (ConstantGroupName.StartsWithKeywordPrefix("Universal") > 0)
+                    {   // PhysicalMeasure.Constants  Table of universal constants
+                        UsingUniversalPhysicalConstants(CurrentContext);
+                        resultLine = "Using universal constants";
+                    }
+                    else if (ConstantGroupName.StartsWithKeywordPrefix("Electromagnetic") > 0)
+                    {   // PhysicalMeasure.Constants  Table of electromagnetic constants
+                        UsingElectromagneticPhysicalConstants(CurrentContext);
+                        resultLine = "Using electromagnetic constants";
+                    }
+                    else if (ConstantGroupName.StartsWithKeywordPrefix("Atomic") > 0)
+                    {   // PhysicalMeasure.Constants  Table of atomic and nuclear constants
+                        UsingAtomicAndNuclearPhysicalConstants(CurrentContext);
+                        resultLine = "Using atomic and nuclear constants";
+                    }
+                    else
+                    {
+                        resultLine = "Unknown Constant group name: " + ConstantGroupName;
+                    }
+
+                    commandLine = commandLine.ReadIdentifier(out ConstantGroupName);
                 }
             }
+            while (ConstantGroupName != null);
 
             return true;
         }
@@ -788,7 +810,7 @@ namespace PhysicalCalculator
                             OK = VariableSet(NewVariableDeclarationNamespace, VariableName, pq);
                             if (pq != null)
                             {
-                                resultLine = VariableName + " = " + pq.ToString();
+                                resultLine = VariableName + " = " + pq.ToString(" UL");
                             }
                             else
                             {
@@ -885,7 +907,7 @@ namespace PhysicalCalculator
 
                     if (OK)
                     {
-                        OK = SystemSet(NewSystemDeclarationNamespace, SystemName, null, out Item);
+                        OK = SystemSet(NewSystemDeclarationNamespace, true, SystemName, null, out Item);
                         if (OK)
                         {
                             // Defined new local base unit 
@@ -967,7 +989,7 @@ namespace PhysicalCalculator
                                 commandLine = commandLine.ReadToken(out unitSymbol);
                             } 
 
-                            OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, unitSymbol, out Item);
+                            OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, unitSymbol, out Item, out string errorMessage);
                             if (OK)
                             {
                                 /*
@@ -991,7 +1013,7 @@ namespace PhysicalCalculator
                             }
                             else
                             {
-                                resultLine = "Unit '" + UnitName + "' can't be declared.\r\n" + resultLine;
+                                resultLine = "Unit '" + UnitName + "' can't be declared. "+ errorMessage + "\r\n" + resultLine;
                             }
                         }
                     }
@@ -1075,10 +1097,12 @@ namespace PhysicalCalculator
             {
                 Accumulator = null;
                 result = IdentifiersClear();
+                resultLine = result ? "Identifiers cleared." : "Failed clearing Identifiers.";
             }
             if (clearCommands)
             {
                 CommandLineReader.CommandHistory.Clear();
+                resultLine += " Command history cleared.";
             }
 
             return result;
@@ -1132,7 +1156,7 @@ namespace PhysicalCalculator
                             resultLine += ", ";
                         }
                     }
-                    resultLine += pq.ToString(null, CurrentContext.CurrentCultureInfo);
+                    resultLine += pq.ToString(" UL", CurrentContext.CurrentCultureInfo);
 
                     Accumulator = pq;
                 }
@@ -1543,9 +1567,9 @@ namespace PhysicalCalculator
         #region  Custom Unit access
 
         //return context.SystemSet(systemName, unitValue, out systemItem);
-        public Boolean SystemSet(IEnvironment context, String systemName, IQuantity unitValue, out INametableItem systemItem) => context.SystemSet(systemName, out systemItem);
+        public Boolean SystemSet(IEnvironment context, bool setAsDefaultSystem, String systemName, IQuantity unitValue, out INametableItem systemItem) => context.SystemSet(systemName, setAsDefaultSystem, out systemItem);
 
-        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem) => context.UnitSet(unitSystem, unitName, unitValue, unitSymbol, out unitItem);
+        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem, out string errorMessage) => context.UnitSet(unitSystem, unitName, unitValue, unitSymbol, out unitItem, out errorMessage);
 
         #endregion  Custom Unit  access
 
