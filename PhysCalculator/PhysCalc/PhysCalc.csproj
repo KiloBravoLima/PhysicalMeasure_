@@ -80,10 +80,10 @@
     <Compile Include="CommandHandler\CommandHandler.cs" />
     <Compile Include="CommandHandler\CommandReader.cs" />
     <Compile Include="CommandHandler\ConsolAnyColor.cs" />
-    <Compile Include="PhysicalCommandBlock.cs" />
-    <Compile Include="PhysicalIdentifiers.cs" />
-    <Compile Include="PhysicalExpression.cs" />
-    <Compile Include="PhysicalFunction.cs" />
+    <Compile Include="ExpressionEvaluate\PhysicalCommandBlock.cs" />
+    <Compile Include="ExpressionEvaluate\PhysicalIdentifiers.cs" />
+    <Compile Include="ExpressionEvaluate\PhysicalExpression.cs" />
+    <Compile Include="ExpressionEvaluate\PhysicalFunction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <DependentUpon>AssemblyInfo.txt4</DependentUpon>
     </Compile>
