@@ -226,8 +226,8 @@ namespace PhysicalCalculator
             return S;
         }
     }
-
-    class CommandFileAccessor : CommandAccessor
+ 
+    class CommandFileAccessor : CommandAccessor, IDisposable
     {
         //public String FileNameStr;
         public StreamReader FileReader;

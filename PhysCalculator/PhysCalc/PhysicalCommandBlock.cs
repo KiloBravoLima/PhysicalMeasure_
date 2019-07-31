@@ -181,7 +181,7 @@ namespace PhysicalCalculator.CommandBlock
                         {
                             if (localContext.CommandBlockToParseInfo.CommandBlock.Commands == null)
                             {
-                                localContext.CommandBlockToParseInfo.CommandBlock.Commands = new List<String>();
+                                // localContext.CommandBlockToParseInfo.CommandBlock.Commands = new List<String>();
                             }
                             Debug.Assert(localContext.CommandBlockToParseInfo.CommandBlock.Commands != null);
                             localContext.CommandBlockToParseInfo.CommandBlock.Commands.Add(commandLine.Substring(0, indexCommandEnd));

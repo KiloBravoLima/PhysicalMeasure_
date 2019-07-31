@@ -139,7 +139,7 @@ namespace TokenParser
         public static int PeekIdentifier(this String commandLine, out String identifier)
         {
             int i = 0;
-            if (commandLine.IsStartOfIdentifier,())
+            if (commandLine.IsStartOfIdentifier())
             {
                 i = 1 + commandLine.Substring(1).TakeWhile(c => IsIdentifierSecondaryChar(c)).Count();
                 identifier = commandLine.Substring(0, i);

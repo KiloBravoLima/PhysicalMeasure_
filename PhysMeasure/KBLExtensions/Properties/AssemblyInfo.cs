@@ -42,6 +42,6 @@ using System.Runtime.InteropServices;
 //  revision: 36600
 
 [assembly: AssemblyVersion("1.0")]
-[assembly: AssemblyFileVersion("1.0.7151.502")]
-[assembly: AssemblyInformationalVersion("1.0.7147")]
+[assembly: AssemblyFileVersion("1.0.7151.15496")]
+[assembly: AssemblyInformationalVersion("1.0.7150")]
 

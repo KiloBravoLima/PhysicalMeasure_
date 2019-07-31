@@ -311,7 +311,7 @@ namespace System.Text
     {
         public static void AppendSeparated(this StringBuilder sb, String text, String separator = " ")
         {
-            if (text.Length > 0)
+            if (text?.Length > 0)
             {
                 if (sb.Length > 0)
                 {
@@ -329,6 +329,7 @@ namespace System.Collections.Generic
 
     public static class IEnumerableExtensions
     {
+        /***
         public static T FirstOrNull<T>(this IEnumerable<T> sequence) where T : class
         {
             //return values.DefaultIfEmpty(null).FirstOrDefault();
@@ -359,6 +360,7 @@ namespace System.Collections.Generic
                 return item;
             return null;
         }
+        ***/
 
         public static String ToStringList<Object>(this IEnumerable<Object> sequence, String separator = ", ")
         {
@@ -384,6 +386,7 @@ namespace System.Collections.Generic
             return a1;
         }
 
+        /***
         public static T FirstOrNull<T>(this T[] values) where T : class
         {
             foreach (T item in values)
@@ -411,6 +414,7 @@ namespace System.Collections.Generic
                 return item;
             return null;
         }
+        ***/
     }
 }
 
@@ -510,7 +514,7 @@ namespace System.Reflection
             String assemblyVersionInfo = AssemblyVersionInfo(assembly);
             String assemblyFileVersionInfo = AssemblyFileVersionInfo(assembly);
 
-            String InfoStr = String.Format("{0,-16} {1} {2}", AsmName.Name, assemblyVersionInfo, assemblyFileVersionInfo);
+            String InfoStr = $"{AsmName.Name,-16} {assemblyVersionInfo} {assemblyFileVersionInfo}";
             return InfoStr;
         }
     }

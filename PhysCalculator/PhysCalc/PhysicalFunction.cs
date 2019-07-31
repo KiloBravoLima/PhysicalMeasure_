@@ -487,7 +487,7 @@ namespace PhysicalCalculator.Function
                                 {
                                     if (localContext.FunctionToParseInfo.Function.Commands == null)
                                     {
-                                        localContext.FunctionToParseInfo.Function.Commands = new List<String>();
+                                        // localContext.FunctionToParseInfo.Function.Commands = new List<String>();
                                     }
                                     Debug.Assert(localContext.FunctionToParseInfo.Function.Commands != null);
                                     localContext.FunctionToParseInfo.Function.Commands.Add(commandLine.Substring(0, indexCommandEnd));

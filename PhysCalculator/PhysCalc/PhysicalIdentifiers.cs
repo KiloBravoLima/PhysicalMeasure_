@@ -41,7 +41,7 @@ namespace PhysicalCalculator.Identifiers
 
     public interface ICommands
     {
-        List<String> Commands { get; set; }
+        List<String> Commands { get; /* set; */ }
     }
 
     public interface ICommandsEvaluator : ICommands, IEvaluator
