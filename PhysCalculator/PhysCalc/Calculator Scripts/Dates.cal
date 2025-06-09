@@ -1,0 +1,28 @@
+﻿// Saved 2025-06-08 19:00:00 to Dates.cal
+
+
+var td = Date(2025-06-08) 
+
+set soon = td + 1 s 
+set inOneMin = td + 1 min 
+set inOneHour = td + 1 h 
+
+set prevHour = td - 1 h 
+set prevDay = td - 24 h 
+set prevWeek = td  - 7 d 
+// set prevMonth = td - 1 month 
+set prevYear = td - 1 y
+
+set nextHour = td + 1 hour 
+set nextDay = td + 24 hour 
+set nextWeek = td + 7 day 
+// set nextMonth = td + 1 month 
+set nextYear = td + 1 year 
+
+set nextHour2 = 1 h  + td 
+set nextDay2 = 24 h  + td 
+set nextWeek2 = 7 d  + td 
+// set nextMonth2 =  1 month  + td 
+set nextYear2 = 1 y  + td 
+
+list

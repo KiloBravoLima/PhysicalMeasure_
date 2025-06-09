@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
+using System.Text;
+
+using PhysicalCalculator.Expression;
+using PhysicalCalculator.Identifiers;
 
 using PhysicalMeasure;
 
 using TokenParser;
-using PhysicalCalculator.Identifiers;
 
 namespace PhysicalCalculator.Function
 {
@@ -28,6 +30,8 @@ namespace PhysicalCalculator.Function
 
         public CalculatorEnvironment StaticOuterContext { get; }
         public CalculatorEnvironment DynamicOuterContext { get; }
+
+        public Type ResultType { get; }
 
         public PhysicalQuantityFunction(CalculatorEnvironment staticOuterContext)
         {
@@ -72,7 +76,7 @@ namespace PhysicalCalculator.Function
             return ListStringBuilder.ToString();
         }
 
-        public Boolean CheckParams(List<Quantity> actualParameterlist, ref String resultLine)
+        public Boolean CheckParams(List<OperandInfo> actualParameterlist, ref String resultLine)
         {
             int ParamCount = Parameterlist.Count;
             if (actualParameterlist.Count < ParamCount)
@@ -90,39 +94,125 @@ namespace PhysicalCalculator.Function
             return true;
         }
 
-        abstract public Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine);
+        // abstract public Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> parameterlist, out T functionResult, ref String resultLine);
+        abstract public Boolean Evaluate(CalculatorEnvironment localContext, List<OperandInfo> parameterlist, out OperandInfo functionResult, ref String resultLine);
+        // abstract public Boolean Evaluate<T>(CalculatorEnvironment localContext, List<OperandInfo> parameterlist, out T functionResult, ref String resultLine);
     }
 
 
-    /**
-    //class PhysicalQuantityFunction<TFunc> : PhysicalQuantityFunction where TFunc : LambdaExpression
-    //class PhysicalQuantityFunction<TFunc> : PhysicalQuantityFunction where TFunc : Expression<Func<Quantity>>
-    //class PhysicalQuantityFunction<TFunc> : PhysicalQuantityFunction where TFunc : Func<Quantity>
-    class PhysicalQuantityFunction<TFunc> : PhysicalQuantityFunction where TFunc : IInvocable
+    class DateTimeZeroParamFunction : PhysicalQuantityFunction
     {
-        private TFunc FF;
+        Func<DateTime> F;
 
-        //public BuildInPhysicalQuantityFunction<TFunc>(TFunc func)
-        public PhysicalQuantityFunction(TFunc func)
+        public DateTimeZeroParamFunction(CalculatorEnvironment staticOuterContext, Func<DateTime> func)
+            : base(staticOuterContext)
         {
-            this.FF = func;
+            F = func;
         }
 
-        override public Boolean Evaluate(CalculatorEnvironment localContext, List<IQuantity> actualParameterlist, out IQuantity functionResult, ref String resultLine)
+        virtual public Boolean Evaluate(CalculatorEnvironment localContext, out DateTime functionResult, ref String resultLine)
         {
-
-            if (!CheckParams(actualParameterlist, ref resultLine))
-            {
-                functionResult = null;
-                return false;
-            }
-
-            //functionResult = this.FF(parameterlist[0]);
-            functionResult = this.FF(actualParameterlist);
+            functionResult = F();
             return true;
         }
+
+        public override bool Evaluate(CalculatorEnvironment localContext, List<OperandInfo> parameterList, out OperandInfo functionResult, ref string resultLine)
+        {
+            DateTime dateTimeObject;
+            Boolean result = Evaluate(localContext, out dateTimeObject, ref resultLine);
+            // functionResult = dateTimeObject;
+            functionResult = new OperandInfo(dateTimeObject);
+            return result;
+        }
+    
+
+        /**
+        override public Boolean Evaluate<T>(CalculatorEnvironment localContext, List<Quantity> dummy_parameterlist, out T functionResult, ref String resultLine)
+        {
+            DateTime dateTimeObject;
+            Boolean result = Evaluate(localContext, out dateTimeObject, ref resultLine);
+            functionResult = (T)(object)dateTimeObject;
+            return result;
+        }
+        **/
     }
-    **/
+
+    class DateTimeParamFunction : PhysicalQuantityFunction
+    {
+        Func<String , DateTime> F;
+
+        public DateTimeParamFunction(CalculatorEnvironment staticOuterContext, Func<String, DateTime> func)
+            : base(staticOuterContext)
+        {
+            F = func;
+        }
+
+        virtual public Boolean Evaluate(CalculatorEnvironment localContext, in String dt, out DateTime functionResult, ref String resultLine)
+        {
+            functionResult = F(dt);
+            return true;
+        }
+
+        public override bool Evaluate(CalculatorEnvironment localContext, List<OperandInfo> parameterList, out OperandInfo functionResult, ref string resultLine)
+        {
+            String dt = parameterList[0].AsString();  
+            DateTime dateTimeObject;
+            Boolean result = Evaluate(localContext, in dt, out dateTimeObject, ref resultLine);
+            // functionResult = dateTimeObject;
+            functionResult = new OperandInfo(dateTimeObject);
+            return result;
+        }
+
+
+        /**
+        override public Boolean Evaluate<T>(CalculatorEnvironment localContext, List<Quantity> dummy_parameterlist, out T functionResult, ref String resultLine)
+        {
+            DateTime dateTimeObject;
+            Boolean result = Evaluate(localContext, out dateTimeObject, ref resultLine);
+            functionResult = (T)(object)dateTimeObject;
+            return result;
+        }
+        **/
+    }
+
+    class PhysicalQuantityZeroParameterFunction : PhysicalQuantityFunction
+    {
+        //UnaryFunction F;
+        Func<Quantity> F;
+
+        //public PhysicalQuantityUnaryFunction(UnaryFunction func)
+        public PhysicalQuantityZeroParameterFunction(CalculatorEnvironment staticOuterContext, Func<Quantity> func)
+            : base(staticOuterContext)
+        {
+            F = func;
+        }
+
+        virtual public Boolean Evaluate(CalculatorEnvironment localContext, out Quantity functionResult, ref String resultLine)
+        {
+            functionResult = F();
+            return true;
+        }
+
+
+        public override bool Evaluate(CalculatorEnvironment localContext, List<OperandInfo> dummy_actualParameterlist, out OperandInfo functionResult, ref String resultLine)
+        {
+            Quantity quantityObject;
+            Boolean result = Evaluate(localContext, out quantityObject, ref resultLine);
+            functionResult = new OperandInfo(quantityObject);
+            return result;
+        }
+
+        /**
+        override public Boolean Evaluate<T>(CalculatorEnvironment localContext, List<Quantity> dummy_actualParameterlist, out T functionResult, ref String resultLine)
+        {
+            // return Evaluate(localContext, out functionResult, ref resultLine);
+            Quantity quantityObject;
+            Boolean result = Evaluate(localContext, out quantityObject, ref resultLine);
+            functionResult = (T)(object)quantityObject;
+            return result;
+        }
+        **/
+    }
 
     class PhysicalQuantityFunction_PQ_SB : PhysicalQuantityFunction
     {
@@ -146,16 +236,16 @@ namespace PhysicalCalculator.Function
             formalparamlist = formalparams;
         }
 
-
-        override public Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> actualParameterlist, out Quantity functionResult, ref String resultLine)
+        public override bool Evaluate(CalculatorEnvironment localContext, List<OperandInfo> actualParameterlist, out OperandInfo functionResult, ref string resultLine)
         {
-            if (!CheckParams(actualParameterlist, ref resultLine)) 
+            if (!CheckParams(actualParameterlist, ref resultLine))
             {
                 functionResult = null;
                 return false;
             }
-
-            functionResult = F(actualParameterlist[0], (SByte)actualParameterlist[1].Value);
+            var param1 = actualParameterlist[0].OperandValue as Quantity;
+            var param2 = (SByte)(actualParameterlist[1].OperandValue as Quantity).Value;
+            functionResult = new OperandInfo(F(param1, param2));
             return true;
         }
     }
@@ -172,7 +262,13 @@ namespace PhysicalCalculator.Function
             F = func;
         }
 
-        override public Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> actualParameterlist, out Quantity functionResult, ref String resultLine)
+        public Boolean Evaluate(CalculatorEnvironment localContext, Quantity actualParameter1, Quantity actualParameter2, out Quantity functionResult, ref String resultLine)
+        {
+            functionResult = F(actualParameter1, actualParameter2);
+            return true;
+        }
+
+        override public Boolean Evaluate(CalculatorEnvironment localContext, List<OperandInfo> actualParameterlist, out OperandInfo functionResult, ref String resultLine)
         {
             if (!CheckParams(actualParameterlist, ref resultLine))
             {
@@ -180,7 +276,10 @@ namespace PhysicalCalculator.Function
                 return false;
             }
 
-            functionResult = F(actualParameterlist[0], actualParameterlist[1]);
+            var param1 = actualParameterlist[0].OperandValue as Quantity;
+            var param2 = actualParameterlist[1].OperandValue as Quantity;
+
+            functionResult = new OperandInfo(F(param1, param2));
             return true;
         }
     }
@@ -246,13 +345,23 @@ namespace PhysicalCalculator.Function
         {
         }
 
-        private List<String> _commands;
+        private List<String> _commands = new List<String>(); 
 
         public List<String> Commands { get { return _commands; } set { _commands = value; } }
 
-        public Boolean Evaluate(CalculatorEnvironment localContext, out Quantity functionResult, ref String resultLine) => Evaluate(localContext, null, out functionResult, ref resultLine);
+        /*
+        public void AddCommandLine(String commandLine) 
+        {
+            if (_commands == null)
+            {
+                _commands = new List<string>();
+            }
+            _commands.Add(commandLine);
+        }
+        */
 
-        override public Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> actualParameterlist, out Quantity functionResult, ref String resultLine)
+
+        override public Boolean Evaluate(CalculatorEnvironment localContext, List<OperandInfo> actualParameterlist, out OperandInfo functionResult, ref String resultLine)
         {
             if (PhysicalFunction.ExecuteCommandsCallback != null)
             {
@@ -269,7 +378,8 @@ namespace PhysicalCalculator.Function
                             return false;
                         }
 
-                        Quantity paramValue = actualParameterlist[ParamIndex];
+                        OperandInfo paramValueOperand = actualParameterlist[ParamIndex];
+                        Quantity paramValue = paramValueOperand.AsQuantity();
                         if (Param.Unit != null)
                         {
                             Quantity paramValueConverted = paramValue.ConvertTo(Param.Unit);
@@ -283,9 +393,11 @@ namespace PhysicalCalculator.Function
                             else
                             {
                                 paramValue = paramValueConverted;
+                                paramValueOperand = new OperandInfo(paramValue);
                             }
                         }
-                        localContext.NamedItems.SetItem(Param.Name, new NamedVariable(paramValue));
+                        // localContext.NamedItems.SetItem(Param.Name, new NamedVariable(paramValue));
+                        localContext.NamedItems.SetItem(Param.Name, new NamedVariable(paramValueOperand));
                         ParamIndex++;
                     }
                 }
@@ -298,7 +410,9 @@ namespace PhysicalCalculator.Function
                 }
                 // Run commands
                 String FuncBodyResult = ""; // Dummy: Never used
-                return PhysicalFunction.ExecuteCommandsCallback(localContext, Commands, ref FuncBodyResult, out functionResult);
+
+                Boolean result = PhysicalFunction.ExecuteCommandsCallback(localContext, Commands, ref FuncBodyResult, out functionResult);
+                return result;
             }
             else
             {
@@ -327,7 +441,7 @@ namespace PhysicalCalculator.Function
           
          **/
 
-        public delegate Boolean ExecuteCommandsFunc(CalculatorEnvironment localContext, List<String> FuncBodyCommands, ref String funcBodyResult, out Quantity functionResult);
+        public delegate Boolean ExecuteCommandsFunc(CalculatorEnvironment localContext, List<String> FuncBodyCommands, ref String funcBodyResult, out OperandInfo functionResult);
 
         public static ExecuteCommandsFunc ExecuteCommandsCallback;
 
@@ -487,9 +601,10 @@ namespace PhysicalCalculator.Function
                                 {
                                     if (localContext.FunctionToParseInfo.Function.Commands == null)
                                     {
-                                        // localContext.FunctionToParseInfo.Function.Commands = new List<String>();
+                                        // Will not work; Commands are ReadOnly here: localContext.FunctionToParseInfo.Function.Commands = new List<String>();
                                     }
                                     Debug.Assert(localContext.FunctionToParseInfo.Function.Commands != null);
+
                                     localContext.FunctionToParseInfo.Function.Commands.Add(commandLine.Substring(0, indexCommandEnd));
                                     commandLine = commandLine.Substring(indexCommandEnd);
                                 }

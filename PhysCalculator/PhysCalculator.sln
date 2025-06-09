@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26020.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysCalc", "PhysCalc\PhysCalc.csproj", "{74C979DF-C059-4DC4-BCA7-FC904F131B37}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -32,8 +32,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhysicalMeasure", "..\PhysM
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CSInteractive", "CSInteractive", "{CC98C940-05AA-4889-8B52-F97A477AC754}"
 	ProjectSection(SolutionItems) = preProject
-		CSInteractivePhysicalMeasureTest.csx = CSInteractivePhysicalMeasureTest.csx
-		CSInteractiveSetup.csx = CSInteractiveSetup.csx
+		CSInteractive\CSharpInteractive.rsp = CSInteractive\CSharpInteractive.rsp
+		CSInteractive\CSInteractivePhysicalMeasureTest.csx = CSInteractive\CSInteractivePhysicalMeasureTest.csx
+		CSInteractive\CSInteractiveSetup.csx = CSInteractive\CSInteractiveSetup.csx
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionsTests", "..\PhysMeasure\KBLExtensionsTests\ExtensionsTests.csproj", "{51533EFE-2004-4123-8099-6A8226470F91}"

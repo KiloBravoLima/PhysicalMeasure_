@@ -364,6 +364,8 @@ namespace System.Collections.Generic
 
         public static String ToStringList<Object>(this IEnumerable<Object> sequence, String separator = ", ")
         {
+            if (!sequence.Any())
+                return "";
             return sequence.Select(item => item.ToString()).Aggregate((current, next) => current + separator + next);
         }
 

@@ -8,6 +8,7 @@ using PhysicalMeasure;
 using TokenParser;
 
 using PhysicalCalculator.Identifiers;
+using PhysicalCalculator.Expression;
 
 namespace PhysicalCalculator.CommandBlock
 {
@@ -22,7 +23,7 @@ namespace PhysicalCalculator.CommandBlock
             return ListStringBuilder.ToString();
         }
 
-        abstract public Boolean Evaluate(CalculatorEnvironment localContext, out Quantity functionResult, ref String resultLine);
+        abstract public Boolean Evaluate(CalculatorEnvironment localContext, out OperandInfo functionResult, ref String resultLine);
 
         public void WriteToTextFile(String name, System.IO.StreamWriter file)
         {
@@ -32,7 +33,7 @@ namespace PhysicalCalculator.CommandBlock
 
     class PhysicalQuantityCommandsBlock : PhysicalQuantityCommandBlock, ICommandsEvaluator
     {
-        public List<String> Commands { get; set; } = new List<String>(); 
+        public List<String> Commands { get; /* set; */ } = new List<String>(); 
 
         override public String ToListString(String name)
         {
@@ -61,7 +62,7 @@ namespace PhysicalCalculator.CommandBlock
             return ListStringBuilder.ToString();
         }
 
-        override public Boolean Evaluate(CalculatorEnvironment localContext, out Quantity commandBlockResult, ref String resultLine)
+        override public Boolean Evaluate(CalculatorEnvironment localContext, out OperandInfo commandBlockResult, ref String resultLine)
         {
             if (PhysicalCommandBlock.ExecuteCommandsCallback != null)
             {
@@ -96,7 +97,7 @@ namespace PhysicalCalculator.CommandBlock
           
          **/
 
-        public delegate Boolean ExecuteCommandsFunc(CalculatorEnvironment localContext, List<String> FuncBodyCommands, ref String funcBodyResult, out Quantity functionResult);
+        public delegate Boolean ExecuteCommandsFunc(CalculatorEnvironment localContext, List<String> FuncBodyCommands, ref String funcBodyResult, out OperandInfo functionResult);
 
         public static ExecuteCommandsFunc ExecuteCommandsCallback;
 
@@ -179,12 +180,16 @@ namespace PhysicalCalculator.CommandBlock
 
                         if (indexCommandEnd > 0)
                         {
+                            /**
                             if (localContext.CommandBlockToParseInfo.CommandBlock.Commands == null)
                             {
                                 // localContext.CommandBlockToParseInfo.CommandBlock.Commands = new List<String>();
                             }
+                            **/
                             Debug.Assert(localContext.CommandBlockToParseInfo.CommandBlock.Commands != null);
                             localContext.CommandBlockToParseInfo.CommandBlock.Commands.Add(commandLine.Substring(0, indexCommandEnd));
+                            /* **/
+                            //** localContext.CommandBlockToParseInfo.CommandBlock.AddCommandLine(commandLine.Substring(0, indexCommandEnd));
                             commandLine = commandLine.Substring(indexCommandEnd);
                         }
 

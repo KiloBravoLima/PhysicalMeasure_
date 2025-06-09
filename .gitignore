@@ -1,0 +1,24 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/PhysCalculator/.vs/PhysCalculator
+/PhysCalculator/PhysCalc/bin
+/PhysCalculator/PhysCalc/obj
+/PhysCalculator/PhysCalculatorTests/bin
+/PhysCalculator/PhysCalculatorTests/obj
+/PhysMeasure/.vs/PhysicalMeasure
+/PhysMeasure/KBLExtensions/bin
+/PhysMeasure/KBLExtensions/obj
+/PhysMeasure/KBLExtensionsTests/bin
+/PhysMeasure/KBLExtensionsTests/obj
+/PhysMeasure/PhysicalMeasure/bin
+/PhysMeasure/PhysicalMeasure/obj
+/PhysMeasure/PhysicalMeasureTest/bin
+/PhysMeasure/PhysicalMeasureTest/obj
+/PhysCalculator/packages
+/PhysCalculator/TestResults
+/PhysMeasure/packages
+/PhysCalculator/Visual Studio 2022/Visualizers/attribcache140.bin
+/PhysCalculator/PhysCalc/PhysCalc.csproj.user

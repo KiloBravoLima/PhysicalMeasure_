@@ -24,7 +24,7 @@ namespace PhysicalCalculator
         ResultWriter ResultLineWriter = null;
 
         const string AccumulatorName = "Accumulator";
-        Quantity Accumulator = null;
+        OperandInfo Accumulator = null;
         CalculatorEnvironment GlobalContext;
         public CalculatorEnvironment CurrentContext;
 
@@ -77,6 +77,12 @@ namespace PhysicalCalculator
             // Physical quantity functions
             somePredefinedSystem.NamedItems.AddItem("Pow", new PhysicalQuantityFunction_PQ_SB(somePredefinedSystem, (pq, exp) => pq.Pow(exp)));
             somePredefinedSystem.NamedItems.AddItem("Rot", new PhysicalQuantityFunction_PQ_SB(somePredefinedSystem, (pq, exp) => pq.Rot(exp)));
+
+            // DateTime functions
+            somePredefinedSystem.NamedItems.AddItem("Date", new DateTimeParamFunction(somePredefinedSystem, (String dt) => DateTime.Parse(dt)));
+            somePredefinedSystem.NamedItems.AddItem("Now", new DateTimeZeroParamFunction(somePredefinedSystem, () => DateTime.Now));
+            somePredefinedSystem.NamedItems.AddItem("ToDay", new DateTimeZeroParamFunction(somePredefinedSystem, () => DateTime.Now.Date));
+            somePredefinedSystem.NamedItems.AddItem("TimeOfDay", new PhysicalQuantityZeroParameterFunction(somePredefinedSystem, () => new Quantity( DateTime.Now.TimeOfDay.TotalSeconds, SI.s)));
         }
 
         private void UsingUniversalPhysicalConstants(CalculatorEnvironment someEnvironment)
@@ -301,7 +307,7 @@ namespace PhysicalCalculator
             } while ((CommandLineFromAccessor || !CommandLineEmpty || !ResultLineEmpty) && !LoopExit);
         }
 
-        public Boolean ExecuteFunctionCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out Quantity functionResult)
+        public Boolean ExecuteFunctionCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out OperandInfo functionResult)
         {
             // Dummy: Never used    funcBodyResult
             CommandReader functionCommandLineReader = new CommandReader(localContext.Name, funcBodyCommands.ToArray(), CommandLineReader.ResultLineWriter)
@@ -321,7 +327,7 @@ namespace PhysicalCalculator
             return true;
         }
 
-        public Boolean ExecuteCommandsCallback(CalculatorEnvironment localContext, List<String> commands, ref String resultLine, out Quantity commandBlockResult)
+        public Boolean ExecuteCommandsCallback(CalculatorEnvironment localContext, List<String> commands, ref String resultLine, out OperandInfo commandBlockResult)
         {
             // Dummy: Never used    resultLine
             CommandReader CommandBlockLineReader = new CommandReader(localContext.Name, commands.ToArray(), CommandLineReader.ResultLineWriter)
@@ -773,6 +779,8 @@ namespace PhysicalCalculator
 
         public Boolean CommandVar(ref String commandLine, ref String resultLine)
         {
+            String tempCommandLine = commandLine;
+
             resultLine = "";
             Boolean OK;
             do
@@ -802,7 +810,8 @@ namespace PhysicalCalculator
                         {
                             ";"
                         };
-                        Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
+                        
+                        OperandInfo pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                         if (!ALocalIdentifier || pq != null)
                         {
@@ -860,7 +869,7 @@ namespace PhysicalCalculator
                         if (!IsCalculatorSetting)
                         {
                             List<string> ExpectedFollow = new List<string> { ";" };
-                            Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
+                            OperandInfo pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                             if (pq != null)
                             {
@@ -956,9 +965,9 @@ namespace PhysicalCalculator
 
                         List<string> ExpectedFollow = new List<string>{",", ";"};
 
-                        Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
+                        OperandInfo pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
-                        if ((pq != null) && pq.IsDimensionless)
+                        if ((pq != null) && pq.AsQuantity().IsDimensionless)
                         {
                             // Defined new local base unit 
                             resultLine = "Unit '" + UnitName + "' can't be declared.\r\n" + "Scaled unit must not be dimension less";
@@ -989,7 +998,7 @@ namespace PhysicalCalculator
                                 commandLine = commandLine.ReadToken(out unitSymbol);
                             } 
 
-                            OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, unitSymbol, out Item, out string errorMessage);
+                            OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, unitSymbol ?? UnitName, out Item, out string errorMessage);
                             if (OK)
                             {
                                 /*
@@ -1038,7 +1047,7 @@ namespace PhysicalCalculator
             }
             else
             {
-                Quantity pq = Accumulator;
+                OperandInfo pq = Accumulator;
 
                 if (pq != null)
                 {
@@ -1145,7 +1154,7 @@ namespace PhysicalCalculator
             List<string> ExpectedFollow = new List<string> { ";", "," };
             do
             {
-                Quantity pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
+                OperandInfo pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
                 if (pq != null)
                 {
@@ -1259,9 +1268,9 @@ namespace PhysicalCalculator
 
         #region Command helpers
 
-        public Quantity GetPhysicalQuantity(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
+        public OperandInfo GetPhysicalQuantity(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
-            Quantity pq = PhysicalCalculator.Expression.PhysicalExpression.ParseConvertedExpression(ref commandLine, ref resultLine, ExpectedFollow);
+            OperandInfo pq = PhysicalCalculator.Expression.PhysicalExpression.ParseConvertedExpression(ref commandLine, ref resultLine, ExpectedFollow);
 
             if (pq == null)
             {
@@ -1492,6 +1501,40 @@ namespace PhysicalCalculator
                     resultLine = "System " + systemvaluestr + " was not found; Current system is " + Physics.CurrentUnitSystems.Default;
                 }
             }
+            else if (variableName.IsKeyword("AutoDefineUnits"))
+            {
+                SettingFound = true;
+
+                commandLine = commandLine.ReadToken(out var autoDefineUnitsValuestr);
+                bool? autoDefineUnitsValue = null;
+                if (autoDefineUnitsValuestr.IsKeyword("On") || autoDefineUnitsValuestr.IsKeyword("True"))
+                {
+                    autoDefineUnitsValue = true;
+                }
+                else if (autoDefineUnitsValuestr.IsKeyword("Off") || autoDefineUnitsValuestr.IsKeyword("False"))
+                {
+                    autoDefineUnitsValue = false;
+                }
+
+                if (autoDefineUnitsValue != null)
+                { 
+                    if (identifierContext != null)
+                    {
+                        identifierContext.AutoDefineUnits = autoDefineUnitsValue.Value;
+                        resultLine = "AutoDefineUnits set to " + autoDefineUnitsValuestr;
+                    }
+                    else
+                    {
+                        CommandLineReader.AutoDefineUnits = autoDefineUnitsValue.Value;
+                        CurrentContext.AutoDefineUnits = autoDefineUnitsValue.Value;
+                        resultLine = "Current AutoDefineUnits set to " + autoDefineUnitsValuestr;
+                    }
+                }
+                else
+                {
+                    resultLine = "AutoDefineUnits can't be set to " + autoDefineUnitsValuestr + "; Current AutoDefineUnits is " + CurrentContext.AutoDefineUnits;
+                }
+            }
             return SettingFound;
         }
 
@@ -1499,7 +1542,7 @@ namespace PhysicalCalculator
 
         #region Variables access
 
-        public Boolean VariableSet(IEnvironment context, String variableName, Quantity variableValue)
+        public Boolean VariableSet(IEnvironment context, String variableName, OperandInfo variableValue)
         {
             if (variableName == AccumulatorName)
             {
@@ -1517,11 +1560,11 @@ namespace PhysicalCalculator
             }
         }
 
-        public Boolean VariableSetLocal(String variableName, Quantity variableValue) => VariableSet(CurrentContext, variableName, variableValue);
+        public Boolean VariableSetLocal(String variableName, OperandInfo variableValue) => VariableSet(CurrentContext, variableName, variableValue);
 
-        public Boolean VariableSetGlobal(String variableName, Quantity variableValue) => VariableSet(GlobalContext, variableName, variableValue);
+        public Boolean VariableSetGlobal(String variableName, OperandInfo variableValue) => VariableSet(GlobalContext, variableName, variableValue);
 
-        public Boolean VariableSet(String variableName, Quantity variableValue)
+        public Boolean VariableSet(String variableName, OperandInfo variableValue)
         {
             if (variableName == AccumulatorName)
             {
@@ -1534,7 +1577,7 @@ namespace PhysicalCalculator
             }
         }
 
-        public Boolean VariableGet(IEnvironment context, String variableName, out Quantity variableValue, ref String resultLine)
+        public Boolean VariableGet(IEnvironment context, String variableName, out OperandInfo variableValue, ref String resultLine)
         {
             if (variableName == AccumulatorName)
             {
@@ -1569,7 +1612,7 @@ namespace PhysicalCalculator
         //return context.SystemSet(systemName, unitValue, out systemItem);
         public Boolean SystemSet(IEnvironment context, bool setAsDefaultSystem, String systemName, IQuantity unitValue, out INametableItem systemItem) => context.SystemSet(systemName, setAsDefaultSystem, out systemItem);
 
-        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem, out string errorMessage) => context.UnitSet(unitSystem, unitName, unitValue, unitSymbol, out unitItem, out errorMessage);
+        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, OperandInfo unitValue, String unitSymbol, out INametableItem unitItem, out string errorMessage) => context.UnitSet(unitSystem, unitName, unitValue, unitSymbol, out unitItem, out errorMessage);
 
         #endregion  Custom Unit  access
 
@@ -1577,7 +1620,7 @@ namespace PhysicalCalculator
 
         public Boolean FunctionLookup(IEnvironment context, String functionName, out IFunctionEvaluator functionevaluator) => context.FunctionFind(functionName, out functionevaluator);
 
-        public Boolean CommandsBlockEvaluate(String CommandBlockName, ICommandsEvaluator commandsEvaluator, out Quantity commandsResult, ref String resultLine)
+        public Boolean CommandsBlockEvaluate(String CommandBlockName, ICommandsEvaluator commandsEvaluator, out OperandInfo commandsResult, ref String resultLine)
         {
             Boolean OK = false;
             commandsResult = null;
@@ -1602,11 +1645,11 @@ namespace PhysicalCalculator
         }
 
 
-        public Boolean FunctionEvaluate(String FunctionName, IFunctionEvaluator functionEvaluator, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine)
+        public Boolean FunctionEvaluate(String FunctionName, IFunctionEvaluator functionEvaluator, List<OperandInfo> parameterlist, out OperandInfo functionResult, ref String resultLine)
         {
             Boolean OK = false;
             functionResult = null;
-
+        
             if (functionEvaluator != null)
             {
                 CalculatorEnvironment FunctionStaticOuterContext = functionEvaluator.StaticOuterContext;
@@ -1628,7 +1671,7 @@ namespace PhysicalCalculator
             return OK;
         }
 
-        public Boolean FunctionEvaluateFileRead(String functionName, out Quantity functionResult, ref String resultLine)
+        public Boolean FunctionEvaluateFileRead(String functionName, out OperandInfo functionResult, ref String resultLine)
         {
             Boolean OK = false;
             functionResult = null;

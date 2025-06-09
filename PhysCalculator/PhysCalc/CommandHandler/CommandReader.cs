@@ -32,6 +32,8 @@ namespace PhysicalCalculator
         String Name { get; }
         TraceLevels OutputTracelevel { get; set; }
         FormatProviderKind FormatProviderSource { get; set; }
+        bool AutoDefineUnits { get; set; }
+
         Boolean IsEmpty { get; }
         String GetCommandLine(ref String ResultLine);
     }
@@ -80,6 +82,29 @@ namespace PhysicalCalculator
                 if (CA != null)
                 {
                     CA.FormatProviderSource = value;
+                }
+            }
+        }
+
+        public bool AutoDefineUnits
+        {
+            get
+            {
+                ICommandAccessor CA = Count > 0 ? this[Count - 1] : null;
+                if (CA != null)
+                {
+                    return CA.AutoDefineUnits;
+                }
+                // Error; just fall back to False
+                return false;
+            }
+
+            set
+            {
+                ICommandAccessor CA = Count > 0 ? this[Count - 1] : null;
+                if (CA != null)
+                {
+                    CA.AutoDefineUnits = value;
                 }
             }
         }
@@ -143,12 +168,14 @@ namespace PhysicalCalculator
     {
         private String _name;
         private TraceLevels OutTracelevel = TraceLevels.Normal; // TraceLevels.All; //TraceLevels.Normal;
-        private FormatProviderKind FormatProviderSrc = FormatProviderKind.InheritedFormatProvider; 
+        private FormatProviderKind FormatProviderSrc = FormatProviderKind.InheritedFormatProvider;
+        private bool AutoDefineUnitsSrc = false;
         public int LinesRead = 0;
 
         public String Name { get { return (_name ?? ""); } set { _name = value;  } }
         public TraceLevels OutputTracelevel { get { return OutTracelevel; } set { OutTracelevel = value; } }
         public FormatProviderKind FormatProviderSource { get { return FormatProviderSrc; } set { FormatProviderSrc = value; } }
+        public bool AutoDefineUnits { get { return AutoDefineUnitsSrc; } set { AutoDefineUnitsSrc = value; } }
 
         //virtual public Boolean IsEmpty { get { return true; } } 
         abstract public Boolean IsEmpty { get; } 
@@ -563,6 +590,8 @@ namespace PhysicalCalculator
         private TraceLevels GlobalOutputTracelevel = TraceLevels.Normal; //TraceLevels.All; // TraceLevels.Normal;
         private FormatProviderKind GlobalFormatProviderSource = FormatProviderKind.DefaultFormatProvider;
 
+        private bool GlobalAutoDefineUnits = false;
+
         public IList<String> CommandHistory = new List<String>();
 
         public CommandReader(ResultWriter ResultLineWriter = null)
@@ -673,6 +702,34 @@ namespace PhysicalCalculator
                 else
                 {
                     GlobalFormatProviderSource = value;
+                }
+            }
+        }
+
+
+        public bool AutoDefineUnits
+        {
+            get
+            {
+                if (CommandAccessors != null)
+                {
+                    return CommandAccessors.AutoDefineUnits;
+                }
+                else
+                {
+                    return GlobalAutoDefineUnits;
+                }
+            }
+
+            set
+            {
+                if (CommandAccessors != null)
+                {
+                    CommandAccessors.AutoDefineUnits = value;
+                }
+                else
+                {
+                    GlobalAutoDefineUnits = value;
                 }
             }
         }

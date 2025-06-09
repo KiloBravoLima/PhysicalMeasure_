@@ -36,18 +36,22 @@ namespace PhysicalCalculator.Identifiers
     {
         //String ToListString(String name);
 
-        Boolean Evaluate(CalculatorEnvironment localContext, out Quantity result, ref String resultLine);
+        Boolean Evaluate(CalculatorEnvironment localContext, out OperandInfo result, ref String resultLine);
     }
 
     public interface ICommands
     {
         List<String> Commands { get; /* set; */ }
+        /**
+        void AddCommandLine();
+        **/
     }
 
     public interface ICommandsEvaluator : ICommands, IEvaluator
     {
     }
 
+    /****
     public interface IFunctionEvaluator : INametableItem
     {
         CalculatorEnvironment StaticOuterContext { get; }
@@ -61,11 +65,40 @@ namespace PhysicalCalculator.Identifiers
 
         Boolean Evaluate(CalculatorEnvironment localContext, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine);
     }
+    ****/
+
+    public interface IFunctionEvaluator : INametableItem
+    {
+        CalculatorEnvironment StaticOuterContext { get; }
+        CalculatorEnvironment DynamicOuterContext { get; }
+
+
+        List<PhysicalQuantityFunctionParam> Parameterlist { get; }
+
+        String ParameterlistStr();
+
+        void ParamListAdd(PhysicalQuantityFunctionParam parameter);
+
+        Type ResultType { get; }
+
+        Boolean Evaluate(CalculatorEnvironment localContext, List<OperandInfo> parameterlist, out OperandInfo functionResult, ref String resultLine);
+
+       //  Boolean Evaluate<T>(CalculatorEnvironment localContext, List<Quantity> parameterlist, out T functionResult, ref String resultLine);
+    }
+
+    /**
+    public interface IQuantityFunctionEvaluator : IFunctionEvaluator<Quantity>;
+
+    public interface IDateTimeFunctionEvaluator : IFunctionEvaluator<DateTime>;
+
+    // public interface IFunctionEvaluator2 : IFunctionEvaluator<DateTime>;
+
+    **/
 
 
     public interface IFunctionCommandsEvaluator : IFunctionEvaluator, ICommands
     {
-    }
+}
 
     public abstract class NametableItem : INametableItem
     {
@@ -280,7 +313,8 @@ namespace PhysicalCalculator.Identifiers
         }
     }
 
-    class NamedVariable : Quantity, INametableItem
+    // class NamedVariable : Quantity, INametableItem
+    record class NamedVariable : OperandInfo, INametableItem
     {
         public virtual IdentifierKind Identifierkind => IdentifierKind.Variable;
 
@@ -304,7 +338,56 @@ namespace PhysicalCalculator.Identifiers
             this.Environment = environment;
         }
 
-        public virtual String ToListString(String name) => $"var {name} = {this.ToString(" UL", CultureInfo)}";
+        public NamedVariable(OperandInfo somephysicalquantity, IEnvironment environment = null)
+            : base(somephysicalquantity)
+        {
+            this.Environment = environment;
+        }
+
+        public T ValueAs<T>() where T : class
+        {
+                if (OperandType == typeof(T))
+                {
+                    return OperandValue as T;
+                }
+                else
+                {
+                    return null;
+                }
+        }
+
+        public Quantity AsQuantity
+        {
+            get
+            {
+                return ValueAs<Quantity>();
+            }
+        }
+
+        public virtual String ToListString(String name)
+        {
+            string str = null;
+            if (this.OperandType == typeof(Quantity))
+            {
+                str = $"var {name} = {this.ToString(" UL", CultureInfo)}";
+            }
+            else
+            if (this.OperandType == typeof(DateTime))
+            {
+                str = $"var {name} = {this.AsDateTime().Value.ToString(CultureInfo)}";
+            }
+            else
+            if (this.OperandType == typeof(String))
+            {
+                str = $"var {name} = {this.AsString().ToString(CultureInfo)}";
+            }
+            else
+            {
+                str = $"var {name} = {this.ToString()}";
+            }
+
+            return str;
+        }
 
         public void WriteToTextFile(String name, System.IO.StreamWriter file)
         {
@@ -312,7 +395,7 @@ namespace PhysicalCalculator.Identifiers
         }
     }
 
-    class NamedConstant : NamedVariable
+    record class NamedConstant : NamedVariable
     {
         public override IdentifierKind Identifierkind => IdentifierKind.Constant;
 
@@ -485,7 +568,6 @@ namespace PhysicalCalculator.Identifiers
         {
             public IFunctionCommandsEvaluator Function = null;
             public String FunctionName = null;
-            //public IEnvironment Environment = null;
             public INametableItem RedefineItem = null; 
 
             public FunctionParseInfo(CalculatorEnvironment staticOuterContext, string NewFunctionName)
@@ -493,10 +575,6 @@ namespace PhysicalCalculator.Identifiers
                 this.FunctionName = NewFunctionName;
                 this.Function = new PhysicalQuantityCommandsFunction(staticOuterContext);
             }
-
-            // FunctionToParseInfo.functionName = functionName;
-            //FunctionToParseInfo.Function = new PhysicalQuantityCommandsFunction();
-            //CurrentContext.ParseState = CommandParserState.ReadFunctionParameterList;
         }
 
         public String Name = null;
@@ -552,6 +630,9 @@ namespace PhysicalCalculator.Identifiers
 
         private FormatProviderKind FormatProviderSrc = FormatProviderKind.DefaultFormatProvider; 
         public FormatProviderKind FormatProviderSource { get { return FormatProviderSrc; } set { FormatProviderSrc = value; } }
+
+        private bool _AutoDefineUnits = false;
+        public bool AutoDefineUnits { get { return _AutoDefineUnits; } set { _AutoDefineUnits = value; } }
 
         #region INameTableItem interface implementation
 
@@ -771,7 +852,7 @@ namespace PhysicalCalculator.Identifiers
             return context.SetLocalIdentifier(systemName, systemItem);
         }
 
-        public Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem, out string errorMessage)
+        public Boolean UnitSet(IUnitSystem unitSystem, String unitName, OperandInfo unitValue, String unitSymbol, out INametableItem unitItem, out string errorMessage)
         {
             // Find identifier 
             Boolean Found = FindIdentifier(unitName, out IEnvironment context, out unitItem);
@@ -794,9 +875,9 @@ namespace PhysicalCalculator.Identifiers
                 // or identifier not found; No local identifier with that name, Declare local unit
                 if (unitSystem == null)
                 {
-                    if (unitValue != null && unitValue.Unit != null)
+                    if (unitValue != null && unitValue.AsQuantity().Unit != null)
                     {   // Is same system as values unit
-                        unitSystem = unitValue.Unit.ExponentsSystem;
+                        unitSystem = unitValue.AsQuantity().Unit.ExponentsSystem;
                     }
 
                     /**
@@ -809,13 +890,14 @@ namespace PhysicalCalculator.Identifiers
                     }
                     **/
                 }
-                unitItem = new NamedUnit(unitSystem, unitName, unitSymbol, unitValue, this);
+                // unitItem = new NamedUnit(unitSystem, unitName, unitSymbol, unitValue?.AsQuantity()?.Unit, this);
+                unitItem = new NamedUnit(unitSystem, unitName, unitSymbol, unitValue?.AsQuantity(), this);
                 updateRes = (true, "");
             }
             else
             {
                 NamedUnit nui = (NamedUnit)unitItem;
-                updateRes = nui.UpdateUnit(unitName, unitValue);
+                updateRes = nui.UpdateUnit(unitName, unitValue.AsQuantity().Unit);
                 
             }
             errorMessage = updateRes.errormessage;
@@ -873,13 +955,13 @@ namespace PhysicalCalculator.Identifiers
             return true;
         }
 
-        public Boolean VariableSet(String variableName, Quantity variableValue)
+        public Boolean VariableSet(String variableName, OperandInfo variableValue)
         {
             // Find identifier 
             Boolean Found = FindIdentifier(variableName, out var context, out var Item);
             if (Found && Item.Identifierkind == IdentifierKind.Variable)
             {   // Identifier is a variable in some context; set it to specified value
-                context.SetLocalIdentifier(variableName, new NamedVariable(variableValue, context as CalculatorEnvironment));
+                context.SetLocalIdentifier(variableName, new NamedVariable(variableValue ?? new OperandInfo(new Quantity()), context as CalculatorEnvironment));
             }
             else
             {
@@ -889,7 +971,7 @@ namespace PhysicalCalculator.Identifiers
                 }
                 else
                 {   // Variable not found; No local function with that name, Declare local variable
-                    this.NamedItems.Add(variableName, new NamedVariable(variableValue, this));
+                    this.NamedItems.Add(variableName, new NamedVariable(variableValue ?? new OperandInfo(new Quantity()), this));
                 }
             }
 
@@ -903,6 +985,23 @@ namespace PhysicalCalculator.Identifiers
             if (Found && ((Item.Identifierkind == IdentifierKind.Variable) || (Item.Identifierkind == IdentifierKind.Constant)))
             {   // Identifier is a variable or constant in some context; Get it
                 variableValue = Item as Quantity;
+                return true;
+            }
+            else
+            {
+                variableValue = null;
+                resultLine = "Variable '" + variableName + "' not found";
+                return false;
+            }
+        }
+
+        public Boolean VariableGet(String variableName, out OperandInfo variableValue, ref String resultLine)
+        {
+            // Find identifier 
+            Boolean Found = FindIdentifier(variableName, out var context, out var Item);
+            if (Found && ((Item.Identifierkind == IdentifierKind.Variable) || (Item.Identifierkind == IdentifierKind.Constant)))
+            {   // Identifier is a variable or constant in some context; Get it
+                variableValue = Item as OperandInfo;
                 return true;
             }
             else

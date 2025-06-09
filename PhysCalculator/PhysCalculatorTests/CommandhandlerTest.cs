@@ -8,11 +8,11 @@ namespace PhysCalculatorTests
     
     
     /// <summary>
-    ///This is a test class for CommandhandlerTest and is intended
-    ///to contain all CommandhandlerTest Unit Tests
+    ///This is a test class for CommandHandlerTest and is intended
+    ///to contain all CommandHandlerTest Unit Tests
     ///</summary>
     [TestClass()]
-    public class CommandhandlerTest
+    public class CommandHandlerTest
     {
 
 
@@ -66,23 +66,23 @@ namespace PhysCalculatorTests
 
 
         /// <summary>
-        ///A test for Commandhandler Constructor
+        ///A test for CommandHandler Constructor
         ///</summary>
         [TestMethod()]
-        public void CommandhandlerConstructorWithArgsTest()
+        public void CommandHandlerConstructorWithArgsTest()
         {
             string[] args = null; // TODO: Initialize to an appropriate value
-            Commandhandler target = new Commandhandler(args);
+            CommandHandler target = new CommandHandler(args);
             Assert.IsNotNull(target);
         }
 
         /// <summary>
-        ///A test for Commandhandler Constructor
+        ///A test for CommandHandler Constructor
         ///</summary>
         [TestMethod()]
-        public void CommandhandlerConstructorNoArgsTest()
+        public void CommandHandlerConstructorNoArgsTest()
         {
-            Commandhandler target = new Commandhandler();
+            CommandHandler target = new CommandHandler();
             Assert.IsNotNull(target);
         }
 
@@ -92,7 +92,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void ParseCharTest_CharFound()
         {
-            Commandhandler target = new Commandhandler(); 
+            CommandHandler target = new CommandHandler(); 
             char ch = 'K'; 
             string CommandLine = "K is found"; 
             string CommandLineExpected = " is found";
@@ -112,7 +112,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void ParseCharTest_CharNotFound()
         {
-            Commandhandler target = new Commandhandler();
+            CommandHandler target = new CommandHandler();
             char ch = 'K';
             string CommandLine = "Char K is not first char and not found";
             string CommandLineExpected = CommandLine;
@@ -132,7 +132,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void ParseTokenTest_TokenFound()
         {
-            Commandhandler target = new Commandhandler();
+            CommandHandler target = new CommandHandler();
             string Token = "Keyword";
             string CommandLine = "Keyword. to find ";
             string CommandLineExpected = ". to find ";
@@ -152,7 +152,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void ParseTokenTest_TokenNotFound()
         {
-            Commandhandler target = new Commandhandler();
+            CommandHandler target = new CommandHandler();
             string Token = "Keyword";
             string CommandLine = " keywor? to find ";
             string CommandLineExpected = " keywor? to find ";
@@ -170,9 +170,9 @@ namespace PhysCalculatorTests
         ///A test for ReadToken
         ///</summary>
         [TestMethod()]
-        public void CommandhandlerTest_ReadTokenTest()
+        public void CommandHandlerTest_ReadTokenTest()
         {
-            Commandhandler target = new Commandhandler(); 
+            CommandHandler target = new CommandHandler(); 
             string CommandLine = "keyword to find ";
             string Token = string.Empty;
             string TokenExpected = "keyword";
@@ -189,7 +189,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void CommandhandlerTest_SkipTokenTest()
         {
-            Commandhandler target = new Commandhandler(); 
+            CommandHandler target = new CommandHandler(); 
             string Token = "Keyword";
             string CommandLine = "keyword. to find ";
             string expected = ". to find "; 
@@ -204,7 +204,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void StartsWithKeywordTest()
         {
-            Commandhandler target = new Commandhandler(); 
+            CommandHandler target = new CommandHandler(); 
             string Keyword = "Keyword"; 
             string CommandLine = "Keyword in front of rest of line";
             bool expected = true;
@@ -219,7 +219,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void TryParseCharTest_CharFound()
         {
-            Commandhandler target = new Commandhandler(); 
+            CommandHandler target = new CommandHandler(); 
             char ch = 'W'; 
             string CommandLine = "Word in front of rest of line";
             string CommandLineExpected = "ord in front of rest of line"; 
@@ -236,7 +236,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void TryParseCharTest_CharNotFound()
         {
-            Commandhandler target = new Commandhandler(); 
+            CommandHandler target = new CommandHandler(); 
             char ch = 'W'; 
             string CommandLine = "word in front of rest of line";
             string CommandLineExpected = "word in front of rest of line"; 
@@ -253,7 +253,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void TryParseTokenTest_TokenFound()
         {
-            Commandhandler target = new Commandhandler(); 
+            CommandHandler target = new CommandHandler(); 
             string Token = "Keyword"; 
             string CommandLine = "keyword in front of line"; 
             string CommandLineExpected = "in front of line"; 
@@ -270,7 +270,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void TryParseTokenTest_TokenNotFound()
         {
-            Commandhandler target = new Commandhandler(); 
+            CommandHandler target = new CommandHandler(); 
             string Token = "Keyword"; 
             string CommandLine = "token in front of line";
             string CommandLineExpected = "token in front of line"; 
@@ -288,7 +288,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void CommandTest_1_Empty()
         {
-            Commandhandler target = new Commandhandler();
+            CommandHandler target = new CommandHandler();
             string CommandLine = string.Empty; 
             string ResultLine = string.Empty;
             string ResultLineExpected = "Unknown command";
@@ -305,7 +305,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void CommandTest_2_Space()
         {
-            Commandhandler target = new Commandhandler();
+            CommandHandler target = new CommandHandler();
             string CommandLine = " "; 
             string ResultLine = string.Empty;
             string ResultLineExpected = "Unknown command"; 
@@ -322,7 +322,7 @@ namespace PhysCalculatorTests
         [TestMethod()]
         public void CommandTest_3_PrintExpresion_1Add2()
         {
-            Commandhandler target = new Commandhandler();
+            CommandHandler target = new CommandHandler();
             string CommandLine = "print 1 + 2";
             string ResultLine = string.Empty;
             string ResultLineExpected = "Unknown command";

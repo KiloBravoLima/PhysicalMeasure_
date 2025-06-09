@@ -53,9 +53,19 @@ namespace PhysicalCalculator
                 else
                 {
 
-// #if DEBUG 
-                    ResultLineWriter.WriteErrorLine($"PhysCalculator called with {args.Count()} arguments: \"{args.ToStringList()}\" ");
-// #endif 
+                    if (args.Any())
+                    {
+                        ResultLineWriter.ForegroundColor = ConsoleColor.DarkGreen;
+                        ResultLineWriter.WriteLine($"PhysCalculator called with {args.Count()} arguments: \"{args.ToStringList()}\" ");
+                    }
+#if DEBUG 
+                    else
+                    {
+                        // ResultLineWriter.WriteErrorLine($"PhysCalculator called with {args.Count()} arguments: \"{args.ToStringList()}\" ");
+                        ResultLineWriter.ForegroundColor = ConsoleColor.Red;
+                        ResultLineWriter.WriteLine($"PhysCalculator called without arguments");
+                    }
+#endif 
 
                     ResultLineWriter.ForegroundColor = ConsoleColor.Blue;
                     ResultLineWriter.WriteLine("PhysCalculator ready");

@@ -187,13 +187,12 @@ namespace PhysCalculatorTests
             string ResultLine = string.Empty;
             string ResultLineExpected = string.Empty;
             string CommandLine = string.Empty; 
-            string CommandLineExpected = "read test"; 
-            bool expected = true; 
-            bool actual;
-            actual = target.ReadCommand(ref ResultLine, out CommandLine);
+            string CommandLineExpected = "read test";
+
+            CommandLine = target.ReadCommand(ref ResultLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
-            Assert.AreEqual(expected, actual);
+
         }
 
         /// <summary>

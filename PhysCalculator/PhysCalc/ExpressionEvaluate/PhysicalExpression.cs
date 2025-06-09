@@ -10,15 +10,142 @@ using PhysicalMeasure;
 using TokenParser;
 
 using PhysicalCalculator.Identifiers;
+using PhysicalCalculator.Function;
 
 
 namespace PhysicalCalculator.Expression
 {
+    public record class OperandInfo
+    {
+        public Object OperandValue;
+        public Type OperandType;
+
+
+        public OperandInfo(Object someValue)
+        {
+            Debug.Assert(someValue != null);
+
+            this.OperandValue = someValue;
+            this.OperandType = someValue.GetType();
+        }
+
+        public OperandInfo(Object someValue, Type someType)
+        {
+            this.OperandValue = someValue;
+            this.OperandType = someType;
+        }
+
+        public OperandInfo(Boolean someValue)
+        {
+            Debug.Assert(someValue != null);
+            this.OperandValue = someValue;
+            this.OperandType = typeof(Boolean);
+        }
+
+        public OperandInfo(DateTime someValue)
+        {
+            Debug.Assert(someValue != null);
+            this.OperandValue = someValue;
+            this.OperandType = typeof(DateTime);
+        }
+        public DateTime? AsDateTime()
+        {
+            return this.OperandValue as DateTime?;
+        }
+        public OperandInfo(String someValue)
+        {
+            Debug.Assert(someValue != null);
+            this.OperandValue = someValue;
+            this.OperandType = typeof(String);
+        }
+        public String AsString()
+        {
+            return this.OperandValue as String;
+        }
+        public OperandInfo(Quantity someValue)
+        {
+            Debug.Assert(someValue != null);
+            this.OperandValue = someValue;
+            this.OperandType = typeof(Quantity);
+        }
+        public Quantity AsQuantity()
+        {
+            return this.OperandValue as Quantity;
+        }
+
+
+        public OperandInfo(Unit someValue)
+        {
+            Debug.Assert(someValue != null);
+            this.OperandValue = someValue;
+            this.OperandType = typeof(Unit);
+        }
+        public Unit AsUnit()
+        {
+            return this.OperandValue as Unit;
+        }
+
+
+
+
+        public String ToString(String format, IFormatProvider formatProvider)
+        {
+            switch (OperandValue)
+            {
+                case DateTime dateTimeValue:
+                    return dateTimeValue.ToString(format, formatProvider);
+                case String stringValue:
+                    return stringValue.ToString(formatProvider);
+                case Quantity quantityValue:
+                    return quantityValue.ToString(format, formatProvider);
+                case Unit unitValue:
+                    return unitValue.ToString(format);
+                case Boolean boolValue:
+                    return boolValue.ToString(formatProvider);
+                case Object objectValue:
+                    return objectValue.ToString();
+                default:
+                    return OperandValue?.ToString();
+            }
+        }
+
+        public String ToString(String format)
+        {
+            switch (OperandValue)
+            {
+                case DateTime dateTimeValue:
+                    return dateTimeValue.ToString(format);
+                case String stringValue:
+                    return stringValue;
+                case Quantity quantityValue:
+                    return quantityValue.ToString(format);
+                case Unit unitValue:
+                    return unitValue.ToString(format);
+                case Boolean boolValue:
+                    return boolValue.ToString();
+                case Object objectValue:
+                    return objectValue.ToString();
+                default:
+                    return OperandValue.ToString();
+            }
+        }
+
+        public override String ToString()
+        {
+            return OperandValue.ToString();
+        }
+
+        public static implicit operator OperandInfo(DateTime v)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     public interface IEnvironment
     {
         TraceLevels OutputTracelevel { get; set; }
         FormatProviderKind FormatProviderSource { get; set; }
+        bool AutoDefineUnits { get; set; }
 
         CultureInfo CurrentCultureInfo { get; }
 
@@ -31,10 +158,10 @@ namespace PhysicalCalculator.Expression
         Boolean SystemSet(String systemName, bool setAsDefaultSystem, out INametableItem systemItem);
 
         Boolean UnitGet(String unitName, out Unit unitValue, ref String resultLine);
-        Boolean UnitSet(IUnitSystem unitSystem, String unitName, Quantity unitValue, String unitSymbol, out INametableItem unitItem, out string errorMessage);
+        Boolean UnitSet(IUnitSystem unitSystem, String unitName, OperandInfo unitValue, String unitSymbol, out INametableItem unitItem, out String errorMessage);
 
-        Boolean VariableGet(String variableName, out Quantity variableValue, ref String resultLine);
-        Boolean VariableSet(String variableName, Quantity variableValue);
+        Boolean VariableGet(String variableName, out OperandInfo variableValue, ref String resultLine);
+        Boolean VariableSet(String variableName, OperandInfo variableValue);
 
 
         Boolean FunctionFind(String functionName, out IFunctionEvaluator functionEvaluator);
@@ -93,11 +220,11 @@ namespace PhysicalCalculator.Expression
         public delegate Boolean IdentifierContextLookupFunc(String identifierName, out IEnvironment foundInContext, out IdentifierKind identifierKind);
         public delegate Boolean QualifiedIdentifierContextLookupFunc(IEnvironment lookInContext, String identifierName, out IEnvironment foundInContext, out IdentifierKind identifierKind);
 
-        public delegate Boolean VariableValueLookupFunc(IEnvironment lookInContext, String variableName, out Quantity variableValue, ref String resultLine);
+        public delegate Boolean VariableValueLookupFunc(IEnvironment lookInContext, String variableName, out OperandInfo variableValue, ref String resultLine);
         public delegate Boolean UnitLookupFunc(IEnvironment lookInContext, String variableName, out Unit unitValue, ref String resultLine);
         public delegate Boolean FunctionLookupFunc(IEnvironment lookInContext, String functionName, out IFunctionEvaluator functionEvaluator);
-        public delegate Boolean FunctionEvaluateFunc(String functionName, IFunctionEvaluator functionevaluator, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine);
-        public delegate Boolean FunctionEvaluateFileReadFunc(String functionName, out Quantity functionResult, ref String resultLine);
+        public delegate Boolean FunctionEvaluateFunc(String functionName, IFunctionEvaluator functionevaluator, List<OperandInfo> parameterlist, out OperandInfo functionResult, ref String resultLine);
+        public delegate Boolean FunctionEvaluateFileReadFunc(String functionName, out OperandInfo functionResult, ref String resultLine);
 
         // Delegate static globals
         public static IdentifierItemLookupFunc IdentifierItemLookupCallback;
@@ -157,7 +284,7 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static Boolean VariableGet(IEnvironment lookInContext, String variableName, out Quantity variableValue, ref String resultLine)
+        public static Boolean VariableGet(IEnvironment lookInContext, String variableName, out OperandInfo variableValue, ref String resultLine)
         {
             variableValue = null;
             if (VariableValueGetCallback != null)
@@ -177,7 +304,7 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static Boolean FunctionGet(IEnvironment lookInContext, String functionName, List<Quantity> parameterlist, out Quantity functionResult, ref String resultLine)
+        public static Boolean FunctionGet(IEnvironment lookInContext, String functionName, List<OperandInfo> parameterlist, out OperandInfo functionResult, ref String resultLine)
         {
             functionResult = null;
             if (FunctionLookupCallback(lookInContext, functionName, out var functionevaluator))
@@ -199,7 +326,8 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static Boolean FileFunctionGet(String functionName, out Quantity functionResult, ref String resultLine)
+
+        public static Boolean FileFunctionGet(String functionName, out OperandInfo functionResult, ref String resultLine)
         {
             functionResult = null;
             if (FunctionEvaluateFileReadCallback != null)
@@ -213,9 +341,35 @@ namespace PhysicalCalculator.Expression
             return false;
         }
 
-        public static List<Quantity> ParseExpressionList(ref String commandLine, ref String resultLine, List<String> ExpectedFollow, Boolean AllowEmptyList = false )
+
+        public static String ParseStringLitteralParam(ref String commandLine, ref String resultLine, List<String> ExpectedFollow, Boolean AllowEmptyList = false)
         {
-            List<Quantity> pqList = new List<Quantity>();
+            String stringLitteral = null;
+            int followPos = 0;
+            foreach (String follow in ExpectedFollow)
+            {
+                int pos = commandLine.IndexOf(follow);
+                if (pos > 0 && (followPos == 0 || pos < followPos))
+                {
+                    followPos = pos;
+                }
+            }
+            if (followPos == 0)
+            {
+                stringLitteral = commandLine;
+                commandLine = String.Empty;
+            }
+            else
+            {
+                stringLitteral = commandLine.Substring(0, followPos);
+                commandLine = commandLine.Substring(followPos);
+            }
+            return stringLitteral;
+        }
+
+        public static List<OperandInfo> ParseExpressionList(ref String commandLine, ref String resultLine, List<String> ExpectedFollow, Boolean AllowEmptyList = false )
+        {
+            List<OperandInfo> pqList = new List<OperandInfo>();
             Boolean MoreToParse = false;
             Boolean OK = true;
             List<String> TempExpectedFollow = ExpectedFollow;
@@ -225,7 +379,7 @@ namespace PhysicalCalculator.Expression
             }
             do
             {
-                Quantity pq = null;
+                OperandInfo pq = null;
                 pq = ParseConvertedExpression(ref commandLine, ref resultLine, TempExpectedFollow);
                 OK = pq != null;
                 if (OK)
@@ -247,7 +401,7 @@ namespace PhysicalCalculator.Expression
 
         public static Nullable<Boolean> ParseBooleanExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
-            IQuantity pq = ParseExpression(ref commandLine, ref resultLine, ExpectedFollow);
+            OperandInfo pq = ParseExpression(ref commandLine, ref resultLine, ExpectedFollow);
             if (pq != null)
             {
                 return !pq.Equals(PQ_False);
@@ -255,9 +409,9 @@ namespace PhysicalCalculator.Expression
             return null;
         }
 
-        public static Quantity ParseConvertedExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
+        public static OperandInfo ParseConvertedExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow)
         {
-            Quantity pq;
+            OperandInfo pq;
 
             List<String> TempExpectedFollow = ExpectedFollow;
             if (!TempExpectedFollow.Contains("["))
@@ -265,9 +419,11 @@ namespace PhysicalCalculator.Expression
                 TempExpectedFollow = new List<string>(ExpectedFollow) { "[" };
             }
             pq = ParseExpression(ref commandLine, ref resultLine, TempExpectedFollow);
-            if (pq != null)
+            if (pq != null && pq.OperandType == typeof(Quantity))
             {
-                pq = ParseOptionalConvertedExpression(pq, ref commandLine, ref resultLine);
+                Quantity tempQuantity = pq.OperandValue as Quantity;
+                Quantity tempQuantityConverted = ParseOptionalConvertedExpression(tempQuantity, ref commandLine, ref resultLine);
+                pq = new OperandInfo(tempQuantityConverted);
             }
 
             return pq;
@@ -392,14 +548,47 @@ namespace PhysicalCalculator.Expression
         {
             public readonly TokenKind TokenKind;
 
-            public readonly Quantity Operand;
+            // public readonly Quantity QuantityOperand;
+            public readonly OperandInfo Operand;
             public readonly OperatorKind Operator;
+
+
+            public Token(TokenKind tokenKind, OperandInfo Operand)
+            {
+                this.TokenKind = tokenKind;
+                this.Operand = Operand;
+            }
+
+            public Token(Boolean Operand)
+            {
+                this.TokenKind = TokenKind.Operand;
+                this.Operand = new OperandInfo(Operand);
+            }
+
+            public Token(DateTime Operand)
+            {
+                this.TokenKind = TokenKind.Operand;
+                this.Operand = new OperandInfo(Operand);
+            }
+
+            public Token(Object Operand, Type OperandType)
+            {
+                this.TokenKind = TokenKind.Operand;
+                this.Operand = new OperandInfo(Operand, OperandType);
+            }
 
             public Token(Quantity Operand)
             {
                 this.TokenKind = TokenKind.Operand;
+                this.Operand = new OperandInfo(Operand);
+            }
+
+            public Token(OperandInfo Operand)
+            {
+                this.TokenKind = TokenKind.Operand;
                 this.Operand = Operand;
             }
+
 
             public Token(OperatorKind Operator)
             {
@@ -739,7 +928,7 @@ namespace PhysicalCalculator.Expression
                                 if (!InnerIdentifierFound)
                                 {
                                     LastReadToken = TokenKind.Operand;
-                                    return new Token(null);
+                                    return new Token(TokenKind.Operand, null);
                                 }
                             }
                             else
@@ -779,7 +968,7 @@ namespace PhysicalCalculator.Expression
                                             if (pu != null)
                                             {
                                                 Pos += OldLen - CommandLine.Length;
-                                                pq = new Quantity(1, pu);
+                                                pq = new OperandInfo(new Quantity(1, pu), typeof(Quantity));
                                             }
                                         }
                                     }
@@ -851,7 +1040,11 @@ namespace PhysicalCalculator.Expression
         public static readonly Quantity PQ_False = new Quantity(0);
         public static readonly Quantity PQ_True = new Quantity(1);
 
-        public static Quantity ParseExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow ) // = null)
+
+        public static readonly OperandInfo OI_False = new OperandInfo(PQ_False, typeof(Quantity));
+        public static readonly OperandInfo OI_True = new OperandInfo(PQ_True, typeof(Quantity));
+
+        public static OperandInfo ParseExpression(ref String commandLine, ref String resultLine, List<String> ExpectedFollow ) // = null)
         {
             //public static readonly 
             Unit dimensionless = new CombinedUnit();
@@ -861,7 +1054,7 @@ namespace PhysicalCalculator.Expression
                 ExpectedFollow = ExpectedFollow,
                 ThrowExceptionOnInvalidInput = false
             };
-            Stack<Quantity> Operands = new Stack<Quantity>();
+            Stack<OperandInfo> Operands = new Stack<OperandInfo>();
 
             Token Token = Tokenizer.GetToken();
             while (Token != null)
@@ -872,8 +1065,18 @@ namespace PhysicalCalculator.Expression
                 if (Token.TokenKind == TokenKind.Operand)
                 {
                     // Stack Quantity operand
-                    Debug.Assert(Token.Operand != null);
-                    Operands.Push(Token.Operand);
+                    if (Token.Operand != null)
+                    {
+                        Operands.Push(Token.Operand);
+                    }
+                    else
+                    {
+                        if (String.IsNullOrEmpty(Tokenizer.ResultString))
+                        {
+                            resultLine += "Internal error. Missing operand value";
+                            resultLine += '\n';
+                        }
+                    }
                 }
                 else if (Token.TokenKind == TokenKind.Operator)
                 {
@@ -886,138 +1089,344 @@ namespace PhysicalCalculator.Expression
                     {
                         Debug.Assert(Operands.Count >= 1);
 
-                        Quantity pqTop = Operands.Pop();
+                        OperandInfo pqTopOperand = Operands.Pop();
+                        Quantity pqTop = pqTopOperand.AsQuantity();
                         // Invert sign of pq
                         Quantity pqResult = pqTop.Multiply(-1);
+                        OperandInfo pqResultOperand = new OperandInfo(pqResult);
                         Debug.Assert(pqResult != null);
-                        Operands.Push(pqResult);
+                        Debug.Assert(pqResultOperand != null);
+                        Operands.Push(pqResultOperand);
                     }
                     else if (Token.Operator == OperatorKind.not)
                     {
                         Debug.Assert(Operands.Count >= 1);
 
-                        Quantity pqTop = Operands.Pop();
+                        OperandInfo pqTopOperand = Operands.Pop();
+                        Quantity pqTop = pqTopOperand.AsQuantity();
                         // Invert pqTop as boolean
                         if (!pqTop.Equals(PQ_False))
                         {
                             pqTop = PQ_False;
+                            pqTopOperand = OI_False;
                         }
                         else
                         {
                             pqTop = PQ_True;
+                            pqTopOperand = OI_True;
                         }
-                        Operands.Push(pqTop);
+                        Operands.Push(pqTopOperand);
                     }
                     else if (Operands.Count >= 2)
                     {
                         Debug.Assert(Operands.Count >= 2);
 
-                        Quantity pqSecond = Operands.Pop();
-                        Quantity pqFirst = Operands.Pop();
+                        OperandInfo secondOperand = Operands.Pop();
+                        OperandInfo firstOperand = Operands.Pop();
 
-                        Debug.Assert(pqSecond != null);
-                        Debug.Assert(pqFirst != null);
+                        if (firstOperand.OperandType == typeof(Quantity) && secondOperand.OperandType == typeof(Quantity))
+                        {
+                            Quantity pqSecond = secondOperand.AsQuantity();
+                            Quantity pqFirst = firstOperand.AsQuantity();
 
-                        if (Token.Operator == OperatorKind.add)
-                        {
-                            // Combine pq1 and pq2 to the new Quantity pq1*pq2   
-                            Quantity pqResult = pqFirst.Add(pqSecond);
-                            Debug.Assert(pqResult != null);
-                            Operands.Push(pqResult);
-                        }
-                        else if (Token.Operator == OperatorKind.sub)
-                        {
-                            // Combine pq1 and pq2 to the new Quantity pq1/pq2
-                            Quantity pqResult = pqFirst.Subtract(pqSecond);
-                            Debug.Assert(pqResult != null);
-                            Operands.Push(pqResult);
-                        }
-                        else if (Token.Operator == OperatorKind.mult)
-                        {
-                            // Combine pq1 and pq2 to the new Quantity pq1*pq2   
-                            Quantity pqResult = pqFirst.Multiply(pqSecond);
-                            Debug.Assert(pqResult != null);
-                            Operands.Push(pqResult);
-                        }
-                        else if (Token.Operator == OperatorKind.div)
-                        {
-                            // Combine pq1 and pq2 to the new Quantity pq1/pq2
-                            Quantity pqResult = pqFirst.Divide(pqSecond);
-                            Debug.Assert(pqResult != null);
-                            Operands.Push(pqResult);
-                        }
-                        else if (   (Token.Operator == OperatorKind.pow)
-                                 || (Token.Operator == OperatorKind.root))
-                        {
-                            SByte Exponent;
-                            if (pqSecond.Value >= 1)
-                            {   // Use operator and Exponent
-                                Exponent = (SByte)pqSecond.Value;
+                            Debug.Assert(pqSecond != null);
+                            Debug.Assert(pqFirst != null);
+
+                            if (Token.Operator == OperatorKind.add)
+                            {
+                                // Combine pq1 and pq2 to the new Quantity pq1+pq2   
+                                Quantity pqResult = pqFirst.Add(pqSecond);
+                                OperandInfo pqResultOperand = new OperandInfo(pqResult);
+                                Debug.Assert(pqResult != null);
+                                Debug.Assert(pqResultOperand != null);
+                                Operands.Push(pqResultOperand);
                             }
-                            else
-                            {   // Invert operator and Exponent
-                                Exponent = (SByte)(1 / pqSecond.Value);
+                            else if (Token.Operator == OperatorKind.sub)
+                            {
+                                // Combine pq1 and pq2 to the new Quantity pq1-pq2
+                                Quantity pqResult = pqFirst.Subtract(pqSecond);
+                                OperandInfo pqResultOperand = new OperandInfo(pqResult);
+                                Debug.Assert(pqResult != null);
+                                Debug.Assert(pqResultOperand != null);
+                                Operands.Push(pqResultOperand);
+                            }
+                            else if (Token.Operator == OperatorKind.mult)
+                            {
+                                // Combine pq1 and pq2 to the new Quantity pq1*pq2   
+                                Quantity pqResult = pqFirst.Multiply(pqSecond);
+                                OperandInfo pqResultOperand = new OperandInfo(pqResult);
+                                Debug.Assert(pqResult != null);
+                                Debug.Assert(pqResultOperand != null);
+                                Operands.Push(pqResultOperand);
+                            }
+                            else if (Token.Operator == OperatorKind.div)
+                            {
+                                // Combine pq1 and pq2 to the new Quantity pq1/pq2
+                                Quantity pqResult = pqFirst.Divide(pqSecond);
+                                OperandInfo pqResultOperand = new OperandInfo(pqResult);
+                                Debug.Assert(pqResult != null);
+                                Debug.Assert(pqResultOperand != null);
+                                Operands.Push(pqResultOperand);
+                            }
+                            else if ((Token.Operator == OperatorKind.pow)
+                                     || (Token.Operator == OperatorKind.root))
+                            {
+                                SByte Exponent;
+                                if (pqSecond.Value >= 1)
+                                {   // Use operator and Exponent
+                                    Exponent = (SByte)pqSecond.Value;
+                                }
+                                else
+                                {   // Invert operator and Exponent
+                                    Exponent = (SByte)(1 / pqSecond.Value);
+
+                                    if (Token.Operator == OperatorKind.pow)
+                                    {
+                                        Token = new Token(OperatorKind.root);
+                                    }
+                                    else
+                                    {
+                                        Token = new Token(OperatorKind.pow);
+                                    }
+                                }
 
                                 if (Token.Operator == OperatorKind.pow)
                                 {
-                                    Token = new Token(OperatorKind.root);
+                                    // Combine pq and exponent to the new Quantity pq^expo
+                                    Quantity pqResult = pqFirst.Pow(Exponent);
+                                    OperandInfo pqResultOperand = new OperandInfo(pqResult);
+                                    Debug.Assert(pqResult != null);
+                                    Debug.Assert(pqResultOperand != null);
+                                    Operands.Push(pqResultOperand);
                                 }
                                 else
                                 {
-                                    Token = new Token(OperatorKind.pow);
+                                    // Combine pq and exponent to the new Quantity pq^(1/expo)
+                                    Quantity pqResult = pqFirst.Rot(Exponent);
+                                    OperandInfo pqResultOperand = new OperandInfo(pqResult);
+                                    Debug.Assert(pqResult != null);
+                                    Debug.Assert(pqResultOperand != null);
+                                    Operands.Push(pqResultOperand);
                                 }
                             }
-
-                            if (Token.Operator == OperatorKind.pow)
+                            else if (Token.Operator == OperatorKind.equals)
                             {
-                                // Combine pq and exponent to the new Quantity pq^expo
-                                Quantity pqResult = pqFirst.Pow(Exponent);
-                                Debug.Assert(pqResult != null);
-                                Operands.Push(pqResult);
+                                // Save pqFirst == pqSecond
+                                Operands.Push(pqFirst.Equals(pqSecond) ? OI_True : OI_False);
+                            }
+                            else if (Token.Operator == OperatorKind.differs)
+                            {
+                                // Save pqFirst != pqSecond
+                                Operands.Push(pqFirst.Equals(pqSecond) ? OI_False : OI_True);
+                            }
+                            else if (Token.Operator == OperatorKind.lessthan
+                                     || Token.Operator == OperatorKind.lessorequals
+                                     || Token.Operator == OperatorKind.largerthan
+                                     || Token.Operator == OperatorKind.largerorequals
+                                    )
+                            {
+                                int res = pqFirst.CompareTo(pqSecond);
+
+                                if (((Token.Operator == OperatorKind.lessthan) && (res < 0))
+                                    || ((Token.Operator == OperatorKind.lessorequals) && (res <= 0))
+                                    || ((Token.Operator == OperatorKind.largerthan) && (res > 0))
+                                    || ((Token.Operator == OperatorKind.largerorequals) && (res >= 0))
+                                    )
+                                {
+                                    Operands.Push(OI_True);
+                                }
+                                else
+                                {
+                                    Operands.Push(OI_False);
+                                }
                             }
                             else
                             {
-                                // Combine pq and exponent to the new Quantity pq^(1/expo)
-                                Quantity pqResult = pqFirst.Rot(Exponent);
-                                Debug.Assert(pqResult != null);
-                                Operands.Push(pqResult);
+                                resultLine += $"Can't {firstOperand.OperandType} {Token.Operator} {secondOperand.OperandType}";
+                                Debug.Assert(false);
                             }
                         }
-                        else if (Token.Operator == OperatorKind.equals)
+                        else if (firstOperand.OperandType == typeof(DateTime) && secondOperand.OperandType == typeof(Quantity))
                         {
-                            // Save pqFirst == pqSecond
-                            Operands.Push(pqFirst.Equals(pqSecond) ?  PQ_True : PQ_False);
-                        }
-                        else if (Token.Operator == OperatorKind.differs)
-                        {
-                            // Save pqFirst != pqSecond
-                            Operands.Push(pqFirst.Equals(pqSecond) ? PQ_False : PQ_True);
-                        }
-                        else if (   Token.Operator == OperatorKind.lessthan
-                                 || Token.Operator == OperatorKind.lessorequals
-                                 || Token.Operator == OperatorKind.largerthan
-                                 || Token.Operator == OperatorKind.largerorequals
-                                )
-                        {
-                            int res = pqFirst.CompareTo(pqSecond);
+                            Quantity pqSecond = secondOperand.AsQuantity();
+                            DateTime? dtFirst = firstOperand.AsDateTime();
 
-                            if (   ((Token.Operator == OperatorKind.lessthan) && (res < 0))
-                                || ((Token.Operator == OperatorKind.lessorequals) && (res <= 0))
-                                || ((Token.Operator == OperatorKind.largerthan) && (res > 0))
-                                || ((Token.Operator == OperatorKind.largerorequals) && (res >= 0))
-                                )
+                            Debug.Assert(pqSecond != null);
+                            Debug.Assert(dtFirst != null);
+
+                            if (Token.Operator == OperatorKind.add)
                             {
-                                Operands.Push(PQ_True);
+                                // Combine pq1 and pq2 to the new Quantity pq1+pq2   
+                                DateTime dtResult;
+                                if (pqSecond.Unit.Equals(SI.s))
+                                {
+                                    dtResult = dtFirst.Value.AddSeconds(pqSecond.Value);
+                                }
+                                else
+                                if (pqSecond.Unit.Equals(SI.min))
+                                {
+                                    dtResult = dtFirst.Value.AddMinutes(pqSecond.Value);
+                                }
+                                else
+                                if (pqSecond.Unit.Equals(SI.h))
+                                {
+                                    dtResult = dtFirst.Value.AddHours(pqSecond.Value);
+                                }
+                                else
+                                if (pqSecond.Unit.Equals(SI.d))
+                                {
+                                    dtResult = dtFirst.Value.AddDays(pqSecond.Value);
+                                }
+                                else
+                                if (pqSecond.Unit.Equals(SI.y))
+                                {
+                                    dtResult = dtFirst.Value.AddYears((int)pqSecond.Value);
+                                }
+                                else
+                                {
+                                    Quantity pq = pqSecond.ConvertTo(SI.s);
+                                    if (pq != null)
+                                    {
+                                        dtResult = dtFirst.Value.AddSeconds(pq.Value);
+                                    }
+                                    else
+                                    {
+                                        dtResult = dtFirst.Value;
+                                        resultLine += $" Can't convert {pqSecond} to timespan to add it to DateTime";
+                                        Debug.Assert(false);
+                                    }
+                                }
+                                OperandInfo dtResultOperand = new OperandInfo(dtResult);
+                                Debug.Assert(dtResult != null);
+                                Debug.Assert(dtResultOperand != null);
+                                Operands.Push(dtResultOperand);
+                            }
+                            else if (Token.Operator == OperatorKind.sub)
+                            {
+                                // Combine pq1 and pq2 to the new Quantity pq1-pq2
+                                DateTime dtResult;
+                                if (pqSecond.Unit.Equals(SI.s))
+                                {
+                                    dtResult = dtFirst.Value.AddSeconds(-1 * pqSecond.Value);
+                                }
+                                else
+                                if (pqSecond.Unit.Equals(SI.min))
+                                {
+                                    dtResult = dtFirst.Value.AddMinutes(-1 * pqSecond.Value);
+                                }
+                                else
+                                if (pqSecond.Unit.Equals(SI.h))
+                                {
+                                    dtResult = dtFirst.Value.AddHours(-1 * pqSecond.Value);
+                                }
+                                else
+                                if (pqSecond.Unit.Equals(SI.d))
+                                {
+                                    dtResult = dtFirst.Value.AddDays(-1 * pqSecond.Value);
+                                }
+                                else
+                                if (pqSecond.Unit.Equals(SI.y))
+                                {
+                                    dtResult = dtFirst.Value.AddYears(-1 * (int)pqSecond.Value);
+                                }
+                                else
+                                {
+                                    Quantity pq = pqSecond.ConvertTo(SI.s);
+                                    if (pq != null)
+                                    {
+                                        dtResult = dtFirst.Value.AddSeconds(pq.Value);
+                                    }
+                                    else
+                                    {
+                                        dtResult = dtFirst.Value;
+                                        resultLine += $" Can't convert {pqSecond} to timespan to subtract it from DateTime";
+                                        Debug.Assert(false);
+                                    }
+                                }
+                                OperandInfo dtResultOperand = new OperandInfo(dtResult);
+                                Debug.Assert(dtResult != null);
+                                Debug.Assert(dtResultOperand != null);
+                                Operands.Push(dtResultOperand);
                             }
                             else
                             {
-                                Operands.Push(PQ_False);
+                                resultLine += $"Can't {firstOperand.OperandType} {Token.Operator} {secondOperand.OperandType}";
+                                Debug.Assert(false);
+                            }
+                        }
+                        else if (firstOperand.OperandType == typeof(Quantity) && secondOperand.OperandType == typeof(DateTime))
+                        {
+                            DateTime? dtSecond = secondOperand.AsDateTime();
+                            Quantity pqFirst = firstOperand.AsQuantity();
+
+                            Debug.Assert(dtSecond != null);
+                            Debug.Assert(pqFirst != null);
+
+                            if (Token.Operator == OperatorKind.add)
+                            {
+                                // Combine pq1 and pq2 to the new Quantity pq1+pq2   
+                                DateTime dtResult;
+                                if (pqFirst.Unit.Equals(SI.s))
+                                {
+                                    dtResult = dtSecond.Value.AddSeconds(pqFirst.Value);
+                                }
+                                else
+                                if (pqFirst.Unit.Equals(SI.min))
+                                {
+                                    dtResult = dtSecond.Value.AddMinutes(pqFirst.Value);
+                                }
+                                else
+                                if (pqFirst.Unit.Equals(SI.h))
+                                {
+                                    dtResult = dtSecond.Value.AddHours(pqFirst.Value);
+                                }
+                                else
+                                if (pqFirst.Unit.Equals(SI.d))
+                                {
+                                    dtResult = dtSecond.Value.AddDays(pqFirst.Value);
+                                }
+                                else
+                                if (pqFirst.Unit.Equals(SI.y))
+                                {
+                                    dtResult = dtSecond.Value.AddYears((int)pqFirst.Value);
+                                }
+                                else
+                                {
+                                    Quantity pq = pqFirst.ConvertTo(SI.s);
+                                    if (pq != null)
+                                    {
+                                        dtResult = dtSecond.Value.AddSeconds(pq.Value);
+                                    }
+                                    else
+                                    {
+                                        dtResult = dtSecond.Value;
+                                        resultLine += $" Can't convert {pqFirst} to timespan to add it to DateTime";
+                                        Debug.Assert(false);
+                                    }
+                                }
+                                OperandInfo dtResultOperand = new OperandInfo(dtResult);
+                                Debug.Assert(dtResult != null);
+                                Debug.Assert(dtResultOperand != null);
+                                Operands.Push(dtResultOperand);
+                            }
+                            else if (Token.Operator == OperatorKind.sub)
+                            {
+                                // Combine pq1 and pq2 to the new Quantity pq1-pq2
+                                resultLine += $"Can't {firstOperand.OperandType} {Token.Operator} {secondOperand.OperandType}";
+                                Debug.Assert(false);
+                            }
+                            else
+                            {
+                                resultLine += $"Can't {firstOperand.OperandType} {Token.Operator} {secondOperand.OperandType}";
+                                Debug.Assert(false);
                             }
                         }
                         else
                         {
+                            resultLine += $"Can't use a {firstOperand.OperandType} and a {secondOperand.OperandType}";
                             Debug.Assert(false);
                         }
+
                     }
                     else
                     if (Tokenizer.InputRecognized)
@@ -1063,7 +1472,7 @@ namespace PhysicalCalculator.Expression
             return (Operands.Count > 0) ? Operands.Pop() : null;
         }
 
-        public static Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, out String identifierName, out Quantity identifierValue)
+        public static Boolean ParseQualifiedIdentifier(ref String commandLine, ref String resultLine, out String identifierName, out OperandInfo identifierValue)
         {
             identifierValue = null;
             commandLine = commandLine.ReadIdentifier(out identifierName);
@@ -1115,14 +1524,29 @@ namespace PhysicalCalculator.Expression
                             TokenString.ParseChar('(', ref commandLine, ref resultLine);
                             commandLine = commandLine.TrimStart();
 
+                            // FunktionInfo funk = IdentifierItem as Funktion;
                             List<string> ExpectedFollow = new List<string> { ")" };
-                            List<Quantity> parameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow, true);
-                            Boolean OK = parameterlist != null;
+                            List<OperandInfo> operandInfoParameterlist = null;
+                            if (IdentifierItem is PhysicalQuantityCommandsFunction)
+                            {
+                                operandInfoParameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow, true);
+                            }
+                            else
+                            if (IdentifierItem is DateTimeParamFunction)
+                            {
+                                String litteralStringParameter = ParseStringLitteralParam(ref commandLine, ref resultLine, ExpectedFollow, true);
+                                operandInfoParameterlist = new List<OperandInfo> { new OperandInfo(litteralStringParameter) };
+                            }
+                            else
+                            {
+                                Debug.Assert(false);
+                            }
+                            Boolean OK = operandInfoParameterlist != null;
                             if (OK)
                             {
                                 TokenString.ParseChar(')', ref commandLine, ref resultLine);
 
-                                FunctionGet(QualifiedIdentifierContext, identifierName, parameterlist, out identifierValue, ref resultLine);
+                                FunctionGet(QualifiedIdentifierContext, identifierName, operandInfoParameterlist, out identifierValue, ref resultLine);
 
                                 commandLine = commandLine.TrimStart();
                             }
@@ -1135,7 +1559,7 @@ namespace PhysicalCalculator.Expression
                         case IdentifierKind.Unit:
                             Unit foundUnit;
                             UnitGet(QualifiedIdentifierContext, identifierName, out foundUnit, ref resultLine);
-                            identifierValue = new Quantity(foundUnit);
+                            identifierValue = new OperandInfo(foundUnit, typeof(Unit));
                             // ref resultLine
                             break;
                         case IdentifierKind.UnitSystem:
