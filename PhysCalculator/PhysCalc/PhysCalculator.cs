@@ -1656,6 +1656,40 @@ namespace PhysicalCalculator
                     resultLine = "AutoDefineUnits can't be set to " + autoDefineUnitsValuestr + "; Current AutoDefineUnits is " + CurrentContext.AutoDefineUnits;
                 }
             }
+            else if (variableName.IsKeyword("AutoDefineUnits"))
+            {
+                SettingFound = true;
+
+                commandLine = commandLine.ReadToken(out var autoDefineUnitsValuestr);
+                bool? autoDefineUnitsValue = null;
+                if (autoDefineUnitsValuestr.IsKeyword("On") || autoDefineUnitsValuestr.IsKeyword("True"))
+                {
+                    autoDefineUnitsValue = true;
+                }
+                else if (autoDefineUnitsValuestr.IsKeyword("Off") || autoDefineUnitsValuestr.IsKeyword("False"))
+                {
+                    autoDefineUnitsValue = false;
+                }
+
+                if (autoDefineUnitsValue != null)
+                { 
+                    if (identifierContext != null)
+                    {
+                        identifierContext.AutoDefineUnits = autoDefineUnitsValue.Value;
+                        resultLine = "AutoDefineUnits set to " + autoDefineUnitsValuestr;
+                    }
+                    else
+                    {
+                        CommandLineReader.AutoDefineUnits = autoDefineUnitsValue.Value;
+                        CurrentContext.AutoDefineUnits = autoDefineUnitsValue.Value;
+                        resultLine = "Current AutoDefineUnits set to " + autoDefineUnitsValuestr;
+                    }
+                }
+                else
+                {
+                    resultLine = "AutoDefineUnits can't be set to " + autoDefineUnitsValuestr + "; Current AutoDefineUnits is " + CurrentContext.AutoDefineUnits;
+                }
+            }
             return SettingFound;
         }
 
