@@ -41,54 +41,92 @@ namespace PhysicalMeasure
         */
 
 
-        public static readonly UnitPrefixTable UnitPrefixes = new UnitPrefixTable(new UnitPrefix[] {new UnitPrefix(UnitPrefixes, "yotta", 'Y', 24),
-                                                                                                    new UnitPrefix(UnitPrefixes, "zetta", 'Z', 21),
-                                                                                                    new UnitPrefix(UnitPrefixes, "exa",   'E', 18),
-                                                                                                    new UnitPrefix(UnitPrefixes, "peta",  'P', 15),
-                                                                                                    new UnitPrefix(UnitPrefixes, "tera",  'T', 12),
-                                                                                                    new UnitPrefix(UnitPrefixes, "giga",  'G', 9),
-                                                                                                    new UnitPrefix(UnitPrefixes, "mega",  'M', 6),
-                                                                                                    new UnitPrefix(UnitPrefixes, "kilo",  'K', 3),   /* k */
-                                                                                       /* extra */  new UnitPrefix(UnitPrefixes, "kilo",  'k', 3),   /* k */
-                                                                                                    new UnitPrefix(UnitPrefixes, "hecto", 'H', 2),   /* h */
-                                                                                       /* extra */  new UnitPrefix(UnitPrefixes, "hecto", 'h', 2),   /* h */
-                                                                                                    new UnitPrefix(UnitPrefixes, "deca",  'D', 1),   /* da */
-                                                                                                    new UnitPrefix(UnitPrefixes, "deci",  'd', -1),
-                                                                                                    new UnitPrefix(UnitPrefixes, "centi", 'c', -2),
-                                                                                                    new UnitPrefix(UnitPrefixes, "milli", 'm', -3),
+        public static readonly UnitPrefixTable PhysicsUnitPrefixes = new UnitPrefixTable(new UnitPrefix[] {new UnitPrefix(PhysicsUnitPrefixes, "yotta", 'Y', 24),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "zetta", 'Z', 21),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "exa",   'E', 18),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "peta",  'P', 15),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "tera",  'T', 12),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "giga",  'G', 9),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "mega",  'M', 6),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "kilo",  'K', 3),   /* k */
+                                                                                       /* extra */  new UnitPrefix(PhysicsUnitPrefixes, "kilo",  'k', 3),   /* k */
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "hecto", 'H', 2),   /* h */
+                                                                                       /* extra */  new UnitPrefix(PhysicsUnitPrefixes, "hecto", 'h', 2),   /* h */
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "deca",  'D', 1),   /* da */
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "deci",  'd', -1),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "centi", 'c', -2),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "milli", 'm', -3),
                                                                                                     // new UnitPrefix(UnitPrefixes, "micro", 'μ', -6), // '\0x03BC' (Char)956  
-                                                                                                    new UnitPrefix(UnitPrefixes, "micro", 'µ', -6),  // ANSI '\0x00B5' (Char)181   
-                                                                                                    new UnitPrefix(UnitPrefixes, "nano",  'n', -9),
-                                                                                                    new UnitPrefix(UnitPrefixes, "pico",  'p', -12),
-                                                                                                    new UnitPrefix(UnitPrefixes, "femto", 'f', -15),
-                                                                                                    new UnitPrefix(UnitPrefixes, "atto",  'a', -18),
-                                                                                                    new UnitPrefix(UnitPrefixes, "zepto", 'z', -21),
-                                                                                                    new UnitPrefix(UnitPrefixes, "yocto", 'y', -24) });
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "micro", 'µ', -6),  // ANSI '\0x00B5' (Char)181   
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "nano",  'n', -9),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "pico",  'p', -12),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "femto", 'f', -15),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "atto",  'a', -18),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "zepto", 'z', -21),
+                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "yocto", 'y', -24) });
 
         /* SI unit prefixes */
-        public static readonly UnitPrefix Y = (UnitPrefix)UnitPrefixes['Y'];
-        public static readonly UnitPrefix Z = (UnitPrefix)UnitPrefixes['Z'];
-        public static readonly UnitPrefix E = (UnitPrefix)UnitPrefixes['E'];
-        public static readonly UnitPrefix P = (UnitPrefix)UnitPrefixes['P'];
-        public static readonly UnitPrefix T = (UnitPrefix)UnitPrefixes['T'];
-        public static readonly UnitPrefix G = (UnitPrefix)UnitPrefixes['G'];
-        public static readonly UnitPrefix M = (UnitPrefix)UnitPrefixes['M'];
-        public static readonly UnitPrefix K = (UnitPrefix)UnitPrefixes['K'];
-        public static readonly UnitPrefix k = (UnitPrefix)UnitPrefixes['k'];
-        public static readonly UnitPrefix H = (UnitPrefix)UnitPrefixes['H'];
-        public static readonly UnitPrefix h = (UnitPrefix)UnitPrefixes['h'];
-        public static readonly UnitPrefix D = (UnitPrefix)UnitPrefixes['D'];
-        public static readonly UnitPrefix da = (UnitPrefix)UnitPrefixes['D']; // Extra
-        public static readonly UnitPrefix d = (UnitPrefix)UnitPrefixes['d'];
-        public static readonly UnitPrefix c = (UnitPrefix)UnitPrefixes['c'];
-        public static readonly UnitPrefix m = (UnitPrefix)UnitPrefixes['m'];
-        public static readonly UnitPrefix my = (UnitPrefix)UnitPrefixes['µ'];
-        public static readonly UnitPrefix n = (UnitPrefix)UnitPrefixes['n'];
-        public static readonly UnitPrefix p = (UnitPrefix)UnitPrefixes['p'];
-        public static readonly UnitPrefix f = (UnitPrefix)UnitPrefixes['f'];
-        public static readonly UnitPrefix a = (UnitPrefix)UnitPrefixes['a'];
-        public static readonly UnitPrefix z = (UnitPrefix)UnitPrefixes['z'];
-        public static readonly UnitPrefix y = (UnitPrefix)UnitPrefixes['y'];
+        public static readonly UnitPrefix Y =  (UnitPrefix)PhysicsUnitPrefixes['Y'];
+        public static readonly UnitPrefix Z =  (UnitPrefix)PhysicsUnitPrefixes['Z'];
+        public static readonly UnitPrefix E =  (UnitPrefix)PhysicsUnitPrefixes['E'];
+        public static readonly UnitPrefix P =  (UnitPrefix)PhysicsUnitPrefixes['P'];
+        public static readonly UnitPrefix T =  (UnitPrefix)PhysicsUnitPrefixes['T'];
+        public static readonly UnitPrefix G =  (UnitPrefix)PhysicsUnitPrefixes['G'];
+        public static readonly UnitPrefix M =  (UnitPrefix)PhysicsUnitPrefixes['M'];
+        public static readonly UnitPrefix K =  (UnitPrefix)PhysicsUnitPrefixes['K'];
+        public static readonly UnitPrefix k =  (UnitPrefix)PhysicsUnitPrefixes['k'];
+        public static readonly UnitPrefix H =  (UnitPrefix)PhysicsUnitPrefixes['H'];
+        public static readonly UnitPrefix h =  (UnitPrefix)PhysicsUnitPrefixes['h'];
+        public static readonly UnitPrefix D =  (UnitPrefix)PhysicsUnitPrefixes['D'];
+        public static readonly UnitPrefix da = (UnitPrefix)PhysicsUnitPrefixes['D']; // Extra
+        public static readonly UnitPrefix d =  (UnitPrefix)PhysicsUnitPrefixes['d'];
+        public static readonly UnitPrefix c =  (UnitPrefix)PhysicsUnitPrefixes['c'];
+        public static readonly UnitPrefix m =  (UnitPrefix)PhysicsUnitPrefixes['m'];
+        public static readonly UnitPrefix my = (UnitPrefix)PhysicsUnitPrefixes['µ'];
+        public static readonly UnitPrefix n =  (UnitPrefix)PhysicsUnitPrefixes['n'];
+        public static readonly UnitPrefix p =  (UnitPrefix)PhysicsUnitPrefixes['p'];
+        public static readonly UnitPrefix f =  (UnitPrefix)PhysicsUnitPrefixes['f'];
+        public static readonly UnitPrefix a =  (UnitPrefix)PhysicsUnitPrefixes['a'];
+        public static readonly UnitPrefix z =  (UnitPrefix)PhysicsUnitPrefixes['z'];
+        public static readonly UnitPrefix y =  (UnitPrefix)PhysicsUnitPrefixes['y'];
+
+
+        /* https://en.wikipedia.org/wiki/Units_of_information
+    
+        Prefixes:
+            Symbol	Prefix	Multiple	    Example
+            Ki	    kibi	 2^10, 1024	    kibibyte  (KiB)
+            Mi	    mebi	 2^20, 1024^2	mebibyte  (MiB)
+            Gi	    gibi	 2^30, 1024^3	gibibyte  (GiB)
+            Ti	    tebi	 2^40, 1024^4	tebibyte  (TiB)
+            Pi	    pebi	 2^50, 1024^5	pebibyte  (PiB)
+            Ei	    exbi	 2^60, 1024^6	exbibyte  (EiB)
+            Zi	    zebi	 2^70, 1024^7	zebibyte  (ZiB)
+            Yi	    yobi	 2^80, 1024^8	yobibyte  (YiB)
+            Ri	    robi	 2^90, 1024^9	robibyte  (RiB)
+            Qi	    quebi	2^100, 1024^10	quebibyte (QiB)
+        */
+        const ushort Ki = 1024;
+        public static readonly UnitPrefixTable DataUnitPrefixes = new UnitPrefixTable(new UnitPrefix[] {new UnitPrefix(DataUnitPrefixes, "quebi", "Qi", new UnitPrefixExponent(10, Ki)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "robi", "Ri", new UnitPrefixExponent(9, Ki)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "yobi", "Yi", new UnitPrefixExponent(8, Ki)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "zebi", "Zi", new UnitPrefixExponent(7, Ki)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "exbi", "Ei", new UnitPrefixExponent(6, Ki)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "pebi", "Pi", new UnitPrefixExponent(5, Ki)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "tebi", "Ti", new UnitPrefixExponent(4, Ki)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "gibi", "Gi", new UnitPrefixExponent(3, Ki)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "mebi", "Mi", new UnitPrefixExponent(2, Ki)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "kibi", "Ki", new UnitPrefixExponent(1, Ki)) });
+
+        /* SI unit prefixes */
+        public static readonly UnitPrefix Qi = (UnitPrefix)DataUnitPrefixes['Qi'];
+        public static readonly UnitPrefix Ri = (UnitPrefix)DataUnitPrefixes['Ri'];
+        public static readonly UnitPrefix Yi = (UnitPrefix)DataUnitPrefixes['Yi'];
+        public static readonly UnitPrefix Zi = (UnitPrefix)DataUnitPrefixes['Zi'];
+        public static readonly UnitPrefix Pi = (UnitPrefix)DataUnitPrefixes['Pi'];
+        public static readonly UnitPrefix Ti = (UnitPrefix)DataUnitPrefixes['Ti'];
+        public static readonly UnitPrefix Gi = (UnitPrefix)DataUnitPrefixes['Gi'];
+        public static readonly UnitPrefix Ki = (UnitPrefix)DataUnitPrefixes['Ki'];
     }
 
     public static class SI
@@ -142,7 +180,7 @@ namespace PhysicalMeasure
         */
 
         public static readonly UnitSystem Units
-            = new UnitSystem("SI", Prefixes.UnitPrefixes,
+            = new UnitSystem("SI", Prefixes.PhysicsUnitPrefixes,
                 (unitsystem) => new BaseUnit[] 
                                     { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
                                       new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), /* kg */
@@ -239,7 +277,55 @@ namespace PhysicalMeasure
         public static readonly ConvertibleUnit y   = (ConvertibleUnit)Units["y"];
     }
 
-    public static /* partial */ class Physics
+    public static class Data
+    {
+        /*  https://en.wikipedia.org/wiki/Units_of_information 
+        Data base units
+            Name      Symbol   Measure 
+            bit       bit       digital data size
+
+        Named scaled units derived from Data base units 
+            Name        Symbol  Quantity                            Expression in terms of other units      Expression in terms of Data base units 
+            byte        B       digital data size                   8 bit                                   8 bit 
+        */
+
+        public static readonly UnitSystem Units
+        = new UnitSystem("Data", Prefixes.DataUnitPrefixes,
+            (unitsystem) => new BaseUnit[]
+                                { new BaseUnit(unitsystem, (SByte)DataBaseUnitKind.DataSize, "bit", "bit") },
+            (unitsystem) => null,
+            (unitsystem) => new ConvertibleUnit[]
+                                { new ConvertibleUnit("byte", "B", unitsystem.BaseUnits[(int)DataBaseUnitKind.DataSize], new ScaledValueConversion(1.0/8)) }  /* [B] = 1/8 * [bit] */
+                       );
+
+        /* Data base units */
+        public static readonly BaseUnit bit = (BaseUnit)Units["bit"];
+
+        /* Named units derived from Data base units */
+        // public static readonly NamedDerivedUnit Byte = (NamedDerivedUnit)Units["byte"];
+
+        /* Convertible Data units */
+        public static readonly ConvertibleUnit Byte = (ConvertibleUnit)Units["byte"];
+
+    }
+
+    /***
+    public static / * partial * / class Data
+    {
+        #region Data Measure Constants
+
+        public const int NoOfBaseUnits = (int)DataBaseUnitKind.DataUnitSystem_NoOfBaseUnits; // = 7;
+
+        #endregion Data Measure Constants
+
+        public static readonly Unit dimensionless = Data.Units.Dimensionless;
+
+        public static readonly UnitPrefixTable ByteUnitPrefixes = Data.Units.UnitPrefixes;
+
+        // public static UnitSystemStack CurrentUnitSystems = new UnitSystemStack();
+    }
+
+    public static / * partial * / class Physics
     {
         #region Physical Measure Constants
 
@@ -249,13 +335,91 @@ namespace PhysicalMeasure
 
         public static readonly Unit dimensionless = SI.Units.Dimensionless;
 
+        public static readonly UnitPrefixTable SiUnitPrefixes = SI.Units.UnitPrefixes;
+
         public static UnitSystemStack CurrentUnitSystems = new UnitSystemStack();
+    }
+    ***/
+
+    public static /* partial */ class Global
+    {
+        #region Physical Measure Constants
+
+        public const int PhysicsNoOfBaseUnits = (int)PhysicalBaseUnitKind.PhysicalUnitSystem_NoOfBaseUnits; // = 7;
+        public static readonly UnitPrefixTable SiUnitPrefixes = SI.Units.UnitPrefixes;
+
+        #endregion Physical Measure Constants
+
+        #region Data Measure Constants
+
+        public const int DataNoOfBaseUnits = (int)DataBaseUnitKind.DataUnitSystem_NoOfBaseUnits; // = 7;
+        public static readonly UnitPrefixTable ByteUnitPrefixes = Data.Units.UnitPrefixes;
+
+        #endregion Data Measure Constants
+
+        public static readonly Unit dimensionless = SI.Units.Dimensionless;
+
+        public static UnitSystemStack CurrentUnitSystems = new UnitSystemStack();
+
+        public static void SetDefaultUnitSystems()
+        {
+            CurrentUnitSystems.Use(Data.Units);
+            CurrentUnitSystems.Use(SI.Units);
+        }
+
+        public static IUnitSystem UnitSystemFromName(String systemValueStr)
+        {
+            // Look for a used (eventually user defined) unit system with specified name.
+            IUnitSystem us = CurrentUnitSystems.UnitSystemFromName(systemValueStr);
+            if (us == null)
+            {   // Not a unit system from used (eventually user defined) unit systems; Try look for a unit system from PhysicalMeasure
+                // Look for a unit system with specified name from PhysicalMeasure.
+                // us = UnitSystems.Systems.UnitSystemFromName(systemValueStr);
+            }
+            return us;
+        }
+
+        public static Unit UnitFromName(String unitName)
+        {
+            // Look for a (eventually user defined) unit with specified name.
+            Unit sus = CurrentUnitSystems.UnitFromName(unitName);
+            if (sus == null)
+            {   // Not a unit system from used (eventually user defined) unit systems; Try look for a unit from PhysicalMeasure
+                // Look for a unit with specified name from PhysicalMeasure.
+                // us = UnitSystems.Systems.UnitFromName(unitName);
+            }
+            return sus;
+        }
+
+        public static Unit UnitFromSymbol(String unitSymbol)
+        {
+            // Look for a (eventually user defined) unit with specified symbol.
+            Unit sus = CurrentUnitSystems.UnitFromSymbol(unitSymbol);
+            if (sus == null)
+            {   // Not a unit system from used (eventually user defined) unit systems; Try look for a unit from PhysicalMeasure
+                // Look for a unit with specified symbol from PhysicalMeasure.
+                // us = UnitSystems.Systems.UnitFromSymbol(unitSymbol);
+            }
+            return sus;
+        }
+
+        public static Unit ScaledUnitFromSymbol(String scaledUnitSymbol)
+        {
+            // Look for a (eventually user defined) unit with specified symbol.
+            Unit sus = CurrentUnitSystems.ScaledUnitFromSymbol(scaledUnitSymbol);
+            if (sus == null)
+            {   // Not a unit system from used (eventually user defined) unit systems; Try look for a unit from PhysicalMeasure
+                // Look for a unit with specified symbol from PhysicalMeasure.
+                // us = UnitSystems.Systems.ScaledUnitFromSymbol(scaledUnitSymbol);
+            }
+            return sus;
+        }
     }
 
     public static class CGS_Units
     {
         public static readonly UnitSystem Units 
-            = new UnitSystem("CGS", Prefixes.UnitPrefixes,
+            = new UnitSystem("CGS", Prefixes.PhysicsUnitPrefixes,
                              (unitsystem) =>  new BaseUnit[] 
                                 { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "centimeter", "cm"),
                                   new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "gram", "g"),
@@ -269,7 +433,7 @@ namespace PhysicalMeasure
     public static class MGD_Units
     {
         public static readonly UnitSystem Units 
-            = new UnitSystem("MGD", Prefixes.UnitPrefixes,
+            = new UnitSystem("MGD", Prefixes.PhysicsUnitPrefixes,
                 (unitsystem) => new BaseUnit[] 
                                     { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
                                       new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), /* kg */
@@ -291,7 +455,7 @@ namespace PhysicalMeasure
     public static class MGM_Units
     {
         public static readonly UnitSystem Units 
-            = new UnitSystem("MGM", Prefixes.UnitPrefixes,
+            = new UnitSystem("MGM", Prefixes.PhysicsUnitPrefixes,
                 (unitsystem) => new BaseUnit[] 
                                     { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
                                       new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), 
@@ -304,7 +468,7 @@ namespace PhysicalMeasure
 
     public static /* partial */ class UnitSystems
     {
-        public static UnitLookup Systems = new UnitLookup(new UnitSystem[] { SI.Units, CGS_Units.Units, MGD_Units.Units, MGM_Units.Units });
+        // Just commented out for test of usage: public static UnitLookup Systems = new UnitLookup(new UnitSystem[] { SI.Units, CGS_Units.Units, MGD_Units.Units, MGM_Units.Units });
 
         public static readonly UnitSystemConversion SItoCGSConversion
             = new UnitSystemConversion(SI.Units, CGS_Units.Units,

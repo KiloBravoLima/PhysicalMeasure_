@@ -606,7 +606,7 @@ namespace PhysicalCalculator.Expression
 
             public int Pos = 0;
 
-            public Unit dimensionless = Physics.dimensionless;
+            public Unit dimensionless = Global.dimensionless;
             public List<String> ExpectedFollow = new List<String>(); // The list of words and symbols which will terminate parsing the InputString without signaling an error.
 
             public Boolean ThrowExceptionOnInvalidInput = false;
@@ -878,26 +878,36 @@ namespace PhysicalCalculator.Expression
                                     {   // Parse optional unit
                                         OldLen = CommandLine.Length;
                                         CommandLine = CommandLine.TrimStart();
-                                        if (!String.IsNullOrEmpty(CommandLine) && (Char.IsLetter(CommandLine[0]) || Char.Equals(CommandLine[0], '°') ))     // Need '°' to read "°C" as unit name
+                                        if (!String.IsNullOrEmpty(CommandLine) && (Char.IsLetter(CommandLine[0]) || Char.Equals(CommandLine[0], '°')))     // Need '°' to read "°C" as unit name
                                         {
                                             ResultLine = "";
                                             pu = ParsePhysicalUnit(ref CommandLine, ref ResultLine);
                                             Pos += OldLen - CommandLine.Length;
                                         }
                                     }
-                                    if (pu == null)
+                                    if (String.IsNullOrWhiteSpace(ResultLine))
                                     {
-                                        pu = dimensionless;
+                                        if (pu == null)
+                                        {
+                                            pu = dimensionless;
+                                        }
+
+                                        Quantity pq = new Quantity(D, pu);
+
+                                        LastReadToken = TokenKind.Operand;
+                                        return new Token(pq);
                                     }
-
-                                    Quantity pq = new Quantity(D, pu);
-
-                                    LastReadToken = TokenKind.Operand;
-                                    return new Token(pq);
+                                    else
+                                    {
+                                        // End of recognized input; Stop reading and return operator tokens from stack.
+                                        ReportInvalidPhysicalExpressionFormatError($"Invalid or missing operand after '{D}' at position {Pos}. {ResultLine}");
+                                    }
                                 }
-
-                                // End of recognized input; Stop reading and return operator tokens from stack.
-                                ReportInvalidPhysicalExpressionFormatError("Invalid or missing operand after '" + c + "' at position " + Pos.ToString());
+                                else
+                                {
+                                    // End of recognized input; Stop reading and return operator tokens from stack.
+                                    ReportInvalidPhysicalExpressionFormatError($"Invalid or missing operand after '{c}' at position {Pos}. {ResultLine}");
+                                }
                             }
                         }
                         else if (Char.IsLetter(c) || Char.Equals(c, '_'))

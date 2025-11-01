@@ -51,18 +51,18 @@
   <ItemGroup>
     <Compile Include="KBL.Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
-      <DependentUpon>AssemblyInfo.txt4</DependentUpon>
+      <!--<DependentUpon>AssemblyInfo.txt4</DependentUpon>-->
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Nuget files3\AssemblyInfo.txt4" />
+    <!--<None Include="Nuget files3\AssemblyInfo.txt4" />-->
     <None Include="Nuget files3\KBL.Extensions.nuspec">
-      <DependentUpon>AssemblyInfo.txt4</DependentUpon>
+      <!--<DependentUpon>AssemblyInfo.txt4</DependentUpon>-->
     </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Properties\AssemblyInfo.txt4" />
+    <!--<None Include="Properties\AssemblyInfo.txt4" />-->
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\..\PhysCalculator\packages\Microsoft.CodeAnalysis.NetAnalyzers.9.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" />

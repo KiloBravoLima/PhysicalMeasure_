@@ -24,7 +24,8 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyCompany("Kilo Bravo")]
 [assembly: AssemblyProduct("PhysicalMeasure")]
-[assembly: AssemblyCopyright("Copyright © 2010-2019 Kilo Bravo")]
+// [assembly: AssemblyCopyright("Copyright © 2010-2019 Kilo Bravo")]
+[assembly: AssemblyCopyright("Copyright © 2010-2025 Kilo Bravo")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -44,9 +45,12 @@ using System.Runtime.InteropServices;
 //  build:    7111
 //  revision: 36600
 
+/**
 [assembly: AssemblyVersion("4.0.7151.15496")]
 [assembly: AssemblyFileVersion("4.0.7151.15496")]
 [assembly: AssemblyInformationalVersion("4.0.7155")]
+**/
 
+[assembly: AssemblyVersion("4.0.*")]
 
 [assembly: InternalsVisibleTo("PhysCalculatorTests")]

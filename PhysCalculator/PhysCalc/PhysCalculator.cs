@@ -26,7 +26,14 @@ namespace PhysicalCalculator
         const string AccumulatorName = "Accumulator";
         OperandInfo Accumulator = null;
         CalculatorEnvironment GlobalContext;
-        public CalculatorEnvironment CurrentContext;
+
+        CalculatorEnvironment m_currentContext;
+        public CalculatorEnvironment CurrentContext
+        {
+            get { return m_currentContext; }
+            set { m_currentContext = value; }
+        }
+
 
         public PhysCalculator()
         {
@@ -144,14 +151,20 @@ namespace PhysicalCalculator
 
         private void InitGlobalContext()
         {
+            // Default Unit Systems
+            // Global.CurrentUnitSystems.Use(SI.Units); 
+            // Global.CurrentUnitSystems.Use(Data.Units); 
+            Global.SetDefaultUnitSystems();
+
             GlobalContext = new CalculatorEnvironment(InitPredefinedSystemContext(), "Global", EnvironmentKind.NamespaceEnv)
             {
                 //
                 FormatProviderSource = FormatProviderKind.DefaultFormatProvider
             };
             //GlobalContext.FormatProviderSource = FormatProviderKind.InvariantFormatProvider;
-
             CurrentContext = GlobalContext;
+
+            BuildListOfCommands();
         }
 
         public IEnvironment GetDeclarationEnvironment()
@@ -347,10 +360,72 @@ namespace PhysicalCalculator
             return true;
         }
 
+        struct NamedCommand
+        {
+            public String commandName;
+            public CommandDelegate commandHandler;
+        }
+
+        List<NamedCommand> Commands = new List<NamedCommand>();
+        void AddCommand(String keyWord, CommandDelegate cmdHandler)
+        {
+            Commands.Add(new NamedCommand(){commandName = keyWord, commandHandler = cmdHandler});
+        }
+
+        void BuildListOfCommands()
+        {
+            AddCommand("//", CommandComment);
+            AddCommand("Read", CommandReadFromFile);
+            AddCommand("Include", CommandReadFromFile);
+            AddCommand("Load", CommandReadFromFile);
+            AddCommand("Save", CommandSaveToFile);
+            AddCommand("Files", CommandListFiles);
+            AddCommand("Using", CommandUsingConstants);
+            AddCommand("Var", CommandVar);
+            AddCommand("Set", CommandSet);
+            AddCommand("System", CommandSystem);
+            AddCommand("Unit", CommandUnit);
+            AddCommand("Print", CommandPrint);
+            AddCommand("List", CommandList);
+            AddCommand("Store", CommandStore);
+            AddCommand("Remove", CommandRemove);
+            AddCommand("Clear", CommandClear);
+            AddCommand("Func", CommandFunc);
+            AddCommand("If", CommandIf);
+            AddCommand("Help", CommandHelp);
+            AddCommand("Version", CommandVersion);
+            AddCommand("About", CommandAbout);
+        }
+
+
         public override Boolean Command(ref String commandLine, out String resultLine)
         {
             Boolean CommandHandled = false;
             resultLine = "Unknown Command";
+
+            // Commands.ForEach(item => { if (!CommandHandled) CheckForCommand(item.commandName, item.commandHandler, ref commandLine, ref resultLine, ref CommandHandled));
+
+            Boolean CommandFound = false;
+            foreach (NamedCommand namedCommand in Commands)
+            {
+                if (!CommandFound)
+                {
+                    CommandFound |= CheckForCommand(namedCommand.commandName, namedCommand.commandHandler, ref commandLine, ref resultLine, ref CommandHandled);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (!CommandFound)
+            {
+                CommandFound =   (CommandHandled = IdentifierAssumed(ref commandLine, ref resultLine)) // Assume a print or set Command
+                              || (CommandHandled = CommandPrint(ref commandLine, ref resultLine)) // Assume a print Command
+                              || (CommandHandled = base.Command(ref commandLine, out resultLine));
+            }
+
+            /**
             Boolean CommandFound =     CheckForCommand("//", CommandComment, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Read", CommandReadFromFile, ref commandLine, ref resultLine, ref CommandHandled)
                                     || CheckForCommand("Include", CommandReadFromFile, ref commandLine, ref resultLine, ref CommandHandled)
@@ -375,6 +450,7 @@ namespace PhysicalCalculator
                                     || (CommandHandled = IdentifierAssumed(ref commandLine, ref resultLine)) // Assume a print or set Command
                                     || (CommandHandled = CommandPrint(ref commandLine, ref resultLine)) // Assume a print Command
                                     || (CommandHandled = base.Command(ref commandLine, out resultLine));
+            **/
 
             return CommandHandled;
         }
@@ -402,6 +478,7 @@ namespace PhysicalCalculator
         public Boolean CommandHelp(ref String commandLine, ref String resultLine)
         {
             CommandHelpParts HelpPart = CommandHelpParts.Command;
+            String commandName = null;
             if (commandLine.StartsWithKeywordPrefix("Expression") > 0)
                 HelpPart = CommandHelpParts.Expression;
             else if (commandLine.StartsWithKeywordPrefix("Parameter") > 0)
@@ -412,35 +489,62 @@ namespace PhysicalCalculator
                 HelpPart = CommandHelpParts.Setting;
             else if (commandLine.StartsWithKeywordPrefix("All") > 0)
                 HelpPart = CommandHelpParts.all;
-
+            else
+            {
+                String localTemp = commandLine;
+                var commandItem = Commands.FirstOrDefault((item) => { int len = localTemp.StartsWithKeywordPrefix(item.commandName); return len > 0; } );
+                if (!String.IsNullOrWhiteSpace(commandItem.commandName))
+                {
+                    commandName = commandItem.commandName;
+                }
+            }
+            
             resultLine = "";
-            if (HelpPart == CommandHelpParts.Command || HelpPart == CommandHelpParts.all)
+            if (HelpPart == CommandHelpParts.Command || HelpPart == CommandHelpParts.all || commandName != null)
             {   //            "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
                 //            "         1         2         3         4         5         6         7         8         9        10        11        12        13        14"
-                resultLine += "Commands:\n"
-                            + "    || Read | Include | Load || <filename>                                   Reads commands from file and execute them\n"
-                            + "    Save [ items | commands ] <filename>                                     Save to file the current variables and functions\n"
-                            + "                                                                                 declarations, or the command history\n"
-                            + "                                                                                 when 'commands' is specified\n"
-                            + "    Files [ -sort=create | write | access ] [ [-path=] <folderpath> ]        List files in folder\n"
-                            + "    Using [ universal | electromagnetic | atomic ]                           Declare constants from specified predefined constant group\n"
+                resultLine += "Commands:\n";
 
-                            + "    Var [ <contextname> . ] <varname> [ = <expression> ] [, <var> ]*         Declare new Variable (local or in specified context)\n"
-                            + "    Set <varname> [ = ] <expression> [, <varname> [ = ] <expression> ]*      Assign Variable or declare it locally if not already declared\n"
-                            + "    System <systemname>                                                      Define new unit system\n"
-                            + "    Unit [ <systemname> . ] <unitname> [ [ = ] <expression> ]                Define new unit. Without an Expression it becomes\n"
-                            + "                                                                                 a base unit, else a converted (scaled) unit\n"
-                            + "    [ Print ] <expression> [, <expression> ]*                                Evaluate expressions and show values\n"
-                            + "    List [ items ] [ settings ] [ commands ]                                 Show All Variable values and functions declarations, \n"
-                            + "                                                                                 setting and commands as specified\n"
-                            + "    Store <varname>                                                          Save last calculation's result to Variable\n"
-                            + "    Remove <varname> [, <varname> ]*                                         Remove Variable\n"
-                            + "    Clear [ items | commands ]                                               Remove All variables or\n"
-                            + "                                                                                 the command history when 'commands' is specified \n"
-                            + "    Func <functionname> ( <paramlist> )  { <commands> }                      Declare a function\n"
-                            + "    Help [ expression | parameter | commands | setting | all ]               Help on topic\n"
-                            + "    Version                                                                  Shows application version info\n"
-                            + "    About                                                                    Shows application info";
+                if (commandName == null || commandName == "Read" || commandName == "Include" || commandName == "Load")
+                {  resultLine += "    || Read | Include | Load || <filename>                                         Reads commands from file and execute them\n"; }
+                if (commandName == null || commandName == "Save")
+                {  resultLine += "    Save [ items | commands ] <filename>                                           Save to file the current variables and functions\n"
+                               + "                                                                                     declarations, or the command history\n"
+                               + "                                                                                     when 'commands' is specified\n"; }
+                if (commandName == null || commandName == "Files")
+                {  resultLine += "    Files [ -sort=create | write | access ] [ [-path=] <folderpath> ]              List files in folder\n"; }
+                if (commandName == null || commandName == "Using")
+                {  resultLine += "    Using [ universal | electromagnetic | atomic ]                                 Declare constants from specified predefined constant group\n"; }
+                if (commandName == null || commandName == "Var")
+                {  resultLine += "    Var [ <contextname> . ] <varname> [ = <expression> ] [, <var> ]*               Declare new Variable (local or in specified context)\n"; }
+                if (commandName == null || commandName == "Set")
+                {  resultLine += "    Set <varname> [ = ] <expression> [, <varname> [ = ] <expression> ]*            Assign Variable or declare it locally if not already declared\n"; }
+                if (commandName == null || commandName == "System")
+                {  resultLine += "    System <systemname>                                                            Define new unit system\n"; }
+                if (commandName == null || commandName == "Unit")
+                {  resultLine += "    Unit [ <systemname> . ] <unitname> [ sym <symbol>] [ [ = ] <expression> ]      Define new unit with a unique symbol char if specified.\n"
+                               + "                                                                                     Without an Expression it becomes a base unit,\n"
+                               + "                                                                                     else a converted (scaled) unit\n"; }
+                if (commandName == null || commandName == "Print")
+                {  resultLine += "    [ Print ] <expression> [, <expression> ]*                                      Evaluate expressions and show values\n"; }
+                if (commandName == null || commandName == "List")
+                {  resultLine += "    List [ items ] [ settings ] [ commands ]                                       Show All Variable values and functions declarations, \n"
+                               + "                                                                                     setting and commands as specified\n"; }
+                if (commandName == null || commandName == "Store")
+                {  resultLine += "    Store <varname>                                                                Save last calculation's result to Variable\n"; }
+                if (commandName == null || commandName == "Remove")
+                {  resultLine += "    Remove <varname> [, <varname> ]*                                               Remove Variable\n"; }
+                if (commandName == null || commandName == "Clear")
+                {  resultLine += "    Clear [ items | commands ]                                                     Remove All variables or\n"
+                               + "                                                                                   the command history when 'commands' is specified \n"; }
+                if (commandName == null || commandName == "Func")
+                {  resultLine += "    Func <functionname> ( <paramlist> )  { <commands> }                            Declare a function\n"; }
+                if (commandName == null || commandName == "Help")
+                {  resultLine += "    Help [ expression | parameter | commands [ <commandName> ] | setting | all ]   Help on topic\n"; }
+                if (commandName == null || commandName == "Version")
+                {  resultLine += "    Version                                                                        Shows application version info\n"; }
+                if (commandName == null || commandName == "About")
+                {  resultLine += "    About                                                                          Shows application info"; }
             }
             if (HelpPart == CommandHelpParts.Expression || HelpPart == CommandHelpParts.all)
             {
@@ -961,9 +1065,17 @@ namespace PhysicalCalculator
 
                     if (OK)
                     {
+                        // unit symbol
+                        String unitSymbol = null;
+                        if (commandLine.StartsWithKeywordPrefix("sym") == 3)
+                        {
+                            commandLine = commandLine.ReadToken(out string dummySymbolKeywordToken);
+                            commandLine = commandLine.ReadToken(out unitSymbol);
+                        }
+
                         TryParseToken("=", ref commandLine);
 
-                        List<string> ExpectedFollow = new List<string>{",", ";"};
+                        List<string> ExpectedFollow = new List<string>{",", ";", "sym"};
 
                         OperandInfo pq = GetPhysicalQuantity(ref commandLine, ref resultLine, ExpectedFollow);
 
@@ -974,7 +1086,6 @@ namespace PhysicalCalculator
                         }
                         else
                         {
-
                             IUnitSystem UnitSys = null;
                             Boolean SystemIdentifierFound = CurrentContext.FindIdentifier(QualifiedIdentifierName, out var SystemContext, out var SystemItem);
                             if (SystemItem != null && SystemItem.Identifierkind == IdentifierKind.UnitSystem)
@@ -983,7 +1094,7 @@ namespace PhysicalCalculator
                             }
                             else
                             {
-                                IUnitSystem Default_UnitSystem = Physics.CurrentUnitSystems.Default;
+                                IUnitSystem Default_UnitSystem = Global.CurrentUnitSystems.Default;
                                 if (Default_UnitSystem.IsIsolatedUnitSystem && !Default_UnitSystem.IsCombinedUnitSystem)
                                 {
                                     UnitSys = Default_UnitSystem;
@@ -991,12 +1102,16 @@ namespace PhysicalCalculator
                             }
 
                             // unit symbol
-                            String unitSymbol = null; 
                             if (commandLine.StartsWithKeywordPrefix("sym") == 3)
                             {
+                                String prevUnitSymbol = unitSymbol;
                                 commandLine = commandLine.ReadToken(out string dummySymbolKeywordToken);
                                 commandLine = commandLine.ReadToken(out unitSymbol);
-                            } 
+                                if (prevUnitSymbol != null && unitSymbol != prevUnitSymbol)
+                                {
+                                    resultLine = $" Symbol for {UnitName} was already declared as {prevUnitSymbol}. ";
+                                }
+                            }
 
                             OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, unitSymbol ?? UnitName, out Item, out string errorMessage);
                             if (OK)
@@ -1009,6 +1124,7 @@ namespace PhysicalCalculator
                                     SystemName = UnitSys.Name + ".";
                                 }
                                 */
+
                                 if (pq != null)
                                 {
                                     // Defined new local unit as scaled unit
@@ -1017,12 +1133,12 @@ namespace PhysicalCalculator
                                 else
                                 {
                                     // Defined new local base unit 
-                                    resultLine = "Unit '" + Item.ToListString(UnitName) + "' declared.";
+                                    resultLine = $"Unit '{Item.ToListString(UnitName)}' {unitSymbol} declared.";
                                 }
                             }
                             else
                             {
-                                resultLine = "Unit '" + UnitName + "' can't be declared. "+ errorMessage + "\r\n" + resultLine;
+                                resultLine = $"Unit '{UnitName}' {unitSymbol} can't be declared. {errorMessage} \r\n" + resultLine;
                             }
                         }
                     }
@@ -1132,7 +1248,8 @@ namespace PhysicalCalculator
 
             if (listNamedItems || listSettings)
             {
-                ListStringBuilder.AppendLine("Default unit system: " + Physics.CurrentUnitSystems.Default.Name);
+                // ListStringBuilder.AppendLine("Default unit system: " + Global.CurrentUnitSystems.Default.Name);
+                ListStringBuilder.AppendLine("Default unit systems: " + Global.CurrentUnitSystems.KnownSystems.ToStringList(" -> "));
                 ListStringBuilder.Append(CurrentContext.ListIdentifiers(false, listNamedItems, listSettings));
             }
             else
@@ -1478,16 +1595,20 @@ namespace PhysicalCalculator
             else if (variableName.IsKeyword("System") || variableName.IsKeyword("Default_System"))
             {
                 SettingFound = true;
-                commandLine = commandLine.ReadToken(out var systemvaluestr);
+                commandLine = commandLine.ReadToken(out var systemValueStr);
 
-                IUnitSystem us = UnitSystems.Systems.UnitSystemFromName(systemvaluestr);
+                /**
+                IUnitSystem us = UnitSystems.Systems.UnitSystemFromName(systemValueStr);
                 if (us == null)
                 {   // Not a unit system from PhysicalMeasure; Try look for a user defined unit system.
-                    // TODO: Look for a user defined unit system with specified name.
+                    // Look for a user defined unit system with specified name.
+                    us = Global.CurrentUnitSystems.UnitSystemFromName(systemValueStr);
                 }
+                **/
+                IUnitSystem us = Global.UnitSystemFromName(systemValueStr);
                 if (us != null)
                 {
-                    if (Physics.CurrentUnitSystems.Use(us))
+                    if (Global.CurrentUnitSystems.Use(us))
                     {
                         resultLine = "System set to " + us.Name;
                     }
@@ -1498,7 +1619,7 @@ namespace PhysicalCalculator
                 }
                 else
                 {
-                    resultLine = "System " + systemvaluestr + " was not found; Current system is " + Physics.CurrentUnitSystems.Default;
+                    resultLine = "System " + systemValueStr + " was not found; Current system is " + Global.CurrentUnitSystems.Default;
                 }
             }
             else if (variableName.IsKeyword("AutoDefineUnits"))

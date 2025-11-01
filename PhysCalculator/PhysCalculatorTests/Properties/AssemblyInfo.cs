@@ -10,7 +10,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PhysCalculatorTests")]
-[assembly: AssemblyCopyright("Copyright ©  2011-2015 KiloBravo")]
+// [assembly: AssemblyCopyright("Copyright ©  2011-2015 KiloBravo")]
+[assembly: AssemblyCopyright("Copyright ©  2011-2025 KiloBravo")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -35,7 +36,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.7151")]
 [assembly: AssemblyFileVersion("1.0.7151.15496")]
 */
+/**
 [assembly: AssemblyVersion("1.0")]
 [assembly: AssemblyFileVersion("1.0.7151.15496")]
 
 [assembly: AssemblyInformationalVersion("1.0.5")]
+**/
+
+[assembly: AssemblyVersion("1.0.*")]

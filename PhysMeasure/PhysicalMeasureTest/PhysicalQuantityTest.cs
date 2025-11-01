@@ -1233,7 +1233,7 @@ namespace PhysicalMeasureTest
             Quantity pg1 = new Quantity(0.000123, SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Mass)]);
             Quantity pg2 = new Quantity(789, SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Mass)]);
 
-            Quantity expected = new Quantity(0.000123 / 789, Physics.dimensionless);
+            Quantity expected = new Quantity(0.000123 / 789, Global.dimensionless);
 
             Quantity actual = pg1 / pg2;
             Assert.AreEqual(expected, actual);

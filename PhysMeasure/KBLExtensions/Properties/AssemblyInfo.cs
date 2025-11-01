@@ -22,7 +22,8 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyCompany("Kilo Bravo")]
 [assembly: AssemblyProduct("KBL.Extensions")]
-[assembly: AssemblyCopyright("Copyright © 2015-2019 Kilo Bravo")]
+// [assembly: AssemblyCopyright("Copyright © 2015-2019 Kilo Bravo")]
+[assembly: AssemblyCopyright("Copyright © 2015-2025 Kilo Bravo")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -41,7 +42,10 @@ using System.Runtime.InteropServices;
 //  build:    7111
 //  revision: 36600
 
+/**
 [assembly: AssemblyVersion("1.0")]
 [assembly: AssemblyFileVersion("1.0.7151.15496")]
 [assembly: AssemblyInformationalVersion("1.0.7150")]
+**/
 
+[assembly: AssemblyVersion("1.0.*")]

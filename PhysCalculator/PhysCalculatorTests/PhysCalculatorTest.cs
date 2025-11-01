@@ -927,7 +927,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             // Assert.AreEqual(expected, actual, "for result");
 
             // Clean up global info for default unit system
-            Physics.CurrentUnitSystems.Reset();
+            Global.CurrentUnitSystems.Reset();
         }
 
         /// <summary>
@@ -1004,7 +1004,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
 
             // Clean up global info for default unit system
-            Physics.CurrentUnitSystems.Reset();
+            Global.CurrentUnitSystems.Reset();
         }
 
 

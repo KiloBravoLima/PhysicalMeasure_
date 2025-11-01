@@ -62,7 +62,7 @@
     <Compile Include="PhysicalMeasure.4.Constants.cs" />
     <Compile Include="PhysicalMeasure.2.Classes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
-      <DependentUpon>AssemblyInfo.txt4</DependentUpon>
+      <!--<DependentUpon>AssemblyInfo.txt4</DependentUpon>-->
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -70,32 +70,32 @@
     <Content Include="Resources\PhysicalMeasureIcon.png" />
     <Content Include="Resources\PhysicalMeasure.ico" />
     <Content Include="Resources\PhysicalMeasure.png" />
-    <Content Include="Properties\AssemblyInfo.tt">
+    <!--<Content Include="Properties\AssemblyInfo.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AssemblyInfo.ttlog</LastGenOutput>
-    </Content>
+    </Content>-->
   </ItemGroup>
   <ItemGroup>
     <None Include="Interface Code Maps\Interfaces_CodeMap_20150525.xps" />
     <None Include="Interface Code Maps\Interfaces_CodeMap_VS2015_20150525.dgml" />
-    <None Include="Nuget files\AssemblyInfo.txt4" />
+    <!--<None Include="Nuget files\AssemblyInfo.txt4" />-->
     <None Include="Nuget files\PhysicalMeasure.nuspec">
-      <DependentUpon>AssemblyInfo.txt4</DependentUpon>
+      <!--<DependentUpon>AssemblyInfo.txt4</DependentUpon>-->
       <SubType>Designer</SubType>
     </None>
     <None Include="Nuget files\PhysicalMeasure.Sample.nuspec">
-      <DependentUpon>AssemblyInfo.txt4</DependentUpon>
+      <!--<DependentUpon>AssemblyInfo.txt4</DependentUpon>-->
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Properties\AssemblyInfo.ttlog">
+    <!--<None Include="Properties\AssemblyInfo.ttlog">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>AssemblyInfo.tt</DependentUpon>
     </None>
-    <None Include="Properties\AssemblyInfo.txt4" />
+    <None Include="Properties\AssemblyInfo.txt4" />-->
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

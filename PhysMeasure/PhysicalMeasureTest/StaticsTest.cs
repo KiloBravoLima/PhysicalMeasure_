@@ -362,7 +362,8 @@ namespace PhysicalMeasureTest
             String SymbolStr = "A";
             IUnit expected = (IUnit)(SI.Units.BaseUnits[3]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromSymbol(SymbolStr);
+            // actual = UnitSystems.Systems.UnitFromSymbol(SymbolStr);
+            actual = Global.UnitFromSymbol(SymbolStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -375,7 +376,8 @@ namespace PhysicalMeasureTest
             String SymbolStr = "C";
             IUnit expected = (IUnit)(SI.Units.NamedDerivedUnits[7]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromSymbol(SymbolStr);
+            // actual = UnitSystems.Systems.UnitFromSymbol(SymbolStr);
+            actual = Global.UnitFromSymbol(SymbolStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -388,7 +390,9 @@ namespace PhysicalMeasureTest
             String SymbolStr = "°C";
             IUnit expected = (IUnit)(SI.Units.ConvertibleUnits[1]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromSymbol(SymbolStr);
+            // actual = UnitSystems.Systems.UnitFromSymbol(SymbolStr);
+            actual = Global.UnitFromSymbol(SymbolStr);
+
             Assert.AreEqual(expected, actual);
         }
 
@@ -405,7 +409,9 @@ namespace PhysicalMeasureTest
             String NameStr = "meter";
             IUnit expected = (IUnit)(SI.Units.BaseUnits[0]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromName(NameStr);
+            // actual = UnitSystems.Systems.UnitFromName(NameStr);
+            actual = Global.UnitFromName(NameStr);
+
             Assert.AreEqual(expected, actual);
         }
 
@@ -418,7 +424,8 @@ namespace PhysicalMeasureTest
             String NameStr = "ampere";
             IUnit expected = (IUnit)(SI.Units.BaseUnits[3]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromName(NameStr);
+            // actual = UnitSystems.Systems.UnitFromName(NameStr);
+            actual = Global.UnitFromName(NameStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -431,7 +438,8 @@ namespace PhysicalMeasureTest
             String NameStr = "candela";
             IUnit expected = (IUnit)(SI.Units.BaseUnits[6]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromName(NameStr);
+            // actual = UnitSystems.Systems.UnitFromName(NameStr);
+            actual = Global.UnitFromName(NameStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -444,7 +452,8 @@ namespace PhysicalMeasureTest
             String NameStr = "hertz";
             IUnit expected = (IUnit)(SI.Units.NamedDerivedUnits[0]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromName(NameStr);
+            // actual = UnitSystems.Systems.UnitFromName(NameStr);
+            actual = Global.UnitFromName(NameStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -457,7 +466,8 @@ namespace PhysicalMeasureTest
             String NameStr = "joule";
             IUnit expected = (IUnit)(SI.Units.NamedDerivedUnits[5]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromName(NameStr);
+            // actual = UnitSystems.Systems.UnitFromName(NameStr);
+            actual = Global.UnitFromName(NameStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -470,7 +480,8 @@ namespace PhysicalMeasureTest
             String NameStr = "katal";
             IUnit expected = (IUnit)(SI.Units.NamedDerivedUnits[19]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromName(NameStr);
+            // actual = UnitSystems.Systems.UnitFromName(NameStr);
+            actual = Global.UnitFromName(NameStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -483,7 +494,8 @@ namespace PhysicalMeasureTest
             String NameStr = "gram";
             IUnit expected = (IUnit)(SI.Units.ConvertibleUnits[0]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromName(NameStr);
+            // actual = UnitSystems.Systems.UnitFromName(NameStr);
+            actual = Global.UnitFromName(NameStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -496,7 +508,8 @@ namespace PhysicalMeasureTest
             String NameStr = "Celsius";
             IUnit expected = (IUnit)(SI.Units.ConvertibleUnits[1]);
             IUnit actual;
-            actual = UnitSystems.Systems.UnitFromName(NameStr);
+            // actual = UnitSystems.Systems.UnitFromName(NameStr);
+            actual = Global.UnitFromName(NameStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -514,7 +527,8 @@ namespace PhysicalMeasureTest
             //Quantity actual;
             Unit expected = new CombinedUnit(new PrefixedUnitExponent(Prefixes.m, SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.ThermodynamicTemperature)], 1));
             Unit actual;
-            actual = UnitSystems.Systems.ScaledUnitFromSymbol(ScaledSymbolStr);
+            // actual = UnitSystems.Systems.ScaledUnitFromSymbol(ScaledSymbolStr);
+            actual = Global.ScaledUnitFromSymbol(ScaledSymbolStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -545,7 +559,8 @@ namespace PhysicalMeasureTest
             //Quantity actual;
             Unit expected = SI.Units.BaseUnits[(int)(PhysicalBaseUnitKind.Mass)];
             Unit actual;
-            actual = UnitSystems.Systems.ScaledUnitFromSymbol(ScaledSymbolStr);
+            //  actual = UnitSystems.Systems.ScaledUnitFromSymbol(ScaledSymbolStr);
+            actual = Global.ScaledUnitFromSymbol(ScaledSymbolStr);
             Assert.AreEqual(expected, actual);
         }
 
@@ -805,7 +820,7 @@ namespace PhysicalMeasureTest
 
             BaseUnit Euro = null;
             ConvertibleUnit Cent = null;
-            UnitSystem EuroUnitSystem = new UnitSystem("Euros", Prefixes.UnitPrefixes,
+            UnitSystem EuroUnitSystem = new UnitSystem("Euros", Prefixes.PhysicsUnitPrefixes,
                 (us) => { Euro = new BaseUnit(us, (SByte)MonetaryBaseUnitKind.Currency, "Euro", "€"); return new BaseUnit[] { Euro }; },
                 null,
                 (us) => { Cent = new ConvertibleUnit("Euro-cent", "¢", us.BaseUnits[0], new ScaledValueConversion(100)); return new ConvertibleUnit[] { Cent }; /* [¢] = 100 * [€] */ });

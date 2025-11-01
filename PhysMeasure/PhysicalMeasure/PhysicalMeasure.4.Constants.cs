@@ -75,13 +75,13 @@ namespace PhysicalMeasure
         /** */
         public static readonly Quantity GF = new Quantity(1.16639E-5, (Prefixes.G * Constants.e * SI.V) ^ -2);
         /* **/
-        public static readonly Quantity alpha = new Quantity(7.2973525376E-3, Physics.dimensionless);
+        public static readonly Quantity alpha = new Quantity(7.2973525376E-3, Global.dimensionless);
         public static readonly Quantity Eh = new Quantity(4.35974417E-18, SI.J);
         public static readonly Quantity mp = new Quantity(1.672621637E-27, SI.Kg);
         public static readonly Quantity h2me = new Quantity(3.636947550E-4, (SI.m ^ 2) / SI.s);
         public static readonly Quantity Rinf = new Quantity(10973731.568525, SI.m ^ -1);
         public static readonly Quantity tcs = new Quantity(6.65245873E-29, SI.m ^ 2);
-        public static readonly Quantity ThetaW = new Quantity(0.22215, Physics.dimensionless);
+        public static readonly Quantity ThetaW = new Quantity(0.22215, Global.dimensionless);
         /*
             Other usefull constants
         */

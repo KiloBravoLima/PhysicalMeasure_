@@ -847,7 +847,7 @@ namespace PhysicalCalculator.Identifiers
             systemItem = new NamedSystem(systemName);
             if (setAsDefault)
             {
-                Physics.CurrentUnitSystems.Use((systemItem as NamedSystem).UnitSystem);
+                Global.CurrentUnitSystems.Use((systemItem as NamedSystem).UnitSystem);
             }
             return context.SetLocalIdentifier(systemName, systemItem);
         }

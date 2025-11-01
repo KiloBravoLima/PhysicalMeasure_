@@ -15,6 +15,7 @@ namespace PhysicalMeasure
     {
         Unknown,
         PhysicalUnitSystem,
+        DataUnitSystem,
         MonetaryUnitSystem,
         CombinedUnitSystem
     }
@@ -30,6 +31,12 @@ namespace PhysicalMeasure
         LuminousIntensity,
 
         PhysicalUnitSystem_NoOfBaseUnits = 7
+    }
+
+    public enum DataBaseUnitKind
+    {
+        DataSize, // Data unit
+        DataUnitSystem_NoOfBaseUnits = 1
     }
 
     public enum MonetaryBaseUnitKind

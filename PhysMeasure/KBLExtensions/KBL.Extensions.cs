@@ -515,8 +515,13 @@ namespace System.Reflection
 
             String assemblyVersionInfo = AssemblyVersionInfo(assembly);
             String assemblyFileVersionInfo = AssemblyFileVersionInfo(assembly);
+            String assemblyFileVersionInfoOut = null;
+            if (!assemblyVersionInfo.Equals(assemblyFileVersionInfo))
+            {
+                assemblyFileVersionInfoOut = $" {assemblyFileVersionInfo}";
+            }
 
-            String InfoStr = $"{AsmName.Name,-16} {assemblyVersionInfo} {assemblyFileVersionInfo}";
+            String InfoStr = $"{AsmName.Name,-16} {assemblyVersionInfo}{assemblyFileVersionInfoOut}";
             return InfoStr;
         }
     }
