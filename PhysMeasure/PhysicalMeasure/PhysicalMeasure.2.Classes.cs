@@ -12,6 +12,7 @@ using System.Runtime.Serialization;
 
 using static PhysicalMeasure.DimensionExponentsExtension;
 using static PhysicalMeasure.Prefixes;
+using System.Linq.Expressions;
 
 namespace PhysicalMeasure
 {
@@ -97,7 +98,7 @@ namespace PhysicalMeasure
         {
             return other == null ? false : Equals(this.exponents, other.exponents);
         }
-        
+
         public static Boolean operator ==(DimensionExponents e1, DimensionExponents e2)
         {
             return e1.Equals(e2);
@@ -186,7 +187,7 @@ namespace PhysicalMeasure
 
             return noOfDimensions;
         }
-        
+
         public delegate SByte CombineExponentsFunc(SByte e1, SByte e2);
 
         public static SByte SByte_Mult(SByte e1, SByte e2) => (SByte)(e1 * e2);
@@ -221,8 +222,8 @@ namespace PhysicalMeasure
 
             while (i < MaxNoOfBaseUnits)
             {
-                NewExponents[i] = NoOfBaseUnits1 > NoOfBaseUnits2 
-                                    ? exponents1[i] 
+                NewExponents[i] = NoOfBaseUnits1 > NoOfBaseUnits2
+                                    ? exponents1[i]
                                     : cef(0, exponents2[i]);
 
                 i++;
@@ -358,7 +359,7 @@ namespace PhysicalMeasure
         public UInt16 Base { get; }
 
         public UnitPrefixExponent(SByte somePrefixExponent)
-            : this (somePrefixExponent, 10)
+            : this(somePrefixExponent, 10)
         {
         }
 
@@ -478,32 +479,32 @@ namespace PhysicalMeasure
         public IUnitPrefixExponent Multiply(IUnitPrefixExponent prefix)
         {
             IUnitPrefixExponent resultExponent = this.prefixExponent.Multiply(prefix);
-            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix) 
-                ? resultExponent 
+            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix)
+                ? resultExponent
                 : unitPrefix;
         }
 
         public IUnitPrefixExponent Divide(IUnitPrefixExponent prefix)
         {
             IUnitPrefixExponent resultExponent = this.prefixExponent.Divide(prefix);
-            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix) 
-                ? resultExponent 
+            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix)
+                ? resultExponent
                 : unitPrefix;
         }
 
         public IUnitPrefixExponent Power(SByte someExponent)
         {
             IUnitPrefixExponent resultExponent = this.prefixExponent.Power(someExponent);
-            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix) 
-                ? resultExponent 
+            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix)
+                ? resultExponent
                 : unitPrefix;
         }
 
         public IUnitPrefixExponent Root(SByte someExponent)
         {
             IUnitPrefixExponent resultExponent = this.prefixExponent.Root(someExponent);
-            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix) 
-                ? resultExponent 
+            return !unitPrefixTable.GetUnitPrefixFromExponent(resultExponent, out IUnitPrefix unitPrefix)
+                ? resultExponent
                 : unitPrefix;
         }
 
@@ -573,27 +574,43 @@ namespace PhysicalMeasure
             return false;
         }
 
+        public char MapAlternativePrefixChar(Char somePrefixChar)
+        {
+            return somePrefixChar switch
+            {                    // 'μ' // '\0x03BC' (char)956  
+                                 // 'µ' // '\0x00B5' (char)181
+                '\x03BC' => 'µ', // 'µ' MICRO SIGN  '\0x00B5' (char)181
+                'k' => 'K',      // Kilo
+                'h' => 'H',      // Hecto
+                _ => somePrefixChar
+            };
+        }
+
         public Boolean GetUnitPrefixFromPrefixChar(Char somePrefixChar, out IUnitPrefix unitPrefix)
         {
-            switch (somePrefixChar)
-            {
-                case '\x03BC':
-
-                    // 'μ' // '\0x03BC' (char)956  
-                    // 'µ' // '\0x00B5' (char)181
-                    somePrefixChar = 'µ'; // 'µ' MICRO SIGN  '\0x00B5' (char)181
-                    break;
-                case 'k':
-                    somePrefixChar = 'K'; // Kilo
-                    break;
-                case 'h':
-                    somePrefixChar = 'H'; // Hecto
-                    break;
-            }
+            somePrefixChar = MapAlternativePrefixChar(somePrefixChar);
 
             foreach (UnitPrefix up in UnitPrefixes)
             {
                 if (up.PrefixChar == somePrefixChar)
+                {
+                    unitPrefix = up;
+                    return true;
+                }
+            }
+            unitPrefix = null;
+            return false;
+        }
+
+        public Boolean GetUnitPrefixFromPrefixString(String somePrefixChars, out IUnitPrefix unitPrefix)
+        {
+            /**
+            somePrefixChar = MapToPrefixChar(somePrefixChar);
+            **/
+
+            foreach (UnitPrefix up in UnitPrefixes)
+            {
+                if (up.PrefixChar == somePrefixChars[0] && up.SecondPrefixChar == somePrefixChars[1])
                 {
                     unitPrefix = up;
                     return true;
@@ -640,6 +657,13 @@ namespace PhysicalMeasure
             return unitPrefix;
         }
 
+
+        public IUnitPrefix UnitPrefixFromPrefixString(String somePrefixChars)
+        {
+            GetUnitPrefixFromPrefixString(somePrefixChars, out IUnitPrefix unitPrefix);
+            return unitPrefix;
+        }
+
         public IUnitPrefixExponent ExponentFromPrefixChar(char somePrefixChar)
         {
             GetExponentFromPrefixChar(somePrefixChar, out IUnitPrefixExponent exponent);
@@ -647,6 +671,8 @@ namespace PhysicalMeasure
         }
 
         public IUnitPrefix this[char somePrefixChar] => UnitPrefixFromPrefixChar(somePrefixChar);
+
+        public IUnitPrefix this[String somePrefixChars] => UnitPrefixFromPrefixString(somePrefixChars);
     }
 
     #endregion Physical Unit prefix Classes
@@ -900,11 +926,11 @@ namespace PhysicalMeasure
         {
             Unit pu = null;
             String resultLine = null;
-            pu = ParseUnit(ref unitString, ref resultLine, throwExceptionOnInvalidInput: true);
+            pu = ParseMixedUnit(ref unitString, ref resultLine, throwExceptionOnInvalidInput: true);
             return pu;
         }
 
-        public static Unit ParseUnit(ref String unitString, ref String resultLine, Boolean throwExceptionOnInvalidInput = true)
+        public static Unit ParseMixedUnit(ref String unitString, ref String resultLine, Boolean throwExceptionOnInvalidInput = true)
         {
             Unit pu = null;
 
@@ -950,7 +976,7 @@ namespace PhysicalMeasure
                     if (tempPU == null)
                     {
                         validFractionalUnit = false;
-                        resultLine = "'" + unitFieldString + "' is not a valid unit.";
+                        resultLine = "\"" + unitFieldString + "\" is not a valid unit.";
                         if (throwExceptionOnInvalidInput)
                         {
                             throw new PhysicalUnitFormatException("The string argument unitString is not in a valid physical unit format. " + resultLine);
@@ -2720,7 +2746,15 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
             return baseUnits.IsOrderedByBaseUnitNumber();
         }
+        public static bool IsDataUnitSystemBaseUnits(this BaseUnit[] baseUnits)
+        {
+            if (baseUnits.Length != (int)DataBaseUnitKind.DataUnitSystem_NoOfBaseUnits)
+            {
+                return false;
+            }
 
+            return /** baseUnits[0]. &&  **/  baseUnits.IsOrderedByBaseUnitNumber();
+        }
         public static bool IsMonetaryUnitSystemBaseUnits(this BaseUnit[] baseUnits)
         {
             if (baseUnits.Length != (int)MonetaryBaseUnitKind.MonetaryUnitSystem_NoOfBaseUnits)
@@ -2728,7 +2762,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 return false;
             }
 
-            return baseUnits.IsOrderedByBaseUnitNumber();
+            return /** baseUnits[0]. &&  **/  baseUnits.IsOrderedByBaseUnitNumber();
         }
     }
 
@@ -5526,10 +5560,12 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public BaseUnit[] BaseUnits { get; /* */ set; /* */ }
         public NamedDerivedUnit[] NamedDerivedUnits { get; /* */ set; /* */ }
         public ConvertibleUnit[] ConvertibleUnits { get; /* */ set; /* */ }
-
+        
         public virtual UnitSystemKind UnitSystemKind { get; /* set; */ }
         public virtual Boolean IsIsolatedUnitSystem { get; } = false;
         public virtual Boolean IsCombinedUnitSystem { get; } = false;
+        public virtual Boolean IsModifiableUnitSystem { get; } = false;
+
 
         protected Unit dimensionless;
         public virtual Unit Dimensionless
@@ -5548,58 +5584,62 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public delegate NamedDerivedUnit[] NamedDerivedUnitsBuilderFunction(AbstractUnitSystem unitSystem);
         public delegate ConvertibleUnit[] ConvertibleUnitsBuilderFunction(AbstractUnitSystem unitSystem);
 
-        public AbstractUnitSystem(String someName, bool isIsolatedUnitSystem)
+        public AbstractUnitSystem(String someName, bool isIsolatedUnitSystem, Boolean isModifiableUnitSystem = false)
             : base(someName)
         {
             IsIsolatedUnitSystem = isIsolatedUnitSystem;
+            IsModifiableUnitSystem = isModifiableUnitSystem;
         }
 
-        public AbstractUnitSystem(String someName)
+        public AbstractUnitSystem(String someName, Boolean isModifiableUnitSystem = false)
             : base(someName)
         {
+            IsModifiableUnitSystem = isModifiableUnitSystem;
         }
 
-        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes)
-            : this(someName , false)
+        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, Boolean isModifiableUnitSystem = false)
+            : this(someName , false, isModifiableUnitSystem)
         {
             this.UnitPrefixes = someUnitPrefixes;
         }
 
-        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder)
-            : this(someName, someUnitPrefixes)
+        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, Boolean isModifiableUnitSystem = false)
+            : this(someName, someUnitPrefixes, isModifiableUnitSystem)
         {
             this.BaseUnits = someBaseUnitsBuilder?.Invoke(this);
 
             CheckBaseUnitsForSystem();
 
-
-            int noOfBaseUnits = this.BaseUnits.Length;
-            UnitSystemKind = this.BaseUnits.IsPhysicalUnitSystemBaseUnits() ? UnitSystemKind.PhysicalUnitSystem
-                          : this.BaseUnits.IsMonetaryUnitSystemBaseUnits() ? UnitSystemKind.MonetaryUnitSystem
-                          : UnitSystemKind.CombinedUnitSystem;
-
+            int noOfBaseUnits = this.BaseUnits?.Length ?? 0;
+            if (noOfBaseUnits > 0)
+            {
+                UnitSystemKind = this.BaseUnits.IsPhysicalUnitSystemBaseUnits() ? UnitSystemKind.PhysicalUnitSystem
+                               : this.BaseUnits.IsDataUnitSystemBaseUnits() ? UnitSystemKind.DataUnitSystem
+                               : this.BaseUnits.IsMonetaryUnitSystemBaseUnits() ? UnitSystemKind.MonetaryUnitSystem
+                               : UnitSystemKind.CombinedUnitSystem;
+            }
             // Not correct: Two MonetaryBaseUnits with each own Monetary UnitSystem can still have a UnitSystemConversion between them, and therefore none of them are an IsolatedUnitSystem.
             this.IsIsolatedUnitSystem = noOfBaseUnits == 1 && this.BaseUnits[0].BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
         }
 
-        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder)
-            : this(someName, someUnitPrefixes, someBaseUnitsBuilder)
+        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, Boolean isModifiableUnitSystem = false)
+            : this(someName, someUnitPrefixes, someBaseUnitsBuilder, isModifiableUnitSystem)
         {
             this.NamedDerivedUnits = someNamedDerivedUnitsBuilder?.Invoke(this);
 
             CheckNamedDerivedUnitsForSystem();
         }
 
-        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder)
-            : this(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder)
+        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder, Boolean isModifiableUnitSystem = false)
+            : this(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder, isModifiableUnitSystem)
         {
             this.ConvertibleUnits = someConvertibleUnitsBuilder?.Invoke(this);
 
             CheckConvertibleUnitsForSystem();
         }
 
-        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder)
-            : this(someName, someUnitPrefixes, (unitsystem) => new BaseUnit[] { someBaseUnit }, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder)
+        public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder, Boolean isModifiableUnitSystem = false)
+            : this(someName, someUnitPrefixes, (unitsystem) => new BaseUnit[] { someBaseUnit }, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder, isModifiableUnitSystem)
         {
             this.IsIsolatedUnitSystem = someBaseUnit.BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
         }
@@ -5612,9 +5652,16 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         protected virtual void CheckUnitsSystem(ConvertibleUnit convertibleUnit)
         {
-            // SimpleSystem is readonly now; must be build for this system 
-            Debug.Assert(convertibleUnit.SimpleSystem == this);
-            Debug.Assert(convertibleUnit.PrimaryUnit.SimpleSystem == this);
+            if (this.GetType() == typeof(UnitSystem))
+            {
+                // SimpleSystem is readonly now; must be build for this system 
+                Debug.Assert(convertibleUnit.SimpleSystem == this);
+                Debug.Assert(convertibleUnit.PrimaryUnit.SimpleSystem == this);
+            }
+            else if (this.GetType() == typeof(ExtentedUnitSystem))
+            {
+
+            }
         }
 
         protected virtual void CheckBaseUnitsNumber(int baseUnitNumber, BaseUnit aBaseUnit)
@@ -5629,37 +5676,39 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         protected void CheckBaseUnitsForSystem()
         {
-            Debug.Assert(this.BaseUnits != null);
-
-            int baseUnitNumber = 0;
-            foreach (BaseUnit aBaseUnit in this.BaseUnits)
+            Debug.Assert(this.BaseUnits != null || this.IsModifiableUnitSystem);
+            if (this.BaseUnits != null)
             {
-                Debug.Assert(aBaseUnit.Kind == UnitKind.BaseUnit);
-                if (aBaseUnit.Kind != UnitKind.BaseUnit)
+                int baseUnitNumber = 0;
+                foreach (BaseUnit aBaseUnit in this.BaseUnits)
                 {
-                    throw new ArgumentException("Must only contain units with Kind = UnitKind.BaseUnit", "BaseUnits");
+                    Debug.Assert(aBaseUnit.Kind == UnitKind.BaseUnit);
+                    if (aBaseUnit.Kind != UnitKind.BaseUnit)
+                    {
+                        throw new ArgumentException("Must only contain units with Kind = UnitKind.BaseUnit", "BaseUnits");
+                    }
+
+                    CheckUnitsSystem(aBaseUnit);
+                    CheckBaseUnitsNumber(baseUnitNumber, aBaseUnit);
+
+                    if (this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at index {baseUnitNumbers.ToStringList()}", "BaseUnits");
+                    }
+
+                    if (this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() > 1)
+                    {
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() == 1);
+
+                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
+                        throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at index {baseUnitNumbers.ToStringList()}", "BaseUnits");
+                    }
+
+                    baseUnitNumber++;
                 }
-
-                CheckUnitsSystem(aBaseUnit);
-                CheckBaseUnitsNumber(baseUnitNumber, aBaseUnit);
-
-                if (this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() > 1)
-                {
-                    Debug.Assert(this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Count() == 1);
-
-                    IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == aBaseUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                    throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at index {baseUnitNumbers.ToStringList()}", "BaseUnits");
-                }
-
-                if (this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() > 1)
-                {
-                    Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Count() == 1);
-
-                    IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == aBaseUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                    throw new ArgumentException($"Base unit's Name must be unique for the unit system: {aBaseUnit.Name} is at index {baseUnitNumbers.ToStringList()}", "BaseUnits");
-                }
-
-                baseUnitNumber++;
             }
         }
 
@@ -5677,17 +5726,17 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
                     CheckUnitsSystem(namedDerivedunit);
 
-                    if (this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 1)
+                    if (this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() > 0)
                     {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() == 1);
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Count() == 0);
 
                         IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == namedDerivedunit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
                         throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
                     }
 
-                    if (this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 1)
+                    if (this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() > 0)
                     {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() == 1);
+                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Count() == 0);
 
                         IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == namedDerivedunit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
                         throw new ArgumentException($"Base unit's Name must be unique for the unit system: {namedDerivedunit.Name} is at index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
@@ -5717,63 +5766,92 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
             if (this.ConvertibleUnits != null)
             {
-                foreach (ConvertibleUnit convertibleUnit in this.ConvertibleUnits)
+                try
                 {
-                    Debug.Assert(convertibleUnit.Kind == UnitKind.ConvertibleUnit);
-                    if (convertibleUnit.Kind != UnitKind.ConvertibleUnit)
+                    foreach (ConvertibleUnit convertibleUnit in this.ConvertibleUnits)
                     {
-                        throw new ArgumentException("Must only contain units with Kind = UnitKind.ConvertibleUnit", "someConvertibleUnits");
+                        Debug.Assert(convertibleUnit.Kind == UnitKind.ConvertibleUnit);
+                        if (convertibleUnit.Kind != UnitKind.ConvertibleUnit)
+                        {
+                            throw new ArgumentException("Must only contain units with Kind = UnitKind.ConvertibleUnit", "someConvertibleUnits");
+                        }
+                        // SimpleSystem is readonly now; must be build for this system 
+                        CheckUnitsSystem(convertibleUnit);
+
+                        {
+                            var matchingNameNamedBaseUnits = this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name && bu.SymbolOrName == convertibleUnit.SymbolOrName);
+                            if (matchingNameNamedBaseUnits.Count() > 0)
+                            {
+                                Debug.Assert(matchingNameNamedBaseUnits.Count() == 0);
+
+                                IList<String> baseUnitNumbers = matchingNameNamedBaseUnits.Select(bu2 => $"{bu2.BaseUnitNumber} ({bu2.Symbol})").ToList();
+                                throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                            }
+                        }
+
+                        {
+                            var matchingSymbolNamedBaseUnits = this.BaseUnits.Where(bu => bu.SymbolOrName == convertibleUnit.SymbolOrName);
+                            if (matchingSymbolNamedBaseUnits.Count() > 0)
+                            {
+                                Debug.Assert(matchingSymbolNamedBaseUnits.Count() == 0);
+
+                                IList<String> baseUnitNumbers = matchingSymbolNamedBaseUnits.Select(bu2 => $"{bu2.BaseUnitNumber} ({bu2.Symbol})").ToList();
+                                throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
+                            }
+                        }
+
+                        if (NamedDerivedUnits != null)
+                        {
+                            var matchingNameNamedDerivedUnits = this.NamedDerivedUnits.Where(ncu => ncu.Name == convertibleUnit.Name && ncu.SymbolOrName == convertibleUnit.SymbolOrName);
+                            if (matchingNameNamedDerivedUnits.Count() > 0)
+                            {
+                                Debug.Assert(matchingNameNamedDerivedUnits.Count() == 0);
+
+                                IList<String> namedDerivedUnitNameAndSymbols = matchingNameNamedDerivedUnits.Select(ndu2 => $"{ndu2.Name} ({ndu2.Symbol})").ToList();
+                                throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at DerivedUnit {namedDerivedUnitNameAndSymbols.ToStringList()}", "someConvertibleUnits");
+                            }
+                        }
+
+                        if (NamedDerivedUnits != null)
+                        {
+                            var matchingSymbolNamedDerivedUnits = this.NamedDerivedUnits.Where(ncu => ncu.SymbolOrName == convertibleUnit.SymbolOrName);
+                            if (matchingSymbolNamedDerivedUnits.Count() > 0)
+                            {
+                                Debug.Assert(matchingSymbolNamedDerivedUnits.Count() == 0);
+
+                                IList<String> namedDerivedUnitNameAndSymbols = matchingSymbolNamedDerivedUnits.Select(ndu2 => $"{ndu2.Name} ({ndu2.Symbol})").ToList();
+                                throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Symbol} is at DerivedUnit {namedDerivedUnitNameAndSymbols.ToStringList()}", "someConvertibleUnits");
+                            }
+                        }
+
+                        if (ConvertibleUnits != null)
+                        {
+                            var matchingNameNamedConvertibleUnits = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name && ncu.SymbolOrName == convertibleUnit.SymbolOrName);
+                            if (matchingNameNamedConvertibleUnits.Count() > 1)
+                            {
+                                Debug.Assert(matchingNameNamedConvertibleUnits.Count() == 1);
+
+                                IList<String> namedConvertibleUnitNameAndSymbols = matchingNameNamedConvertibleUnits.Select(ncu2 => $"{ncu2.Name} ({ncu2.Symbol})").ToList();
+                                throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at named ConvertibleUnit {namedConvertibleUnitNameAndSymbols.ToStringList()}", "someConvertibleUnits");
+                            }
+                        }
+
+                        if (ConvertibleUnits != null)
+                        {
+                            var matchingSymbolNamedConvertibleUnits = this.ConvertibleUnits.Where(ncu => ncu.Symbol == convertibleUnit.Symbol);
+                            if (matchingSymbolNamedConvertibleUnits.Count() > 1)
+                            {
+                                Debug.Assert(matchingSymbolNamedConvertibleUnits.Count() == 1);
+
+                                IList<String> namedConvertibleUnitNameAndSymbols = matchingSymbolNamedConvertibleUnits.Select(ncu2 => $"{ncu2.Name} ({ncu2.Symbol})").ToList();
+                                throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Name} is at named ConvertibleUnit {namedConvertibleUnitNameAndSymbols.ToStringList()}", "someConvertibleUnits");
+                            }
+                        }
                     }
-                    // SimpleSystem is readonly now; must be build for this system 
-                    CheckUnitsSystem(convertibleUnit);
-
-                    if (this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() == 1);
-
-                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Name == convertibleUnit.Name).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-                    if (this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() == 1);
-
-                        IList<SByte> baseUnitNumbers = this.BaseUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Select(bu2 => bu2.BaseUnitNumber).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at base unit index {baseUnitNumbers.ToStringList()}", "someNamedDerivedUnits");
-                    }
-
-                    if (this.NamedDerivedUnits?.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
-
-                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Select(ndu2 => ndu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-
-                    if (this.NamedDerivedUnits?.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
-
-                        IList<String> namedDerivedUnitNames = this.NamedDerivedUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Select(ndu2 => ndu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Symbol} is at DerivedUnit {namedDerivedUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-
-                    if (this.ConvertibleUnits.Where(bu => bu.Name == convertibleUnit.Name).Count() > 1)
-                    {
-                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Name == convertibleUnit.Name).Count() == 1);
-
-                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Name must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
-
-                    if (this.ConvertibleUnits.Where(bu => bu.Symbol == convertibleUnit.Symbol).Count() > 1)
-                    {
-                        Debug.Assert(this.ConvertibleUnits.Where(ndu => ndu.Symbol == convertibleUnit.Symbol).Count() == 1);
-
-                        IList<String> namedconvertibleUnitNames = this.ConvertibleUnits.Where(ncu => ncu.Name == convertibleUnit.Name).Select(ncu2 => ncu2.Name).ToList();
-                        throw new ArgumentException($"A unit's Symbol must be unique for the unit system: {convertibleUnit.Name} is at namedconvertibleUnit {namedconvertibleUnitNames.ToStringList()}", "someConvertibleUnits");
-                    }
+                }
+                catch (Exception ex)
+                {
+                    throw;
                 }
             }
         }
@@ -6442,6 +6520,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         }
     }
 
+    /**
     public class ExtentableUnitSystem : AbstractUnitSystem
     {
         public ExtentableUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder)
@@ -6449,15 +6528,16 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
         }
 
-        public override UnitSystemKind UnitSystemKind { get; /* set; */ } = UnitSystemKind.MonetaryUnitSystem;
-        public override Boolean IsIsolatedUnitSystem { get; /* set; */ } = false;
-        public override Boolean IsCombinedUnitSystem { get; /* set; */ } = false;
+        public override UnitSystemKind UnitSystemKind { get; / * set; * / } = UnitSystemKind.MonetaryUnitSystem;
+        public override Boolean IsIsolatedUnitSystem { get; / * set; * / } = false;
+        public override Boolean IsCombinedUnitSystem { get; / * set; * / } = false;
     }   
+    **/
 
     public class UnitSystem : AbstractUnitSystem
     {
-         public UnitSystem(String someName, Boolean someIsIsolated)
-            : base(someName, someIsIsolated)
+         public UnitSystem(String someName, Boolean someIsIsolated, Boolean isModifiableUnitSystem = false)
+            : base(someName, someIsIsolated, isModifiableUnitSystem)
         {
            
         }
@@ -6467,33 +6547,96 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
         }
 
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes)
-            : base(someName, someUnitPrefixes)
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, Boolean isModifiableUnitSystem = false)
+            : base(someName, someUnitPrefixes, isModifiableUnitSystem)
         {
         }
 
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder)
-            : base(someName, someUnitPrefixes, someBaseUnitsBuilder)
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, Boolean isModifiableUnitSystem = false)
+            : base(someName, someUnitPrefixes, someBaseUnitsBuilder, isModifiableUnitSystem)
         {
         }
 
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder)
-            : base(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder)
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, Boolean isModifiableUnitSystem = false)
+            : base(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder, isModifiableUnitSystem)
         {
         }
 
 
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder)
-            : base(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder)
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder, Boolean isModifiableUnitSystem = false)
+            : base(someName, someUnitPrefixes, someBaseUnitsBuilder, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder, isModifiableUnitSystem)
         {
         }
 
-        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder)
-            : this(someName, someUnitPrefixes, (unitsystem) =>  new BaseUnit[] { someBaseUnit }, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder)
+        public UnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder, Boolean isModifiableUnitSystem = false)
+            : this(someName, someUnitPrefixes, (unitsystem) =>  new BaseUnit[] { someBaseUnit }, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder, isModifiableUnitSystem)
         {
         }
     }
 
+    public class ExtentedUnitSystem : AbstractUnitSystem
+    {
+        UnitSystem m_extentionOfUnitSystem;
+
+        public ExtentedUnitSystem(UnitSystem extentionOfUnitSystem, String someUnitSystemName, BaseUnitsBuilderFunction someExtraBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someExtraNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someExtraConvertibleUnitsBuilder)
+             : base(someUnitSystemName, someUnitPrefixes: extentionOfUnitSystem.UnitPrefixes
+                 , someBaseUnitsBuilder:
+                      (unitSystem) =>
+                      {
+                          List<BaseUnit> oldClonedBaseUnits = new List<BaseUnit>();
+                          foreach (BaseUnit bu in extentionOfUnitSystem.BaseUnits)
+                          {
+                              BaseUnit clonedBaseUnit = new BaseUnit(unitSystem, bu.BaseUnitNumber, bu.Name, bu.Symbol);
+                              oldClonedBaseUnits.Add(clonedBaseUnit);
+                          }
+                          if (someExtraBaseUnitsBuilder == null)
+                          {
+                              return oldClonedBaseUnits.ToArray();
+                          }
+                          var extraBaseUnits = someExtraBaseUnitsBuilder(unitSystem);
+                          return oldClonedBaseUnits.Concat(extraBaseUnits).ToArray();
+                      }
+                 , someNamedDerivedUnitsBuilder:
+                    (unitSystem) =>
+                    {
+                        List<NamedDerivedUnit> oldClonedNamedDerivedUnits = new List<NamedDerivedUnit>();
+                        foreach (NamedDerivedUnit ndu in extentionOfUnitSystem.NamedDerivedUnits)
+                        {
+                            NamedDerivedUnit clonedNamedDerivedUnit = new NamedDerivedUnit(unitSystem, ndu.Name, ndu.Symbol, ndu.Exponents);
+                            oldClonedNamedDerivedUnits.Add(clonedNamedDerivedUnit);
+                        }
+                        if (someExtraNamedDerivedUnitsBuilder == null)
+                        {
+                            return oldClonedNamedDerivedUnits.ToArray();
+                        }
+                        var extraNamedDerivedUnits = someExtraNamedDerivedUnitsBuilder(unitSystem);
+                        return oldClonedNamedDerivedUnits.Concat(extraNamedDerivedUnits).ToArray();
+                    }
+                 , someConvertibleUnitsBuilder:
+                    (unitSystem) =>
+                    {
+                        List<ConvertibleUnit> oldClonedConvertibleUnits = new List<ConvertibleUnit>();
+                        foreach (ConvertibleUnit cu in extentionOfUnitSystem.ConvertibleUnits)
+                        {
+                            ConvertibleUnit clonedConvertibleUnit = new ConvertibleUnit(someName: cu.Name, cu.Symbol, cu.PrimaryUnit, cu.Conversion as ValueConversion);
+                            oldClonedConvertibleUnits.Add(clonedConvertibleUnit);
+                        }
+                        if (someExtraConvertibleUnitsBuilder == null)
+                        {
+                            return oldClonedConvertibleUnits.ToArray();
+                        }
+                        var extraConvertibleUnits = someExtraConvertibleUnitsBuilder(unitSystem);
+                        return oldClonedConvertibleUnits.Concat(extraConvertibleUnits).ToArray();
+                    }
+             )
+        {
+            m_extentionOfUnitSystem = extentionOfUnitSystem;
+        }
+
+        public override UnitSystemKind UnitSystemKind { get { return m_extentionOfUnitSystem.UnitSystemKind; } /* set; */ } 
+        public override Boolean IsIsolatedUnitSystem { get { return m_extentionOfUnitSystem.IsIsolatedUnitSystem; } /* set; */ } 
+        public override Boolean IsCombinedUnitSystem { get { return m_extentionOfUnitSystem.IsCombinedUnitSystem /** || m_extentionOfUnitSystem.UnitSystemKind !=  **/ ; } /* set; */ }
+    }
 
     public class CombinedUnitSystem : AbstractUnitSystem, ICombinedUnitSystem
     {
@@ -6556,21 +6699,52 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             //: base(someName ?? "<" + someSubUnitSystems.ToStringList.Aggregate("", ((str, us) => String.IsNullOrWhiteSpace(str) ? us.Name : str + ", " + us.Name)) + ">")
             : base(someName ?? "<" + someSubUnitSystems.Select(us => us.Name).ToStringList() + ">"
                    , new UnitPrefixTable(someSubUnitSystems.Where(us => !(us.UnitPrefixes is null)).SelectMany(us => us.UnitPrefixes?.UnitPrefixes)
-                                                           .Distinct().ToArray())  
-                   , (aus => someSubUnitSystems.Where(us => !(us.BaseUnits is null)).Select(us => us.BaseUnits)
+                                                           .Distinct().ToArray())
+                   , /* BaseUnits */ (aus => someSubUnitSystems.Where(us => !(us.BaseUnits is null)).Select(us => us.BaseUnits)
                                                .Aggregate((buslist, bus) => ArrayExtensions.Concat<BaseUnit>(buslist, bus)))
-                   , (aus => someSubUnitSystems.Where(us => !(us.NamedDerivedUnits is null)).Select(us => us.NamedDerivedUnits)
-                                               .Aggregate((nduslist, ndus) => ArrayExtensions.Concat<NamedDerivedUnit>(nduslist, ndus)))
-                   , (aus => someSubUnitSystems.Where(us => !(us.ConvertibleUnits is null)).Select(us => us.ConvertibleUnits)
-                                               .Aggregate((cuslist, cus) => ArrayExtensions.Concat<ConvertibleUnit>(cuslist, cus)))  )
+                   , /* NamedDerivedUnits */ (aus => someSubUnitSystems.Where(us => !(us.NamedDerivedUnits is null)).Select(us => us.NamedDerivedUnits)
+                                               .Aggregate((nduslist, ndus) => UnitArrayExtensions.UnionUniqueName<NamedDerivedUnit>(nduslist, ndus)))
+                   , /* ConvertibleUnits */ (aus => someSubUnitSystems.Where(us => !(us.ConvertibleUnits is null)).Select(us => us.ConvertibleUnits)
+                                               .Aggregate((cuslist, cus) => UnitArrayExtensions.UnionUniqueName<ConvertibleUnit>(cuslist, cus)))  )
         {
             UnitSystems = someSubUnitSystems; // .OrderByDescending(us => us.BaseUnits.Length).ToArray();
 
             CheckBaseUnitsForSystem();
             CheckNamedDerivedUnitsForSystem();
             CheckConvertibleUnitsForSystem();
+        }
 
+        public static class UnitArrayExtensions
+        {
+            public static T[] UnionUniqueName<T>(T[] a1, T[] a2) where T : Unit, INamedUnit
+            {
+                if (a1 != null && a2 != null)
+                {   
+                    var a2Unique = a2.Where(u2 => !a1.Any(u1 => u1.UnitName == u2.UnitName)).ToArray();
+                    return a1.Concat(a2Unique).ToArray();
+                }
 
+                if (a2 != null)
+                {
+                    return a2;
+                }
+                return a1;
+            }
+
+            public static T[] UnionUniqueNameAndDefinition<T>(T[] a1, T[] a2) where T : Unit, INamedUnit
+            {
+                if (a1 != null && a2 != null)
+                {
+                    var a2Unique = a2.Where(u2 => !a1.Any(u1 => u1.UnitName == u2.UnitName /*** && u1.UnitDefinition == u2.UnitDefinition ***/ && u1.UnitSymbol == u2.UnitSymbol )).ToArray();
+                    return a1.Concat(a2Unique).ToArray();
+                }
+
+                if (a2 != null)
+                {
+                    return a2;
+                }
+                return a1;
+            }
         }
 
         protected override void CheckUnitsSystem(SystemUnit aSystemUnit)

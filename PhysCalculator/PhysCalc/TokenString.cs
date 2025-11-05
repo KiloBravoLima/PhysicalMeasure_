@@ -13,7 +13,7 @@ namespace TokenParser
 
             if (IsExpectedChar)
             {
-                commandLine = commandLine.Substring(1);
+                commandLine = commandLine.Substring(1).TrimStart();
             }
             else
             {
@@ -27,14 +27,18 @@ namespace TokenParser
             Boolean IsExpectedChar = (!String.IsNullOrEmpty(commandLine)) && commandLine[0] == ch;
             if (IsExpectedChar)
             {
-                commandLine = commandLine.Substring(1);
+                commandLine = commandLine.Substring(1).TrimStart();
             }
             return IsExpectedChar;
         }
 
         public static Boolean ParseToken(String token, ref String commandLine, ref string resultLine)
         {
-            Boolean IsExpectedToken = commandLine.StartsWithKeyword(token);
+            bool isComment = token == "//";
+            Boolean IsExpectedToken =    (!isComment && commandLine.StartsWithKeyword(token) && (   commandLine.Length == token.Length
+                                                                                                 || (commandLine.Length > token.Length && !IsIdentifierSecondaryChar(commandLine.Substring(token.Length, 1)[0]))))
+                                      || (isComment && commandLine.StartsWith(token, StringComparison.OrdinalIgnoreCase));
+
             if (IsExpectedToken)
             {
                 commandLine = commandLine.SkipToken(token);
@@ -48,8 +52,10 @@ namespace TokenParser
 
         public static Boolean TryParseToken(String token, ref String commandLine)
         {
-            Boolean IsExpectedToken = commandLine.StartsWithKeyword(token);
-
+            bool isComment = token == "//";
+            Boolean IsExpectedToken =    (!isComment && commandLine.StartsWithKeyword(token) && (    commandLine.Length == token.Length 
+                                                                                                 || (commandLine.Length > token.Length && !IsIdentifierSecondaryChar(commandLine.Substring(token.Length, 1)[0]))))
+                                      || (isComment && commandLine.StartsWith(token, StringComparison.OrdinalIgnoreCase)); 
             if (IsExpectedToken)
             {
                 commandLine = commandLine.SkipToken(token);
@@ -57,7 +63,7 @@ namespace TokenParser
             return IsExpectedToken;
         }
 
-        public static Boolean TryParseTokenPrefix(String token, ref String commandLine)
+        public static Boolean TryParseKeywordPrefix(String token, ref String commandLine)
         {
             int Tokenlen = commandLine.StartsWithKeywordPrefix(token);
 
@@ -70,6 +76,31 @@ namespace TokenParser
             return IsExpectedToken;
         }
 
+        public static Boolean ParseKeyWord(String keyword, ref String commandLine, ref string resultLine)
+        {
+            Boolean IsExpectedKeyword = commandLine.StartsWithKeyword(keyword) && (  commandLine.Length == keyword.Length
+                                                                                   || (commandLine.Length > keyword.Length && !IsIdentifierSecondaryChar(commandLine.Substring(keyword.Length, 1)[0])));
+            if (IsExpectedKeyword)
+            {
+                commandLine = commandLine.SkipToken(keyword);
+            }
+            else
+            {
+                resultLine = resultLine + " keyword '" + keyword + "' expected";
+            }
+            return IsExpectedKeyword;
+        }
+
+        public static Boolean TryParseKeyword(String keyword, ref String commandLine)
+        {
+            Boolean IsExpectedKeyword = commandLine.StartsWithKeyword(keyword) && (commandLine.Length == keyword.Length
+                                                                       || (commandLine.Length > keyword.Length && !IsIdentifierSecondaryChar(commandLine.Substring(keyword.Length, 1)[0])));
+            if (IsExpectedKeyword)
+            {
+                commandLine = commandLine.SkipToken(keyword);
+            }
+            return IsExpectedKeyword;
+        }
 
         #endregion Static parse methodes
 
@@ -117,6 +148,7 @@ namespace TokenParser
 
         public static String ReadToken(this String commandLine, out String token)
         {
+            commandLine = commandLine.TrimStart();
             int i = PeekToken(commandLine, out token);
             return commandLine.Substring(i).TrimStart();
         }

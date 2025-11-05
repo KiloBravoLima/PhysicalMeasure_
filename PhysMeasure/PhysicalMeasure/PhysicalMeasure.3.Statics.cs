@@ -106,27 +106,27 @@ namespace PhysicalMeasure
             Ri	    robi	 2^90, 1024^9	robibyte  (RiB)
             Qi	    quebi	2^100, 1024^10	quebibyte (QiB)
         */
-        const ushort Ki = 1024;
-        public static readonly UnitPrefixTable DataUnitPrefixes = new UnitPrefixTable(new UnitPrefix[] {new UnitPrefix(DataUnitPrefixes, "quebi", "Qi", new UnitPrefixExponent(10, Ki)),
-                                                                                                        new UnitPrefix(DataUnitPrefixes, "robi", "Ri", new UnitPrefixExponent(9, Ki)),
-                                                                                                        new UnitPrefix(DataUnitPrefixes, "yobi", "Yi", new UnitPrefixExponent(8, Ki)),
-                                                                                                        new UnitPrefix(DataUnitPrefixes, "zebi", "Zi", new UnitPrefixExponent(7, Ki)),
-                                                                                                        new UnitPrefix(DataUnitPrefixes, "exbi", "Ei", new UnitPrefixExponent(6, Ki)),
-                                                                                                        new UnitPrefix(DataUnitPrefixes, "pebi", "Pi", new UnitPrefixExponent(5, Ki)),
-                                                                                                        new UnitPrefix(DataUnitPrefixes, "tebi", "Ti", new UnitPrefixExponent(4, Ki)),
-                                                                                                        new UnitPrefix(DataUnitPrefixes, "gibi", "Gi", new UnitPrefixExponent(3, Ki)),
-                                                                                                        new UnitPrefix(DataUnitPrefixes, "mebi", "Mi", new UnitPrefixExponent(2, Ki)),
-                                                                                                        new UnitPrefix(DataUnitPrefixes, "kibi", "Ki", new UnitPrefixExponent(1, Ki)) });
+        const ushort Ki_ = 1024;
+        public static readonly UnitPrefixTable DataUnitPrefixes = new UnitPrefixTable(new UnitPrefix[] {new UnitPrefix(DataUnitPrefixes, "quebi", "Qi", new UnitPrefixExponent(10, Ki_)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "robi", "Ri", new UnitPrefixExponent(9, Ki_)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "yobi", "Yi", new UnitPrefixExponent(8, Ki_)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "zebi", "Zi", new UnitPrefixExponent(7, Ki_)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "exbi", "Ei", new UnitPrefixExponent(6, Ki_)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "pebi", "Pi", new UnitPrefixExponent(5, Ki_)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "tebi", "Ti", new UnitPrefixExponent(4, Ki_)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "gibi", "Gi", new UnitPrefixExponent(3, Ki_)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "mebi", "Mi", new UnitPrefixExponent(2, Ki_)),
+                                                                                                        new UnitPrefix(DataUnitPrefixes, "kibi", "Ki", new UnitPrefixExponent(1, Ki_)) });
 
         /* SI unit prefixes */
-        public static readonly UnitPrefix Qi = (UnitPrefix)DataUnitPrefixes['Qi'];
-        public static readonly UnitPrefix Ri = (UnitPrefix)DataUnitPrefixes['Ri'];
-        public static readonly UnitPrefix Yi = (UnitPrefix)DataUnitPrefixes['Yi'];
-        public static readonly UnitPrefix Zi = (UnitPrefix)DataUnitPrefixes['Zi'];
-        public static readonly UnitPrefix Pi = (UnitPrefix)DataUnitPrefixes['Pi'];
-        public static readonly UnitPrefix Ti = (UnitPrefix)DataUnitPrefixes['Ti'];
-        public static readonly UnitPrefix Gi = (UnitPrefix)DataUnitPrefixes['Gi'];
-        public static readonly UnitPrefix Ki = (UnitPrefix)DataUnitPrefixes['Ki'];
+        public static readonly UnitPrefix Qi = (UnitPrefix)DataUnitPrefixes["Qi"];
+        public static readonly UnitPrefix Ri = (UnitPrefix)DataUnitPrefixes["Ri"];
+        public static readonly UnitPrefix Yi = (UnitPrefix)DataUnitPrefixes["Yi"];
+        public static readonly UnitPrefix Zi = (UnitPrefix)DataUnitPrefixes["Zi"];
+        public static readonly UnitPrefix Pi = (UnitPrefix)DataUnitPrefixes["Pi"];
+        public static readonly UnitPrefix Ti = (UnitPrefix)DataUnitPrefixes["Ti"];
+        public static readonly UnitPrefix Gi = (UnitPrefix)DataUnitPrefixes["Gi"];
+        public static readonly UnitPrefix Ki = (UnitPrefix)DataUnitPrefixes["Ki"];
     }
 
     public static class SI

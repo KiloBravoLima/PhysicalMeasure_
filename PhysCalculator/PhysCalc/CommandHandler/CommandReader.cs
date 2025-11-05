@@ -209,7 +209,7 @@ namespace PhysicalCalculator
                 S = "";
                 if (!String.IsNullOrWhiteSpace(Name))
                 {
-                    ResultLine = "CommandBlock '" + Name + "' is empty";
+                    ResultLine = "CommandBlock \"" + Name + "\" is empty";
                 }
                 else 
                 {
@@ -221,7 +221,7 @@ namespace PhysicalCalculator
             {
                 if (OutputTracelevel.HasFlag(TraceLevels.FunctionEnterLeave))
                 {
-                    ResultLine = "Reading from '" + Name + "'";
+                    ResultLine = "Reading from \"" + Name + "\"";
                 }
             }
 
@@ -238,7 +238,7 @@ namespace PhysicalCalculator
                             ResultLine += "\n";
                         }
                         //resultLine += "End of CommandBlock '" + name + "'";
-                        ResultLine += "End of '" + Name + "'";
+                        ResultLine += "End of \"" + Name + "\"";
                     }
 
                     CommandBlock = null;
@@ -311,7 +311,7 @@ namespace PhysicalCalculator
                     FileReader = new StreamReader(FileNameStr, Encoding.UTF7);
                     if (OutputTracelevel.HasFlag(TraceLevels.FileEnterLeave))
                     {
-                        ResultLine = "Reading from file " + FileNameStr;
+                        ResultLine = $"Reading from file \"{FileNameStr}\"";
                     }
                 }
                 catch (DirectoryNotFoundException e)
@@ -323,7 +323,7 @@ namespace PhysicalCalculator
                 catch (FileNotFoundException e)
                 {
                     S = "";
-                    ResultLine = "File '" + e.FileName + "' not found";
+                    ResultLine = "File \"" + e.FileName + "\" not found";
                     FileNameStr = null;
                 }
             }
@@ -336,7 +336,7 @@ namespace PhysicalCalculator
                     S = "";
                     if (OutputTracelevel.HasFlag(TraceLevels.FileEnterLeave))
                     {
-                        ResultLine = "End of File '" + FileNameStr + "'";
+                        ResultLine = "End of File \"" + FileNameStr + "\"";
                     }
 
                     FileReader.Close();

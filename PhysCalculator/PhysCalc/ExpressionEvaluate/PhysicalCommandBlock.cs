@@ -118,7 +118,7 @@ namespace PhysicalCalculator.CommandBlock
                         return null;
                     }
 
-                    OK = TokenString.ParseToken("{", ref commandLine, ref resultLine);
+                    OK = TokenString.ParseChar('{', ref commandLine, ref resultLine);
                     if (OK)
                     {
                         localContext.ParseState = CommandParserState.ReadCommands;
@@ -195,7 +195,7 @@ namespace PhysicalCalculator.CommandBlock
 
                         if (!String.IsNullOrEmpty(commandLine))
                         {
-                            OK = TokenString.ParseToken("}", ref commandLine, ref resultLine);
+                            OK = TokenString.ParseChar('}', ref commandLine, ref resultLine);
                             if (OK)
                             {
                                 if (localContext.CommandBlockToParseInfo.InnerBlockCount > 0)

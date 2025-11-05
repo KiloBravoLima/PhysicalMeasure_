@@ -686,7 +686,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLine = "epotfunc.cal";
             string CommandLineExpected = string.Empty;
             string ResultLine = "";
-            string ResultLineExpected = "Reading from 'epotfunc.cal' ";
+            string ResultLineExpected = "Reading from \"epotfunc.cal\" ";
             bool expected = true;
             bool actual;
             actual = target.CommandReadFromFile(ref CommandLine, ref ResultLine);
@@ -708,8 +708,8 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             //string commandLine = "testfunc.cal"; 
             string CommandLineExpected = string.Empty; 
             string ResultLine = "";
-            string ResultLineExpected = "Reading from 'epotfunc.cal' ";
-            // string ResultLineExpected = "Reading from 'testfunc.cal' "; 
+            string ResultLineExpected = "Reading from \"epotfunc.cal\" ";
+            // string ResultLineExpected = "Reading from \"testfunc.cal\" "; 
             bool expected = true; 
             bool actual;
             actual = target.CommandReadFromFile(ref CommandLine, ref ResultLine);
@@ -733,7 +733,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLine = "varname"; 
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
-            string ResultLineExpected = "'varname' not known";
+            string ResultLineExpected = "\"varname\" not known";
             bool expected = false; 
             bool actual;
             actual = target.CommandRemove(ref CommandLine, ref ResultLine);

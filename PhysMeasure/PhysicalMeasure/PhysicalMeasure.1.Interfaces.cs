@@ -475,6 +475,7 @@ namespace PhysicalMeasure
         UnitSystemKind UnitSystemKind { get; }
         bool IsIsolatedUnitSystem { get; }
         bool IsCombinedUnitSystem { get; }
+        bool IsModifiableUnitSystem { get; }
 
         UnitPrefixTable UnitPrefixes { get; }
         BaseUnit[] BaseUnits { get; }

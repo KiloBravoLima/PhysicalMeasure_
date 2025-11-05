@@ -10,6 +10,7 @@ using PhysicalCalculator.Expression;
 using PhysicalCalculator.CommandBlock;
 using PhysicalCalculator.Function;
 using System.Runtime.Serialization;
+using System.Linq;
 
 namespace PhysicalCalculator.Identifiers
 {
@@ -115,7 +116,7 @@ namespace PhysicalCalculator.Identifiers
 
         public NamedSystem(String name)
         {
-            UnitSystem = new UnitSystem(name, true);
+            UnitSystem = new UnitSystem(name, someIsIsolated: true, isModifiableUnitSystem: true);
         }
 
         public override String ToListString(String name) => $"system {name}";
@@ -231,15 +232,24 @@ namespace PhysicalCalculator.Identifiers
         {
             if (unitSystem == null)
             {
-                unitSystem = new UnitSystem(name + "_system", null, (unitsystem) => new BaseUnit[] { new BaseUnit(unitsystem, 0, name, unitSymbol) } );
+                unitSystem = new UnitSystem(name + "_system", null, (unitsystem) => new BaseUnit[] { new BaseUnit(unitsystem, 0, name, unitSymbol) }, isModifiableUnitSystem: true);
                 return unitSystem.BaseUnits[0];
             }
             else
+            if (unitSystem.IsModifiableUnitSystem)
             {
                 int NoOfBaseUnits = 0;
+                sbyte indexForExistingBaseUnit = -1;
                 if (unitSystem.BaseUnits != null)
                 {
                     NoOfBaseUnits = unitSystem.BaseUnits.Length;
+                    indexForExistingBaseUnit = unitSystem.BaseUnits.Single(bu => bu.Name == name && bu.Symbol == unitSymbol).BaseUnitNumber;
+                }
+                if (indexForExistingBaseUnit >= 0)
+                {
+                    // Base unit already exists
+                    unitSystem.BaseUnits[indexForExistingBaseUnit] = new BaseUnit(unitSystem, indexForExistingBaseUnit, name, unitSymbol); 
+                    return unitSystem.BaseUnits[indexForExistingBaseUnit];
                 }
                 BaseUnit[] baseunitarray = new BaseUnit[NoOfBaseUnits + 1];
                 if (NoOfBaseUnits > 0)
@@ -251,6 +261,18 @@ namespace PhysicalCalculator.Identifiers
                 uso.BaseUnits = baseunitarray;
                 return baseunitarray[NoOfBaseUnits];
             }
+            else
+            {
+                // try use a new unit system
+
+                /**
+                unitSystem = new UnitSystem(name + "_system", null, (unitsystem) => new BaseUnit[] { new BaseUnit(unitsystem, 0, name, unitSymbol) }, isModifiableUnitSystem: true);
+                return unitSystem.BaseUnits[0];
+                **/
+
+                unitSystem = new ExtentedUnitSystem(unitSystem as UnitSystem, $"{unitSystem.Name}_With_{name}_system", someExtraBaseUnitsBuilder: (newUnitsystem) => new BaseUnit[] { new BaseUnit(newUnitsystem, (sbyte)unitSystem.BaseUnits.Length, name, unitSymbol) }, someExtraNamedDerivedUnitsBuilder: null, someExtraConvertibleUnitsBuilder: null); 
+                return unitSystem.BaseUnits[unitSystem.BaseUnits.Length-1];
+            }
         }
 
         private static ConvertibleUnit MakeScaledUnit(String name, String unitSymbol, IUnitSystem unitSystem, Unit primaryUnit, Double scaleFactor)
@@ -258,15 +280,28 @@ namespace PhysicalCalculator.Identifiers
             if (unitSystem == null)
             {
                 ConvertibleUnit[] convertibleunitarray = new ConvertibleUnit[] { new ConvertibleUnit(name, unitSymbol, primaryUnit, new ScaledValueConversion(1.0 / scaleFactor)) };
-                unitSystem = new UnitSystem(name + "_system", null, (unitsystem) => null, (unitsystem) => null, (unitsystem) => convertibleunitarray);
+                unitSystem = new UnitSystem(name + "_system", null, (unitsystem) => null, (unitsystem) => null, (unitsystem) => convertibleunitarray, isModifiableUnitSystem: true);
                 return convertibleunitarray[0];
             }
             else
+            if (unitSystem.IsModifiableUnitSystem)
             {
                 int NoOfConvertibleUnits = 0;
+                int indexForExistingConvertibleUnit = -1;
                 if (unitSystem.ConvertibleUnits != null)
                 {
                     NoOfConvertibleUnits = unitSystem.ConvertibleUnits.Length;
+                    var existingConvertibleUnit = unitSystem.ConvertibleUnits.FirstOrDefault(cu => cu.Name == name && cu.Symbol == unitSymbol);
+                    if (existingConvertibleUnit != null)
+                    {
+                        indexForExistingConvertibleUnit = Array.IndexOf(unitSystem.ConvertibleUnits, existingConvertibleUnit);
+                    }
+                }
+                if (indexForExistingConvertibleUnit >= 0)
+                {
+                    // Convertible unit already exists
+                    unitSystem.ConvertibleUnits[indexForExistingConvertibleUnit] = new ConvertibleUnit(name, unitSymbol, primaryUnit, new ScaledValueConversion(1.0 / scaleFactor));
+                    return unitSystem.ConvertibleUnits[indexForExistingConvertibleUnit];
                 }
                 ConvertibleUnit[] convertibleunitarray = new ConvertibleUnit[NoOfConvertibleUnits + 1];
                 if (NoOfConvertibleUnits > 0)
@@ -277,6 +312,20 @@ namespace PhysicalCalculator.Identifiers
                 UnitSystem uso = unitSystem as UnitSystem;
                 uso.ConvertibleUnits = convertibleunitarray;
                 return convertibleunitarray[NoOfConvertibleUnits];
+            }
+            else
+            {
+                // try use a new unit system
+
+                /**
+                ConvertibleUnit[] convertibleunitarray = new ConvertibleUnit[] { new ConvertibleUnit(name, unitSymbol, primaryUnit, new ScaledValueConversion(1.0 / scaleFactor)) };
+                unitSystem = new UnitSystem(name + "_system", null, (unitsystem) => null, (unitsystem) => null, (unitsystem) => convertibleunitarray, isModifiableUnitSystem: true);
+                return convertibleunitarray[0];
+                **/
+
+                ConvertibleUnit[] convertibleunitarray = new ConvertibleUnit[] { new ConvertibleUnit(name, unitSymbol, primaryUnit, new ScaledValueConversion(1.0 / scaleFactor)) };
+                unitSystem = new ExtentedUnitSystem(unitSystem as UnitSystem, $"{unitSystem.Name}_With_{name}_system", someExtraBaseUnitsBuilder: null, someExtraNamedDerivedUnitsBuilder: null, (unitsystem) => convertibleunitarray);
+                return convertibleunitarray[0];
             }
         }
 
@@ -525,14 +574,9 @@ namespace PhysicalCalculator.Identifiers
                         ListStringBuilder.AppendLine();
                     }
 
-                    if (Item.Value != null)
-                    {
-                        ListStringBuilder.Append(Item.Value.ToListString(Item.Key));
-                    }
-                    else
-                    {
-                        ListStringBuilder.Append($"Item {Item.Key}");
-                    }
+                    String itemStr = (Item.Value != null) ? Item.Value.ToListString(Item.Key)
+                                                          : $"Item {Item.Key}";
+                    ListStringBuilder.Append("    " + itemStr);
 
                     count++;
                 }
@@ -713,20 +757,20 @@ namespace PhysicalCalculator.Identifiers
             return false;
         }
 
-        public String ListIdentifiers(Boolean forceListContextName = false, Boolean listNamedItems  = false, Boolean listSettings = false)
+        public String ListIdentifiers(Boolean forceListContext = false, Boolean listNamedItems  = false, Boolean listSettings = false)
         {
             StringBuilder ListStringBuilder = new StringBuilder();
 
             Boolean HasItemsToShow = listNamedItems && (NamedItems.Count > 0);
-            Boolean ListContextName = forceListContextName | HasItemsToShow | listSettings;
+            Boolean ListContext = forceListContext | HasItemsToShow | listSettings;
             String ListStr;
             if (OuterContext != null)
             {
-                ListStr = OuterContext.ListIdentifiers(ListContextName, listNamedItems, listSettings);
+                ListStr = OuterContext.ListIdentifiers(ListContext, listNamedItems, listSettings);
                 ListStringBuilder.Append(ListStr);
                 ListStringBuilder.AppendLine();
             }
-            if (ListContextName)
+            if (ListContext)
             {
                 if (OuterContext != null)
                 {
@@ -736,7 +780,7 @@ namespace PhysicalCalculator.Identifiers
                 if (listSettings)
                 {
                     ListStringBuilder.AppendLine();
-                    ListStringBuilder.AppendLine("Settings");
+                    ListStringBuilder.AppendLine("  Settings:");
                     
                     switch (OutputTracelevel)
                     {
@@ -757,7 +801,7 @@ namespace PhysicalCalculator.Identifiers
                             break;
                     }
 
-                    ListStringBuilder.Append($"Tracelevel = {ListStr}");
+                    ListStringBuilder.Append($"    Tracelevel = {ListStr}");
                     ListStringBuilder.AppendLine();
 
                     switch (FormatProviderSource)
@@ -775,7 +819,7 @@ namespace PhysicalCalculator.Identifiers
                             ListStr = FormatProviderSource.ToString(); 
                             break;
                     }
-                    ListStringBuilder.Append($"FormatProvider = {ListStr}");
+                    ListStringBuilder.Append($"    FormatProvider = {ListStr}");
                 }
                 if (HasItemsToShow)
                 {
@@ -783,7 +827,7 @@ namespace PhysicalCalculator.Identifiers
 
                     if (listSettings)
                     {
-                        ListStringBuilder.AppendLine("Items");
+                        ListStringBuilder.AppendLine("  Items:");
                     }
 
                     ListStr = NamedItems.ListItems();

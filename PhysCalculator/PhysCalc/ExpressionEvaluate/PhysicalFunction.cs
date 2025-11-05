@@ -321,20 +321,20 @@ namespace PhysicalCalculator.Function
             if (Commands.Count <= 1)
             {
                 // Single line func
-                ListStringBuilder.AppendFormat("Func {0}({1}) {{ {2} }}", name, ParameterlistStr(), Commands.Count > 0 ? Commands[0] : "");
+                ListStringBuilder.AppendFormat("    Func {0}({1}) {{ {2} }}", name, ParameterlistStr(), Commands.Count > 0 ? Commands[0] : "");
             }
             else
             {
                 // Multi line func
-                ListStringBuilder.AppendFormat("Func {0}({1})", name, ParameterlistStr());
+                ListStringBuilder.AppendFormat("    Func {0}({1})", name, ParameterlistStr());
                 ListStringBuilder.AppendLine();
-                ListStringBuilder.AppendLine("{");
+                ListStringBuilder.AppendLine("    {");
                 foreach (String CommandLine in Commands)
                 {
-                    ListStringBuilder.AppendFormat("\t{0}", CommandLine);
+                    ListStringBuilder.AppendFormat("        {0}", CommandLine);
                     ListStringBuilder.AppendLine();
                 }
-                ListStringBuilder.Append("}");
+                ListStringBuilder.Append("    }");
                 //ListStringBuilder.AppendLine();
             }
             return ListStringBuilder.ToString();
@@ -463,7 +463,7 @@ namespace PhysicalCalculator.Function
                     return null;
                 }
 
-                OK = TokenString.ParseToken("(", ref commandLine, ref resultLine);
+                OK = TokenString.ParseChar('(', ref commandLine, ref resultLine);
 
                 localContext.ParseState = CommandParserState.ReadFunctionParameters;
             }
@@ -489,6 +489,7 @@ namespace PhysicalCalculator.Function
                     if (   (localContext.ParseState == CommandParserState.ReadFunctionParameters)
                         || (localContext.ParseState == CommandParserState.ReadFunctionParameter))
                     {
+                        commandLine = commandLine.TrimStart();
                         PhysicalQuantityFunctionParam param = ParseFunctionParam(ref commandLine, ref resultLine);
 
                         OK &= param != null;
@@ -502,7 +503,7 @@ namespace PhysicalCalculator.Function
                         }
                     }
 
-                    MoreParamsToParse = TokenString.TryParseToken(",", ref commandLine);
+                    MoreParamsToParse = TokenString.TryParseChar(',', ref commandLine);
                     if (MoreParamsToParse)
                     {
                         localContext.ParseState = CommandParserState.ReadFunctionParameter;
@@ -518,7 +519,7 @@ namespace PhysicalCalculator.Function
                 if (   (localContext.ParseState == CommandParserState.ReadFunctionParameters)
                     || (localContext.ParseState == CommandParserState.ReadFunctionParametersOptional))
                 {
-                    OK = TokenString.ParseToken(")", ref commandLine, ref resultLine);
+                    OK = TokenString.ParseChar(')', ref commandLine, ref resultLine);
 
                     if (OK)
                     {
@@ -537,7 +538,7 @@ namespace PhysicalCalculator.Function
                                 return null;
                             }
 
-                            OK = TokenString.ParseToken("{", ref commandLine, ref resultLine);
+                            OK = TokenString.ParseChar('{', ref commandLine, ref resultLine);
                             if (OK)
                             {
                                 localContext.ParseState = CommandParserState.ReadFunctionBody;
@@ -611,7 +612,7 @@ namespace PhysicalCalculator.Function
 
                                 if (localContext.CommandBlockLevel == 0)
                                 {
-                                    OK = TokenString.ParseToken("}", ref commandLine, ref resultLine);
+                                    OK = TokenString.ParseChar('}', ref commandLine, ref resultLine);
                                     if (OK)
                                     {   // Completed function declaration parsing 
                                         localContext.ParseState = CommandParserState.ExecuteCommandLine;

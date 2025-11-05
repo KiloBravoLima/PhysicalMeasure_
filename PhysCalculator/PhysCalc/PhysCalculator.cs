@@ -15,6 +15,7 @@ using PhysicalCalculator.Identifiers;
 using PhysicalCalculator.CommandBlock;
 using PhysicalCalculator.Function;
 using PhysicalCalculator.Expression;
+using System.Diagnostics.Eventing.Reader;
 
 namespace PhysicalCalculator
 {
@@ -237,8 +238,7 @@ namespace PhysicalCalculator
                     ResultLineEmpty = String.IsNullOrWhiteSpace(ResultLine);
                     if (!ResultLineEmpty)
                     {
-                        resultLineWriter.WriteLine(ResultLine);
-                        ResultLine = "";
+                        WriteResultLine(ref ResultLine, resultLineWriter);
                         LoopExit = false;   // Show error 
                     }
 
@@ -256,7 +256,7 @@ namespace PhysicalCalculator
                             else
                             {
                                 // LoopExit = CommandLine.Equals("Exit", StringComparison.OrdinalIgnoreCase);
-                                LoopExit = TryParseToken("Exit", ref CommandLine);
+                                LoopExit = TryParseKeyword("Exit", ref CommandLine);
                                 if (!LoopExit)
                                 {
                                     LoopExit = !Command(ref CommandLine, out ResultLine);
@@ -267,7 +267,7 @@ namespace PhysicalCalculator
                             {
                                 if (!string.IsNullOrEmpty(CommandLine))
                                 {
-                                    if (!TryParseToken(";", ref CommandLine))
+                                    if (!TryParseChar(';', ref CommandLine))
                                     {
                                         if (!String.IsNullOrEmpty(ResultLine))
                                         {
@@ -281,9 +281,12 @@ namespace PhysicalCalculator
 
                                 if (!String.IsNullOrWhiteSpace(ResultLine))
                                 {
+                                    /**
                                     resultLineWriter.ForegroundColor = ConsoleColor.White;
                                     resultLineWriter.WriteLine(ResultLine);
                                     resultLineWriter.ResetColor();
+                                    **/
+                                    WriteResultLine(ref ResultLine,  resultLineWriter);
                                 }
                                 else
                                 {
@@ -318,6 +321,43 @@ namespace PhysicalCalculator
                     LoopExit = false;
                 }
             } while ((CommandLineFromAccessor || !CommandLineEmpty || !ResultLineEmpty) && !LoopExit);
+        }
+
+        private void WriteResultLine(ref String resultLine, ResultWriter resultLineWriter)
+        {
+            bool isFileRead = false;
+            bool isError =    resultLine.Contains("Error")  // , StringComparison.OrdinalIgnoreCase)
+                           || resultLine.Contains("not found")
+                           || resultLine.Contains("Do not")
+                           || resultLine.Contains("can't be declared")
+                           || resultLine.Contains("Can't update");
+            if (isError)
+            {
+                resultLineWriter.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                isFileRead =   resultLine.Contains("Reading from")  
+                            || resultLine.Contains("End of File")
+                            || resultLine.Contains("Do not");
+                if (isFileRead)
+                {
+                    resultLineWriter.ForegroundColor = ConsoleColor.Yellow;
+                }
+                else
+                {
+                    resultLineWriter.ForegroundColor = ConsoleColor.White;
+                }
+            }
+
+            resultLineWriter.WriteLine(resultLine);
+
+            // if (isError || isFileRead)
+            {
+                resultLineWriter.ResetColor();
+            }
+
+            resultLine = "";
         }
 
         public Boolean ExecuteFunctionCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out OperandInfo functionResult)
@@ -366,14 +406,27 @@ namespace PhysicalCalculator
             public CommandDelegate commandHandler;
         }
 
-        List<NamedCommand> Commands = new List<NamedCommand>();
+        List<NamedCommand> m_commands = null;
+        List<NamedCommand> Commands 
+        { 
+            get 
+            {
+                if (m_commands == null)
+                {
+                    BuildListOfCommands();
+                }
+                return m_commands; 
+            } 
+        }
         void AddCommand(String keyWord, CommandDelegate cmdHandler)
         {
-            Commands.Add(new NamedCommand(){commandName = keyWord, commandHandler = cmdHandler});
+            m_commands.Add(new NamedCommand(){commandName = keyWord, commandHandler = cmdHandler});
         }
 
         void BuildListOfCommands()
         {
+            m_commands = new List<NamedCommand>();
+
             AddCommand("//", CommandComment);
             AddCommand("Read", CommandReadFromFile);
             AddCommand("Include", CommandReadFromFile);
@@ -400,12 +453,10 @@ namespace PhysicalCalculator
 
         public override Boolean Command(ref String commandLine, out String resultLine)
         {
+            Boolean CommandFound = false;
             Boolean CommandHandled = false;
             resultLine = "Unknown Command";
 
-            // Commands.ForEach(item => { if (!CommandHandled) CheckForCommand(item.commandName, item.commandHandler, ref commandLine, ref resultLine, ref CommandHandled));
-
-            Boolean CommandFound = false;
             foreach (NamedCommand namedCommand in Commands)
             {
                 if (!CommandFound)
@@ -424,33 +475,6 @@ namespace PhysicalCalculator
                               || (CommandHandled = CommandPrint(ref commandLine, ref resultLine)) // Assume a print Command
                               || (CommandHandled = base.Command(ref commandLine, out resultLine));
             }
-
-            /**
-            Boolean CommandFound =     CheckForCommand("//", CommandComment, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Read", CommandReadFromFile, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Include", CommandReadFromFile, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Load", CommandReadFromFile, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Save", CommandSaveToFile, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Files", CommandListFiles, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Using", CommandUsingConstants, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Var", CommandVar, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Set", CommandSet, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("System", CommandSystem, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Unit", CommandUnit, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Print", CommandPrint, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("List", CommandList, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Store", CommandStore, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Remove", CommandRemove, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Clear", CommandClear, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Func", CommandFunc, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("If", CommandIf, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Help", CommandHelp, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("Version", CommandVersion, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || CheckForCommand("About", CommandAbout, ref commandLine, ref resultLine, ref CommandHandled)
-                                    || (CommandHandled = IdentifierAssumed(ref commandLine, ref resultLine)) // Assume a print or set Command
-                                    || (CommandHandled = CommandPrint(ref commandLine, ref resultLine)) // Assume a print Command
-                                    || (CommandHandled = base.Command(ref commandLine, out resultLine));
-            **/
 
             return CommandHandled;
         }
@@ -652,7 +676,7 @@ namespace PhysicalCalculator
             if ((CommandLineReader != null) && (!string.IsNullOrWhiteSpace(FilePathStr)))
             {
                 CommandLineReader.AddFile(FilePathStr);
-                resultLine = "Reading from '" + CommandLineReader.Accessor() + "' ";
+                resultLine = "Reading from \"" + CommandLineReader.Accessor() + "\" ";
             }
             return true;
         }
@@ -661,11 +685,11 @@ namespace PhysicalCalculator
         {
             bool SaveContext = true;
 
-            if (TryParseTokenPrefix("Context", ref commandLine))
+            if (TryParseKeywordPrefix("Context", ref commandLine))
             {
                 SaveContext = true;
             }
-            else if (TryParseTokenPrefix("Commands", ref commandLine))
+            else if (TryParseKeywordPrefix("Commands", ref commandLine))
             {
                 SaveContext = false;
             }
@@ -751,12 +775,12 @@ namespace PhysicalCalculator
             {
                 while (TryParseChar('-', ref commandLine))
                 {
-                    if (TryParseToken("sort", ref commandLine))
+                    if (TryParseKeyword("sort", ref commandLine))
                     {
                         ParseChar('=', ref commandLine, ref resultLine);
                         commandLine = commandLine.ReadToken(out SortStr);
                     }
-                    else if (TryParseToken("path", ref commandLine))
+                    else if (TryParseKeyword("path", ref commandLine))
                     {
                         ParseChar('=', ref commandLine, ref resultLine);
                         //commandLine.ReadToken(out FilePathStr);
@@ -908,7 +932,7 @@ namespace PhysicalCalculator
 
                     if (OK)
                     {
-                        TryParseToken("=", ref commandLine);
+                        TryParseChar('=', ref commandLine);
 
                         List<string> ExpectedFollow = new List<string>
                         {
@@ -927,21 +951,21 @@ namespace PhysicalCalculator
                             }
                             else
                             {
-                                resultLine = "Variable '" + VariableName + "' declared";
+                                resultLine = "Variable \"" + VariableName + "\" declared";
                             }
                         }
                         else
                         {
-                            resultLine = "Local Variable '" + VariableName + "' is already declared";
+                            resultLine = "Local Variable \"" + VariableName + "\" is already declared";
                         }
                     }
                     else 
                     {
                         Debug.Assert(ALocalIdentifier && Item.Identifierkind != IdentifierKind.Variable);
-                        resultLine = "Local identifier '" + VariableName + "' is already declared as a " + Item.Identifierkind.ToString();
+                        resultLine = "Local identifier \"" + VariableName + "\" is already declared as a " + Item.Identifierkind.ToString();
                     }
                 }
-            } while (OK && TryParseToken(",", ref commandLine));
+            } while (OK && TryParseChar(',', ref commandLine));
             return true;
         }
 
@@ -967,7 +991,7 @@ namespace PhysicalCalculator
 
                     if (OK)
                     {
-                        TryParseToken("=", ref commandLine);
+                        TryParseChar('=', ref commandLine);
 
                         Boolean IsCalculatorSetting = CheckForCalculatorSetting(IdentifierContext, VariableName, ref commandLine, ref resultLine);
                         if (!IsCalculatorSetting)
@@ -987,10 +1011,10 @@ namespace PhysicalCalculator
                     else
                     {
                         Debug.Assert(ALocalIdentifier && Item.Identifierkind != IdentifierKind.Variable);
-                        resultLine = "Local identifier '" + VariableName + "' is already declared as a " + Item.Identifierkind.ToString();
+                        resultLine = "Local identifier \"" + VariableName + "\" is already declared as a " + Item.Identifierkind.ToString();
                     }
                 }
-            } while (OK && TryParseToken(",", ref commandLine));
+            } while (OK && TryParseChar(',', ref commandLine));
 
             return true;
         }
@@ -1024,19 +1048,19 @@ namespace PhysicalCalculator
                         if (OK)
                         {
                             // Defined new local base unit 
-                            resultLine = "System '" + SystemName + "' declared.";
+                            resultLine = "System \"" + SystemName + "\" declared.";
                         }
                         else
                         {
-                            resultLine = "System '" + SystemName + "' can't be declared.\r\n" + resultLine;
+                            resultLine = "System \"" + SystemName + "\" can't be declared.\r\n" + resultLine;
                         }
                     }
                     else
                     {
-                        resultLine = "Identifier '" + SystemName + "' is already declared as a " + Item.Identifierkind.ToString();
+                        resultLine = "Identifier \"" + SystemName + "\" is already declared as a " + Item.Identifierkind.ToString();
                     }
                 }
-            } while (OK && TryParseToken(",", ref commandLine));
+            } while (OK && TryParseChar(',', ref commandLine));
             return true;
         }
 
@@ -1073,7 +1097,7 @@ namespace PhysicalCalculator
                             commandLine = commandLine.ReadToken(out unitSymbol);
                         }
 
-                        TryParseToken("=", ref commandLine);
+                        TryParseChar('=', ref commandLine);
 
                         List<string> ExpectedFollow = new List<string>{",", ";", "sym"};
 
@@ -1082,7 +1106,7 @@ namespace PhysicalCalculator
                         if ((pq != null) && pq.AsQuantity().IsDimensionless)
                         {
                             // Defined new local base unit 
-                            resultLine = "Unit '" + UnitName + "' can't be declared.\r\n" + "Scaled unit must not be dimension less";
+                            resultLine = "Unit \"" + UnitName + "\" can't be declared.\r\n" + "Scaled unit must not be dimension less";
                         }
                         else
                         {
@@ -1133,21 +1157,21 @@ namespace PhysicalCalculator
                                 else
                                 {
                                     // Defined new local base unit 
-                                    resultLine = $"Unit '{Item.ToListString(UnitName)}' {unitSymbol} declared.";
+                                    resultLine = $"Unit \"{Item.ToListString(UnitName)}\" {unitSymbol} declared.";
                                 }
                             }
                             else
                             {
-                                resultLine = $"Unit '{UnitName}' {unitSymbol} can't be declared. {errorMessage} \r\n" + resultLine;
+                                resultLine = $"Unit \"{UnitName}\" {unitSymbol} can't be declared. {errorMessage} \r\n" + resultLine;
                             }
                         }
                     }
                     else
                     {
-                        resultLine = "Identifier '" + UnitName + "' is already declared as a " + Item.Identifierkind.ToString();
+                        resultLine = "Identifier \"" + UnitName + "\" is already declared as a " + Item.Identifierkind.ToString();
                     }
                 }
-            } while (OK && TryParseToken(",", ref commandLine));
+            } while (OK && TryParseChar(',', ref commandLine));
             return true;
         }
 
@@ -1197,19 +1221,20 @@ namespace PhysicalCalculator
                     }
                     else
                     {
-                        resultLine = "'" + ItemName + "' not known";
+                        resultLine = "\"" + ItemName + "\" not known";
                     }
                 }
-            } while (OK && TryParseToken(",", ref commandLine));
+            } while (OK && TryParseChar(',', ref commandLine));
             return OK;
         }
 
         public Boolean CommandClear(ref String commandLine, ref String resultLine)
         {
-            Boolean clearNamedItems = TryParseTokenPrefix("Items", ref commandLine);
-            Boolean clearCommands = TryParseTokenPrefix("Commands", ref commandLine);
+            Boolean clearNamedItems = TryParseKeywordPrefix("Items", ref commandLine);
+            Boolean clearCommands = TryParseKeywordPrefix("Commands", ref commandLine);
+            Boolean clearAll = TryParseKeywordPrefix("All", ref commandLine);
 
-            if (!clearNamedItems && !clearCommands)
+            if ((!clearNamedItems && !clearCommands) || clearAll)
             {
                 // Default to both
                 clearNamedItems = clearCommands = true;
@@ -1235,13 +1260,18 @@ namespace PhysicalCalculator
 
         public Boolean CommandList(ref String commandLine, ref String resultLine)
         {
-            Boolean listNamedItems = TryParseTokenPrefix("Items", ref commandLine);
-            Boolean listSettings = TryParseTokenPrefix("Settings", ref commandLine);
-            Boolean listCommands = TryParseTokenPrefix("Commands", ref commandLine);
-            
-            if (!listNamedItems && !listSettings && !listCommands)
+            Boolean listNamedItems = TryParseKeywordPrefix("Items", ref commandLine);
+            Boolean listSettings = TryParseKeywordPrefix("Settings", ref commandLine);
+            Boolean listCommands = TryParseKeywordPrefix("Commands", ref commandLine);
+            Boolean listAll = TryParseKeywordPrefix("All", ref commandLine);
+
+            if (!listNamedItems && !listSettings && !listCommands && !listAll)
             {
                 listNamedItems = true;
+            }
+            else if (listAll)
+            {
+                listNamedItems = listSettings = listCommands = true;
             }
 
             StringBuilder ListStringBuilder = new StringBuilder();
@@ -1252,11 +1282,19 @@ namespace PhysicalCalculator
                 ListStringBuilder.AppendLine("Default unit systems: " + Global.CurrentUnitSystems.KnownSystems.ToStringList(" -> "));
                 ListStringBuilder.Append(CurrentContext.ListIdentifiers(false, listNamedItems, listSettings));
             }
-            else
+
+            if (listCommands && CommandLineReader.CommandHistory.Any())
             {
+                if (listNamedItems || listSettings)
+                {
+                    ListStringBuilder.AppendLine();
+                    ListStringBuilder.AppendLine();
+                }
+
+                ListStringBuilder.AppendLine("Command History:");
                 foreach (String CommandLine in CommandLineReader.CommandHistory)
                 {
-                    ListStringBuilder.AppendLine(CommandLine);
+                    ListStringBuilder.AppendLine("  " +CommandLine);
                 }
             }
             resultLine = ListStringBuilder.ToString();
@@ -1286,7 +1324,7 @@ namespace PhysicalCalculator
 
                     Accumulator = pq;
                 }
-            } while (!String.IsNullOrWhiteSpace(commandLine) && TryParseToken(",", ref commandLine));
+            } while (!String.IsNullOrWhiteSpace(commandLine) && TryParseChar(',', ref commandLine));
 
             return true;
         }
@@ -1336,7 +1374,7 @@ namespace PhysicalCalculator
 
                     if (IsALocalIdentifier)
                     {
-                        resultLine = "Function '" + FunctionName + "' is already declared";
+                        resultLine = "Function \"" + FunctionName + "\" is already declared";
                         CurrentContext.FunctionToParseInfo.RedefineItem = Item;
                     }
 
@@ -1344,7 +1382,7 @@ namespace PhysicalCalculator
                 }
                 else
                 {
-                    resultLine = "'" + FunctionName + "' is already defined as a " + Item.Identifierkind.ToString();
+                    resultLine = "\"" + FunctionName + "\" is already defined as a " + Item.Identifierkind.ToString();
                 }
             }
             return true;
@@ -1366,7 +1404,7 @@ namespace PhysicalCalculator
                 //thenBlock.Evaluate(CurrentContext, out Accumulator, ref resultLine);
                 CommandsBlockEvaluate("", thenBlock, out Accumulator, ref resultLine);
             }
-            if (TryParseToken("else", ref commandLine))
+            if (TryParseKeyword("else", ref commandLine))
             {
                 CurrentContext.BeginParsingCommandBlock();
                 ICommandsEvaluator elseBlock = ParseCommandBlockDeclaration(ref commandLine, ref resultLine);
@@ -1488,12 +1526,12 @@ namespace PhysicalCalculator
                 if (CurrentContext.FunctionToParseInfo.RedefineItem != null) 
                 {
                     CurrentContext.NamedItems.SetItem(CurrentContext.FunctionToParseInfo.FunctionName, FuncEval);
-                    resultLine = "Function '" + CurrentContext.FunctionToParseInfo.FunctionName + "' re-defined";
+                    resultLine = "Function \"" + CurrentContext.FunctionToParseInfo.FunctionName + "\" re-defined";
                 }
                 else 
                 {
                     CurrentContext.NamedItems.AddItem(CurrentContext.FunctionToParseInfo.FunctionName, FuncEval);
-                    resultLine = "Function '" + CurrentContext.FunctionToParseInfo.FunctionName + "' declared";
+                    resultLine = "Function \"" + CurrentContext.FunctionToParseInfo.FunctionName + "\" declared";
                 }
 
                 /*

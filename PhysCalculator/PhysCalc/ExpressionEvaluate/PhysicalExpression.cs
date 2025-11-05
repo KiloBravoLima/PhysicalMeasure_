@@ -385,7 +385,7 @@ namespace PhysicalCalculator.Expression
                 if (OK)
                 {
                     pqList.Add(pq);
-                    MoreToParse = TokenString.TryParseToken(",", ref commandLine);
+                    MoreToParse = TokenString.TryParseChar(',', ref commandLine);
                 }
                 else
                 {
@@ -492,7 +492,7 @@ namespace PhysicalCalculator.Expression
         public static Unit ParseOptionalConvertToUnit(ref String commandLine, ref String resultLine)
         {
             Unit pu = null;
-            if (TokenString.TryParseToken("[", ref commandLine))
+            if (TokenString.TryParseChar('[', ref commandLine))
             { // "Convert to unit" square parentheses
 
                 int UnitStringLen = commandLine.IndexOf(']');
@@ -529,7 +529,7 @@ namespace PhysicalCalculator.Expression
                 commandLine = commandLine.Substring(UnitStringLen);
                 commandLine = commandLine.TrimStart();
 
-                TokenString.ParseToken("]", ref commandLine, ref resultLine);
+                TokenString.ParseChar(']', ref commandLine, ref resultLine);
             }
 
             return pu;
@@ -1857,7 +1857,7 @@ namespace PhysicalCalculator.Expression
                     }
                     String UnitStr = commandLine.Substring(0, UnitStringLen);
                     String tempResultLine = null;
-                    pu = Unit.ParseUnit(ref UnitStr, ref tempResultLine, false);
+                    pu = Unit.ParseMixedUnit(ref UnitStr, ref tempResultLine, false);
                     if (pu != null || String.IsNullOrEmpty(resultLine))
                     {
                         resultLine = tempResultLine;

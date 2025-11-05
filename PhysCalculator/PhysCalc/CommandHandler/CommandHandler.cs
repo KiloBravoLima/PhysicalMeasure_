@@ -44,6 +44,10 @@ namespace CommandParser
         public Boolean StartsWithKeyword(String Keyword, String CommandLine) => CommandLine.StartsWithKeyword(Keyword);
 
         // static 
+        public Boolean TryParseKeyword(String Keyword, ref String CommandLine) => TokenString.TryParseKeyword(Keyword, ref CommandLine);
+
+
+        // static 
         public String SkipToken(String Token, String CommandLine) => CommandLine.SkipToken(Token);
 
         // static 
@@ -58,7 +62,7 @@ namespace CommandParser
         // static 
         public Boolean TryParseToken(String Token, ref String CommandLine) => TokenString.TryParseToken(Token, ref CommandLine);
 
-        public Boolean TryParseTokenPrefix(String Token, ref String CommandLine) => TokenString.TryParseTokenPrefix(Token, ref CommandLine);
+        public Boolean TryParseKeywordPrefix(String Token, ref String CommandLine) => TokenString.TryParseKeywordPrefix(Token, ref CommandLine);
 
 
         // static 
