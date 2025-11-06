@@ -152,10 +152,7 @@ namespace PhysicalCalculator
 
         private void InitGlobalContext()
         {
-            // Default Unit Systems
-            // Global.CurrentUnitSystems.Use(SI.Units); 
-            // Global.CurrentUnitSystems.Use(Data.Units); 
-            Global.SetDefaultUnitSystems();
+            SetDefaultUnitSystems();
 
             GlobalContext = new CalculatorEnvironment(InitPredefinedSystemContext(), "Global", EnvironmentKind.NamespaceEnv)
             {
@@ -166,6 +163,15 @@ namespace PhysicalCalculator
             CurrentContext = GlobalContext;
 
             BuildListOfCommands();
+        }
+
+        public void SetDefaultUnitSystems()
+        {
+            Global.CurrentUnitSystems.Use(Data.Units);
+            Global.CurrentUnitSystems.Use(SI.Units);
+
+            Data.Units.TraceUnitSystem();
+            SI.Units.TraceUnitSystem();
         }
 
         public IEnvironment GetDeclarationEnvironment()
@@ -1119,7 +1125,8 @@ namespace PhysicalCalculator
                             else
                             {
                                 IUnitSystem Default_UnitSystem = Global.CurrentUnitSystems.Default;
-                                if (Default_UnitSystem.IsIsolatedUnitSystem && !Default_UnitSystem.IsCombinedUnitSystem)
+                                // if (Default_UnitSystem.IsIsolatedUnitSystem && !Default_UnitSystem.IsCombinedUnitSystem)
+                                if (!Default_UnitSystem.IsCombinedUnitSystem && Default_UnitSystem.IsModifiableUnitSystem)
                                 {
                                     UnitSys = Default_UnitSystem;
                                 }
@@ -1279,7 +1286,7 @@ namespace PhysicalCalculator
             if (listNamedItems || listSettings)
             {
                 // ListStringBuilder.AppendLine("Default unit system: " + Global.CurrentUnitSystems.Default.Name);
-                ListStringBuilder.AppendLine("Default unit systems: " + Global.CurrentUnitSystems.KnownSystems.ToStringList(" -> "));
+                ListStringBuilder.AppendLine("Current unit systems: " + Global.CurrentUnitSystems.KnownSystems.ToStringList(" -> "));
                 ListStringBuilder.Append(CurrentContext.ListIdentifiers(false, listNamedItems, listSettings));
             }
 

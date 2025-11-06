@@ -361,11 +361,13 @@ namespace PhysicalMeasure
 
         public static UnitSystemStack CurrentUnitSystems = new UnitSystemStack();
 
+        /**
         public static void SetDefaultUnitSystems()
         {
             CurrentUnitSystems.Use(Data.Units);
             CurrentUnitSystems.Use(SI.Units);
         }
+        **/
 
         public static IUnitSystem UnitSystemFromName(String systemValueStr)
         {

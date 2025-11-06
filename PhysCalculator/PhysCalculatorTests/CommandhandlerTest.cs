@@ -95,7 +95,7 @@ namespace PhysCalculatorTests
             CommandHandler target = new CommandHandler(); 
             char ch = 'K'; 
             string CommandLine = "K is found"; 
-            string CommandLineExpected = " is found";
+            string CommandLineExpected = "is found";
             string ResultLine = string.Empty; 
             string ResultLineExpected = string.Empty; 
             bool expected = true;

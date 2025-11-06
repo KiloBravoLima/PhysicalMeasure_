@@ -100,8 +100,8 @@ namespace PhysCalculatorTests
             string FileNameStr = "Filename.ext";
             CommandFileAccessor target = new CommandFileAccessor(FileNameStr);
             string ResultLine = string.Empty; 
-            string ResultLineStartExpected = "File '";
-            string ResultLineEndExpected = "Filename.ext' not found";
+            string ResultLineStartExpected = "File \"";
+            string ResultLineEndExpected = "Filename.ext\" not found";
             string expected = string.Empty;
             string actual;
             actual = target.GetCommandLine(ref ResultLine);
@@ -113,7 +113,7 @@ namespace PhysCalculatorTests
             //Assert.IsTrue(actual.EndsWith(expectedEnd));
         }
 
-        /*****************
+        /*****************  
         /// <summary>
         ///A test for ReadFromFile
         ///</summary>

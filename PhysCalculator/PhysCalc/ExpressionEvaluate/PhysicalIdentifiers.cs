@@ -270,7 +270,7 @@ namespace PhysicalCalculator.Identifiers
                 return unitSystem.BaseUnits[0];
                 **/
 
-                unitSystem = new ExtentedUnitSystem(unitSystem as UnitSystem, $"{unitSystem.Name}_With_{name}_system", someExtraBaseUnitsBuilder: (newUnitsystem) => new BaseUnit[] { new BaseUnit(newUnitsystem, (sbyte)unitSystem.BaseUnits.Length, name, unitSymbol) }, someExtraNamedDerivedUnitsBuilder: null, someExtraConvertibleUnitsBuilder: null); 
+                unitSystem = new ExtentedUnitSystem(unitSystem as UnitSystem, $"{unitSystem.Name}_With_{name}_system", someExtraBaseUnitsBuilder: (newUnitsystem) => new BaseUnit[] { new BaseUnit(newUnitsystem, (sbyte)unitSystem.BaseUnits.Length, name, unitSymbol) }, someExtraNamedDerivedUnitsBuilder: null, someExtraConvertibleUnitsBuilder: null, isModifiableUnitSystem: true); 
                 return unitSystem.BaseUnits[unitSystem.BaseUnits.Length-1];
             }
         }
@@ -324,7 +324,7 @@ namespace PhysicalCalculator.Identifiers
                 **/
 
                 ConvertibleUnit[] convertibleunitarray = new ConvertibleUnit[] { new ConvertibleUnit(name, unitSymbol, primaryUnit, new ScaledValueConversion(1.0 / scaleFactor)) };
-                unitSystem = new ExtentedUnitSystem(unitSystem as UnitSystem, $"{unitSystem.Name}_With_{name}_system", someExtraBaseUnitsBuilder: null, someExtraNamedDerivedUnitsBuilder: null, (unitsystem) => convertibleunitarray);
+                unitSystem = new ExtentedUnitSystem(unitSystem as UnitSystem, $"{unitSystem.Name}_With_{name}_system", someExtraBaseUnitsBuilder: null, someExtraNamedDerivedUnitsBuilder: null, (unitsystem) => convertibleunitarray, isModifiableUnitSystem: true);
                 return convertibleunitarray[0];
             }
         }

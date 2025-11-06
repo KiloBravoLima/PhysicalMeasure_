@@ -249,14 +249,14 @@ namespace PhysCalculatorTests
                 "Var [ <contextname> . ] <varname> [ = <expression> ] [, <var> ]*",
                 "Set <varname> [ = ] <expression> [, <varname> [ = ] <expression> ]*",
                 "System <systemname>",
-                "Unit [ <systemname> . ] <unitname> [ [ = ] <expression> ]",
+                "Unit [ <systemname> . ] <unitname> [ sym <symbol>] [ [ = ] <expression> ]",
                 "[ Print ] <expression> [, <expression> ]*",
                 "List [ items ] [ settings ] [ commands ] ",
                 "Store <varname>",
                 "Remove <varname> [, <varname> ]*",
                 "Clear [ items | commands ]",
                 "Func <functionname> ( <paramlist> )  { <commands> }",
-                "Help [ expression | parameter | commands | setting | all ]"
+                "Help [ expression | parameter | commands [ <commandName> ] | setting | all ]"
             };
             bool expected = true; 
             bool actual;

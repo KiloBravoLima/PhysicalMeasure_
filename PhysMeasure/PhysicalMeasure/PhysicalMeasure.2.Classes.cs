@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 using static PhysicalMeasure.DimensionExponentsExtension;
 using static PhysicalMeasure.Prefixes;
 using System.Linq.Expressions;
+using System.IO;
 
 namespace PhysicalMeasure
 {
@@ -673,6 +674,16 @@ namespace PhysicalMeasure
         public IUnitPrefix this[char somePrefixChar] => UnitPrefixFromPrefixChar(somePrefixChar);
 
         public IUnitPrefix this[String somePrefixChars] => UnitPrefixFromPrefixString(somePrefixChars);
+
+        public override String ToString()
+        {
+            String str = "UnitPrefixTable: ";
+            foreach (UnitPrefix up in UnitPrefixes)
+            {
+                str += up.Name + " (" + up.PrefixChar + "): 10^" + up.Exponent.ToString() + ", ";
+            }
+            return str;
+        }
     }
 
     #endregion Physical Unit prefix Classes
@@ -1527,7 +1538,7 @@ namespace PhysicalMeasure
 
             if ((!String.IsNullOrEmpty(unitStr))
                 && ((system = this.ExponentsSystem) != null)
-                && (forceShowSystem || system != Global.CurrentUnitSystems.Default)
+                && (forceShowSystem || (Global.CurrentUnitSystems != null && system != Global.CurrentUnitSystems.Default))
                 && (!system.IsIsolatedUnitSystem)
                  /*
                  && (!(    Physics.SI_Units == Physics.Default_UnitSystem 
@@ -2903,7 +2914,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             if (UnitIsMissingSystem && (someNominatorExponents || someDenominatorExponents))
             {
                 // Do some trace of error    
-                Debug.WriteLine(global::System.Reflection.Assembly.GetExecutingAssembly().ToString() + " Unit " + this.Kind.ToString() + " { " + ExponentsStr + "} missing unit system.");
+                Debug.WriteLine($"{ DateTime.Now} " + global::System.Reflection.Assembly.GetExecutingAssembly().ToString() + " Unit " + this.Kind.ToString() + " { " + ExponentsStr + "} missing unit system.", "Error");
             }
 #endif
 
@@ -5589,18 +5600,33 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         {
             IsIsolatedUnitSystem = isIsolatedUnitSystem;
             IsModifiableUnitSystem = isModifiableUnitSystem;
+
+            if (IsModifiableUnitSystem)
+            {
+                Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{someName}' {this.GetType()} created. IsIsolatedUnitSystem={IsIsolatedUnitSystem}, IsModifiableUnitSystem={IsModifiableUnitSystem}", "Info");
+            }
         }
 
         public AbstractUnitSystem(String someName, Boolean isModifiableUnitSystem = false)
             : base(someName)
         {
             IsModifiableUnitSystem = isModifiableUnitSystem;
+
+            if (IsModifiableUnitSystem)
+            {
+                Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' {this.GetType()} created. IsIsolatedUnitSystem={IsIsolatedUnitSystem}, IsModifiableUnitSystem={IsModifiableUnitSystem}", "Info");
+            }
         }
 
         public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, Boolean isModifiableUnitSystem = false)
-            : this(someName , false, isModifiableUnitSystem)
+            : this(someName, false, isModifiableUnitSystem)
         {
             this.UnitPrefixes = someUnitPrefixes;
+
+            if (IsModifiableUnitSystem)
+            {
+                Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' UnitPrefixes: {UnitPrefixes}", "Info");
+            }
         }
 
         public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, Boolean isModifiableUnitSystem = false)
@@ -5620,6 +5646,11 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             }
             // Not correct: Two MonetaryBaseUnits with each own Monetary UnitSystem can still have a UnitSystemConversion between them, and therefore none of them are an IsolatedUnitSystem.
             this.IsIsolatedUnitSystem = noOfBaseUnits == 1 && this.BaseUnits[0].BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
+
+            if (IsModifiableUnitSystem)
+            {
+                Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' BaseUnits: {BaseUnits} {BaseUnits.ToStringList()}", "Info");
+            }
         }
 
         public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, Boolean isModifiableUnitSystem = false)
@@ -5628,6 +5659,11 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             this.NamedDerivedUnits = someNamedDerivedUnitsBuilder?.Invoke(this);
 
             CheckNamedDerivedUnitsForSystem();
+
+            if (IsModifiableUnitSystem)
+            {
+                Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' NamedDerivedUnits: {NamedDerivedUnits} {NamedDerivedUnits.ToStringList()}", "Info");
+            }
         }
 
         public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnitsBuilderFunction someBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder, Boolean isModifiableUnitSystem = false)
@@ -5636,12 +5672,30 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             this.ConvertibleUnits = someConvertibleUnitsBuilder?.Invoke(this);
 
             CheckConvertibleUnitsForSystem();
+
+            if (IsModifiableUnitSystem)
+            {
+                Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' ConvertibleUnits: {ConvertibleUnits} {ConvertibleUnits.ToStringList()}", "Info");
+            }
         }
 
         public AbstractUnitSystem(String someName, UnitPrefixTable someUnitPrefixes, BaseUnit someBaseUnit, NamedDerivedUnitsBuilderFunction someNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someConvertibleUnitsBuilder, Boolean isModifiableUnitSystem = false)
             : this(someName, someUnitPrefixes, (unitsystem) => new BaseUnit[] { someBaseUnit }, someNamedDerivedUnitsBuilder, someConvertibleUnitsBuilder, isModifiableUnitSystem)
         {
-            this.IsIsolatedUnitSystem = someBaseUnit.BaseUnitNumber == (SByte)MonetaryBaseUnitKind.Currency;
+            // Not correct: Two MonetaryBaseUnits with each own Monetary UnitSystem can still have a UnitSystemConversion between them, and therefore none of them are an IsolatedUnitSystem.
+
+            // this.IsIsolatedUnitSystem =   someBaseUnit.BaseUnitNumber ==  (SByte)DataBaseUnitKind.DataSize
+            //                            || someBaseUnit.BaseUnitNumber ==  (SByte)MonetaryBaseUnitKind.Currency;
+            this.IsIsolatedUnitSystem = someBaseUnit.BaseUnitNumber == 0; // == (SByte)DataBaseUnitKind.DataSize ==  (SByte)MonetaryBaseUnitKind.Currency;
+        }
+
+        public void TraceUnitSystem()
+        {
+                                            Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' {this.GetType()} created. IsIsolatedUnitSystem={IsIsolatedUnitSystem}, IsModifiableUnitSystem={IsModifiableUnitSystem}", "Info"); 
+            if (UnitPrefixes != null)       Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' UnitPrefixes: {UnitPrefixes}", "Info");
+            if (BaseUnits != null)          Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' BaseUnits: {BaseUnits} {BaseUnits.ToStringList()}", "Info");
+            if (NamedDerivedUnits != null)  Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' NamedDerivedUnits: {NamedDerivedUnits} {NamedDerivedUnits.ToStringList()}", "Info");
+            if (ConvertibleUnits != null)   Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' ConvertibleUnits: {ConvertibleUnits} {ConvertibleUnits.ToStringList()}", "Info");
         }
 
         protected virtual void CheckUnitsSystem(SystemUnit aSystemUnit)
@@ -5660,7 +5714,16 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             }
             else if (this.GetType() == typeof(ExtentedUnitSystem))
             {
-
+                var eus = this as ExtentedUnitSystem;
+                if (eus?.ExtentionOfUnitSystem != null)
+                {
+                    Debug.Assert(convertibleUnit.SimpleSystem == eus.ExtentionOfUnitSystem);
+                    Debug.Assert(convertibleUnit.PrimaryUnit.SimpleSystem == eus.ExtentionOfUnitSystem);
+                }
+            }
+            else
+            {
+                Debug.Assert(this.GetType() == typeof(UnitSystem), $"Unknown UnitsSystem: {this.GetType()}");
             }
         }
 
@@ -6578,16 +6641,21 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
     {
         UnitSystem m_extentionOfUnitSystem;
 
-        public ExtentedUnitSystem(UnitSystem extentionOfUnitSystem, String someUnitSystemName, BaseUnitsBuilderFunction someExtraBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someExtraNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someExtraConvertibleUnitsBuilder)
+        public UnitSystem ExtentionOfUnitSystem { get { return m_extentionOfUnitSystem; }  }
+
+        public ExtentedUnitSystem(UnitSystem extentionOfUnitSystem, String someUnitSystemName, BaseUnitsBuilderFunction someExtraBaseUnitsBuilder, NamedDerivedUnitsBuilderFunction someExtraNamedDerivedUnitsBuilder, ConvertibleUnitsBuilderFunction someExtraConvertibleUnitsBuilder, Boolean isModifiableUnitSystem = true)
              : base(someUnitSystemName, someUnitPrefixes: extentionOfUnitSystem.UnitPrefixes
                  , someBaseUnitsBuilder:
                       (unitSystem) =>
                       {
                           List<BaseUnit> oldClonedBaseUnits = new List<BaseUnit>();
-                          foreach (BaseUnit bu in extentionOfUnitSystem.BaseUnits)
+                          if (extentionOfUnitSystem.BaseUnits != null)
                           {
-                              BaseUnit clonedBaseUnit = new BaseUnit(unitSystem, bu.BaseUnitNumber, bu.Name, bu.Symbol);
-                              oldClonedBaseUnits.Add(clonedBaseUnit);
+                              foreach (BaseUnit bu in extentionOfUnitSystem.BaseUnits)
+                              {
+                                  BaseUnit clonedBaseUnit = new BaseUnit(unitSystem, bu.BaseUnitNumber, bu.Name, bu.Symbol);
+                                  oldClonedBaseUnits.Add(clonedBaseUnit);
+                              }
                           }
                           if (someExtraBaseUnitsBuilder == null)
                           {
@@ -6600,10 +6668,13 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                     (unitSystem) =>
                     {
                         List<NamedDerivedUnit> oldClonedNamedDerivedUnits = new List<NamedDerivedUnit>();
-                        foreach (NamedDerivedUnit ndu in extentionOfUnitSystem.NamedDerivedUnits)
+                        if (extentionOfUnitSystem.NamedDerivedUnits != null)
                         {
-                            NamedDerivedUnit clonedNamedDerivedUnit = new NamedDerivedUnit(unitSystem, ndu.Name, ndu.Symbol, ndu.Exponents);
-                            oldClonedNamedDerivedUnits.Add(clonedNamedDerivedUnit);
+                            foreach (NamedDerivedUnit ndu in extentionOfUnitSystem.NamedDerivedUnits)
+                            {
+                                NamedDerivedUnit clonedNamedDerivedUnit = new NamedDerivedUnit(unitSystem, ndu.Name, ndu.Symbol, ndu.Exponents);
+                                oldClonedNamedDerivedUnits.Add(clonedNamedDerivedUnit);
+                            }
                         }
                         if (someExtraNamedDerivedUnitsBuilder == null)
                         {
@@ -6616,10 +6687,13 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                     (unitSystem) =>
                     {
                         List<ConvertibleUnit> oldClonedConvertibleUnits = new List<ConvertibleUnit>();
-                        foreach (ConvertibleUnit cu in extentionOfUnitSystem.ConvertibleUnits)
+                        if (extentionOfUnitSystem.ConvertibleUnits != null)
                         {
-                            ConvertibleUnit clonedConvertibleUnit = new ConvertibleUnit(someName: cu.Name, cu.Symbol, cu.PrimaryUnit, cu.Conversion as ValueConversion);
-                            oldClonedConvertibleUnits.Add(clonedConvertibleUnit);
+                            foreach (ConvertibleUnit cu in extentionOfUnitSystem.ConvertibleUnits)
+                            {
+                                ConvertibleUnit clonedConvertibleUnit = new ConvertibleUnit(someName: cu.Name, cu.Symbol, cu.PrimaryUnit, cu.Conversion as ValueConversion);
+                                oldClonedConvertibleUnits.Add(clonedConvertibleUnit);
+                            }
                         }
                         if (someExtraConvertibleUnitsBuilder == null)
                         {
@@ -6628,14 +6702,15 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                         var extraConvertibleUnits = someExtraConvertibleUnitsBuilder(unitSystem);
                         return oldClonedConvertibleUnits.Concat(extraConvertibleUnits).ToArray();
                     }
+                    , isModifiableUnitSystem
              )
         {
             m_extentionOfUnitSystem = extentionOfUnitSystem;
         }
 
-        public override UnitSystemKind UnitSystemKind { get { return m_extentionOfUnitSystem.UnitSystemKind; } /* set; */ } 
-        public override Boolean IsIsolatedUnitSystem { get { return m_extentionOfUnitSystem.IsIsolatedUnitSystem; } /* set; */ } 
-        public override Boolean IsCombinedUnitSystem { get { return m_extentionOfUnitSystem.IsCombinedUnitSystem /** || m_extentionOfUnitSystem.UnitSystemKind !=  **/ ; } /* set; */ }
+        public override UnitSystemKind UnitSystemKind { get { return m_extentionOfUnitSystem != null ? m_extentionOfUnitSystem.UnitSystemKind : UnitSystemKind.Unknown; } /* set; */ } 
+        public override Boolean IsIsolatedUnitSystem { get { return m_extentionOfUnitSystem != null && m_extentionOfUnitSystem.IsIsolatedUnitSystem; } /* set; */ } 
+        public override Boolean IsCombinedUnitSystem { get { return m_extentionOfUnitSystem != null && m_extentionOfUnitSystem.IsCombinedUnitSystem /** || m_extentionOfUnitSystem.UnitSystemKind !=  **/ ; } /* set; */ }
     }
 
     public class CombinedUnitSystem : AbstractUnitSystem, ICombinedUnitSystem
@@ -7979,28 +8054,83 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
     public class UnitSystemStack
     {
-        protected Stack<IUnitSystem> default_UnitSystem_Stack = new Stack<IUnitSystem>();
+        #region UnitSystem stack management
+
+        protected Stack<IUnitSystem>  m_unitSystems_Stack = new Stack<IUnitSystem>();
+
+        public Stack<IUnitSystem> KnownSystemsStack
+        {
+            get 
+            {
+                if (m_unitSystems_Stack == null || m_unitSystems_Stack.Count <= 0)
+                {
+                    m_unitSystems_Stack.Push(SI.Units);     // Initial default
+                }
+
+                return m_unitSystems_Stack;
+            }
+        }
 
         public List<IUnitSystem> KnownSystems
         {
-            get { return default_UnitSystem_Stack.ToList(); }
+            // Do use KnownSystemsStack; we need to add Initial default if empty
+            get { return KnownSystemsStack.ToList(); }
         }
 
+        private void Push(IUnitSystem unitSystem)
+        {
+            // Do NOT use KnownSystemsStack; we need to not add Initial default
+
+            if (!m_unitSystems_Stack.Any() || m_unitSystems_Stack.Peek() != unitSystem)          
+            {
+                m_unitSystems_Stack.Push(unitSystem);
+                Trace.WriteLine($"{DateTime.Now} KnownSystemsStack pushed '{unitSystem.Name}'", "Info");
+            }
+            else 
+            { 
+                Trace.WriteLine($"{DateTime.Now} KnownSystemsStack push ignored; already on top '{unitSystem.Name}'", "Warning");
+            }
+        }
+
+        private IUnitSystem Pop()
+        {
+            // Do NOT use KnownSystemsStack; we need to not add Initial default  
+            if (m_unitSystems_Stack.Any())
+            {
+                IUnitSystem unitSystem = m_unitSystems_Stack.Pop();
+                Trace.WriteLine($"{DateTime.Now} KnownSystemsStack poped '{unitSystem.Name}'", "Info");
+                return unitSystem;
+            }
+            Trace.WriteLine($"{DateTime.Now} KnownSystemsStack notthing to pop", "Warning");
+            return null;
+        }
+        
         public IUnitSystem Default
         {
             get
             {
-                return default_UnitSystem_Stack == null || default_UnitSystem_Stack.Count <= 0 
-                        ? SI.Units
-                        : default_UnitSystem_Stack.Peek();
+                // Do use KnownSystemsStack; we need to add Initial default if empty
+                return KnownSystemsStack.Peek();
+            }
+
+            set 
+            {
+                // Do NOT use KnownSystemsStack; we need to not add Initial default
+
+                if (m_unitSystems_Stack.Peek() != value)  
+                {
+                    Push(value);           
+                }
             }
         }
 
         public Boolean Use(IUnitSystem newUnitSystem)
         {
-            if (Default != newUnitSystem)
+            // Do NOT use KnownSystemsStack; we need to not add Initial default  
+
+            if (!m_unitSystems_Stack.Contains(newUnitSystem))  
             {
-                default_UnitSystem_Stack.Push(newUnitSystem);
+                Push(newUnitSystem);     
                 return true;
             }
             return false;
@@ -8008,9 +8138,10 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public Boolean Unuse(IUnitSystem oldUnitSystem)
         {
-            if (default_UnitSystem_Stack != null && default_UnitSystem_Stack.Count > 0 && default_UnitSystem_Stack.Peek() == oldUnitSystem)
+            // Do NOT use KnownSystemsStack; we need to not add Initial default
+            if (m_unitSystems_Stack.Peek() == oldUnitSystem)  
             {
-                default_UnitSystem_Stack.Pop();
+                Pop();                    
                 return true;
             }
             return false;
@@ -8018,23 +8149,17 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public void Reset()
         {
-            default_UnitSystem_Stack.Clear();
+            // Do NOT use KnownSystemsStack; we need to not add Initial default
+            m_unitSystems_Stack.Clear();                     
         }
 
+        #endregion UnitSystem stack management
 
         #region UnitLookUp
-        /**
-        protected UnitSystem[] unitSystems;
-
-        public UnitLookup(UnitSystem[] someUnitSystems)
-        {
-            unitSystems = someUnitSystems;
-        }
-        **/
 
         public Unit UnitFromName(String nameStr)
         {
-            foreach (UnitSystem us in default_UnitSystem_Stack)
+            foreach (UnitSystem us in KnownSystemsStack)
             {
                 INamedSymbolUnit unit = us.UnitFromName(nameStr);
                 if (unit != null)
@@ -8047,7 +8172,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public Unit UnitFromSymbol(String symbolStr)
         {
-            foreach (UnitSystem us in default_UnitSystem_Stack)
+            foreach (UnitSystem us in KnownSystemsStack)
             {
                 INamedSymbolUnit unit = us.UnitFromSymbol(symbolStr);
                 if (unit != null)
@@ -8060,7 +8185,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public Unit ScaledUnitFromSymbol(String scaledSymbolStr)
         {
-            foreach (UnitSystem us in default_UnitSystem_Stack)
+            foreach (UnitSystem us in KnownSystemsStack)
             {
                 Unit scaledUnit = us.ScaledUnitFromSymbol(scaledSymbolStr);
                 if (scaledUnit != null)
@@ -8073,12 +8198,13 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public IUnitSystem UnitSystemFromName(String unitSystemSymbolStr)
         {
-            IUnitSystem result_us = default_UnitSystem_Stack.FirstOrDefault<IUnitSystem>(us => us.Name == unitSystemSymbolStr);
+            IUnitSystem result_us = KnownSystemsStack.FirstOrDefault<IUnitSystem>(us => us.Name == unitSystemSymbolStr);
             return result_us;
         }
         #endregion UnitLookUp
     }
 
+    /***
     public class UnitLookup //(SingleUnitSystem[] unitSystems)
     {
         protected UnitSystem[] unitSystems;
@@ -8133,6 +8259,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return result_us;
         }
     }
+    ***/
 
     public class UnitSystemConversionLookup
     {
