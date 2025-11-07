@@ -1327,7 +1327,28 @@ namespace PhysicalCalculator
                             resultLine += ", ";
                         }
                     }
-                    resultLine += pq.ToString(" UL", CurrentContext.CurrentCultureInfo);
+
+                    String formatStr = null ;
+                    if (pq.OperandType == typeof(Quantity))
+                    {
+                        formatStr = " UL";
+                    }
+                    else if (pq.OperandType == typeof(DateTime))
+                    {
+                        formatStr = "yyyy-MM-dd HH:mm:ss";
+                    }
+
+                    String pqStr;
+                    if (formatStr != null)
+                    {
+                        pqStr = pq.ToString(formatStr, CurrentContext.CurrentCultureInfo);
+                    }
+                    else 
+                    {
+                        pqStr = pq.ToString();
+                    }
+
+                    resultLine += pqStr;
 
                     Accumulator = pq;
                 }

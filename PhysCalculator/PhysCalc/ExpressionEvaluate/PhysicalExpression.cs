@@ -307,11 +307,11 @@ namespace PhysicalCalculator.Expression
         public static Boolean FunctionGet(IEnvironment lookInContext, String functionName, List<OperandInfo> parameterlist, out OperandInfo functionResult, ref String resultLine)
         {
             functionResult = null;
-            if (FunctionLookupCallback(lookInContext, functionName, out var functionevaluator))
+            if (FunctionLookupCallback(lookInContext, functionName, out var functionEvaluator))
             {
                 if (FunctionEvaluateCallback != null)
                 {
-                    return FunctionEvaluateCallback(functionName, functionevaluator, parameterlist, out functionResult, ref resultLine);
+                    return FunctionEvaluateCallback(functionName, functionEvaluator, parameterlist, out functionResult, ref resultLine);
                 }
                 else
                 {
@@ -1531,39 +1531,47 @@ namespace PhysicalCalculator.Expression
                             VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
                             break;
                         case IdentifierKind.Function:
-                            TokenString.ParseChar('(', ref commandLine, ref resultLine);
-                            commandLine = commandLine.TrimStart();
 
-                            // FunktionInfo funk = IdentifierItem as Funktion;
-                            List<string> ExpectedFollow = new List<string> { ")" };
-                            List<OperandInfo> operandInfoParameterlist = null;
-                            if (IdentifierItem is PhysicalQuantityCommandsFunction)
-                            {
-                                operandInfoParameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow, true);
-                            }
-                            else
-                            if (IdentifierItem is DateTimeParamFunction)
-                            {
-                                String litteralStringParameter = ParseStringLitteralParam(ref commandLine, ref resultLine, ExpectedFollow, true);
-                                operandInfoParameterlist = new List<OperandInfo> { new OperandInfo(litteralStringParameter) };
-                            }
-                            else
-                            {
-                                Debug.Assert(false);
-                            }
-                            Boolean OK = operandInfoParameterlist != null;
-                            if (OK)
-                            {
-                                TokenString.ParseChar(')', ref commandLine, ref resultLine);
 
-                                FunctionGet(QualifiedIdentifierContext, identifierName, operandInfoParameterlist, out identifierValue, ref resultLine);
-
+                            if (TokenString.ParseChar('(', ref commandLine, ref resultLine))
+                            {
                                 commandLine = commandLine.TrimStart();
+
+                                // FunktionInfo funk = IdentifierItem as Funktion;
+                                List<string> ExpectedFollow = new List<string> { ")" };
+                                List<OperandInfo> operandInfoParameterlist = null;
+                                if (IdentifierItem is PhysicalQuantityCommandsFunction)
+                                {
+                                    operandInfoParameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow, true);
+                                }
+                                else
+                                if (IdentifierItem is DateTimeParamFunction)
+                                {
+                                    String litteralStringParameter = ParseStringLitteralParam(ref commandLine, ref resultLine, ExpectedFollow, true);
+                                    operandInfoParameterlist = new List<OperandInfo> { new OperandInfo(litteralStringParameter) };
+                                }
+                                else
+                                {
+                                    Debug.Assert(false);
+                                }
+                                Boolean OK = operandInfoParameterlist != null;
+                                if (OK)
+                                {
+                                    TokenString.ParseChar(')', ref commandLine, ref resultLine);
+
+                                    FunctionGet(QualifiedIdentifierContext, identifierName, operandInfoParameterlist, out identifierValue, ref resultLine);
+
+                                    commandLine = commandLine.TrimStart();
+                                }
+                                else
+                                {
+                                    // Error in result line
+                                    Debug.Assert(!String.IsNullOrEmpty(resultLine));
+                                }
                             }
                             else
                             {
-                                // Error in result line
-                                Debug.Assert(!String.IsNullOrEmpty(resultLine));
+                                resultLine = "Missing parameters for funtion " + identifierName; //  + " " + IdentifierItem.;
                             }
                             break;
                         case IdentifierKind.Unit:
