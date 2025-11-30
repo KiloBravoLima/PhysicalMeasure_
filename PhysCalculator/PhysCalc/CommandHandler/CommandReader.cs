@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using ConsolAnyColor;
+using PhysicalCalculator.Identifiers;
 
 namespace PhysicalCalculator
 {
@@ -311,7 +312,8 @@ namespace PhysicalCalculator
                     //Encoding FileEncoding = Encoding.ASCII;
                     //Encoding FileEncoding = Encoding.UTF7;
                     FileReader = new StreamReader(FileNameStr, Encoding.UTF7);
-                    if (OutputTracelevel.HasFlag(TraceLevels.FileEnterLeave))
+
+                    if (FileReader != null && OutputTracelevel.HasFlag(TraceLevels.FileEnterLeave))
                     {
                         ResultLine = $"Reading from file \"{FileNameStr}\"";
                     }
@@ -442,27 +444,16 @@ namespace PhysicalCalculator
             }
             else
             {
-                Console.Write(color == ConsoleColor.DarkGreen ? ConsoleAnsiColors.ForgroundDarkGreen
-                            : color == ConsoleColor.Blue      ? ConsoleAnsiColors.ForgroundBlue
-                            : color == ConsoleColor.Red       ? ConsoleAnsiColors.ForgroundRed 
-                            : color == ConsoleColor.Yellow    ? ConsoleAnsiColors.ForgroundYellow
-                            : color == ConsoleColor.White     ? ConsoleAnsiColors.ForgroundWhite 
+                Console.Write(color == ConsoleColor.DarkGreen   ? ConsoleAnsiColors.ForgroundDarkGreen
+                            : color == ConsoleColor.Blue        ? ConsoleAnsiColors.ForgroundBlue
+                            : color == ConsoleColor.Red         ? ConsoleAnsiColors.ForgroundRed 
+                         // : color == ConsoleColor.Gray        ? ConsoleAnsiColors.ForgroundGray
+                            : color == ConsoleColor.DarkYellow  ? ConsoleAnsiColors.ForgroundOrange
+                            : color == ConsoleColor.Yellow      ? ConsoleAnsiColors.ForgroundYellow
+                            : color == ConsoleColor.White       ? ConsoleAnsiColors.ForgroundWhite 
                             : ConsoleAnsiColors.ForgroundColorReset);
-                // Console.ForegroundColor = foregroundColor;
             }
         }
-
-        /***
-        // Console.Write("\x1b[31mThis is red via ANSI\x1b[0m\n");
-        // const string ansi = $"\x1b[38;2;{r};{g};{b}m";
-        const string ForgroundDarkGreen = "\x1b[38;2;0;100;0m";
-        const string ForgroundBlue = "\x1b[38;2;0;0;255m";
-        const string ForgroundRed = "\x1b[31m";
-        const string ForgroundOrange = "\x1b[38;2;255;100;0m";
-        const string ForgroundYellow = "\x1b[38;2;255;255;0m";
-        const string ForgroundWhite = "\x1b[38;2;255;255;255m";
-        const string ForgroundColorReset = "\x1b[0m";
-        ***/
 
         public void ResetColor()
         {
@@ -614,81 +605,6 @@ namespace PhysicalCalculator
             }
         }
 
-
-        /**
-        
-         
-    // ----- Simple ConsoleColor example -----
-    static void WriteWithConsoleColor(ConsoleColor fg, ConsoleColor bg, string text)
-    {
-        var oldFg = Console.ForegroundColor;
-        var oldBg = Console.BackgroundColor;
-        try
-        {
-            Console.ForegroundColor = fg;
-            Console.BackgroundColor = bg;
-            Console.Write(text);
-        }
-        finally
-        {
-            Console.ForegroundColor = oldFg;
-            Console.BackgroundColor = oldBg;
-        }
-    }
-
-    // ----- ANSI / TrueColor example -----
-    // Use "\x1b[38;2;R;G;Bm" for foreground RGB, "\x1b[48;2;R;G;Bm" for background.
-    static void WriteWithAnsiTrueColor(int r, int g, int b, string text)
-    {
-        string ansi = $"\x1b[38;2;{r};{g};{b}m";
-        string reset = "\x1b[0m";
-        Console.Write(ansi + text + reset);
-    }
-
-    // ----- Enable VT processing on Windows (so ANSI sequences work) -----
-    const int STD_OUTPUT_HANDLE = -11;
-    const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    static extern IntPtr GetStdHandle(int nStdHandle);
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
-
-    static void EnableVirtualTerminalProcessing()
-    {
-        var handle = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (handle == IntPtr.Zero) return;
-        if (GetConsoleMode(handle, out var mode))
-        {
-            mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-            SetConsoleMode(handle, mode);
-        }
-    }
-
-    static void Main()
-    {
-        // Simple usage (works everywhere)
-        WriteWithConsoleColor(ConsoleColor.Yellow, ConsoleColor.Black, "This is yellow on black\n");
-
-        // ANSI usage (more control). On Windows call EnableVirtualTerminalProcessing()
-        EnableVirtualTerminalProcessing();
-        WriteWithAnsiTrueColor(255, 100, 0, "This is orange using truecolor ANSI\n");
-
-        // ANSI short color example
-        Console.Write("\x1b[31mThis is red via ANSI\x1b[0m\n");
-
-        // Third‑party alternative (recommended for complex UIs):
-        // - `Spectre.Console` (rich formatting, tables, progress bars)
-        // - `Colorful.Console` (convenience helpers)
-    }
-
-          
-         **/
-
         public void WritePrompt(String prompt)
         {
             ConsoleColor tempColor = this.ForegroundColor;
@@ -703,17 +619,84 @@ namespace PhysicalCalculator
             }
         }
 
-        public void WriteCommandLine(String commandLine)
+        public void WriteCommandLine(CalculatorEnvironment localContext, String commandLine)
         {
             bool isFileRead = false;
-            bool isComment =  commandLine.Contains("//")  // , StringComparison.OrdinalIgnoreCase)
-                           || commandLine.Contains("/*")
-                           || commandLine.Contains("*/");
-            if (isComment)
+            int lineCommentStartIndex = commandLine.IndexOf("//");
+            int startIndex = commandLine.IndexOf("/*");
+            int endIndex = commandLine.IndexOf("*/");
+            bool isBlockCommenStart = startIndex >= 0 && (lineCommentStartIndex < 0 || (startIndex < lineCommentStartIndex && (endIndex < 0 || lineCommentStartIndex < endIndex )) );
+            bool isBlockCommenEnd = endIndex >= 0 && startIndex < endIndex && (lineCommentStartIndex < endIndex);
+            bool isLineComment = lineCommentStartIndex >= 0 && (startIndex < 0 || lineCommentStartIndex < startIndex) && (endIndex < lineCommentStartIndex) ;
+
+            int beforeCommentEndIndex = (lineCommentStartIndex >= 0 && startIndex >= 0) ? Math.Min(lineCommentStartIndex, startIndex) -1
+                                                                                        : (lineCommentStartIndex >= 0 || startIndex >= 0) ?  Math.Max(lineCommentStartIndex, startIndex) -1
+                                                                                                                                          : -1;
+            int afterCommentBeginIndex = endIndex >= 0 ? (commandLine.Length >= endIndex + 3 ) ? endIndex + 3 
+                                                                                               : -1
+                                                       : (lineCommentStartIndex >= 0 || startIndex >= 0 || localContext?.CommentToParseInfo != null) ? -1
+                                                                                                                                                     : 0;
+            String beforeCommentLine = null;
+            String commentLine = null;
+            String afterCommentLine = "";
+
+            if (beforeCommentEndIndex >= 0)                         
+                beforeCommentLine = commandLine.Substring(0, beforeCommentEndIndex+1);
+
+            if (beforeCommentEndIndex >= 0 && afterCommentBeginIndex >= 0 && afterCommentBeginIndex - beforeCommentEndIndex > 0)
+                commentLine = commandLine.Substring(beforeCommentEndIndex + 1, afterCommentBeginIndex - beforeCommentEndIndex);
+            else
+            if (isLineComment || isBlockCommenStart  || isBlockCommenEnd || localContext?.CommentToParseInfo != null || beforeCommentEndIndex >= 0)
+                commentLine = commandLine.Substring(beforeCommentEndIndex + 1);
+
+#if DEBUG
+            if ((isLineComment || isBlockCommenEnd || isBlockCommenStart || localContext?.CommentToParseInfo != null) && commentLine == null)
             {
+                this.WriteLine($"WriteCommandLine internal error: missing commentLine for commandLine = {commandLine.Length} '{commandLine}'");
+            }
+#endif // DEBUG
+
+            if (afterCommentBeginIndex >= 0)
+            {
+                if (commandLine.Length > afterCommentBeginIndex)
+                    afterCommentLine = commandLine.Substring(afterCommentBeginIndex);
+#if DEBUG
+                else
+                    this.WriteLine($"WriteCommandLine internal error: afterCommentBeginIndex = {afterCommentBeginIndex} >= 0 but commandLine = {commandLine.Length} '{commandLine}'");
+#endif // DEBUG
+            }
+            if (beforeCommentLine != null) 
+                this.Write(beforeCommentLine);
+            ConsoleColor? tempColor = null;
+            if ((isLineComment || isBlockCommenStart || localContext?.CommentToParseInfo != null) && this.ForegroundColor != ConsoleColor.DarkGreen)
+            {
+                tempColor = this.ForegroundColor;
                 this.ForegroundColor = ConsoleColor.DarkGreen;
             }
-            this.WriteLine(commandLine);
+            if (commentLine != null) 
+                this.Write(commentLine);
+            if (isLineComment || isBlockCommenEnd)
+            {
+                if (localContext?.CommentToParseInfo == null)
+                {
+                    if (tempColor != null && tempColor != ConsoleColor.DarkGreen && localContext.CommentToParseInfo == null)
+                    {
+                        this.ForegroundColor = tempColor.Value;
+                    }
+                    else
+                    {
+                        this.ForegroundColor = ConsoleColor.Gray;
+                    }
+                }
+            }
+#if DEBUG          
+            if ((beforeCommentLine?.Length ?? 0 + commentLine?.Length ?? 0 + afterCommentLine.Length) != commandLine.Length)
+            {
+                this.WriteLine($"{afterCommentLine}  WriteCommandLine internal error: {beforeCommentLine?.Length ?? -1}  {commentLine?.Length ?? -1} {afterCommentLine.Length} '{commandLine}'");
+            }
+            else
+#endif // DEBUG
+            this.WriteLine(afterCommentLine);
         }
 
         public void WriteResultLine(ref String resultLine)
@@ -923,76 +906,6 @@ namespace PhysicalCalculator
             }
         }
 
-        public void Write(String Line)
-        {   // Echo Line to output
-            if (ResultLineWriter != null) 
-            {   // Echo Line to file output
-                ResultLineWriter.Write(Line);
-            }
-            else
-            {   // Echo Line to console output
-                Console.Write(Line);
-            }
-        }
-
-        public void WriteLine(String Line)
-        {   // Echo Line to output
-            if (ResultLineWriter != null)
-            {   // Echo Line to file output
-                ResultLineWriter.WriteLine(Line);
-            }
-            else
-            {   // Echo Line to console output
-                Console.WriteLine(Line);
-            }
-        }
-
-        public void WritePrompt(String prompt)
-        {   // Echo Line to output
-            if (ResultLineWriter != null)
-            {   // Echo Line to file output
-                ResultLineWriter.WritePrompt(prompt);
-            }
-            else
-            {   // Echo Line to console output
-
-                ConsoleColor tempColor = Console.ForegroundColor;
-                if (tempColor != ConsoleColor.White) // ConsoleColor.Gray
-                {
-                    Console.ForegroundColor = ConsoleColor.White; // ConsoleColor.Gray
-                }
-                Console.Write(prompt);
-                if (tempColor != ConsoleColor.White) // ConsoleColor.Gray
-                {
-                    Console.ForegroundColor = tempColor;
-                }
-            }
-        }
-
-        public void WriteCommandLine(String Line)
-        {   // Echo Line to output
-            if (ResultLineWriter != null)
-            {   // Echo Line to file output
-                ResultLineWriter.WriteCommandLine(Line);
-            }
-            else
-            {   // Echo Line to console output
-                Console.WriteLine(Line);
-            }
-        }
-
-        public void WriteResultLine(String Line)
-        {   // Echo Line to output
-            if (ResultLineWriter != null)
-            {   // Echo Line to file output
-                ResultLineWriter.WriteResultLine(ref Line);
-            }
-            else
-            {   // Echo Line to console output
-                Console.WriteLine(Line);
-            }
-        }
-
         public void AddCommandList(String CommandListName, String[] ListOfCommands)
         {
             CommandList CL = new CommandList(ListOfCommands);
@@ -1041,9 +954,81 @@ namespace PhysicalCalculator
             return AccessorName;
         }
 
-        public virtual String ReadCommand(ref String ResultLine)
+        public virtual String ReadCommand(CalculatorEnvironment localContext, ref String ResultLine)
         {
-            String commandLine = null;
+            #region local functions
+            void Write(String Line)
+            {   // Echo Line to output
+                if (ResultLineWriter != null)
+                {   // Echo Line to file output
+                    ResultLineWriter.Write(Line);
+                }
+                else
+                {   // Echo Line to console output
+                    Console.Write(Line);
+                }
+            }
+
+            void WriteLine(String Line)
+            {   // Echo Line to output
+                if (ResultLineWriter != null)
+                {   // Echo Line to file output
+                    ResultLineWriter.WriteLine(Line);
+                }
+                else
+                {   // Echo Line to console output
+                    Console.WriteLine(Line);
+                }
+            }
+
+            void WritePrompt(String prompt)
+            {   // Echo Line to output
+                if (ResultLineWriter != null)
+                {   // Echo Line to file output
+                    ResultLineWriter.WritePrompt(prompt);
+                }
+                else
+                {   // Echo Line to console output
+
+                    ConsoleColor tempColor = Console.ForegroundColor;
+                    if (tempColor != ConsoleColor.White) // ConsoleColor.Gray
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // ConsoleColor.Gray
+                    }
+                    Console.Write(prompt);
+                    if (tempColor != ConsoleColor.White) // ConsoleColor.Gray
+                    {
+                        Console.ForegroundColor = tempColor;
+                    }
+                }
+            }
+
+            void WriteCommandLine(String Line)
+            {   // Echo Line to output
+                if (ResultLineWriter != null)
+                {   // Echo Line to file output
+                    ResultLineWriter.WriteCommandLine(localContext, Line);
+                }
+                else
+                {   // Echo Line to console output
+                    Console.WriteLine(Line);
+                }
+            }
+
+            void WriteResultLine(String Line)
+            {   // Echo Line to output
+                if (ResultLineWriter != null)
+                {   // Echo Line to file output
+                    ResultLineWriter.WriteResultLine(ref Line);
+                }
+                else
+                {   // Echo Line to console output
+                    Console.WriteLine(Line);
+                }
+            }
+            #endregion local functions
+
+            String commandLine = null; 
             if (CommandAccessors != null)
             {
                 commandLine = CommandAccessors.GetCommandLine(ref ResultLine);

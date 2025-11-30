@@ -158,7 +158,7 @@ namespace PhysicalCalculator.Expression
         Boolean SystemSet(String systemName, bool setAsDefaultSystem, out INametableItem systemItem);
 
         Boolean UnitGet(String unitName, out Unit unitValue, ref String resultLine);
-        Boolean UnitSet(IUnitSystem unitSystem, String unitName, OperandInfo unitValue, String unitSymbol, out INametableItem unitItem, out String errorMessage);
+        Boolean UnitSet(IUnitSystem unitSystem, String unitName, OperandInfo unitValue, String unitSymbol, BaseUnitDimension? specifiedDimension, out INametableItem unitItem, out String errorMessage);
 
         Boolean VariableGet(String variableName, out OperandInfo variableValue, ref String resultLine);
         Boolean VariableSet(String variableName, OperandInfo variableValue);
@@ -468,7 +468,7 @@ namespace PhysicalCalculator.Expression
             if (pqRes != null)
             {
                 Unit pqUnit = pqRes.Unit;
-                if (pqUnit != null)
+                if (pqUnit != null && !pqUnit.IsDimensionless)
                 {
                     Unit namedDerivedUnit = pqUnit.AsNamedUnit;
                     if (namedDerivedUnit != null && !ReferenceEquals(namedDerivedUnit, pqUnit))
@@ -1000,7 +1000,9 @@ namespace PhysicalCalculator.Expression
                             }
 
                             // End of recognized input; Stop reading and return operator tokens from stack.
-                            ReportInvalidPhysicalExpressionFormatError("Invalid or missing operand at '" + InputString.Substring(Pos) + "' at position " + Pos.ToString());
+                            String errorMessage = (!String.IsNullOrEmpty(IdentifierName)) ? "Unknown identifier: '" + IdentifierName + "'"
+                                                                                          : "Invalid or missing operand at '" + InputString.Substring(Pos) + "' at position " + Pos.ToString();
+                            ReportInvalidPhysicalExpressionFormatError(errorMessage);
                         }
                         else
                         {

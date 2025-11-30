@@ -11,22 +11,54 @@ namespace PhysicalMeasure
 
     #region Physical Measure Constants
 
+    public enum BaseUnitDimension
+    {
+        // for custom defined or isolated unit system units
+        Unknown,
+
+        // Physical unit dimensions
+        Length,
+        Mass,
+        Time,
+        ElectricCurrent,
+        ThermodynamicTemperature,
+        AmountOfSubstance,
+        LuminousIntensity,
+
+        // Trigometry unit dimensions
+        Angle,
+        SolidAngle,
+
+        // Data size unit dimension
+        DataSize,
+
+        // Monetary unit dimension
+        Currency
+    }
+
+    public interface IUnitDimensionExponentsAccess
+    {
+        (BaseUnitDimension, SByte)[] Exponents { get; }
+    }
+
+
     public enum UnitSystemKind
     {
         Unknown,
-        PhysicalUnitSystem,
+        TrigometryUnitSystem,
         DataUnitSystem,
+        PhysicalUnitSystem,
         MonetaryUnitSystem,
         CombinedUnitSystem
     }
 
-
-    public enum TrigometryUnitKind
+    public enum TrigometryBaseUnitKind
     {
         Radian, // 
-        TrigometrySystem_NoOfBaseUnits = 1
-    }
+        Steradian,
 
+        TrigometrySystem_NoOfBaseUnits = 2
+    }
 
     public enum PhysicalBaseUnitKind
     {

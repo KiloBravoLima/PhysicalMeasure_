@@ -251,7 +251,7 @@ namespace PhysicalCalculator
                     ResultLine = "";
 
                     CommandLineFromAccessor = commandLineReader.HasAccessor();
-                    String FullCommandLine = commandLineReader.ReadCommand(ref ResultLine);
+                    String FullCommandLine = commandLineReader.ReadCommand(localContext, ref ResultLine);
                     CommandLineEmpty = String.IsNullOrWhiteSpace(FullCommandLine);
                     ResultLineEmpty = String.IsNullOrWhiteSpace(ResultLine);
                     if (!ResultLineEmpty)
@@ -573,7 +573,7 @@ namespace PhysicalCalculator
                 if (commandName == null || commandName == "Print")
                 {  resultLine += "    [ Print ] <expression> [, <expression> ]*                                      Evaluate expressions and show values\n"; }
                 if (commandName == null || commandName == "List")
-                {  resultLine += "    List [ items ] [ settings ] [ commands ]                                       Show All Variable values and functions declarations, \n"
+                {  resultLine += "    List [ items ] [ settings ] [ commands ]  [ <unitsystemname> ]                                     Show All Variable values and functions declarations, \n"
                                + "                                                                                     setting and commands as specified\n"; }
                 if (commandName == null || commandName == "Store")
                 {  resultLine += "    Store <varname>                                                                Save last calculation's result to Variable\n"; }
@@ -656,13 +656,13 @@ namespace PhysicalCalculator
         public (Boolean commandHandled, String resultLine) CommandAbout(ref String commandLine)
         {
             //PhysCalc
-            System.Reflection.Assembly PhysCaclAsm = System.Reflection.Assembly.GetExecutingAssembly();
+            System.Reflection.Assembly PhysCalcAsm = System.Reflection.Assembly.GetExecutingAssembly();
 
             //PhysicalMeasure
             System.Reflection.Assembly PhysicalMeasureAsm = typeof(Quantity).Assembly;
 
             String resultLine = "PhysCalculator" + "\n";
-            resultLine += PhysCaclAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo() + "\n";
+            resultLine += PhysCalcAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo() + "\n";
             // resultLine += "http://physicalmeasure.codeplex.com";
             resultLine += "https://github.com/KiloBravoLima/PhysicalMeasure_";
 
@@ -676,7 +676,7 @@ namespace PhysicalCalculator
             (commandLine, String commentStartStr) = commandLine.PeekCommentStartToken();
             if (!String.IsNullOrWhiteSpace(commentStartStr))
             {
-                resultLine += ConsoleAnsiColors.ForgroundRed;
+                resultLine += ConsoleAnsiColors.ForgroundDarkGreen; //  ForgroundRed;
                 (bool commentEnded, commentStartStr) = CurrentContext.BeginParsingComment(ref commandLine);
                 if (!String.IsNullOrEmpty(commandLine))
                 {
@@ -1141,6 +1141,23 @@ namespace PhysicalCalculator
                             commandLine = commandLine.ReadToken(out unitSymbol);
                         }
 
+                        String dimensionName = null;
+                        BaseUnitDimension? specifiedDimension = null;
+                        if (commandLine.StartsWithKeywordPrefix("dim") == 3)
+                        {
+                            commandLine = commandLine.ReadToken(out string dummyDimensionKeywordToken);
+                            commandLine = commandLine.ReadToken(out dimensionName);
+
+                            if (dimensionName != null)
+                            {
+                                specifiedDimension = BaseUnitDimensionExtensions.ParseBaseUnitDimension(dimensionName);
+                                if (specifiedDimension == BaseUnitDimension.Unknown)
+                                {
+                                    resultLine = $"{dimensionName} is not a valid base unit dimension";
+                                }
+                            }
+                        }
+
                         TryParseChar('=', ref commandLine);
 
                         List<string> ExpectedFollow = new List<string>{",", ";", "sym"};
@@ -1182,7 +1199,7 @@ namespace PhysicalCalculator
                                 }
                             }
 
-                            OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, unitSymbol ?? UnitName, out Item, out string errorMessage);
+                            OK = UnitSet(NewUnitDeclarationNamespace, UnitSys, UnitName, pq, unitSymbol ?? UnitName, specifiedDimension, out Item, out string errorMessage);
                             if (OK)
                             {
                                 /*
@@ -1308,6 +1325,7 @@ namespace PhysicalCalculator
             Boolean listNamedItems = TryParseKeywordPrefix("Items", ref commandLine);
             Boolean listSettings = TryParseKeywordPrefix("Settings", ref commandLine);
             Boolean listCommands = TryParseKeywordPrefix("Commands", ref commandLine);
+            Boolean listBaseUnitDimensions = TryParseKeywordPrefix("Dimensions", ref commandLine);
             Boolean listAll = TryParseKeywordPrefix("All", ref commandLine);
 
             IUnitSystem unitSystem = null;
@@ -1320,16 +1338,29 @@ namespace PhysicalCalculator
                 }
             }
 
-            if (!listNamedItems && !listSettings && !listCommands && !listAll && unitSystem == null)
+            if (!listNamedItems && !listSettings && !listCommands && !listBaseUnitDimensions && !listAll && unitSystem == null)
             {
                 listNamedItems = true;
             }
             else if (listAll)
             {
-                listNamedItems = listSettings = listCommands = true;
+                listNamedItems = listSettings = listCommands = listBaseUnitDimensions = true;
             }
 
             StringBuilder ListStringBuilder = new StringBuilder();
+
+            if (listBaseUnitDimensions)
+            {
+                ListStringBuilder.AppendLine("Base Unit Dimensions:");
+                foreach (BaseUnitDimension dim in Enum.GetValues(typeof(BaseUnitDimension)))
+                {
+                    if (dim != BaseUnitDimension.Unknown)
+                    {
+                        ListStringBuilder.AppendLine("  " + dim.ToString());
+                    }
+                }
+                ListStringBuilder.AppendLine();
+            }
 
             if (listNamedItems || listSettings)
             {
@@ -1353,15 +1384,34 @@ namespace PhysicalCalculator
                 }
             }
 
-            if (unitSystem != null)
+            if (listAll || unitSystem != null)
             {
-                List<String> strings = unitSystem.ToStrings();
-                ListStringBuilder.AppendLine($"UnitSystem '{unitSystem.Name}':");
-                foreach (var str in strings)
+                int index = -1;
+                if (listAll)
                 {
-                    ListStringBuilder.AppendLine("  " + str);
+                    // Try get first unitSystem
+                    index = 0;
+                    unitSystem = Global.CurrentUnitSystems.KnownSystems.ElementAtOrDefault(index);
+                }
+                while (unitSystem != null)
+                {
+                    List<String> strings = unitSystem.ToStrings();
+                    ListStringBuilder.AppendLine($"UnitSystem '{unitSystem.Name}':");
+                    foreach (var str in strings)
+                    {
+                        ListStringBuilder.AppendLine("  " + str);
+                    }
+                    unitSystem = null;
+                    // End of unitSystem
+
+                    if (listAll)
+                    {   // Try get next unitSystem
+                        index++;
+                        unitSystem = Global.CurrentUnitSystems.KnownSystems.ElementAtOrDefault(index);
+                    }
                 }
             }
+
             String resultLine = ListStringBuilder.ToString();
 
             return (true, resultLine);
@@ -1891,7 +1941,7 @@ namespace PhysicalCalculator
         //return context.SystemSet(systemName, unitValue, out systemItem);
         public Boolean SystemSet(IEnvironment context, bool setAsDefaultSystem, String systemName, IQuantity unitValue, out INametableItem systemItem) => context.SystemSet(systemName, setAsDefaultSystem, out systemItem);
 
-        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, OperandInfo unitValue, String unitSymbol, out INametableItem unitItem, out string errorMessage) => context.UnitSet(unitSystem, unitName, unitValue, unitSymbol, out unitItem, out errorMessage);
+        public Boolean UnitSet(IEnvironment context, IUnitSystem unitSystem, String unitName, OperandInfo unitValue, String unitSymbol, BaseUnitDimension? specifiedDimension, out INametableItem unitItem, out string errorMessage) => context.UnitSet(unitSystem, unitName, unitValue, unitSymbol, specifiedDimension, out unitItem, out errorMessage);
 
         #endregion  Custom Unit  access
 
@@ -2079,9 +2129,6 @@ namespace PhysicalCalculator
 
         #endregion  Identifier access
     }
-
-
-
 
 }
 

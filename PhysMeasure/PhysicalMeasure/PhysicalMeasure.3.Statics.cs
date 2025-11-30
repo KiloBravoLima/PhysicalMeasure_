@@ -129,6 +129,58 @@ namespace PhysicalMeasure
         public static readonly UnitPrefix Ki = (UnitPrefix)DataUnitPrefixes["Ki"];
     }
 
+    public static class Trigeometry
+    {
+        public static readonly UnitSystem Units
+        = new UnitSystem("Trigeometry", Prefixes.PhysicsUnitPrefixes,
+            (unitsystem) => new BaseUnit[]
+                                {   new BaseUnit(unitsystem, (SByte)TrigometryBaseUnitKind.Radian, "radian", "rad",    BaseUnitDimension.Angle),
+                                    new BaseUnit(unitsystem, (SByte)TrigometryBaseUnitKind.Steradian, "steradian", "sr", BaseUnitDimension.SolidAngle),
+                                },
+            //   new NamedDerivedUnit(unitsystem, "radian", "rad", new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
+            //   new NamedDerivedUnit(unitsystem, "steradian", "sr", new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
+            (unitsystem) => null,
+            (unitsystem) => new ConvertibleUnit[]
+                                {   new ConvertibleUnit("degree", "°" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ , unitsystem.BaseUnits[(int)TrigometryBaseUnitKind.Radian], new ScaledValueConversion( 360.0 /(2.0 * Math.PI)))   /* [°] = 360 / 2 PI  [rad] */
+                                }
+, isModifiableUnitSystem: false , isIsolatedUnitSystem : true
+                         );
+
+        /* Trigeometry units */
+        public static readonly BaseUnit rad = (BaseUnit)Units["rad"];
+
+        /* Convertible Trigeometry units */
+        public static readonly ConvertibleUnit degree = (ConvertibleUnit)Units["°"];
+    }
+
+    public static class Data
+    {
+        /*  https://en.wikipedia.org/wiki/Units_of_information 
+        Data base units
+            Name      Symbol   Measure 
+            bit       bit       digital data size
+
+        Named scaled units derived from Data base units 
+            Name        Symbol  Quantity                            Expression in terms of other units      Expression in terms of Data base units 
+            byte        B       digital data size                   8 bit                                   8 bit 
+        */
+
+        public static readonly UnitSystem Units
+        = new UnitSystem("Data", Prefixes.DataUnitPrefixes,
+            (unitsystem) => new BaseUnit[]
+                                { new BaseUnit(unitsystem, (SByte)DataBaseUnitKind.DataSize, "bit", "bit", BaseUnitDimension.DataSize) },
+            (unitsystem) => null,
+            (unitsystem) => new ConvertibleUnit[]
+                                { new ConvertibleUnit("byte", "B", unitsystem.BaseUnits[(int)DataBaseUnitKind.DataSize], new ScaledValueConversion(1.0/8)) }  /* [B] = 1/8 * [bit] */
+                       );
+
+        /* Data base units */
+        public static readonly BaseUnit bit = (BaseUnit)Units["bit"];
+
+        /* Convertible Data units */
+        public static readonly ConvertibleUnit Byte = (ConvertibleUnit)Units["byte"];
+    }
+
     public static class SI
     {
         /*  http://en.wikipedia.org/wiki/Category:SI_units 
@@ -182,17 +234,17 @@ namespace PhysicalMeasure
         public static readonly UnitSystem Units
             = new UnitSystem("SI", Prefixes.PhysicsUnitPrefixes,
                 (unitsystem) => new BaseUnit[] 
-                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), /* kg */
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "second", "s"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd") },
+                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m", BaseUnitDimension.Length),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg", BaseUnitDimension.Mass), /* kg */
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "second", "s", BaseUnitDimension.Time),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A", BaseUnitDimension.ElectricCurrent),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K", BaseUnitDimension.ThermodynamicTemperature),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol", BaseUnitDimension.AmountOfSubstance),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd", BaseUnitDimension.LuminousIntensity) },
                 (unitsystem) => new NamedDerivedUnit[] 
                                     { new NamedDerivedUnit(unitsystem, "hertz",     "Hz",   new SByte[] { 0, 0, -1, 0, 0, 0, 0 }),
-                                      new NamedDerivedUnit(unitsystem, "radian",    "rad",  new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
-                                      new NamedDerivedUnit(unitsystem, "steradian", "sr",   new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
+                                //      new NamedDerivedUnit(unitsystem, "radian",    "rad",  new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
+                                //      new NamedDerivedUnit(unitsystem, "steradian", "sr",   new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
                                       new NamedDerivedUnit(unitsystem, "newton",    "N",    new SByte[] { 1, 1, -2, 0, 0, 0, 0 }),
                                       new NamedDerivedUnit(unitsystem, "pascal",    "Pa",   new SByte[] { -1, 1, -2, 0, 0, 0, 0 }),
                                       new NamedDerivedUnit(unitsystem, "joule",     "J",    new SByte[] { 2, 1, -2, 0, 0, 0, 0 }),
@@ -277,92 +329,6 @@ namespace PhysicalMeasure
         public static readonly ConvertibleUnit y   = (ConvertibleUnit)Units["y"];
     }
 
-    public static class Data
-    {
-        /*  https://en.wikipedia.org/wiki/Units_of_information 
-        Data base units
-            Name      Symbol   Measure 
-            bit       bit       digital data size
-
-        Named scaled units derived from Data base units 
-            Name        Symbol  Quantity                            Expression in terms of other units      Expression in terms of Data base units 
-            byte        B       digital data size                   8 bit                                   8 bit 
-        */
-
-        public static readonly UnitSystem Units
-        = new UnitSystem("Data", Prefixes.DataUnitPrefixes,
-            (unitsystem) => new BaseUnit[]
-                                { new BaseUnit(unitsystem, (SByte)DataBaseUnitKind.DataSize, "bit", "bit") },
-            (unitsystem) => null,
-            (unitsystem) => new ConvertibleUnit[]
-                                { new ConvertibleUnit("byte", "B", unitsystem.BaseUnits[(int)DataBaseUnitKind.DataSize], new ScaledValueConversion(1.0/8)) }  /* [B] = 1/8 * [bit] */
-                       );
-
-        /* Data base units */
-        public static readonly BaseUnit bit = (BaseUnit)Units["bit"];
-
-        /* Named units derived from Data base units */
-        // public static readonly NamedDerivedUnit Byte = (NamedDerivedUnit)Units["byte"];
-
-        /* Convertible Data units */
-        public static readonly ConvertibleUnit Byte = (ConvertibleUnit)Units["byte"];
-
-    }
-
-    public static class Trigeometry
-    {
-        public static readonly UnitSystem Units
-        = new UnitSystem("Trigeometry", Prefixes.PhysicsUnitPrefixes,
-            (unitsystem) => new BaseUnit[]
-                                { new BaseUnit(unitsystem, (SByte)TrigometryUnitKind.Radian, "Radian", "rad") },
-            (unitsystem) => null,
-            (unitsystem) => new ConvertibleUnit[]
-                                { new ConvertibleUnit("Degree", "°" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ , unitsystem.BaseUnits[(int)TrigometryUnitKind.Radian], new ScaledValueConversion( 360.0 /(2.0 * Math.PI))) }  /* [°] = 360 / 2 PI  [rad] */
-                       );
-
-        /* Trigeometry units */
-        public static readonly BaseUnit rad = (BaseUnit)Units["rad"];
-
-        /* Named units derived from Trigeometry units */
-        // public static readonly NamedDerivedUnit degree = (NamedDerivedUnit)Units["°"];
-
-        /* Convertible Trigeometry units */
-        public static readonly ConvertibleUnit degree = (ConvertibleUnit)Units["°"];
-
-    }
-
-    /***
-    public static / * partial * / class Data
-    {
-        #region Data Measure Constants
-
-        public const int NoOfBaseUnits = (int)DataBaseUnitKind.DataUnitSystem_NoOfBaseUnits; // = 7;
-
-        #endregion Data Measure Constants
-
-        public static readonly Unit dimensionless = Data.Units.Dimensionless;
-
-        public static readonly UnitPrefixTable ByteUnitPrefixes = Data.Units.UnitPrefixes;
-
-        // public static UnitSystemStack CurrentUnitSystems = new UnitSystemStack();
-    }
-
-    public static / * partial * / class Physics
-    {
-        #region Physical Measure Constants
-
-        public const int NoOfBaseUnits = (int)PhysicalBaseUnitKind.PhysicalUnitSystem_NoOfBaseUnits; // = 7;
-
-        #endregion Physical Measure Constants
-
-        public static readonly Unit dimensionless = SI.Units.Dimensionless;
-
-        public static readonly UnitPrefixTable SiUnitPrefixes = SI.Units.UnitPrefixes;
-
-        public static UnitSystemStack CurrentUnitSystems = new UnitSystemStack();
-    }
-    ***/
-
     public static /* partial */ class Global
     {
         #region Physical Measure Constants
@@ -445,13 +411,13 @@ namespace PhysicalMeasure
         public static readonly UnitSystem Units 
             = new UnitSystem("CGS", Prefixes.PhysicsUnitPrefixes,
                              (unitsystem) =>  new BaseUnit[] 
-                                { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "centimeter", "cm"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "gram", "g"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "second", "s"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol"),
-                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd")});
+                                { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "centimeter", "cm", BaseUnitDimension.Length),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "gram", "g", BaseUnitDimension.Mass),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "second", "s", BaseUnitDimension.Time),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A", BaseUnitDimension.ElectricCurrent),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K", BaseUnitDimension.ThermodynamicTemperature),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol", BaseUnitDimension.AmountOfSubstance),
+                                  new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd", BaseUnitDimension.LuminousIntensity)});
     }
 
     public static class MGD_Units
@@ -459,13 +425,13 @@ namespace PhysicalMeasure
         public static readonly UnitSystem Units 
             = new UnitSystem("MGD", Prefixes.PhysicsUnitPrefixes,
                 (unitsystem) => new BaseUnit[] 
-                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), /* kg */
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "day", "d"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd") }
+                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m", BaseUnitDimension.Length),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg", BaseUnitDimension.Mass), /* kg */
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "day", "d", BaseUnitDimension.Time),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A", BaseUnitDimension.ElectricCurrent),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K", BaseUnitDimension.ThermodynamicTemperature),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol", BaseUnitDimension.AmountOfSubstance),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd", BaseUnitDimension.LuminousIntensity) }
                 , null,
                 (unitsystem) => new ConvertibleUnit[] 
                                     { new ConvertibleUnit("second", "sec", unitsystem.BaseUnits[(int)PhysicalBaseUnitKind.Time], new ScaledValueConversion(24 * 60 * 60)),  /* [sec]  = 24 * 60 * 60 * [d] */
@@ -481,13 +447,13 @@ namespace PhysicalMeasure
         public static readonly UnitSystem Units 
             = new UnitSystem("MGM", Prefixes.PhysicsUnitPrefixes,
                 (unitsystem) => new BaseUnit[] 
-                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg"), 
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "moment", "ø"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol"),
-                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd") });
+                                    { new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Length, "meter", "m", BaseUnitDimension.Length),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Mass, "kilogram", "Kg", BaseUnitDimension.Mass), 
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.Time, "moment", "ø", BaseUnitDimension.Time),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ElectricCurrent, "ampere", "A", BaseUnitDimension.ElectricCurrent),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.ThermodynamicTemperature, "kelvin", "K", BaseUnitDimension.ThermodynamicTemperature),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.AmountOfSubstance, "mol", "mol", BaseUnitDimension.AmountOfSubstance),
+                                      new BaseUnit(unitsystem, (SByte)PhysicalBaseUnitKind.LuminousIntensity, "candela", "cd", BaseUnitDimension.LuminousIntensity) });
     }
 
     public static /* partial */ class UnitSystems

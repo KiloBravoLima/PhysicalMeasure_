@@ -6,47 +6,81 @@ var resPow2Rot2 = rot(25 , 2)
 
 
 var theta0   = 0        * 1 rad 
+var theta30  = PI * 1/6 * 1 rad 
 var theta45  = PI * 1/4 * 1 rad 
+var theta60  = PI * 2/6 * 1 rad 
 var theta90  = PI * 2/4 * 1 rad 
+var theta120 = PI * 4/6 * 1 rad 
 var theta135 = PI * 3/4 * 1 rad 
+var theta150 = PI * 5/6 * 1 rad 
 var theta180 = PI       * 1 rad 
+var theta210 = PI * 7/6 * 1 rad 
 var theta225 = PI * 5/4 * 1 rad 
+var theta240 = PI * 8/6 * 1 rad
 var theta270 = PI * 1.5 * 1 rad 
-var theta315 = PI * 7/4 * 1 rad 
-var theta360 = PI * 2   * 1 rad 
+var theta300 = PI * 10/6 * 1 rad
+var theta315 = PI *  7/4 * 1 rad 
+var theta330 = PI * 11/6 * 1 rad
+var theta360 = PI * 2    * 1 rad 
 
 var theta0InDegrees   = theta0 [°]
+var theta30InDegrees  = theta30 [°]
 var theta45InDegrees  = theta45 [°]
+var theta60InDegrees  = theta60 [°]
 var theta90InDegrees  = theta90 [°]
+var theta120InDegrees = theta120 [°]
 var theta135InDegrees = theta135 [°]
+var theta150InDegrees = theta150 [°]
 var theta180InDegrees = theta180 [°]
+var theta210InDegrees = theta210 [°]
 var theta225InDegrees = theta225 [°]
+var theta240InDegrees = theta240 [°]
+var theta270InDegrees = theta270 [°]
+var theta300InDegrees = theta300 [°]
 var theta315InDegrees = theta315 [°]
+var theta330InDegrees = theta330 [°]
 var theta360InDegrees = theta360 [°]
 
 var sinTheta0 = sin(theta0)
+var sinTheta30 = sin(theta30)
 var sinTheta45 = sin(theta45)
+var sinTheta60 = sin(theta60)
 var sinTheta90 = sin(theta90)
+var sinTheta120 = sin(theta120)
 var sinTheta135 = sin(theta135)
+var sinTheta150 = sin(theta150)
 var sinTheta180 = sin(theta180)
+var sinTheta210 = sin(theta210)
 var sinTheta225 = sin(theta225)
+var sinTheta240 = sin(theta240)
 var sinTheta270 = sin(theta270)
+var sinTheta300 = sin(theta300)
 var sinTheta315 = sin(theta315)
+var sinTheta330 = sin(theta330)
 var sinTheta360 = sin(theta360)
 
 var cosTheta0 = cos(theta0)
+var cosTheta30 = cos(theta30)
 var cosTheta45 = cos(theta45)
+var cosTheta60 = cos(theta60)
 var cosTheta90 = cos(theta90)
+var cosTheta120 = cos(theta120)
+var cosTheta135 = cos(theta135)
+var cosTheta150 = cos(theta150)
 var cosTheta180 = cos(theta180)
+var cosTheta210 = cos(theta210)
 var cosTheta225 = cos(theta225)
+var cosTheta240 = cos(theta240)
 var cosTheta270 = cos(theta270)
+var cosTheta300 = cos(theta300)
 var cosTheta315 = cos(theta315)
+var cosTheta330 = cos(theta330)
 var cosTheta360 = cos(theta360)
 
 var height =  5.5 cm
 var length =  36 cm
-var sinTheta = height / length
-var theta2 = Asin(sinTheta)
+var sinTheta2 = height / length
+var theta2 = Asin(sinTheta2)
 
 var theta2InDegrees = theta2 [°] ; // Convert radians to degrees
 

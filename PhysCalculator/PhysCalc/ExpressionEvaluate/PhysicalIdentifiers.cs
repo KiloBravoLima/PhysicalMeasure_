@@ -136,7 +136,7 @@ namespace PhysicalCalculator.Identifiers
 
         public IEnvironment Environment = null;
 
-        public NamedUnit(IUnitSystem unitSystem, String name, String unitSymbol, Unit physicalUnit, CalculatorEnvironment environment = null /* = null */)
+        public NamedUnit(IUnitSystem unitSystem, String name, String unitSymbol, Unit physicalUnit, BaseUnitDimension? dimension, CalculatorEnvironment environment = null /* = null */)
         {
             this.Environment = environment;
             if (physicalUnit != null)
@@ -145,11 +145,11 @@ namespace PhysicalCalculator.Identifiers
             }
             else
             {
-                this.pu = MakeBaseUnit(name, unitSymbol, unitSystem);
+                this.pu = MakeBaseUnit(name, unitSymbol, unitSystem, dimension);
             }
         }
 
-        public NamedUnit(IUnitSystem unitSystem, String name, String unitSymbol, Quantity unitValue, CalculatorEnvironment environment /* = null */)
+        public NamedUnit(IUnitSystem unitSystem, String name, String unitSymbol, Quantity unitValue, BaseUnitDimension? dimension, CalculatorEnvironment environment /* = null */)
         {
             this.Environment = environment;
             if (unitValue != null)
@@ -170,7 +170,7 @@ namespace PhysicalCalculator.Identifiers
             }
             else
             {
-                this.pu = MakeBaseUnit(name, unitSymbol, unitSystem);
+                this.pu = MakeBaseUnit(name, unitSymbol, unitSystem, dimension);
             }
         }
 
@@ -234,11 +234,13 @@ namespace PhysicalCalculator.Identifiers
 
         private static BaseUnit MakeBaseUnit(String name) => MakeBaseUnit(name, null, null);
 
-        private static BaseUnit MakeBaseUnit(String name, String unitSymbol, IUnitSystem unitSystem)
+        private static BaseUnit MakeBaseUnit(String name, String unitSymbol, IUnitSystem unitSystem, BaseUnitDimension? someDimension = null)
         {
+            BaseUnitDimension dimension = (someDimension != null) ? someDimension.Value : BaseUnitDimension.Unknown;
+
             if (unitSystem == null)
             {
-                unitSystem = new UnitSystem(name + "_system", null, (unitsystem) => new BaseUnit[] { new BaseUnit(unitsystem, 0, name, unitSymbol) }, isModifiableUnitSystem: true);
+                unitSystem = new UnitSystem(name + "_system", null, (unitsystem) => new BaseUnit[] { new BaseUnit(unitsystem, 0, name, unitSymbol, dimension) }, isModifiableUnitSystem: true);
                 return unitSystem.BaseUnits[0];
             }
             else
@@ -254,7 +256,7 @@ namespace PhysicalCalculator.Identifiers
                 if (indexForExistingBaseUnit >= 0)
                 {
                     // Base unit already exists
-                    unitSystem.BaseUnits[indexForExistingBaseUnit] = new BaseUnit(unitSystem, indexForExistingBaseUnit, name, unitSymbol); 
+                    unitSystem.BaseUnits[indexForExistingBaseUnit] = new BaseUnit(unitSystem, indexForExistingBaseUnit, name, unitSymbol, dimension); 
                     return unitSystem.BaseUnits[indexForExistingBaseUnit];
                 }
                 BaseUnit[] baseunitarray = new BaseUnit[NoOfBaseUnits + 1];
@@ -262,7 +264,7 @@ namespace PhysicalCalculator.Identifiers
                 {
                     unitSystem.BaseUnits.CopyTo(baseunitarray, 0);
                 }
-                baseunitarray[NoOfBaseUnits] = new BaseUnit(unitSystem, (sbyte)(NoOfBaseUnits), name, unitSymbol);
+                baseunitarray[NoOfBaseUnits] = new BaseUnit(unitSystem, (sbyte)(NoOfBaseUnits), name, unitSymbol, dimension);
                 UnitSystem uso = unitSystem as UnitSystem;
                 uso.BaseUnits = baseunitarray;
                 return baseunitarray[NoOfBaseUnits];
@@ -276,7 +278,7 @@ namespace PhysicalCalculator.Identifiers
                 return unitSystem.BaseUnits[0];
                 **/
 
-                unitSystem = new ExtentedUnitSystem(unitSystem as UnitSystem, $"{unitSystem.Name}_With_{name}_system", someExtraBaseUnitsBuilder: (newUnitsystem) => new BaseUnit[] { new BaseUnit(newUnitsystem, (sbyte)unitSystem.BaseUnits.Length, name, unitSymbol) }, someExtraNamedDerivedUnitsBuilder: null, someExtraConvertibleUnitsBuilder: null, isModifiableUnitSystem: true); 
+                unitSystem = new ExtentedUnitSystem(unitSystem as UnitSystem, $"{unitSystem.Name}_With_{name}_system", someExtraBaseUnitsBuilder: (newUnitsystem) => new BaseUnit[] { new BaseUnit(newUnitsystem, (sbyte)unitSystem.BaseUnits.Length, name, unitSymbol, dimension) }, someExtraNamedDerivedUnitsBuilder: null, someExtraConvertibleUnitsBuilder: null, isModifiableUnitSystem: true); 
                 return unitSystem.BaseUnits[unitSystem.BaseUnits.Length-1];
             }
         }
@@ -1009,7 +1011,7 @@ namespace PhysicalCalculator.Identifiers
             return context.SetLocalIdentifier(systemName, systemItem);
         }
 
-        public Boolean UnitSet(IUnitSystem unitSystem, String unitName, OperandInfo unitValue, String unitSymbol, out INametableItem unitItem, out string errorMessage)
+        public Boolean UnitSet(IUnitSystem unitSystem, String unitName, OperandInfo unitValue, String unitSymbol, BaseUnitDimension? dimension, out INametableItem unitItem, out string errorMessage)
         {
             // Find identifier 
             Boolean Found = FindIdentifier(unitName, out IEnvironment context, out unitItem);
@@ -1048,7 +1050,7 @@ namespace PhysicalCalculator.Identifiers
                     **/
                 }
                 // unitItem = new NamedUnit(unitSystem, unitName, unitSymbol, unitValue?.AsQuantity()?.Unit, this);
-                unitItem = new NamedUnit(unitSystem, unitName, unitSymbol, unitValue?.AsQuantity(), this);
+                unitItem = new NamedUnit(unitSystem, unitName, unitSymbol, unitValue?.AsQuantity(), dimension, this);
                 updateRes = (true, "");
             }
             else
