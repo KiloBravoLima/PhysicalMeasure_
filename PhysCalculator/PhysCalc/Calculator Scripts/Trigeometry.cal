@@ -1,0 +1,53 @@
+﻿// Saved 2025-11-17 12:00:00 to Trigeometry.cal
+
+/** **/
+var resPow2 = pow(5, 2)
+var resPow2Rot2 = rot(25 , 2)
+
+
+var theta0   = 0        * 1 rad 
+var theta45  = PI * 1/4 * 1 rad 
+var theta90  = PI * 2/4 * 1 rad 
+var theta135 = PI * 3/4 * 1 rad 
+var theta180 = PI       * 1 rad 
+var theta225 = PI * 5/4 * 1 rad 
+var theta270 = PI * 1.5 * 1 rad 
+var theta315 = PI * 7/4 * 1 rad 
+var theta360 = PI * 2   * 1 rad 
+
+var theta0InDegrees   = theta0 [°]
+var theta45InDegrees  = theta45 [°]
+var theta90InDegrees  = theta90 [°]
+var theta135InDegrees = theta135 [°]
+var theta180InDegrees = theta180 [°]
+var theta225InDegrees = theta225 [°]
+var theta315InDegrees = theta315 [°]
+var theta360InDegrees = theta360 [°]
+
+var sinTheta0 = sin(theta0)
+var sinTheta45 = sin(theta45)
+var sinTheta90 = sin(theta90)
+var sinTheta135 = sin(theta135)
+var sinTheta180 = sin(theta180)
+var sinTheta225 = sin(theta225)
+var sinTheta270 = sin(theta270)
+var sinTheta315 = sin(theta315)
+var sinTheta360 = sin(theta360)
+
+var cosTheta0 = cos(theta0)
+var cosTheta45 = cos(theta45)
+var cosTheta90 = cos(theta90)
+var cosTheta180 = cos(theta180)
+var cosTheta225 = cos(theta225)
+var cosTheta270 = cos(theta270)
+var cosTheta315 = cos(theta315)
+var cosTheta360 = cos(theta360)
+
+var height =  5.5 cm
+var length =  36 cm
+var sinTheta = height / length
+var theta2 = Asin(sinTheta)
+
+var theta2InDegrees = theta2 [°] ; // Convert radians to degrees
+
+list

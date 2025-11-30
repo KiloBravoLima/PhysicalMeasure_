@@ -437,7 +437,7 @@ namespace PhysicalCalculator.Expression
             if (!String.IsNullOrEmpty(commandLine))
             {
                 pu = ParseOptionalConvertToUnit(ref commandLine, ref resultLine);
-                if (Object.ReferenceEquals(pu, ConvertToBaseUnits))
+                if (pu != null && Object.ReferenceEquals(pu, ConvertToBaseUnits))
                 {
                     pu = new CombinedUnit(pq.Unit.AsPrefixedUnitExponentList());
                 }
@@ -1049,6 +1049,7 @@ namespace PhysicalCalculator.Expression
 
         public static readonly Quantity PQ_False = new Quantity(0);
         public static readonly Quantity PQ_True = new Quantity(1);
+        public static readonly Quantity PQ_Pi = new Quantity(Math.PI);
 
 
         public static readonly OperandInfo OI_False = new OperandInfo(PQ_False, typeof(Quantity));
@@ -1531,8 +1532,6 @@ namespace PhysicalCalculator.Expression
                             VariableGet(QualifiedIdentifierContext, identifierName, out identifierValue, ref resultLine);
                             break;
                         case IdentifierKind.Function:
-
-
                             if (TokenString.ParseChar('(', ref commandLine, ref resultLine))
                             {
                                 commandLine = commandLine.TrimStart();
@@ -1540,7 +1539,9 @@ namespace PhysicalCalculator.Expression
                                 // FunktionInfo funk = IdentifierItem as Funktion;
                                 List<string> ExpectedFollow = new List<string> { ")" };
                                 List<OperandInfo> operandInfoParameterlist = null;
-                                if (IdentifierItem is PhysicalQuantityCommandsFunction)
+                                if (   IdentifierItem is PhysicalQuantityFunction_PQ_SB 
+                                    || IdentifierItem is PhysicalQuantityFunction_PQ
+                                    || IdentifierItem is PhysicalQuantityCommandsFunction)
                                 {
                                     operandInfoParameterlist = ParseExpressionList(ref commandLine, ref resultLine, ExpectedFollow, true);
                                 }
@@ -1856,7 +1857,7 @@ namespace PhysicalCalculator.Expression
 
                 // Parse unit
                 commandLine = commandLine.TrimStart();
-                if (!String.IsNullOrEmpty(commandLine) && (Char.IsLetter(commandLine[0]) || Char.Equals(commandLine[0], '°')))        // Need '°' to read "°C" as unit name
+                if (!String.IsNullOrEmpty(commandLine) && (Char.IsLetter(commandLine[0]) || Char.Equals(commandLine[0], '°')))        // Need '°' to read "°" and "°C" as unit names
                 {
                     int UnitStringLen = commandLine.IndexOfAny(new Char[] { ' ' });  // ' '
                     if (UnitStringLen < 0 )

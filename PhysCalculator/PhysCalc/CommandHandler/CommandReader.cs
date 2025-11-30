@@ -3,6 +3,8 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text;
 
+using ConsolAnyColor;
+
 namespace PhysicalCalculator
 {
     [Flags]
@@ -440,9 +442,27 @@ namespace PhysicalCalculator
             }
             else
             {
-                Console.ForegroundColor = foregroundColor;
+                Console.Write(color == ConsoleColor.DarkGreen ? ConsoleAnsiColors.ForgroundDarkGreen
+                            : color == ConsoleColor.Blue      ? ConsoleAnsiColors.ForgroundBlue
+                            : color == ConsoleColor.Red       ? ConsoleAnsiColors.ForgroundRed 
+                            : color == ConsoleColor.Yellow    ? ConsoleAnsiColors.ForgroundYellow
+                            : color == ConsoleColor.White     ? ConsoleAnsiColors.ForgroundWhite 
+                            : ConsoleAnsiColors.ForgroundColorReset);
+                // Console.ForegroundColor = foregroundColor;
             }
         }
+
+        /***
+        // Console.Write("\x1b[31mThis is red via ANSI\x1b[0m\n");
+        // const string ansi = $"\x1b[38;2;{r};{g};{b}m";
+        const string ForgroundDarkGreen = "\x1b[38;2;0;100;0m";
+        const string ForgroundBlue = "\x1b[38;2;0;0;255m";
+        const string ForgroundRed = "\x1b[31m";
+        const string ForgroundOrange = "\x1b[38;2;255;100;0m";
+        const string ForgroundYellow = "\x1b[38;2;255;255;0m";
+        const string ForgroundWhite = "\x1b[38;2;255;255;255m";
+        const string ForgroundColorReset = "\x1b[0m";
+        ***/
 
         public void ResetColor()
         {
@@ -462,7 +482,8 @@ namespace PhysicalCalculator
             }
             else
             {
-                Console.ResetColor();
+                Console.Write(ConsoleAnsiColors.ForgroundColorReset);
+                // Console.ResetColor();
             }
 
             backgroundColor = Console.BackgroundColor;
@@ -471,28 +492,58 @@ namespace PhysicalCalculator
 
         public enum TextMode 
         {
-            Normal = 0,
-            Highlight = 1,
-            Warning = 2,
-            Error = 3
+            Normal = 0,            // Gray
+            Highlight = 1,         // White
+            Warning = 2,           // Yellow
+            Error = 3,             // Red
+            Comment = 4,           // DarkGreen
+            Special = 5            // Blue
         }
 
-        public void SetTextMode(TextMode tm)
-        {
-            if (tm == TextMode.Error)
+
+        List<(TextMode tmCase, ConsoleColor colorCase)> TextModeSetters = new List<(TextMode tmCase, ConsoleColor colorCase)>()
             {
-                if (UseColors && ForegroundColor != ConsoleColor.Red)
-                { 
-                    SetForegroundColor(ConsoleColor.Red);
+                (TextMode.Normal, ConsoleColor.Gray),
+                (TextMode.Highlight, ConsoleColor.White),
+                (TextMode.Warning, ConsoleColor.Yellow),
+                (TextMode.Error, ConsoleColor.Red),
+                (TextMode.Comment, ConsoleColor.DarkGreen),
+                (TextMode.Special, ConsoleColor.Blue)
+            };
+
+        bool CheckTextMode(TextMode newTm, TextMode tmCase, ConsoleColor colorCase)
+        {
+            if (newTm == tmCase)
+            {
+                if (ForegroundColor != colorCase)
+                {
+                    SetForegroundColor(colorCase);
                 }
             }
-            else
+            return newTm == tmCase;
+        }
+        public void SetTextMode(TextMode tm)
+        {
+            if (!UseColors)
             {
-                //if (UseColors && ForegroundColor != ConsoleColor.Gray)
-                if (UseColors && ForegroundColor == ConsoleColor.Red)
+                return;
+            }
+
+            Boolean foundTextModeSetter = false;
+            foreach((TextMode tmCase, ConsoleColor colorCase) element in TextModeSetters)
+            {
+                if (!foundTextModeSetter)
                 {
-                    ResetColor();
+                    foundTextModeSetter = CheckTextMode(tm, element.tmCase, element.colorCase);
                 }
+                else 
+                {
+                    break;
+                }
+            }
+            if (!foundTextModeSetter)
+            {
+                ResetColor();
             }
         }
 
@@ -563,6 +614,144 @@ namespace PhysicalCalculator
             }
         }
 
+
+        /**
+        
+         
+    // ----- Simple ConsoleColor example -----
+    static void WriteWithConsoleColor(ConsoleColor fg, ConsoleColor bg, string text)
+    {
+        var oldFg = Console.ForegroundColor;
+        var oldBg = Console.BackgroundColor;
+        try
+        {
+            Console.ForegroundColor = fg;
+            Console.BackgroundColor = bg;
+            Console.Write(text);
+        }
+        finally
+        {
+            Console.ForegroundColor = oldFg;
+            Console.BackgroundColor = oldBg;
+        }
+    }
+
+    // ----- ANSI / TrueColor example -----
+    // Use "\x1b[38;2;R;G;Bm" for foreground RGB, "\x1b[48;2;R;G;Bm" for background.
+    static void WriteWithAnsiTrueColor(int r, int g, int b, string text)
+    {
+        string ansi = $"\x1b[38;2;{r};{g};{b}m";
+        string reset = "\x1b[0m";
+        Console.Write(ansi + text + reset);
+    }
+
+    // ----- Enable VT processing on Windows (so ANSI sequences work) -----
+    const int STD_OUTPUT_HANDLE = -11;
+    const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern IntPtr GetStdHandle(int nStdHandle);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+
+    static void EnableVirtualTerminalProcessing()
+    {
+        var handle = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (handle == IntPtr.Zero) return;
+        if (GetConsoleMode(handle, out var mode))
+        {
+            mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            SetConsoleMode(handle, mode);
+        }
+    }
+
+    static void Main()
+    {
+        // Simple usage (works everywhere)
+        WriteWithConsoleColor(ConsoleColor.Yellow, ConsoleColor.Black, "This is yellow on black\n");
+
+        // ANSI usage (more control). On Windows call EnableVirtualTerminalProcessing()
+        EnableVirtualTerminalProcessing();
+        WriteWithAnsiTrueColor(255, 100, 0, "This is orange using truecolor ANSI\n");
+
+        // ANSI short color example
+        Console.Write("\x1b[31mThis is red via ANSI\x1b[0m\n");
+
+        // Third‑party alternative (recommended for complex UIs):
+        // - `Spectre.Console` (rich formatting, tables, progress bars)
+        // - `Colorful.Console` (convenience helpers)
+    }
+
+          
+         **/
+
+        public void WritePrompt(String prompt)
+        {
+            ConsoleColor tempColor = this.ForegroundColor;
+            if (tempColor != ConsoleColor.White) // ConsoleColor.Gray
+            {
+                this.ForegroundColor = ConsoleColor.White; // ConsoleColor.Gray
+            }
+            this.Write(prompt);
+            if (tempColor != ConsoleColor.White) // ConsoleColor.Gray
+            {
+                this.ForegroundColor = tempColor;
+            }
+        }
+
+        public void WriteCommandLine(String commandLine)
+        {
+            bool isFileRead = false;
+            bool isComment =  commandLine.Contains("//")  // , StringComparison.OrdinalIgnoreCase)
+                           || commandLine.Contains("/*")
+                           || commandLine.Contains("*/");
+            if (isComment)
+            {
+                this.ForegroundColor = ConsoleColor.DarkGreen;
+            }
+            this.WriteLine(commandLine);
+        }
+
+        public void WriteResultLine(ref String resultLine)
+        {
+            bool isFileRead = false;
+            bool isError =    resultLine.Contains("Error")  // , StringComparison.OrdinalIgnoreCase)
+                           || resultLine.Contains("not found")
+                           || resultLine.Contains("Do not")
+                           || resultLine.Contains("can't be declared")
+                           || resultLine.Contains("Can't update");
+            if (isError)
+            {
+                this.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                isFileRead =   resultLine.Contains("Reading from")
+                            || resultLine.Contains("End of File")
+                            || resultLine.Contains("Do not");
+                if (isFileRead)
+                {
+                    this.ForegroundColor = ConsoleColor.Yellow;
+                }
+                else
+                {
+                    this.ForegroundColor = ConsoleColor.White;
+                }
+            }
+
+            this.WriteLine(resultLine);
+
+            // if (isError || isFileRead)
+            {
+                this.ResetColor();
+            }
+
+            resultLine = "";
+        }
 
         public void WriteErrorLine(String ResultLine)
         {
@@ -758,6 +947,52 @@ namespace PhysicalCalculator
             }
         }
 
+        public void WritePrompt(String prompt)
+        {   // Echo Line to output
+            if (ResultLineWriter != null)
+            {   // Echo Line to file output
+                ResultLineWriter.WritePrompt(prompt);
+            }
+            else
+            {   // Echo Line to console output
+
+                ConsoleColor tempColor = Console.ForegroundColor;
+                if (tempColor != ConsoleColor.White) // ConsoleColor.Gray
+                {
+                    Console.ForegroundColor = ConsoleColor.White; // ConsoleColor.Gray
+                }
+                Console.Write(prompt);
+                if (tempColor != ConsoleColor.White) // ConsoleColor.Gray
+                {
+                    Console.ForegroundColor = tempColor;
+                }
+            }
+        }
+
+        public void WriteCommandLine(String Line)
+        {   // Echo Line to output
+            if (ResultLineWriter != null)
+            {   // Echo Line to file output
+                ResultLineWriter.WriteCommandLine(Line);
+            }
+            else
+            {   // Echo Line to console output
+                Console.WriteLine(Line);
+            }
+        }
+
+        public void WriteResultLine(String Line)
+        {   // Echo Line to output
+            if (ResultLineWriter != null)
+            {   // Echo Line to file output
+                ResultLineWriter.WriteResultLine(ref Line);
+            }
+            else
+            {   // Echo Line to console output
+                Console.WriteLine(Line);
+            }
+        }
+
         public void AddCommandList(String CommandListName, String[] ListOfCommands)
         {
             CommandList CL = new CommandList(ListOfCommands);
@@ -821,17 +1056,17 @@ namespace PhysicalCalculator
                 {   // Echo Command to output
                     if (!String.IsNullOrWhiteSpace(ResultLine))
                     {
-                        WriteLine(ResultLine);
+                        WriteResultLine(ResultLine);
                         ResultLine = "";
                     }
-                    Write("| ");
-                    WriteLine(commandLine);
+                    WritePrompt("| ");
+                    WriteCommandLine(commandLine);
                 }
             }
             else if (ReadFromConsoleWhenEmpty)
             {
                 // Show that we are ready to next Command from user
-                Write("|>");
+                WritePrompt("|>");
 
                 commandLine = Console.ReadLine();
                 CommandHistory.Add(commandLine);

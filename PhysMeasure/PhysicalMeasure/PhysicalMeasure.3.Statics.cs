@@ -309,6 +309,28 @@ namespace PhysicalMeasure
 
     }
 
+    public static class Trigeometry
+    {
+        public static readonly UnitSystem Units
+        = new UnitSystem("Trigeometry", Prefixes.PhysicsUnitPrefixes,
+            (unitsystem) => new BaseUnit[]
+                                { new BaseUnit(unitsystem, (SByte)TrigometryUnitKind.Radian, "Radian", "rad") },
+            (unitsystem) => null,
+            (unitsystem) => new ConvertibleUnit[]
+                                { new ConvertibleUnit("Degree", "°" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ , unitsystem.BaseUnits[(int)TrigometryUnitKind.Radian], new ScaledValueConversion( 360.0 /(2.0 * Math.PI))) }  /* [°] = 360 / 2 PI  [rad] */
+                       );
+
+        /* Trigeometry units */
+        public static readonly BaseUnit rad = (BaseUnit)Units["rad"];
+
+        /* Named units derived from Trigeometry units */
+        // public static readonly NamedDerivedUnit degree = (NamedDerivedUnit)Units["°"];
+
+        /* Convertible Trigeometry units */
+        public static readonly ConvertibleUnit degree = (ConvertibleUnit)Units["°"];
+
+    }
+
     /***
     public static / * partial * / class Data
     {

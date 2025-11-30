@@ -15,29 +15,28 @@ namespace CommandParser
         {
         }
 
-        public virtual Boolean Command(ref String CommandLine, out String ResultLine)
+        public virtual (Boolean CommandHandled, String ResultLine) Command(ref String CommandLine)
         {
             Boolean CommandHandled = false;
 
-            ResultLine = "Unknown command";
+            String ResultLine = "Unknown command";
 
-            return CommandHandled;
+            return (CommandHandled, ResultLine);
         }
 
-        public delegate Boolean CommandDelegate(ref string CommandLine, ref string ResultLine);
+        public delegate ( Boolean CommandHandled, string CommandLine)  CommandDelegate(ref string CommandLine);
 
         // static 
-        public Boolean CheckForCommand(String CommandKeyword, CommandDelegate CmdHandler, ref String CommandLine, ref String ResultLine, ref Boolean CommandHandled)
+        public (Boolean CommandFound, String ResultLine) CheckForCommand(String CommandKeyword, CommandDelegate CmdHandler, ref String CommandLine)
         {
             Boolean IsThisCommand = TryParseToken(CommandKeyword, ref CommandLine);
-
+            String ResultLine = "";
             if (IsThisCommand)
             {
-                ResultLine = "";
-                CommandHandled = CmdHandler(ref CommandLine, ref ResultLine);
+                (Boolean CommandHandled, ResultLine) = CmdHandler(ref CommandLine);
             }
 
-            return IsThisCommand;
+            return (IsThisCommand, ResultLine);
         }
 
         // static 

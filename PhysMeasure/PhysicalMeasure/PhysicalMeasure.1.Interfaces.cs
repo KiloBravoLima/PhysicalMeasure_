@@ -20,6 +20,14 @@ namespace PhysicalMeasure
         CombinedUnitSystem
     }
 
+
+    public enum TrigometryUnitKind
+    {
+        Radian, // 
+        TrigometrySystem_NoOfBaseUnits = 1
+    }
+
+
     public enum PhysicalBaseUnitKind
     {
         Length,
@@ -358,6 +366,12 @@ namespace PhysicalMeasure
         Quantity Abs();
     }
 
+    public interface IQuantityTrigometryMath
+    {
+        Quantity Sin();
+        Quantity Cos();
+    }
+
     public interface IQuantityConversion
     {
         // Auto detecting if specific or relative unit conversion 
@@ -504,6 +518,8 @@ namespace PhysicalMeasure
         Quantity ConvertTo(Quantity physicalQuantity, IUnitSystem convertToUnitSystem);
 
         Quantity SpecificConvertTo(Quantity physicalQuantity, Unit convertToUnit);
+
+        List<String> ToStrings();
     }
 
     public interface ICombinedUnitSystem : IUnitSystem, IEquatable<ICombinedUnitSystem>

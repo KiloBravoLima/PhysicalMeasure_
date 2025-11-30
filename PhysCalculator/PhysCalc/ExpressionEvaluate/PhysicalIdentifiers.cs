@@ -1,16 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Globalization;
-using System.Diagnostics;
+﻿using ConsolAnyColor;
+
+using PhysicalCalculator.CommandBlock;
+using PhysicalCalculator.Expression;
+using PhysicalCalculator.Function;
 
 using PhysicalMeasure;
 
-using PhysicalCalculator.Expression;
-using PhysicalCalculator.CommandBlock;
-using PhysicalCalculator.Function;
-using System.Runtime.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
+
+using TokenParser;
+
+using static PhysicalCalculator.Identifiers.CalculatorEnvironment;
 
 namespace PhysicalCalculator.Identifiers
 {
@@ -488,7 +494,9 @@ namespace PhysicalCalculator.Identifiers
         ReadFunctionBody = 7,
 
         ReadCommandBlock = 8,  
-        ReadCommands = 9  
+        ReadCommands = 9,
+
+        ReadComment = 10,
     }
     
     public enum DeclarationEnvironmentKind
@@ -595,6 +603,42 @@ namespace PhysicalCalculator.Identifiers
 
     public class CalculatorEnvironment : NametableItem, IEnvironment
     {
+        public class CommentParseInfo
+        {
+            public CommentParseInfo outerCommentToParseInfo = null;
+            public CommandParserState PrevParseState;
+
+            public String CommentStartStr = null;
+            public String CommentEndStr = null;
+            public String CommentText = null;
+
+            public void AddCommentText(String commentText)
+            {
+                this.CommentText += commentText;
+                if (outerCommentToParseInfo != null)
+                {
+                    outerCommentToParseInfo.AddCommentText(commentText);
+                }   
+            }
+
+            public CommentParseInfo(string commentStartStr, CommentParseInfo outerCommentToParseInf, CommandParserState prevParseState)
+            {
+                this.outerCommentToParseInfo = outerCommentToParseInf;
+                this.PrevParseState = prevParseState;
+
+                this.CommentStartStr = commentStartStr;
+                var reversed = commentStartStr.Reverse().ToArray();
+                String reversedStr = "";
+                foreach (char chr in reversed)
+                {
+                    reversedStr += chr;
+                }
+                this.CommentEndStr = reversedStr;
+
+                this.CommentText = "";
+            }
+        }
+
         public class CommandBlockParseInfo
         {
             public ICommandsEvaluator CommandBlock = null;
@@ -665,6 +709,7 @@ namespace PhysicalCalculator.Identifiers
         public NamedItemTable NamedItems = new NamedItemTable();
 
         public CommandParserState ParseState = CommandParserState.ExecuteCommandLine;
+        public CommentParseInfo CommentToParseInfo = null;
         public FunctionParseInfo FunctionToParseInfo = null;
         public CommandBlockParseInfo CommandBlockToParseInfo = null;
         public int CommandBlockLevel = 0;
@@ -675,8 +720,8 @@ namespace PhysicalCalculator.Identifiers
         private FormatProviderKind FormatProviderSrc = FormatProviderKind.DefaultFormatProvider; 
         public FormatProviderKind FormatProviderSource { get { return FormatProviderSrc; } set { FormatProviderSrc = value; } }
 
-        private bool _AutoDefineUnits = false;
-        public bool AutoDefineUnits { get { return _AutoDefineUnits; } set { _AutoDefineUnits = value; } }
+        private Boolean _AutoDefineUnits = false;
+        public Boolean AutoDefineUnits { get { return _AutoDefineUnits; } set { _AutoDefineUnits = value; } }
 
         #region INameTableItem interface implementation
 
@@ -686,6 +731,74 @@ namespace PhysicalCalculator.Identifiers
 
         #endregion INameTableItem interface implementation
 
+        public (Boolean commentEnded, String resultLine) BeginParsingComment(ref String commandLine) 
+        {
+            Boolean commentEnded = false;
+            String resultLine = null;
+            (commandLine, String commentStartStr) = commandLine.ReadCommentStartToken();
+            if (!String.IsNullOrWhiteSpace(commentStartStr))
+            {
+                resultLine = "" + ConsoleAnsiColors.ForgroundDarkGreen;
+                CommentToParseInfo = new CommentParseInfo(commentStartStr, CommentToParseInfo, ParseState);
+                ParseState = CommandParserState.ReadComment;
+                if (!String.IsNullOrEmpty(commandLine))
+                {
+                    (commentEnded, resultLine) = ParsingCommentContent(ref commandLine);
+                }
+            }
+            return (commentEnded, resultLine);
+        }
+
+        public (Boolean endOfComment, String resultLine) ParsingCommentContent(ref string commandLine)
+        {
+            String resultLine = null;
+            String commentText;
+            int endIndex = commandLine.IndexOf(CommentToParseInfo.CommentEndStr);
+            Boolean endOfComment = endIndex >= 0 && (endIndex == 0 || commandLine[endIndex -1] != '*' || CommentToParseInfo.CommentEndStr.Length == 2);
+            if (endOfComment)
+            {
+                commentText = commandLine.Substring(0, endIndex);
+                commandLine = commandLine.Substring(endIndex + CommentToParseInfo.CommentEndStr.Length).TrimStart();
+                if (!String.IsNullOrEmpty(commentText))
+                {
+                    CommentToParseInfo.AddCommentText(commentText);
+                }
+                resultLine = "" + ConsoleAnsiColors.ForgroundColorReset;
+                EndParsingComment();
+            }
+            else
+            {
+                commentText = commandLine;
+                commandLine = null;
+
+                int beginOfInnerCommentIndex = commentText.IndexOf("/*");
+                Boolean beginOfInnerComment = beginOfInnerCommentIndex >= 0;
+                if (beginOfInnerComment)
+                {
+                    commentText = commentText.Substring(0, beginOfInnerCommentIndex);
+                    if (!String.IsNullOrEmpty(commentText))
+                    {
+                        CommentToParseInfo.AddCommentText(commentText);
+                    }
+                    String innerCommentText = commentText.Substring(beginOfInnerCommentIndex);
+
+                    (Boolean commentEnded, resultLine) = BeginParsingComment(ref innerCommentText);
+                }
+                else
+                if (!String.IsNullOrEmpty(commentText))
+                {
+                    CommentToParseInfo.AddCommentText(commentText);
+                }
+            }
+
+            return (endOfComment, resultLine);
+        }
+
+        public void EndParsingComment()
+        {
+            ParseState = CommentToParseInfo.PrevParseState;
+            CommentToParseInfo = CommentToParseInfo.outerCommentToParseInfo;
+        }
         public Boolean FindNameSpace(String nameSpaceName, out CalculatorEnvironment context)
         {
             // Check this namespace

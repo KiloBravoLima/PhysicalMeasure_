@@ -131,6 +131,19 @@ namespace ConsolAnyColor
         internal static extern Boolean SetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFO_EX_ARRAY csbe);
     }
 
+    static class ConsoleAnsiColors
+    {
+        // Console.Write("\x1b[31mThis is red via ANSI\x1b[0m\n");
+        // const string ansi = $"\x1b[38;2;{r};{g};{b}m";
+        public const string ForgroundDarkGreen = "\x1b[38;2;0;100;0m";
+        public const string ForgroundBlue = "\x1b[38;2;0;0;255m";
+        public const string ForgroundRed = "\x1b[31m";
+        public const string ForgroundOrange = "\x1b[38;2;255;100;0m";
+        public const string ForgroundYellow = "\x1b[38;2;255;255;0m";
+        public const string ForgroundWhite = "\x1b[38;2;255;255;255m";
+        public const string ForgroundColorReset = "\x1b[0m";
+    }
+
     class ConsolAnyColorClass
     {
         // using ConsolNativeMethods;

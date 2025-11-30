@@ -124,6 +124,15 @@
     <None Include="Calculator Scripts\Convert.cal">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Calculator Scripts\Testing.cal">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Calculator Scripts\TrigeometryTesting.cal">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Calculator Scripts\Trigeometry.cal">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Calculator Scripts\Dates.cal">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

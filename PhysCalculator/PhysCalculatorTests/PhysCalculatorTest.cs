@@ -128,7 +128,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = (99999.99).ToString()+" g"; 
             bool expected = true; 
             bool actual;
-            actual = target.Command(ref CommandLine, out ResultLine);
+            (actual, ResultLine) = target.Command(ref CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
         }
@@ -146,7 +146,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = "Identifiers cleared. Command history cleared."; 
             bool expected = true; 
             bool actual;
-            actual = target.CommandClear(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandClear(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -171,8 +171,8 @@ namespace PhysCalculatorTests
             };
             bool expected = true;
             bool actual;
-            actual = target.Command(ref CommandLine, out ResultLine);
-
+            (actual, ResultLine) = target.Command(ref CommandLine);
+            
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(expected, actual);
 
@@ -198,7 +198,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = string.Empty;
             bool expected = true; 
             bool actual;
-            actual = target.CommandComment(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandLineComment(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -260,7 +260,7 @@ namespace PhysCalculatorTests
             };
             bool expected = true; 
             bool actual;
-            actual = target.CommandHelp(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandHelp(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(expected, actual);
 
@@ -287,7 +287,7 @@ namespace PhysCalculatorTests
             bool expected = true;
             bool actual;
 
-            actual = target.CommandSet(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandSet(ref CommandLine);
 
 
             CommandLine = string.Empty; 
@@ -301,7 +301,7 @@ namespace PhysCalculatorTests
                 "var varname = 12 J"
             };
             expected = true;
-            actual = target.CommandList(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandList(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             //Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -326,7 +326,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = (123.456).ToString()+" N"; 
             bool expected = true; 
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine" );
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
             Assert.AreEqual(expected, actual, "for result");
@@ -346,7 +346,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = (3600).ToString() + " m/h";
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
             Assert.AreEqual(expected, actual, "for result");
@@ -367,7 +367,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = "0,17088";
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
             Assert.AreEqual(expected, actual, "for result");
@@ -388,7 +388,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = (123.999999).ToString() + " h";
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -407,7 +407,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = "123:59:59,9964000000091 h:min:s";
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -428,7 +428,7 @@ namespace PhysCalculatorTests
 
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -449,7 +449,7 @@ namespace PhysCalculatorTests
 
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -469,7 +469,7 @@ namespace PhysCalculatorTests
 
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -490,7 +490,7 @@ namespace PhysCalculatorTests
 
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -527,7 +527,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -562,7 +562,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine  );
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -583,7 +583,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -605,7 +605,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -627,7 +627,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -647,7 +647,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -668,7 +668,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             bool expected = true;
             bool actual;
-            actual = target.CommandPrint(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandPrint(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -689,7 +689,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string ResultLineExpected = "Reading from \"epotfunc.cal\" ";
             bool expected = true;
             bool actual;
-            actual = target.CommandReadFromFile(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandReadFromFile(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
             Assert.AreEqual(expected, actual, "for actual");
@@ -712,7 +712,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             // string ResultLineExpected = "Reading from \"testfunc.cal\" "; 
             bool expected = true; 
             bool actual;
-            actual = target.CommandReadFromFile(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandReadFromFile(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine, "for commandLine");
             Assert.AreEqual(ResultLineExpected, ResultLine, "for ResultLine");
             Assert.AreEqual(expected, actual, "for actual");
@@ -736,7 +736,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string ResultLineExpected = "\"varname\" not known";
             bool expected = false; 
             bool actual;
-            actual = target.CommandRemove(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandRemove(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -757,14 +757,14 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             bool expected = true;
             bool actual;
 
-            actual = target.CommandSet(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandSet(ref CommandLine);
 
             CommandLine = "varname";
             CommandLineExpected = string.Empty;
             ResultLine = string.Empty;
             ResultLineExpected = string.Empty;
             expected = true;
-            actual = target.CommandRemove(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandRemove(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -783,7 +783,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string ResultLineExpected = "Saved "; 
             bool expected = true; 
             bool actual;
-            actual = target.CommandSaveToFile(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandSaveToFile(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine, "for CommandLine");
             Assert.AreEqual(ResultLineExpected, ResultLine.Substring(0, ResultLineExpected.Length), "for ResultLine");
             Assert.AreEqual(expected, actual, "for actual");
@@ -802,7 +802,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string ResultLineExpected = "varname = 12 J";
             bool expected = true; 
             bool actual;
-            actual = target.CommandSet(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandSet(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine, "commandLine not as expected");
             Assert.AreEqual(ResultLineExpected, ResultLine, "ResultLine not as expected");
             Assert.AreEqual(expected, actual, "CommandSet() return value not as expected");
@@ -821,7 +821,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string ResultLineExpected = "PeriodInDays = " + (1220).ToString() + " day";
             bool expected = true;
             bool actual;
-            actual = target.Command(ref CommandLine, out ResultLine);
+            (actual, ResultLine) = target.Command(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine, "commandLine not as expected");
             Assert.AreEqual(ResultLineExpected, ResultLine, "ResultLine not as expected");
             Assert.AreEqual(expected, actual, "CommandSet() return value not as expected");
@@ -839,7 +839,8 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             // Set some value in accumulator
             string CommandLine = "3 N * 4 m";
             string ResultLine = string.Empty;
-            target.CommandPrint(ref CommandLine, ref ResultLine);
+            Boolean commandHandled;
+            (commandHandled, ResultLine) = target.CommandPrint(ref CommandLine);
 
             // Store accumulator value to var
             CommandLine = "Varname";
@@ -848,7 +849,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string ResultLineExpected = "12 J";
             bool expected = true; 
             bool actual;
-            actual = target.CommandStore(ref CommandLine, ref ResultLine);
+            (actual, ResultLine) = target.CommandStore(ref CommandLine);
             Assert.AreEqual(CommandLineExpected, CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
@@ -870,7 +871,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             Quantity AccumulatorExpected = new Quantity(111);
             bool expected = true;
             bool actual;
-            actual = target.Command(ref CommandLine, out ResultLine);
+            (actual, ResultLine) = target.Command(ref CommandLine);
             string AccumulatorAccessResultLineExpected = "";
 
             Assert.AreEqual(true, target.VariableGet(null, "Accumulator", out var AccumulatorActual, ref AccumulatorAccessResultLineExpected), "for accumulator access");

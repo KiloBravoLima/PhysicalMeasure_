@@ -163,7 +163,42 @@ namespace TokenParser
             token = commandLine.Substring(0, i);
             return i;
         }
-                             
+
+        public static (String commandLine, String CommentStartStr) ReadCommentStartToken(this String commandLine)
+        {
+            commandLine = commandLine.TrimStart();
+            int i = 0;
+            String CommentStartStr;
+            if (commandLine.StartsWith("/*"))
+            {  // IsStartOfBlockComment 
+                i = 2 + commandLine.Substring(2).TakeWhile(c => c == '*').Count();
+                CommentStartStr = commandLine.Substring(0, i);
+                commandLine = commandLine.Substring(i).TrimStart();
+            }
+            else
+            {
+                CommentStartStr = null;
+            }
+            return (commandLine, CommentStartStr);
+        }
+
+        public static (String commandLine, String CommentStartStr) PeekCommentStartToken(this String commandLine)
+        {
+            commandLine = commandLine.TrimStart();
+            int i = 0;
+            String CommentStartStr;
+            if (commandLine.StartsWith("/*"))
+            {  // IsStartOfBlockComment 
+                i = 2 + commandLine.Substring(2).TakeWhile(c => c == '*').Count();
+                CommentStartStr = commandLine.Substring(0, i);
+                // commandLine = commandLine.Substring(i).TrimStart();
+            }
+            else
+            {
+                CommentStartStr = null;
+            }
+            return (commandLine, CommentStartStr);
+        }
         public static Boolean IsIdentifierStartChar(char c) => (Char.IsLetter(c) || Char.Equals(c, '_')); 
         public static Boolean IsIdentifierSecondaryChar(char c) => (Char.IsLetterOrDigit(c) || Char.Equals(c, '_') );
         public static Boolean IsStartOfIdentifier(this String commandLine) => (!String.IsNullOrEmpty(commandLine) && IsIdentifierStartChar(commandLine[0]));

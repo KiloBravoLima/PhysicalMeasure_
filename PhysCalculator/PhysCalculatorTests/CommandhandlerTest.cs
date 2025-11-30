@@ -294,7 +294,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = "Unknown command";
             bool expected = false; 
             bool actual;
-            actual = target.Command(ref CommandLine, out ResultLine);
+            (actual, ResultLine) = target.Command(ref CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
         }
@@ -311,7 +311,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = "Unknown command"; 
             bool expected = false; 
             bool actual;
-            actual = target.Command(ref CommandLine, out ResultLine);
+            (actual, ResultLine) = target.Command(ref CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
         }
@@ -328,7 +328,7 @@ namespace PhysCalculatorTests
             string ResultLineExpected = "Unknown command";
             bool expected = false;
             bool actual;
-            actual = target.Command(ref CommandLine, out ResultLine);
+            (actual, ResultLine) = target.Command(ref CommandLine);
             Assert.AreEqual(ResultLineExpected, ResultLine);
             Assert.AreEqual(expected, actual);
         }

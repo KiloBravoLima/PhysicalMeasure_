@@ -214,6 +214,41 @@ namespace PhysicalCalculator.Function
         **/
     }
 
+
+    class PhysicalQuantityFunction_PQ : PhysicalQuantityFunction
+    {
+        //UnaryFunction F;
+        Func<Quantity, Quantity> F;
+
+        //public PhysicalQuantityUnaryFunction(UnaryFunction func)
+        public PhysicalQuantityFunction_PQ(CalculatorEnvironment staticOuterContext, Func<Quantity, Quantity> func)
+            : base(staticOuterContext)
+        {
+            F = func;
+
+            ParamListAdd(new PhysicalQuantityFunctionParam("PQ", null));
+        }
+
+        public PhysicalQuantityFunction_PQ(CalculatorEnvironment staticOuterContext, Func<Quantity,Quantity> func, List<PhysicalQuantityFunctionParam> formalparams)
+            : base(staticOuterContext)
+        {
+            F = func;
+            formalparamlist = formalparams;
+        }
+
+        public override bool Evaluate(CalculatorEnvironment localContext, List<OperandInfo> actualParameterlist, out OperandInfo functionResult, ref string resultLine)
+        {
+            if (!CheckParams(actualParameterlist, ref resultLine))
+            {
+                functionResult = null;
+                return false;
+            }
+            var param1 = actualParameterlist[0].OperandValue as Quantity;
+            functionResult = new OperandInfo(F(param1));
+            return true;
+        }
+    }
+
     class PhysicalQuantityFunction_PQ_SB : PhysicalQuantityFunction
     {
         //UnaryFunction F;

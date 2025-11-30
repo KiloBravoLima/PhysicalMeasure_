@@ -1,21 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
-using System.IO;
+﻿using CommandParser;
 
-using System.Reflection;
+using ConsolAnyColor;
+
+using PhysicalCalculator.CommandBlock;
+using PhysicalCalculator.Expression;
+using PhysicalCalculator.Function;
+using PhysicalCalculator.Identifiers;
+
 using PhysicalMeasure;
 
-using TokenParser;
-using CommandParser;
-
-using PhysicalCalculator.Identifiers;
-using PhysicalCalculator.CommandBlock;
-using PhysicalCalculator.Function;
-using PhysicalCalculator.Expression;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+
+using TokenParser;
 
 namespace PhysicalCalculator
 {
@@ -78,9 +81,16 @@ namespace PhysicalCalculator
 
         private void FillPredefinedSystemContext(CalculatorEnvironment somePredefinedSystem)
         {
-            // (Physical quantity) constants
+            // Constants
             somePredefinedSystem.NamedItems.AddItem("False", new NamedConstant(PhysicalCalculator.Expression.PhysicalExpression.PQ_False));
             somePredefinedSystem.NamedItems.AddItem("True", new NamedConstant(PhysicalCalculator.Expression.PhysicalExpression.PQ_True));
+            somePredefinedSystem.NamedItems.AddItem("Pi", new NamedConstant(PhysicalCalculator.Expression.PhysicalExpression.PQ_Pi));
+
+            // Trigometry functions
+            somePredefinedSystem.NamedItems.AddItem("Sin", new PhysicalQuantityFunction_PQ(somePredefinedSystem, (pq) => pq.Sin()));
+            somePredefinedSystem.NamedItems.AddItem("Cos", new PhysicalQuantityFunction_PQ(somePredefinedSystem, (pq) => pq.Cos()));
+            somePredefinedSystem.NamedItems.AddItem("Asin", new PhysicalQuantityFunction_PQ(somePredefinedSystem, (pq) => pq.Asin()));
+            somePredefinedSystem.NamedItems.AddItem("Acos", new PhysicalQuantityFunction_PQ(somePredefinedSystem, (pq) => pq.Acos()));
 
             // Physical quantity functions
             somePredefinedSystem.NamedItems.AddItem("Pow", new PhysicalQuantityFunction_PQ_SB(somePredefinedSystem, (pq, exp) => pq.Pow(exp)));
@@ -167,9 +177,11 @@ namespace PhysicalCalculator
 
         public void SetDefaultUnitSystems()
         {
+            Global.CurrentUnitSystems.Use(Trigeometry.Units);
             Global.CurrentUnitSystems.Use(Data.Units);
             Global.CurrentUnitSystems.Use(SI.Units);
 
+            Trigeometry.Units.TraceUnitSystem();
             Data.Units.TraceUnitSystem();
             SI.Units.TraceUnitSystem();
         }
@@ -244,7 +256,7 @@ namespace PhysicalCalculator
                     ResultLineEmpty = String.IsNullOrWhiteSpace(ResultLine);
                     if (!ResultLineEmpty)
                     {
-                        WriteResultLine(ref ResultLine, resultLineWriter);
+                        resultLineWriter.WriteResultLine(ref ResultLine);
                         LoopExit = false;   // Show error 
                     }
 
@@ -255,17 +267,29 @@ namespace PhysicalCalculator
                         {
                             CommandLine = CommandLine.Trim();
 
+                            if (localContext.CommentToParseInfo != null)
+                            {
+                                (bool commandHandled, ResultLine) = CommentText(ref CommandLine);
+                                LoopExit = !commandHandled;
+                            }
+                            else
                             if (localContext.FunctionToParseInfo != null)
                             {
                                 LoopExit = !FunctionDeclaration(ref CommandLine, out ResultLine);
                             }
                             else
+                            if (CommandLine.StartsWith("/*"))
                             {
-                                // LoopExit = CommandLine.Equals("Exit", StringComparison.OrdinalIgnoreCase);
+                                (bool commandHandled, ResultLine) = CommandBlockComment(ref CommandLine);
+                                LoopExit = !commandHandled;
+                            }
+                            else
+                            {
                                 LoopExit = TryParseKeyword("Exit", ref CommandLine);
                                 if (!LoopExit)
                                 {
-                                    LoopExit = !Command(ref CommandLine, out ResultLine);
+                                    (bool commandHandled, ResultLine) = Command(ref CommandLine);
+                                    LoopExit = !commandHandled;
                                 }
                             }
 
@@ -287,12 +311,7 @@ namespace PhysicalCalculator
 
                                 if (!String.IsNullOrWhiteSpace(ResultLine))
                                 {
-                                    /**
-                                    resultLineWriter.ForegroundColor = ConsoleColor.White;
-                                    resultLineWriter.WriteLine(ResultLine);
-                                    resultLineWriter.ResetColor();
-                                    **/
-                                    WriteResultLine(ref ResultLine,  resultLineWriter);
+                                    resultLineWriter.WriteResultLine(ref ResultLine);
                                 }
                                 else
                                 {
@@ -327,43 +346,6 @@ namespace PhysicalCalculator
                     LoopExit = false;
                 }
             } while ((CommandLineFromAccessor || !CommandLineEmpty || !ResultLineEmpty) && !LoopExit);
-        }
-
-        private void WriteResultLine(ref String resultLine, ResultWriter resultLineWriter)
-        {
-            bool isFileRead = false;
-            bool isError =    resultLine.Contains("Error")  // , StringComparison.OrdinalIgnoreCase)
-                           || resultLine.Contains("not found")
-                           || resultLine.Contains("Do not")
-                           || resultLine.Contains("can't be declared")
-                           || resultLine.Contains("Can't update");
-            if (isError)
-            {
-                resultLineWriter.ForegroundColor = ConsoleColor.Red;
-            }
-            else
-            {
-                isFileRead =   resultLine.Contains("Reading from")  
-                            || resultLine.Contains("End of File")
-                            || resultLine.Contains("Do not");
-                if (isFileRead)
-                {
-                    resultLineWriter.ForegroundColor = ConsoleColor.Yellow;
-                }
-                else
-                {
-                    resultLineWriter.ForegroundColor = ConsoleColor.White;
-                }
-            }
-
-            resultLineWriter.WriteLine(resultLine);
-
-            // if (isError || isFileRead)
-            {
-                resultLineWriter.ResetColor();
-            }
-
-            resultLine = "";
         }
 
         public Boolean ExecuteFunctionCommandsCallback(CalculatorEnvironment localContext, List<String> funcBodyCommands, ref String funcBodyResult, out OperandInfo functionResult)
@@ -433,7 +415,9 @@ namespace PhysicalCalculator
         {
             m_commands = new List<NamedCommand>();
 
-            AddCommand("//", CommandComment);
+            AddCommand("/*", CommandBlockComment);
+            AddCommand("//", CommandLineComment);
+            AddCommand("Exit", CommandExit);
             AddCommand("Read", CommandReadFromFile);
             AddCommand("Include", CommandReadFromFile);
             AddCommand("Load", CommandReadFromFile);
@@ -457,17 +441,17 @@ namespace PhysicalCalculator
         }
 
 
-        public override Boolean Command(ref String commandLine, out String resultLine)
+        public override (Boolean CommandHandled, String ResultLine) Command(ref String commandLine)
         {
-            Boolean CommandFound = false;
+            // Boolean CommandFound = false;
             Boolean CommandHandled = false;
-            resultLine = "Unknown Command";
+            String resultLine = "Unknown Command";
 
             foreach (NamedCommand namedCommand in Commands)
             {
-                if (!CommandFound)
+                if (!CommandHandled)
                 {
-                    CommandFound |= CheckForCommand(namedCommand.commandName, namedCommand.commandHandler, ref commandLine, ref resultLine, ref CommandHandled);
+                    (CommandHandled, resultLine) = CheckForCommand(namedCommand.commandName, namedCommand.commandHandler, ref commandLine);
                 }
                 else
                 {
@@ -475,14 +459,45 @@ namespace PhysicalCalculator
                 }
             }
 
-            if (!CommandFound)
+            if (!CommandHandled)
             {
+                /**
                 CommandFound =   (CommandHandled = IdentifierAssumed(ref commandLine, ref resultLine)) // Assume a print or set Command
                               || (CommandHandled = CommandPrint(ref commandLine, ref resultLine)) // Assume a print Command
                               || (CommandHandled = base.Command(ref commandLine, out resultLine));
+                **/
+
+                (CommandHandled, resultLine) = IdentifierAssumed(ref commandLine); // Assume a print or set Command
+                                                                                   //  CommandFound = CommandHandled;
+                if (!CommandHandled)
+                {
+                    (CommandHandled, resultLine) = CommandPrint(ref commandLine); // Assume a print
+                                                                                  // CommandFound = CommandHandled;
+                    if (!CommandHandled)
+                    {
+                        (CommandHandled, resultLine) = base.Command(ref commandLine);
+                        // CommandFound = CommandHandled;
+                    }
+                }
             }
 
-            return CommandHandled;
+            return (CommandHandled, resultLine);
+        }
+
+        public (Boolean CommentReadingDone, String resultLine) CommentText(ref String commandLine)
+        {
+            String resultLine = "";
+            // if (CurrentContext.CommentToParseInfo != null)
+            {
+                (Boolean CommentReadingDone, resultLine) = CurrentContext.ParsingCommentContent(ref commandLine);
+            }
+            /**
+            else 
+            {
+                resultLine = "Calculator Internal Error: CommentText() Expected some CommentToParseInfo";
+            }
+            **/
+            return (true, resultLine); // CommandHandled; Don't exit
         }
 
         public Boolean FunctionDeclaration(ref String commandLine, out String resultLine)
@@ -505,7 +520,7 @@ namespace PhysicalCalculator
             all = 0xF
         }
 
-        public Boolean CommandHelp(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandHelp(ref String commandLine)
         {
             CommandHelpParts HelpPart = CommandHelpParts.Command;
             String commandName = null;
@@ -529,7 +544,7 @@ namespace PhysicalCalculator
                 }
             }
             
-            resultLine = "";
+            String resultLine = "";
             if (HelpPart == CommandHelpParts.Command || HelpPart == CommandHelpParts.all || commandName != null)
             {   //            "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
                 //            "         1         2         3         4         5         6         7         8         9        10        11        12        13        14"
@@ -621,10 +636,10 @@ namespace PhysicalCalculator
             }
 
             commandLine = "";
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean CommandVersion(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandVersion(ref String commandLine)
         {
             //PhysCalc
             System.Reflection.Assembly PhysCaclAsm = System.Reflection.Assembly.GetExecutingAssembly();
@@ -632,13 +647,13 @@ namespace PhysicalCalculator
             //PhysicalMeasure
             System.Reflection.Assembly PhysicalMeasureAsm = typeof(Quantity).Assembly;
 
-            resultLine = PhysCaclAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo();
+            String resultLine = PhysCaclAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo();
 
             commandLine = "";
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean CommandAbout(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandAbout(ref String commandLine)
         {
             //PhysCalc
             System.Reflection.Assembly PhysCaclAsm = System.Reflection.Assembly.GetExecutingAssembly();
@@ -646,26 +661,49 @@ namespace PhysicalCalculator
             //PhysicalMeasure
             System.Reflection.Assembly PhysicalMeasureAsm = typeof(Quantity).Assembly;
 
-            resultLine = "PhysCalculator" + "\n";
+            String resultLine = "PhysCalculator" + "\n";
             resultLine += PhysCaclAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo() + "\n";
             // resultLine += "http://physicalmeasure.codeplex.com";
             resultLine += "https://github.com/KiloBravoLima/PhysicalMeasure_";
 
             commandLine = "";
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean CommandComment(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandBlockComment(ref String commandLine)
         {
-            resultLine = ""; // = commandLine;
-            commandLine = "";
-            return true;
+            String resultLine = "";
+            (commandLine, String commentStartStr) = commandLine.PeekCommentStartToken();
+            if (!String.IsNullOrWhiteSpace(commentStartStr))
+            {
+                resultLine += ConsoleAnsiColors.ForgroundRed;
+                (bool commentEnded, commentStartStr) = CurrentContext.BeginParsingComment(ref commandLine);
+                if (!String.IsNullOrEmpty(commandLine))
+                {
+                    (commentEnded , resultLine) = CurrentContext.ParsingCommentContent(ref commandLine);
+                }
+            }
+            return (true, resultLine);
         }
-        
-        public Boolean CommandReadFromFile(ref String commandLine, ref String resultLine)
+
+        public (Boolean commandHandled, String resultLine) CommandLineComment(ref String commandLine)
+        {
+            String resultLine = ""; 
+            commandLine = "";
+            return (true, resultLine);
+        }
+
+        public (Boolean commandHandled, String resultLine) CommandExit(ref String commandLine)
+        {
+            String resultLine = "Exiting"; 
+            //commandLine = "";
+            return (false, resultLine);
+        }
+
+        public (Boolean commandHandled, String resultLine) CommandReadFromFile(ref String commandLine)
         {
             String FilePathStr;
-            resultLine = "";
+            String resultLine = "";
             int statementSeparatorIndex = commandLine.IndexOf(';');
             if (statementSeparatorIndex >= 0)
             {   // To end of statement
@@ -677,17 +715,16 @@ namespace PhysicalCalculator
                 FilePathStr = commandLine;
                 commandLine = "";
             }
-            
 
             if ((CommandLineReader != null) && (!string.IsNullOrWhiteSpace(FilePathStr)))
             {
                 CommandLineReader.AddFile(FilePathStr);
                 resultLine = "Reading from \"" + CommandLineReader.Accessor() + "\" ";
             }
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean CommandSaveToFile(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandSaveToFile(ref String commandLine)
         {
             bool SaveContext = true;
 
@@ -703,7 +740,7 @@ namespace PhysicalCalculator
             String FileNameStr;
             FileNameStr = commandLine;
             commandLine = "";
-            resultLine = "";
+            String resultLine = "";
 
             if (!Path.HasExtension(FileNameStr))
             {
@@ -739,7 +776,7 @@ namespace PhysicalCalculator
 
                 resultLine = headerLine;
             }
-            return true;
+            return (true, resultLine);
         }
 
         public void SaveContextToFile(CalculatorEnvironment context, System.IO.StreamWriter file)
@@ -770,12 +807,12 @@ namespace PhysicalCalculator
         }
 
 
-        public Boolean CommandListFiles(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandListFiles(ref String commandLine)
         {
             String FilePathStr = "."; // Look in current (local) dir
             String SortStr = "name"; // Sort by file name
             Func<FileInfo, String> KeySelector;
-            resultLine = "";
+            String resultLine = "";
 
             if (!string.IsNullOrWhiteSpace(commandLine))
             {
@@ -860,12 +897,13 @@ namespace PhysicalCalculator
             }
 
             resultLine = ListStringBuilder.ToString();
-            return true;
+            return (true, resultLine);
         }
         
-        public Boolean CommandUsingConstants(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandUsingConstants(ref String commandLine)
         {
             commandLine = commandLine.ReadIdentifier(out var ConstantGroupName);
+            String resultLine;
             do
             {
                 if (ConstantGroupName == null)
@@ -908,14 +946,14 @@ namespace PhysicalCalculator
             }
             while (ConstantGroupName != null);
 
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean CommandVar(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandVar(ref String commandLine)
         {
             String tempCommandLine = commandLine;
 
-            resultLine = "";
+            String resultLine = "";
             Boolean OK;
             do
             {
@@ -972,12 +1010,12 @@ namespace PhysicalCalculator
                     }
                 }
             } while (OK && TryParseChar(',', ref commandLine));
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean CommandSet(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandSet(ref String commandLine)
         {
-            resultLine = "";
+            String resultLine = "";
             Boolean OK;
             do
             {
@@ -1022,12 +1060,12 @@ namespace PhysicalCalculator
                 }
             } while (OK && TryParseChar(',', ref commandLine));
 
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean CommandSystem(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandSystem(ref String commandLine)
         {
-            resultLine = "";
+            String resultLine = "";
             Boolean OK;
             do
             {
@@ -1067,12 +1105,12 @@ namespace PhysicalCalculator
                     }
                 }
             } while (OK && TryParseChar(',', ref commandLine));
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean CommandUnit(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandUnit(ref String commandLine)
         {
-            resultLine = "";
+            String resultLine = "";
             Boolean OK;
             do
             {
@@ -1179,13 +1217,13 @@ namespace PhysicalCalculator
                     }
                 }
             } while (OK && TryParseChar(',', ref commandLine));
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean CommandStore(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandStore(ref String commandLine)
         {   // Store accumulator value to var
             Boolean OK = false;
-            resultLine = "";
+            String resultLine = "";
             commandLine = commandLine.ReadIdentifier(out var VariableName);
 
             if (VariableName == null)
@@ -1204,13 +1242,13 @@ namespace PhysicalCalculator
                 }
             }
 
-            return OK;
+            return (OK, resultLine);
         }
 
-        public Boolean CommandRemove(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandRemove(ref String commandLine)
         {
             Boolean OK = false;
-            resultLine = "";
+            String resultLine = "";
             do
             {
                 commandLine = commandLine.ReadIdentifier(out var ItemName);
@@ -1232,10 +1270,10 @@ namespace PhysicalCalculator
                     }
                 }
             } while (OK && TryParseChar(',', ref commandLine));
-            return OK;
+            return (OK, resultLine);
         }
 
-        public Boolean CommandClear(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandClear(ref String commandLine)
         {
             Boolean clearNamedItems = TryParseKeywordPrefix("Items", ref commandLine);
             Boolean clearCommands = TryParseKeywordPrefix("Commands", ref commandLine);
@@ -1248,7 +1286,7 @@ namespace PhysicalCalculator
             }
 
             Boolean result = true;
-            resultLine = "";
+            String resultLine = "";
 
             if (clearNamedItems)
             {
@@ -1262,17 +1300,27 @@ namespace PhysicalCalculator
                 resultLine += " Command history cleared.";
             }
 
-            return result;
+            return (result, resultLine);
         }
 
-        public Boolean CommandList(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandList(ref String commandLine)
         {
             Boolean listNamedItems = TryParseKeywordPrefix("Items", ref commandLine);
             Boolean listSettings = TryParseKeywordPrefix("Settings", ref commandLine);
             Boolean listCommands = TryParseKeywordPrefix("Commands", ref commandLine);
             Boolean listAll = TryParseKeywordPrefix("All", ref commandLine);
 
-            if (!listNamedItems && !listSettings && !listCommands && !listAll)
+            IUnitSystem unitSystem = null;
+            foreach (var sys in Global.CurrentUnitSystems.KnownSystems)
+            {
+                if (TryParseToken(sys.Name, ref commandLine))
+                {
+                    unitSystem = sys;
+                    break;
+                }
+            }
+
+            if (!listNamedItems && !listSettings && !listCommands && !listAll && unitSystem == null)
             {
                 listNamedItems = true;
             }
@@ -1304,14 +1352,24 @@ namespace PhysicalCalculator
                     ListStringBuilder.AppendLine("  " +CommandLine);
                 }
             }
-            resultLine = ListStringBuilder.ToString();
 
-            return true;
+            if (unitSystem != null)
+            {
+                List<String> strings = unitSystem.ToStrings();
+                ListStringBuilder.AppendLine($"UnitSystem '{unitSystem.Name}':");
+                foreach (var str in strings)
+                {
+                    ListStringBuilder.AppendLine("  " + str);
+                }
+            }
+            String resultLine = ListStringBuilder.ToString();
+
+            return (true, resultLine);
         }
 
-        public Boolean CommandPrint(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandPrint(ref String commandLine)
         {
-            resultLine = "";
+            String resultLine = "";
 
             List<string> ExpectedFollow = new List<string> { ";", "," };
             do
@@ -1354,10 +1412,10 @@ namespace PhysicalCalculator
                 }
             } while (!String.IsNullOrWhiteSpace(commandLine) && TryParseChar(',', ref commandLine));
 
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean IdentifierAssumed(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) IdentifierAssumed(ref String commandLine)
         {
             int len = commandLine.PeekIdentifier(out string identifier);
 
@@ -1368,21 +1426,21 @@ namespace PhysicalCalculator
                 if (token2 == '=')
                 {
                     // Assume a set Command
-                    return CommandSet(ref commandLine, ref resultLine);
+                    return CommandSet(ref commandLine);
                 }
                 else
                 {
                     // Assume a print Command
-                    return CommandPrint(ref commandLine, ref resultLine);
+                    return CommandPrint(ref commandLine);
                 }
             }
 
-            return false;
+            return (false,"");
         }
 
-        public Boolean CommandFunc(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandFunc(ref String commandLine)
         {
-            resultLine = "";
+            String resultLine = "";
             commandLine = commandLine.ReadIdentifier(out var FunctionName);
             if (FunctionName == null)
             {
@@ -1398,7 +1456,7 @@ namespace PhysicalCalculator
                 Boolean OK = !IsALocalIdentifier || Item.Identifierkind == IdentifierKind.Function;
                 if (OK)
                 {
-                    CurrentContext.BeginParsingFunction(FunctionName);
+                    CurrentContext.BeginParsingFunction(FunctionName); 
 
                     if (IsALocalIdentifier)
                     {
@@ -1413,12 +1471,12 @@ namespace PhysicalCalculator
                     resultLine = "\"" + FunctionName + "\" is already defined as a " + Item.Identifierkind.ToString();
                 }
             }
-            return true;
+            return (true, resultLine);
         }
 
-        public Boolean CommandIf(ref String commandLine, ref String resultLine)
+        public (Boolean commandHandled, String resultLine) CommandIf(ref String commandLine)
         {
-            resultLine = "";
+            String resultLine = "";
             List<string> ExpectedFollow = new List<string>
             {   
                 // ExpectedFollow.Add("//"),
@@ -1443,7 +1501,7 @@ namespace PhysicalCalculator
                 }
             }
 
-            return true;
+            return (true, resultLine);
         }
 
 

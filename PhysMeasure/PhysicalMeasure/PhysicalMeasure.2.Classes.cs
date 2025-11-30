@@ -1112,7 +1112,20 @@ namespace PhysicalMeasure
             private int pos = 0;
             private int afterLastOperandPos = 0;
             private int lastValidPos = 0;
-            private Boolean inputRecognized = true;
+            private Boolean inputRecognizedVar = true;
+
+            private Boolean inputRecognizedProp
+            {
+                get { return inputRecognizedVar; }
+                set
+                {
+                    if (inputRecognizedVar != value)
+                    {
+                        inputRecognizedVar = value;
+                    }
+                    inputRecognizedVar = value;
+                }
+            }
             // private readonly IUnit dimensionless = Physics.dimensionless;
             private readonly Boolean throwExceptionOnInvalidInput = false;
 
@@ -1190,7 +1203,7 @@ namespace PhysicalMeasure
                 }
                 else
                 {
-                    inputRecognized = false;
+                    inputRecognizedProp = false;
                 }
             }
 
@@ -1211,7 +1224,7 @@ namespace PhysicalMeasure
                     return RemoveFirstToken();
                 }
                 int OperatorsCountForRecognizedTokens = operators.Count;
-                while ((inputString.Length > pos) && inputRecognized)
+                while ((inputString.Length > pos) && inputRecognizedProp)
                 {
                     Char c = inputString[pos];
                     if (Char.IsWhiteSpace(c))
@@ -1247,7 +1260,7 @@ namespace PhysicalMeasure
                             }
                             else
                             {
-                                inputRecognized = false;
+                                inputRecognizedProp = false;
                             }
                         }
                         else
@@ -1287,7 +1300,7 @@ namespace PhysicalMeasure
                                 }
                                 else
                                 {
-                                    inputRecognized = false;
+                                    inputRecognizedProp = false;
                                 }
                             }
                         }
@@ -1303,7 +1316,7 @@ namespace PhysicalMeasure
                             }
                             else
                             {
-                                inputRecognized = false;
+                                inputRecognizedProp = false;
                             }
                         }
                         else
@@ -1350,7 +1363,7 @@ namespace PhysicalMeasure
                             }
                             else
                             {
-                                inputRecognized = false;
+                                inputRecognizedProp = false;
                             }
                         }
                     }
@@ -1361,7 +1374,7 @@ namespace PhysicalMeasure
                     }
                 };
 
-                if (!inputRecognized)
+                if (!inputRecognizedProp)
                 {
                     // Remove operators from stack which was pushed for not recognized input
                     while (operators.Count > OperatorsCountForRecognizedTokens)
@@ -1441,7 +1454,8 @@ namespace PhysicalMeasure
                         else if (token.Operator == OperatorKind.Div)
                         {
                             // Combine pu1 and pu2 to the new unit pu1/pu2
-                            operands.Push(puFirst.CombineDivide(puSecond));
+                            // operands.Push(puFirst.CombineDivide(puSecond));
+                            operands.Push(puFirst.Divide(puSecond));
                         }
                     }
                     else
@@ -2396,7 +2410,14 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public virtual Unit Divide(Unit physicalUnit)
         {
             Debug.Assert(physicalUnit != null, "The 'physicalUnit' parameter must be specified");
-            return this.CombineDivide(physicalUnit);
+            if (this.Equals(physicalUnit))
+            {
+                return Dimensionless;
+            }
+            else
+            {
+                return this.CombineDivide(physicalUnit);
+            }
         }
 
         public virtual Unit Multiply(IUnit physicalUnit)
@@ -2408,7 +2429,14 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public virtual Unit Divide(IUnit physicalUnit)
         {
             Debug.Assert(physicalUnit != null, "The 'physicalUnit' parameter must be specified");
-            return this.CombineDivide(physicalUnit);
+            if (this.Equals(physicalUnit))
+            {
+                return Dimensionless;
+            }
+            else
+            {
+                return this.CombineDivide(physicalUnit);
+            }
         }
 
 
@@ -2422,8 +2450,15 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public virtual Quantity Divide(Quantity physicalQuantity)
         {
             Debug.Assert(physicalQuantity != null, "The 'physicalQuantity' parameter must be specified");
-            Unit pu = this.Divide(physicalQuantity.Unit);
-            return pu.Divide(physicalQuantity.Value);
+            if (this.Equals(physicalQuantity.Unit))
+            {
+                return new Quantity(1/physicalQuantity.Value);
+            }
+            else
+            {
+                Unit pu = this.Divide(physicalQuantity.Unit);
+                return pu.Divide(physicalQuantity.Value);
+            }
         }
 
         public virtual Quantity Multiply(Double value) => new Quantity(value, this);
@@ -2441,8 +2476,16 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         public virtual Quantity Divide(Double value, Quantity physicalQuantity)
         {
             Debug.Assert(physicalQuantity != null, "The 'physicalQuantity' parameter must be specified");
-            Unit pu = this.Divide(physicalQuantity.Unit);
-            return pu.Multiply(value / physicalQuantity.Value);
+            Double resValue = value / physicalQuantity.Value;
+            if (this.Equals (physicalQuantity.Unit))
+            {
+                return new Quantity(resValue);
+            }
+            else 
+            {
+                Unit pu = this.Divide(physicalQuantity.Unit);
+                return pu.Multiply(resValue);
+            }
         }
 
         public Unit Pow(SByte exponent) => this.Power(exponent);
@@ -2548,9 +2591,16 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public virtual CombinedUnit CombineDivide(Unit physicalUnit)
         {
-            CombinedUnit uRes = new CombinedUnit(this);
-            uRes = uRes.CombineDivide(physicalUnit);
-            return uRes;
+            if (this.Equals(physicalUnit))
+            {
+                return new CombinedUnit(); 
+            }
+            else
+            {
+                CombinedUnit uRes = new CombinedUnit(this);
+                uRes = uRes.CombineDivide(physicalUnit);
+                return uRes;
+            }
         }
 
         public virtual CombinedUnit CombineMultiply(IUnit physicalUnit)
@@ -5689,14 +5739,27 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             this.IsIsolatedUnitSystem = someBaseUnit.BaseUnitNumber == 0; // == (SByte)DataBaseUnitKind.DataSize ==  (SByte)MonetaryBaseUnitKind.Currency;
         }
 
+        public List<String> ToStrings()
+        {
+            List<String> strings = new List<string>();
+            strings.Add($"{this.GetType()} '{Name}', IsIsolatedUnitSystem={IsIsolatedUnitSystem}, IsModifiableUnitSystem={IsModifiableUnitSystem}");
+            if (UnitPrefixes != null) strings.Add($"UnitPrefixes: {UnitPrefixes}");
+            if (BaseUnits != null) strings.Add($"BaseUnits: {BaseUnits} {BaseUnits.ToStringList()}");
+            if (NamedDerivedUnits != null) strings.Add($"NamedDerivedUnits: {NamedDerivedUnits} {NamedDerivedUnits.ToStringList()}");
+            if (ConvertibleUnits != null) strings.Add($"ConvertibleUnits: {ConvertibleUnits} {ConvertibleUnits.ToStringList()}");
+
+            return strings;
+        }
         public void TraceUnitSystem()
         {
-                                            Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' {this.GetType()} created. IsIsolatedUnitSystem={IsIsolatedUnitSystem}, IsModifiableUnitSystem={IsModifiableUnitSystem}", "Info"); 
-            if (UnitPrefixes != null)       Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' UnitPrefixes: {UnitPrefixes}", "Info");
-            if (BaseUnits != null)          Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' BaseUnits: {BaseUnits} {BaseUnits.ToStringList()}", "Info");
-            if (NamedDerivedUnits != null)  Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' NamedDerivedUnits: {NamedDerivedUnits} {NamedDerivedUnits.ToStringList()}", "Info");
-            if (ConvertibleUnits != null)   Trace.WriteLine($"{DateTime.Now} AbstractUnitSystem '{Name}' ConvertibleUnits: {ConvertibleUnits} {ConvertibleUnits.ToStringList()}", "Info");
-        }
+            var now = DateTime.Now;
+            List<String> strings = ToStrings();
+            Trace.WriteLine($"{now} UnitSystem '{Name}' Created", "Info");
+            foreach (var str in strings)
+            {              
+                Trace.WriteLine($"{now} UnitSystem '{Name}' {str}", "Info"); 
+            }
+         }
 
         protected virtual void CheckUnitsSystem(SystemUnit aSystemUnit)
         {
@@ -8047,6 +8110,70 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
         }
 
         #endregion Physical Quantity IPhysicalUnitMath implementation        
+
+        #region Physical Quantity IPhysicalUnitMathTrigometry implementation  
+
+        public Quantity Sinus()
+        {
+            Quantity angle_in_radians = this;
+            if (angle_in_radians.Unit != null && angle_in_radians.Unit != Global.CurrentUnitSystems.Default.Dimensionless)
+            {
+                angle_in_radians = this.ConvertTo(Trigeometry.rad);
+            }
+
+            Unit sinUnit = null; //  Global.CurrentUnitSystems.Default.Dimensionless;
+            Double sinValue = System.Math.Sin(angle_in_radians.Value);
+            return new Quantity(sinValue, sinUnit);
+        }
+
+        public Quantity Cosinus()
+        {
+            Quantity angle_in_radians = this;
+            if (angle_in_radians.Unit != null && angle_in_radians.Unit != Global.CurrentUnitSystems.Default.Dimensionless)
+            {
+                angle_in_radians = this.ConvertTo(Trigeometry.rad);
+            }
+
+            Unit cosUnit = null; //  Global.CurrentUnitSystems.Default.Dimensionless;
+            Double cosValue = System.Math.Cos(angle_in_radians.Value);
+            return new Quantity(cosValue, cosUnit);
+        }
+
+        public Quantity InversSinus()
+        {
+            Quantity sin = this;
+            if (sin.Unit != null && sin.Unit != Global.CurrentUnitSystems.Default.Dimensionless)
+            {
+                sin = this.ConvertTo(Global.CurrentUnitSystems.Default.Dimensionless);
+            }
+
+            Unit asinUnit = Trigeometry.rad; //  Global.CurrentUnitSystems.Default.Dimensionless;  
+            Double angle_in_radians = System.Math.Asin(sin.Value);
+            return new Quantity(angle_in_radians, asinUnit);
+        }
+
+        public Quantity InversCosinus()
+        {
+            Quantity cos = this;
+            if (cos.Unit != null && cos.Unit != Global.CurrentUnitSystems.Default.Dimensionless)
+            {
+                cos = this.ConvertTo(Global.CurrentUnitSystems.Default.Dimensionless);
+            }
+
+            Unit acosUnit = Trigeometry.rad; //  Global.CurrentUnitSystems.Default.Dimensionless;  
+            Double angle_in_radians = System.Math.Acos(cos.Value);
+            return new Quantity(angle_in_radians, acosUnit);
+        }
+
+        public Quantity Sin() => this.Sinus();
+
+        public Quantity Cos() => this.Cosinus();
+
+        public Quantity Asin() => this.InversSinus();
+
+        public Quantity Acos() => this.InversCosinus();
+
+        #endregion Physical Quantity IPhysicalUnitMathTrigometry implementation  
     }
 
     #endregion Physical Quantity Classes
