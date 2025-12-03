@@ -1156,6 +1156,14 @@ namespace PhysicalCalculator
                                     resultLine = $"{dimensionName} is not a valid base unit dimension";
                                 }
                             }
+                            else
+                            {
+                                resultLine = $"No dimension specified";
+                            }
+                        }
+                        else
+                        {
+                            resultLine = $"No dimension specified";
                         }
 
                         TryParseChar('=', ref commandLine);
@@ -1167,7 +1175,7 @@ namespace PhysicalCalculator
                         if ((pq != null) && pq.AsQuantity().IsDimensionless)
                         {
                             // Defined new local base unit 
-                            resultLine = "Unit \"" + UnitName + "\" can't be declared.\r\n" + "Scaled unit must not be dimension less";
+                            resultLine += "Unit \"" + UnitName + "\" can't be declared.\r\n" + "Scaled unit must not be dimension less";
                         }
                         else
                         {
@@ -1195,7 +1203,7 @@ namespace PhysicalCalculator
                                 commandLine = commandLine.ReadToken(out unitSymbol);
                                 if (prevUnitSymbol != null && unitSymbol != prevUnitSymbol)
                                 {
-                                    resultLine = $" Symbol for {UnitName} was already declared as {prevUnitSymbol}. ";
+                                    resultLine += $" Symbol for {UnitName} was already declared as {prevUnitSymbol}. ";
                                 }
                             }
 
@@ -1219,7 +1227,7 @@ namespace PhysicalCalculator
                                 else
                                 {
                                     // Defined new local base unit 
-                                    resultLine = $"Unit \"{Item.ToListString(UnitName)}\" {unitSymbol} declared.";
+                                    resultLine += $"Unit \"{Item.ToListString(UnitName)}\" {unitSymbol} declared.";
                                 }
                             }
                             else

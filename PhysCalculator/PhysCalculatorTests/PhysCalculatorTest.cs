@@ -600,7 +600,9 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLineExpected = "x"; 
 
             string ResultLine = string.Empty;
-            string ResultLineExpected = "The string argument is not in a valid physical expression format. Invalid or missing operand at 'x' at position 25\n"
+            // string ResultLineExpected = "The string argument is not in a valid physical expression format. Invalid or missing operand at 'x' at position 25\n"
+            string ResultLineExpected    = "The string argument is not in a valid physical expression format. Unknown identifier: 'x'\n"
+                                         // Unknown identifier: 'x'
                                          + (1000 * 24 * 356).ToString() + " MW·h";
 
             bool expected = true;
@@ -622,7 +624,8 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             string CommandLineExpected = "xx * 356 d/z";
             string ResultLine = string.Empty;
 
-            string ResultLineExpected = "The string argument is not in a valid physical expression format. Invalid or missing operand at 'xx * 356 d/z' at position 15\n"
+            // string ResultLineExpected = "The string argument is not in a valid physical expression format. Invalid or missing operand at 'xx * 356 d/z' at position 15\n"
+            string ResultLineExpected = "The string argument is not in a valid physical expression format. Unknown identifier: 'xx'\n"
                                         + (1000 * 24 ).ToString() + " MW·h";
 
             bool expected = true;
@@ -891,7 +894,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
         {
             PhysCalculator target = new PhysCalculator();
             target.Setup();
-            string[] CommandLines = { "unit USD", "1500 USD /0.23 KWh" };
+            string[] CommandLines = { "unit USD dim Currency", "1500 USD /0.23 KWh" };
             List<String> ResultLines = new List<string>();
             string CommandLineExpected = string.Empty;
             string ResultLine = string.Empty;
@@ -940,7 +943,7 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
             PhysCalculator target = new PhysCalculator();
             target.Setup();
             string[] CommandLines = 
-              { "unit DKR",
+              { "unit DKR dim Currency",
                 "unit Øre = 0.01 DKR",
                 "set EnergyUnitPrice = 241.75 Øre /1.0 KWh",
                 "set EnergyConsumed = 1234.56 kWh",
@@ -982,7 +985,8 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             var PriceEnergyConsumedItem_variable = PriceEnergyConsumedItem as NamedVariable;
             Assert.AreNotEqual(null, PriceEnergyConsumedItem_variable, "for PriceEnergyConsumedItem_variable access");
-            IQuantity pq = PriceEnergyConsumedItem_variable.AsQuantity() as IQuantity;
+            // IQuantity pq = PriceEnergyConsumedItem_variable.AsQuantity() as IQuantity;
+            Quantity pq = PriceEnergyConsumedItem_variable.AsQuantity();
             Unit pu = pq.Unit;
             UnitKind uk = pu.Kind;
 

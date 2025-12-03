@@ -1597,7 +1597,7 @@ namespace PhysicalMeasure
 
             if ((!String.IsNullOrEmpty(unitStr))
                 && ((system = this.ExponentsSystem) != null)
-                && (forceShowSystem || (Global.CurrentUnitSystems != null && system != Global.CurrentUnitSystems.Default))
+                && (forceShowSystem || (system.UnitSystemKind != UnitSystemKind.MonetaryUnitSystem && system.UnitSystemKind != UnitSystemKind.CombinedUnitSystem && Global.CurrentUnitSystems != null && system != Global.CurrentUnitSystems.Default && system != SI.Units && system != Data.Units && system != Trigeometry.Units))
                 && (!system.IsIsolatedUnitSystem)
                  /*
                  && (!(    Physics.SI_Units == Physics.Default_UnitSystem 
@@ -1750,7 +1750,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 int unitFormatIndex = format.IndexOf(" U");
                 if (unitFormatIndex >= 0)
                 {
-                    // vaue format in front of " U"
+                    // value format in front of " U"
                     valueFormat = unitFormatIndex - 1 >= 0 ? format.Substring(0, unitFormatIndex - 1) : null;
                     // unit format follows after " U"
                     unitFormat = format.Length > unitFormatIndex + 2 ? format.Substring(unitFormatIndex + 2) : null;
@@ -2870,6 +2870,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public static List<BaseUnitDimension> MonetaryBaseUnitDimensions =
             [   BaseUnitDimension.Currency];
+
         public static bool IsPhysicalUnitSystemBaseUnits(this BaseUnit[] baseUnits)
         {
             if (baseUnits.All(baseunit => PhysicalBaseUnitDimensions.Contains(baseunit.BaseUnitDimension)))
@@ -5724,12 +5725,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
             if (inlineUnitFormat)
             {
-                resultStr = fracPQConv != null
-                    ? MainUnit.ValueAndUnitString(integralValue, format, formatProvider)
-                                + separator
-                                + FractionalUnit.ValueAndUnitString(fracPQConv.Value, fractionalValueFormat, null)
+                resultStr = (fracPQConv != null)              
+                    ? MainUnit.ValueAndUnitString(integralValue, format, formatProvider) + separator + FractionalUnit.ValueAndUnitString(fracPQConv.Value, fractionalValueFormat, null)
                     : MainUnit.ValueAndUnitString(value, format, formatProvider);
-
                 return resultStr;
             }
 
@@ -5831,9 +5829,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             if (noOfBaseUnits > 0)
             {
                 UnitSystemKind = this.BaseUnits.IsPhysicalUnitSystemBaseUnits() ? UnitSystemKind.PhysicalUnitSystem
-                               : this.BaseUnits.IsDataUnitSystemBaseUnits() ? UnitSystemKind.DataUnitSystem
                                : this.BaseUnits.IsTrigeometryUnitSystemBaseUnits() ? UnitSystemKind.TrigometryUnitSystem
                                : this.BaseUnits.IsMonetaryUnitSystemBaseUnits() ? UnitSystemKind.MonetaryUnitSystem
+                               : this.BaseUnits.IsDataUnitSystemBaseUnits() ? UnitSystemKind.DataUnitSystem
                                : UnitSystemKind.CombinedUnitSystem;
             }
             // Not correct: Two MonetaryBaseUnits with each own Monetary UnitSystem can still have a UnitSystemConversion between them, and therefore none of them are an IsolatedUnitSystem.

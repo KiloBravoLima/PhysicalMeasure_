@@ -88,7 +88,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitToStringTest()
         {
-            Unit u = (Unit)(SI.Units.NamedDerivedUnits[5]);
+            Unit u = (Unit)(SI.Units.NamedDerivedUnits[3]);
 
             String expected = "J";
 
@@ -140,7 +140,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitBaseUnitStringTest()
         {
-            IUnit Watt = SI.Units.NamedDerivedUnits[6];
+            IUnit Watt = SI.Units.NamedDerivedUnits[4];
 
             String expected = "1 m2·Kg/s3";
 
@@ -232,7 +232,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitToStringFormatTest()
         {
-            Unit u = (Unit)(SI.Units.NamedDerivedUnits[5]);
+            Unit u = (Unit)(SI.Units.NamedDerivedUnits[3]);
 
             String expected = "J";
             String actual = u.ToString();
@@ -343,7 +343,7 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitBaseUnitStringFormatTest()
         {
-            IUnit Watt = SI.Units.NamedDerivedUnits[6];
+            IUnit Watt = SI.Units.NamedDerivedUnits[4];
 
             String expected = "1 m2·Kg/s3";
             String actual = Watt.ConvertToBaseUnit().ToString();

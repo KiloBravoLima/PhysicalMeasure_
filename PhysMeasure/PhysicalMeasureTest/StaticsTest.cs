@@ -374,7 +374,7 @@ namespace PhysicalMeasureTest
         public void UnitFromSymbolTestCoulomb()
         {
             String SymbolStr = "C";
-            IUnit expected = (IUnit)(SI.Units.NamedDerivedUnits[7]);
+            IUnit expected = (IUnit)(SI.Units.NamedDerivedUnits[5]);
             IUnit actual;
             // actual = UnitSystems.Systems.UnitFromSymbol(SymbolStr);
             actual = Global.UnitFromSymbol(SymbolStr);
@@ -464,7 +464,7 @@ namespace PhysicalMeasureTest
         public void UnitFromNameTestJoule()
         {
             String NameStr = "joule";
-            IUnit expected = (IUnit)(SI.Units.NamedDerivedUnits[5]);
+            IUnit expected = (IUnit)(SI.Units.NamedDerivedUnits[3]);
             IUnit actual;
             // actual = UnitSystems.Systems.UnitFromName(NameStr);
             actual = Global.UnitFromName(NameStr);
@@ -478,7 +478,7 @@ namespace PhysicalMeasureTest
         public void UnitFromNameTestKatal()
         {
             String NameStr = "katal";
-            IUnit expected = (IUnit)(SI.Units.NamedDerivedUnits[19]);
+            IUnit expected = (IUnit)(SI.Units.NamedDerivedUnits[17]);
             IUnit actual;
             // actual = UnitSystems.Systems.UnitFromName(NameStr);
             actual = Global.UnitFromName(NameStr);
