@@ -136,6 +136,7 @@ namespace PhysicalMeasure
             (unitsystem) => new BaseUnit[]
                                 {   new BaseUnit(unitsystem, (SByte)TrigometryBaseUnitKind.Radian, "radian", "rad",    BaseUnitDimension.Angle),
                                     new BaseUnit(unitsystem, (SByte)TrigometryBaseUnitKind.Steradian, "steradian", "sr", BaseUnitDimension.SolidAngle),
+                                {   new NamedDerivedUnit(unitsystem, "steradian", "sr", new SByte[] { 2 }), // BaseUnitDimension.SolidAngle 
                                 },
             //   new NamedDerivedUnit(unitsystem, "radian", "rad", new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
             //   new NamedDerivedUnit(unitsystem, "steradian", "sr", new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
