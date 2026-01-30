@@ -864,6 +864,29 @@ namespace PhysicalMeasureTest
             Assert.AreEqual(expected, actual);
         }
 
+        [TestMethod()]
+        public void TestRadianParseString()
+        {
+            String s = "1.234 rad";
+            NumberStyles styles = NumberStyles.Float;
+            IFormatProvider provider = NumberFormatInfo.InvariantInfo;
+            IQuantity expected = new Quantity(1.234,  Trigeometry.rad);
+            IQuantity actual;
+            actual = Quantity.Parse(s, styles, provider);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod()]
+        public void TestSteRadianParseString()
+        {
+            String s = "1.234 sr";
+            NumberStyles styles = NumberStyles.Float;
+            IFormatProvider provider = NumberFormatInfo.InvariantInfo;
+            IQuantity expected = new Quantity(1.234, Trigeometry.sr);
+            IQuantity actual;
+            actual = Quantity.Parse(s, styles, provider);
+            Assert.AreEqual(expected, actual);
+        }
         #endregion Quantity.Parse test
 
 
@@ -1353,6 +1376,19 @@ namespace PhysicalMeasureTest
 
             // Must not compile:  
             // Quantity h_sub_m = h - m;
+
+        }
+
+        [TestMethod()]
+        public void SquareOfRadianTest()
+        {
+            Quantity angle = Quantity.Parse("1.234 rad") as Quantity;
+
+            Quantity expected = new Quantity(1.234 * 1.234, Trigeometry.sr);
+
+            Quantity actual = angle * angle;
+
+            Assert.AreEqual(expected, actual);
 
         }
 

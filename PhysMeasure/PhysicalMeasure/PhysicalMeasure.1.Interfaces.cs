@@ -16,7 +16,7 @@ namespace PhysicalMeasure
         // for custom defined or isolated unit system units
         Unknown,
 
-        // Physical unit dimensions
+        // Physical base unit dimensions
         Length,
         Mass,
         Time,
@@ -26,13 +26,13 @@ namespace PhysicalMeasure
         LuminousIntensity,
 
         // Trigometry unit dimensions
-        Angle,
-        SolidAngle,
+        Angle,          // Base unit
+        SolidAngle,     // Named derived unit = Angle * Angle
 
-        // Data size unit dimension
+        // Data size base unit dimension
         DataSize,
 
-        // Monetary unit dimension
+        // Monetary base unit dimension
         Currency
     }
 

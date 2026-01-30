@@ -16,56 +16,67 @@ namespace PhysicalMeasure
             The International System of Units specifies twenty SI prefixes:
 
             SI prefixes   
-                Prefix Symbol   1000^m      10^n    Decimal                     Short scale     Long scale      Since
-                yotta   Y       1000^8      10^24   1000000000000000000000000   Septillion      Quadrillion     1991 
-                zetta   Z       1000^7      10^21   1000000000000000000000      Sextillion      Trilliard       1991 
-                exa     E       1000^6      10^18   1000000000000000000         Quintillion     Trillion        1975 
-                peta    P       1000^5      10^15   1000000000000000            Quadrillion     Billiard        1975 
-                tera    T       1000^4      10^12   1000000000000               Trillion        Billion         1960 
-                giga    G       1000^3      10^9    1000000000                  Billion         Milliard        1960 
-                mega    M       1000^2      10^6    1000000                             Million                 1960 
-                kilo    k       1000^1      10^3    1000                                Thousand                1795 
-                hecto   h       1000^2⁄3    10^2    100                                 Hundred                 1795 
-                deca    da      1000^1⁄3    10^1    10                                  Ten                     1795 
-                                1000^0      10^0    1                                   One  
-                deci    d       1000^−1⁄3   10^−1   0.1                                 Tenth                   1795 
-                centi   c       1000^−2⁄3   10^−2   0.01                                Hundredth               1795 
-                milli   m       1000^−1     10^−3   0.001                               Thousandth              1795 
-                micro   μ       1000^−2     10^−6   0.000001                            Millionth               1960 
-                nano    n       1000^−3     10^−9   0.000000001                 Billionth       Milliardth      1960 
-                pico    p       1000^−4     10^−12  0.000000000001              Trillionth      Billionth       1960 
-                femto   f       1000^−5     10^−15  0.000000000000001           Quadrillionth   Billiardth      1964 
-                atto    a       1000^−6     10^−18  0.000000000000000001        Quintillionth   Trillionth      1964 
-                zepto   z       1000^−7     10^−21  0.000000000000000000001     Sextillionth    Trilliardth     1991 
-                yocto   y       1000^−8     10^−24  0.000000000000000000000001  Septillionth    Quadrillionth   1991 
+                Prefix Symbol   1000^m      10^n    Decimal                             Short scale     Long scale      Since
+                quetta  Q       1000^10     10^30   1000000000000000000000000000000     Nonillion       Decillion       2022
+                ronna   R       1000^9      10^27   1000000000000000000000000000        Octillion       Trilliard       2022
+                yotta   Y       1000^8      10^24   1000000000000000000000000           Septillion      Quadrillion     1991 
+                zetta   Z       1000^7      10^21   1000000000000000000000              Sextillion      Trilliard       1991 
+                exa     E       1000^6      10^18   1000000000000000000                 Quintillion     Trillion        1975 
+                peta    P       1000^5      10^15   1000000000000000                    Quadrillion     Billiard        1975 
+                tera    T       1000^4      10^12   1000000000000                       Trillion        Billion         1960 
+                giga    G       1000^3      10^9    1000000000                          Billion         Milliard        1960 
+                mega    M       1000^2      10^6    1000000                                     Million                 1960 
+                kilo    k       1000^1      10^3    1000                                        Thousand                1795 
+                hecto   h       1000^2⁄3    10^2    100                                         Hundred                 1795 
+                deca    da      1000^1⁄3    10^1    10                                          Ten                     1795 
+                                1000^0      10^0    1                                           One  
+                deci    d       1000^−1⁄3   10^−1   0.1                                         Tenth                   1795 
+                centi   c       1000^−2⁄3   10^−2   0.01                                        Hundredth               1795 
+                milli   m       1000^−1     10^−3   0.001                                       Thousandth              1795 
+                micro   μ       1000^−2     10^−6   0.000001                                    Millionth               1960 
+                nano    n       1000^−3     10^−9   0.000000001                         Billionth       Milliardth      1960 
+                pico    p       1000^−4     10^−12  0.000000000001                      Trillionth      Billionth       1960 
+                femto   f       1000^−5     10^−15  0.000000000000001                   Quadrillionth   Billiardth      1964 
+                atto    a       1000^−6     10^−18  0.000000000000000001                Quintillionth   Trillionth      1964 
+                zepto   z       1000^−7     10^−21  0.000000000000000000001             Sextillionth    Trilliardth     1991 
+                yocto   y       1000^−8     10^−24  0.000000000000000000000001          Septillionth    Quadrillionth   1991 
+                ronto   r       1000^−9     10^−27  0.000000000000000000000000001       Octillionth     Quadrilliardth  2022
+                quecto  q       1000^−10    10^−30  0.000000000000000000000000000001    Nonillionth     Decillionth     2022
         */
 
 
-        public static readonly UnitPrefixTable PhysicsUnitPrefixes = new UnitPrefixTable(new UnitPrefix[] {new UnitPrefix(PhysicsUnitPrefixes, "yotta", 'Y', 24),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "zetta", 'Z', 21),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "exa",   'E', 18),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "peta",  'P', 15),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "tera",  'T', 12),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "giga",  'G', 9),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "mega",  'M', 6),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "kilo",  'K', 3),   /* k */
-                                                                                       /* extra */  new UnitPrefix(PhysicsUnitPrefixes, "kilo",  'k', 3),   /* k */
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "hecto", 'H', 2),   /* h */
-                                                                                       /* extra */  new UnitPrefix(PhysicsUnitPrefixes, "hecto", 'h', 2),   /* h */
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "deca",  'D', 1),   /* da */
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "deci",  'd', -1),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "centi", 'c', -2),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "milli", 'm', -3),
-                                                                                                    // new UnitPrefix(UnitPrefixes, "micro", 'μ', -6), // '\0x03BC' (Char)956  
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "micro", 'µ', -6),  // ANSI '\0x00B5' (Char)181   
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "nano",  'n', -9),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "pico",  'p', -12),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "femto", 'f', -15),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "atto",  'a', -18),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "zepto", 'z', -21),
-                                                                                                    new UnitPrefix(PhysicsUnitPrefixes, "yocto", 'y', -24) });
+        public static readonly UnitPrefixTable PhysicsUnitPrefixes = new UnitPrefixTable(new UnitPrefix[] {new UnitPrefix(PhysicsUnitPrefixes, "quetta", 'Q', 30),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "ronna",  'R', 27),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "yotta", 'Y', 24),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "zetta", 'Z', 21),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "exa",   'E', 18),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "peta",  'P', 15),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "tera",  'T', 12),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "giga",  'G', 9),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "mega",  'M', 6),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "kilo",  'K', 3),   /* k */
+                                                                                              /* extra */  new UnitPrefix(PhysicsUnitPrefixes, "kilo",  'k', 3),   /* k */
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "hecto", 'H', 2),   /* h */
+                                                                                              /* extra */  new UnitPrefix(PhysicsUnitPrefixes, "hecto", 'h', 2),   /* h */
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "deca",  'D', 1),   /* da */
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "deci",  'd', -1),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "centi", 'c', -2),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "milli", 'm', -3),
+                                                                                                        // new UnitPrefix(PhysicsUnitPrefixes, "micro", 'μ', -6), // '\0x03BC' (Char)956  
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "micro", 'µ', -6),  // ANSI '\0x00B5' (Char)181   
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "nano",  'n', -9),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "pico",  'p', -12),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "femto", 'f', -15),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "atto",  'a', -18),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "zepto", 'z', -21),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "yocto", 'y', -24),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "ronto", 'r', -27),
+                                                                                                           new UnitPrefix(PhysicsUnitPrefixes, "quecto", 'q', -30)
+        });
 
         /* SI unit prefixes */
+        public static readonly UnitPrefix Q =  (UnitPrefix)PhysicsUnitPrefixes['Q'];
+        public static readonly UnitPrefix R = (UnitPrefix)PhysicsUnitPrefixes['R'];
         public static readonly UnitPrefix Y =  (UnitPrefix)PhysicsUnitPrefixes['Y'];
         public static readonly UnitPrefix Z =  (UnitPrefix)PhysicsUnitPrefixes['Z'];
         public static readonly UnitPrefix E =  (UnitPrefix)PhysicsUnitPrefixes['E'];
@@ -89,6 +100,8 @@ namespace PhysicalMeasure
         public static readonly UnitPrefix a =  (UnitPrefix)PhysicsUnitPrefixes['a'];
         public static readonly UnitPrefix z =  (UnitPrefix)PhysicsUnitPrefixes['z'];
         public static readonly UnitPrefix y =  (UnitPrefix)PhysicsUnitPrefixes['y'];
+        public static readonly UnitPrefix r =  (UnitPrefix)PhysicsUnitPrefixes['r'];
+        public static readonly UnitPrefix q =  (UnitPrefix)PhysicsUnitPrefixes['q'];
 
 
         /* https://en.wikipedia.org/wiki/Units_of_information
@@ -135,20 +148,21 @@ namespace PhysicalMeasure
         = new UnitSystem("Trigeometry", Prefixes.PhysicsUnitPrefixes,
             (unitsystem) => new BaseUnit[]
                                 {   new BaseUnit(unitsystem, (SByte)TrigometryBaseUnitKind.Radian, "radian", "rad",    BaseUnitDimension.Angle),
-                                    new BaseUnit(unitsystem, (SByte)TrigometryBaseUnitKind.Steradian, "steradian", "sr", BaseUnitDimension.SolidAngle),
+                                 // new BaseUnit(unitsystem, (SByte)TrigometryBaseUnitKind.Steradian, "steradian", "sr", BaseUnitDimension.SolidAngle),
+                                },
+            (unitsystem) => new NamedDerivedUnit[]
                                 {   new NamedDerivedUnit(unitsystem, "steradian", "sr", new SByte[] { 2 }), // BaseUnitDimension.SolidAngle 
                                 },
-            //   new NamedDerivedUnit(unitsystem, "radian", "rad", new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
-            //   new NamedDerivedUnit(unitsystem, "steradian", "sr", new SByte[] { 0, 0, 0, 0, 0, 0, 0 }),
-            (unitsystem) => null,
             (unitsystem) => new ConvertibleUnit[]
                                 {   new ConvertibleUnit("degree", "°" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ , unitsystem.BaseUnits[(int)TrigometryBaseUnitKind.Radian], new ScaledValueConversion( 360.0 /(2.0 * Math.PI)))   /* [°] = 360 / 2 PI  [rad] */
-                                }
-, isModifiableUnitSystem: false , isIsolatedUnitSystem : true
+                                },
+            isModifiableUnitSystem: false, isIsolatedUnitSystem : true
                          );
 
         /* Trigeometry units */
         public static readonly BaseUnit rad = (BaseUnit)Units["rad"];
+        /* Trigeometry units */
+        public static readonly NamedDerivedUnit sr = (NamedDerivedUnit)Units["sr"];
 
         /* Convertible Trigeometry units */
         public static readonly ConvertibleUnit degree = (ConvertibleUnit)Units["°"];
