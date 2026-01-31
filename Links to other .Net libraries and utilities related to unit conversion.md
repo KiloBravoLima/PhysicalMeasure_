@@ -29,8 +29,11 @@ Other .Net libraries and utilities related to unit conversion, using other appro
  [https://github.com/Tsjunne/Physics](https://github.com/Tsjunne/Physics)
  
  [https://github.com/JohanLarsson/Gu.Units](https://github.com/JohanLarsson/Gu.Units)
+
+ [https://github.com/angularsen/UnitsNet](https://github.com/angularsen/UnitsNet)
  
  [https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days](https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days)
 
 [https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li](https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li)
+
 
