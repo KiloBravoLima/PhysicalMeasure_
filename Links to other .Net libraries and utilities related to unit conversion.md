@@ -10,6 +10,7 @@ Outdated links:
  
  [http://ngenericdimensions.codeplex.com](http://ngenericdimensions.codeplex.com)
  
+ 
 
 Class based: One class or interface type for each dimension or a combination of (base) dimensions
  
@@ -17,6 +18,12 @@ Class based: One class or interface type for each dimension or a combination of 
  
  [https://github.com/cureos/csunits](https://github.com/cureos/csunits)
  
+ [https://github.com/JohanLarsson/Gu.Units](https://github.com/JohanLarsson/Gu.Units)
+
+ [https://github.com/angularsen/UnitsNet](https://github.com/angularsen/UnitsNet)
+ 
+ [https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li](https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li)
+
  
 Dimension based: One class for all units and dimensions
  
@@ -27,7 +34,10 @@ Dimension based: One class for all units and dimensions
  [http://www.codeproject.com/Articles/23087/Measurement-Unit-Conversion-Library](http://www.codeproject.com/Articles/23087/Measurement-Unit-Conversion-Library)
 
  [http://www.codeproject.com/Articles/1066008/Using-physical-quantities-and-units-of-measurement](http://www.codeproject.com/Articles/1066008/Using-physical-quantities-and-units-of-measurement)
- 
+
+ [https://github.com/Tsjunne/Physics](https://github.com/Tsjunne/Physics)
+
+ [https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days](https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days)
  
 Some of both: 
 
@@ -38,18 +48,3 @@ Some of both:
  [http://www.gnu.org/software/units](http://www.gnu.org/software/units)
  
  
-......
- 
- [https://github.com/Tsjunne/Physics](https://github.com/Tsjunne/Physics)
- 
- [https://github.com/JohanLarsson/Gu.Units](https://github.com/JohanLarsson/Gu.Units)
-
- [https://github.com/angularsen/UnitsNet](https://github.com/angularsen/UnitsNet)
- 
- [https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days](https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days)
-
-[https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li](https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li)
-
-
-
-
