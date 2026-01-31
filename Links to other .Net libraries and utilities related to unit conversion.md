@@ -1,5 +1,7 @@
 Other .Net libraries and utilities related to unit conversion, using other approaches:
 
+Outdated links:
+
  [http://unitconversionlib.codeplex.com](http://unitconversionlib.codeplex.com)
  
  [http://quantitysystem.codeplex.com](http://quantitysystem.codeplex.com)
@@ -8,23 +10,35 @@ Other .Net libraries and utilities related to unit conversion, using other appro
  
  [http://ngenericdimensions.codeplex.com](http://ngenericdimensions.codeplex.com)
  
+
+Class based: One class or interface type for each dimension or a combination of (base) dimensions
+ 
  [http://github.com/objorke/QuantityTypes](http://github.com/objorke/QuantityTypes)
  
+ [https://github.com/cureos/csunits](https://github.com/cureos/csunits)
+ 
+ 
+Dimension based: One class for all units and dimensions
+ 
  [http://sourceforge.net/projects/quantitiesnet](http://sourceforge.net/projects/quantitiesnet)
- 
+
  [http://www.codeproject.com/Articles/611731/Working-with-Units-and-Amounts](http://www.codeproject.com/Articles/611731/Working-with-Units-and-Amounts)
- 
- [http://www.codeproject.com/Articles/404573/Units-of-Measure-Library-for-NET](http://www.codeproject.com/Articles/404573/Units-of-Measure-Library-for-NET)
- 
- [http://www.codeproject.com/Articles/413750/Units-of-Measure-Validator-for-Csharp](http://www.codeproject.com/Articles/413750/Units-of-Measure-Validator-for-Csharp)
- 
+
  [http://www.codeproject.com/Articles/23087/Measurement-Unit-Conversion-Library](http://www.codeproject.com/Articles/23087/Measurement-Unit-Conversion-Library)
- 
+
  [http://www.codeproject.com/Articles/1066008/Using-physical-quantities-and-units-of-measurement](http://www.codeproject.com/Articles/1066008/Using-physical-quantities-and-units-of-measurement)
+ 
+ 
+Some of both: 
+
+ [http://www.codeproject.com/Articles/404573/Units-of-Measure-Library-for-NET](http://www.codeproject.com/Articles/404573/Units-of-Measure-Library-for-NET)
+
+ [http://www.codeproject.com/Articles/413750/Units-of-Measure-Validator-for-Csharp](http://www.codeproject.com/Articles/413750/Units-of-Measure-Validator-for-Csharp)
  
  [http://www.gnu.org/software/units](http://www.gnu.org/software/units)
  
- [https://github.com/cureos/csunits](https://github.com/cureos/csunits)
+ 
+
  
  [https://github.com/Tsjunne/Physics](https://github.com/Tsjunne/Physics)
  
@@ -35,5 +49,6 @@ Other .Net libraries and utilities related to unit conversion, using other appro
  [https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days](https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days)
 
 [https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li](https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li)
+
 
 
