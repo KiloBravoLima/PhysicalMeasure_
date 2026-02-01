@@ -10,13 +10,15 @@ Dimension based: One class can hold values for any unit/dimensions
 
  [http://www.codeproject.com/Articles/1066008/Using-physical-quantities-and-units-of-measurement](http://www.codeproject.com/Articles/1066008/Using-physical-quantities-and-units-of-measurement)
 
+ [https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days](https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days)
+
  [https://github.com/Tsjunne/Physics](https://github.com/Tsjunne/Physics)
 
- [https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days](https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days)
- 
 
 Class based: One class for each dimension or a combination of (base) dimensions
- 
+
+ [https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li](https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li)
+
  [http://github.com/objorke/QuantityTypes](http://github.com/objorke/QuantityTypes)
  
  [https://github.com/cureos/csunits](https://github.com/cureos/csunits)
@@ -25,8 +27,6 @@ Class based: One class for each dimension or a combination of (base) dimensions
 
  [https://github.com/angularsen/UnitsNet](https://github.com/angularsen/UnitsNet)
  
- [https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li](https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li)
-
 
 Some of both, with specific methodes for calculations and unit conversions for each unit: 
 
@@ -48,3 +48,4 @@ Outdated links:
  [http://ngenericdimensions.codeplex.com](http://ngenericdimensions.codeplex.com)
  
  
+
