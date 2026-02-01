@@ -1,31 +1,6 @@
 Other .Net libraries and utilities related to unit conversion, using other approaches:
 
-Outdated links:
-
- [http://unitconversionlib.codeplex.com](http://unitconversionlib.codeplex.com)
- 
- [http://quantitysystem.codeplex.com](http://quantitysystem.codeplex.com)
- 
- [http://unitsofmeasure.codeplex.com](http://unitsofmeasure.codeplex.com)
- 
- [http://ngenericdimensions.codeplex.com](http://ngenericdimensions.codeplex.com)
- 
- 
-
-Class based: One class or interface type for each dimension or a combination of (base) dimensions
- 
- [http://github.com/objorke/QuantityTypes](http://github.com/objorke/QuantityTypes)
- 
- [https://github.com/cureos/csunits](https://github.com/cureos/csunits)
- 
- [https://github.com/JohanLarsson/Gu.Units](https://github.com/JohanLarsson/Gu.Units)
-
- [https://github.com/angularsen/UnitsNet](https://github.com/angularsen/UnitsNet)
- 
- [https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li](https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li)
-
- 
-Dimension based: One class for all units and dimensions
+Dimension based: One class can hold values for any unit/dimensions
  
  [http://sourceforge.net/projects/quantitiesnet](http://sourceforge.net/projects/quantitiesnet)
 
@@ -39,12 +14,37 @@ Dimension based: One class for all units and dimensions
 
  [https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days](https://www.codeproject.com/Articles/1259458/A-Dynamic-Units-of-Measure-Library-in-9-Days)
  
-Some of both: 
+
+Class based: One class for each dimension or a combination of (base) dimensions
+ 
+ [http://github.com/objorke/QuantityTypes](http://github.com/objorke/QuantityTypes)
+ 
+ [https://github.com/cureos/csunits](https://github.com/cureos/csunits)
+ 
+ [https://github.com/JohanLarsson/Gu.Units](https://github.com/JohanLarsson/Gu.Units)
+
+ [https://github.com/angularsen/UnitsNet](https://github.com/angularsen/UnitsNet)
+ 
+ [https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li](https://www.codeproject.com/Articles/5306824/Taking-Your-Brain-to-Another-Dimension-A-Csharp-li)
+
+
+Some of both, with specific methodes for calculations and unit conversions for each unit: 
 
  [http://www.codeproject.com/Articles/404573/Units-of-Measure-Library-for-NET](http://www.codeproject.com/Articles/404573/Units-of-Measure-Library-for-NET)
 
  [http://www.codeproject.com/Articles/413750/Units-of-Measure-Validator-for-Csharp](http://www.codeproject.com/Articles/413750/Units-of-Measure-Validator-for-Csharp)
  
  [http://www.gnu.org/software/units](http://www.gnu.org/software/units)
+ 
+
+Outdated links:
+
+ [http://unitconversionlib.codeplex.com](http://unitconversionlib.codeplex.com)
+ 
+ [http://quantitysystem.codeplex.com](http://quantitysystem.codeplex.com)
+ 
+ [http://unitsofmeasure.codeplex.com](http://unitsofmeasure.codeplex.com)
+ 
+ [http://ngenericdimensions.codeplex.com](http://ngenericdimensions.codeplex.com)
  
  
