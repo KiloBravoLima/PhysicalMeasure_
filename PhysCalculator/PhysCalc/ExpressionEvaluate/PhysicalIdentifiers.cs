@@ -740,7 +740,7 @@ namespace PhysicalCalculator.Identifiers
             (commandLine, String commentStartStr) = commandLine.ReadCommentStartToken();
             if (!String.IsNullOrWhiteSpace(commentStartStr))
             {
-                resultLine = "" + ConsoleAnsiColors.ForgroundDarkGreen;
+                resultLine = "" + ConsoleAnsiColors.ForegroundDarkGreen;
                 CommentToParseInfo = new CommentParseInfo(commentStartStr, CommentToParseInfo, ParseState);
                 ParseState = CommandParserState.ReadComment;
                 if (!String.IsNullOrEmpty(commandLine))
@@ -765,7 +765,7 @@ namespace PhysicalCalculator.Identifiers
                 {
                     CommentToParseInfo.AddCommentText(commentText);
                 }
-                resultLine = "" + ConsoleAnsiColors.ForgroundColorReset;
+                resultLine = "" + ConsoleAnsiColors.ColorsReset;
                 EndParsingComment();
             }
             else

@@ -444,14 +444,14 @@ namespace PhysicalCalculator
             }
             else
             {
-                Console.Write(color == ConsoleColor.DarkGreen   ? ConsoleAnsiColors.ForgroundDarkGreen
-                            : color == ConsoleColor.Blue        ? ConsoleAnsiColors.ForgroundBlue
-                            : color == ConsoleColor.Red         ? ConsoleAnsiColors.ForgroundRed 
-                         // : color == ConsoleColor.Gray        ? ConsoleAnsiColors.ForgroundGray
-                            : color == ConsoleColor.DarkYellow  ? ConsoleAnsiColors.ForgroundOrange
-                            : color == ConsoleColor.Yellow      ? ConsoleAnsiColors.ForgroundYellow
-                            : color == ConsoleColor.White       ? ConsoleAnsiColors.ForgroundWhite 
-                            : ConsoleAnsiColors.ForgroundColorReset);
+                Console.Write(color == ConsoleColor.DarkGreen   ? ConsoleAnsiColors.ForegroundDarkGreen
+                            : color == ConsoleColor.Blue        ? ConsoleAnsiColors.ForegroundBlue
+                            : color == ConsoleColor.Red         ? ConsoleAnsiColors.ForegroundRed 
+                         // : color == ConsoleColor.Gray        ? ConsoleAnsiColors.ForegroundGray
+                            : color == ConsoleColor.DarkYellow  ? ConsoleAnsiColors.ForegroundDarkYellow
+                            : color == ConsoleColor.Yellow      ? ConsoleAnsiColors.ForegroundYellow
+                            : color == ConsoleColor.White       ? ConsoleAnsiColors.ForegroundWhite 
+                            : ConsoleAnsiColors.ColorsReset);
             }
         }
 
@@ -473,7 +473,7 @@ namespace PhysicalCalculator
             }
             else
             {
-                Console.Write(ConsoleAnsiColors.ForgroundColorReset);
+                Console.Write(ConsoleAnsiColors.ColorsReset);
                 // Console.ResetColor();
             }
 

@@ -4,10 +4,9 @@
 // Use this code in any way you want
 
 using System;
+using System.Diagnostics;                // for Debug
 using System.Drawing;                    // for Color (add reference to  System.Drawing.assembly)
 using System.Runtime.InteropServices;    // for StructLayout
-
-using System.Diagnostics;                // for Debug
 
 namespace ConsolAnyColor
 {
@@ -133,15 +132,60 @@ namespace ConsolAnyColor
 
     static class ConsoleAnsiColors
     {
+        /**
         // Console.Write("\x1b[31mThis is red via ANSI\x1b[0m\n");
         // const string ansi = $"\x1b[38;2;{r};{g};{b}m";
-        public const string ForgroundDarkGreen = "\x1b[38;2;0;100;0m";
-        public const string ForgroundBlue = "\x1b[38;2;0;0;255m";
-        public const string ForgroundRed = "\x1b[31m";
-        public const string ForgroundOrange = "\x1b[38;2;255;100;0m";
-        public const string ForgroundYellow = "\x1b[38;2;255;255;0m";
-        public const string ForgroundWhite = "\x1b[38;2;255;255;255m";
-        public const string ForgroundColorReset = "\x1b[0m";
+        public const string ForegroundDarkGreen = "\x1b[38;2;0;100;0m";
+        public const string ForegroundBlue = "\x1b[38;2;0;0;255m";
+        public const string ForegroundRed = "\x1b[31m";
+        public const string ForegroundOrange = "\x1b[38;2;255;100;0m";
+        public const string ForegroundYellow = "\x1b[38;2;255;255;0m";
+        public const string ForegroundDarkGreen = "\x1b[38;2;0;100;0m";
+        public const string ForegroundWhite = "\x1b[38;2;255;255;255m";
+        **/
+
+        public const string ColorsReset = "\x1b[0m";
+
+        // Dark Foreground colors: \u001b[{30+ i}m i= 0..7
+        public const string ForegroundBlack = "\x1b[30m";
+        public const string ForegroundDarkBlue = "\x1b[34m";
+        public const string ForegroundDarkGreen = "\x1b[32m";
+        public const string ForegroundDarkCyan = "\x1b[36m";
+        public const string ForegroundDarkRed = "\x1b[31m";
+        public const string ForegroundDarkMagenta = "\x1b[35m";
+        public const string ForegroundDarkYellow = "\x1b[33m";
+        public const string ForegroundGray = "\x1b[37m";
+
+        // Light Foreground colors: \u001b[{90+ i}m i= 0..7
+        public const string ForegroundDarkGray = "\x1b[90m";
+        public const string ForegroundBlue = "\x1b[94m";
+        public const string ForegroundGreen = "\x1b[92m";
+        public const string ForegroundCyan = "\x1b[96m";
+        public const string ForegroundRed = "\x1b[91m";
+        public const string ForegroundMagenta = "\x1b[95m";
+        public const string ForegroundYellow = "\x1b[93m";
+        public const string ForegroundWhite = "\x1b[97m";
+
+        // Dark Background colors: \u001b[{40+ i}m
+        public const string BackgroundBlack = "\x1b[40m";
+        public const string BackgroundDarkBlue = "\x1b[44m";
+        public const string BackgroundDarkGreen = "\x1b[42m";
+        public const string BackgroundDarkCyan = "\x1b[46m";
+        public const string BackgroundDarkRed = "\x1b[41m";
+        public const string BackgroundDarkMagenta = "\x1b[45m";
+        public const string BackgroundDarkYellow = "\x1b[43m";
+        public const string BackgroundGray = "\x1b[47m";
+
+        // Light Background colors: \u001b[{100+ i}m
+        public const string BackgroundDarkGray = "\x1b[100m";
+        public const string BackgroundBlue = "\x1b[104m";
+        public const string BackgroundGreen = "\x1b[102m";
+        public const string BackgroundCyan = "\x1b[106";
+        public const string BackgroundRed = "\x1b[101m";
+        public const string BackgroundMagenta = "\x1b[105m";
+        public const string BackgroundYellow = "\x1b[103m";
+        public const string BackgroundWhite = "\x1b[107m";
+
     }
 
     class ConsolAnyColorClass

@@ -76,7 +76,7 @@ namespace PhysicalMeasure
 
         /* SI unit prefixes */
         public static readonly UnitPrefix Q =  (UnitPrefix)PhysicsUnitPrefixes['Q'];
-        public static readonly UnitPrefix R = (UnitPrefix)PhysicsUnitPrefixes['R'];
+        public static readonly UnitPrefix R =  (UnitPrefix)PhysicsUnitPrefixes['R'];
         public static readonly UnitPrefix Y =  (UnitPrefix)PhysicsUnitPrefixes['Y'];
         public static readonly UnitPrefix Z =  (UnitPrefix)PhysicsUnitPrefixes['Z'];
         public static readonly UnitPrefix E =  (UnitPrefix)PhysicsUnitPrefixes['E'];
@@ -264,7 +264,7 @@ namespace PhysicalMeasure
                                       new NamedDerivedUnit(unitsystem, "pascal",    "Pa",   new SByte[] { -1, 1, -2, 0, 0, 0, 0 }),
                                       new NamedDerivedUnit(unitsystem, "joule",     "J",    new SByte[] { 2, 1, -2, 0, 0, 0, 0 }),
                                       new NamedDerivedUnit(unitsystem, "watt",      "W",    new SByte[] { 2, 1, -3, 0, 0, 0, 0 }),
-                                      new NamedDerivedUnit(unitsystem, "coulomb",   "C",    new SByte[] { 1, 0, 0, 1, 0, 0, 0 }),
+                                      new NamedDerivedUnit(unitsystem, "coulomb",   "C",    new SByte[] { 0, 0, 1, 1, 0, 0, 0 }),
                                       new NamedDerivedUnit(unitsystem, "volt",      "V",    new SByte[] { 2, 1, -3, -1, 0, 0, 0 }),
                                       new NamedDerivedUnit(unitsystem, "farad",     "F",    new SByte[] { -2, -1, 4, 2, 0, 0, 0 }),
                                       new NamedDerivedUnit(unitsystem, "ohm",       "Ω",    new SByte[] { 2, 1, -3, -2, 0, 0, 0 }),

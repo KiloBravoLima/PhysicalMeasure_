@@ -662,8 +662,8 @@ namespace PhysicalCalculator
             System.Reflection.Assembly PhysicalMeasureAsm = typeof(Quantity).Assembly;
 
             String resultLine = "PhysCalculator" + "\n";
-            resultLine += PhysCalcAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo() + "\n";
-            // resultLine += "http://physicalmeasure.codeplex.com";
+            resultLine += PhysCalcAsm.AssemblyInfo() + "\n" + PhysicalMeasureAsm.AssemblyInfo() + "\n"; 
+            // resultLine += "http://physicalmeasure.codeplex.com"; 
             resultLine += "https://github.com/KiloBravoLima/PhysicalMeasure_";
 
             commandLine = "";
@@ -676,7 +676,7 @@ namespace PhysicalCalculator
             (commandLine, String commentStartStr) = commandLine.PeekCommentStartToken();
             if (!String.IsNullOrWhiteSpace(commentStartStr))
             {
-                resultLine += ConsoleAnsiColors.ForgroundDarkGreen; //  ForgroundRed;
+                resultLine += ConsoleAnsiColors.ForegroundDarkGreen; //  ForgroundRed;
                 (bool commentEnded, commentStartStr) = CurrentContext.BeginParsingComment(ref commandLine);
                 if (!String.IsNullOrEmpty(commandLine))
                 {

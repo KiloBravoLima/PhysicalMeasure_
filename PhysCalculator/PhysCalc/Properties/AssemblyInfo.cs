@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("Kilo Bravo")]
 [assembly: AssemblyProduct("PhysicalMeasure")]
 // [assembly: AssemblyCopyright("Copyright © 2010-2019 Kilo Bravo")]
-[assembly: AssemblyCopyright("Copyright © 2010-2025 Kilo Bravo")]
+[assembly: AssemblyCopyright("Copyright © 2010-2026 Kilo Bravo")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

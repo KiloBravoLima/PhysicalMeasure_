@@ -24,6 +24,7 @@ namespace PhysicalCalculator
         */
         public static void Main(string[] args)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
             ConsolAnyColorClass.SetColor(ConsoleColor.Blue, Color.FromArgb(50, 50, 255));  // Slightly light blue
 
             ResultWriter ResultLineWriter = new ResultWriter();
