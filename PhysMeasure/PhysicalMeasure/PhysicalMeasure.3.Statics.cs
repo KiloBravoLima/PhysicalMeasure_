@@ -147,14 +147,14 @@ namespace PhysicalMeasure
         public static readonly UnitSystem Units
         = new UnitSystem("Trigeometry", Prefixes.PhysicsUnitPrefixes,
             (unitsystem) => new BaseUnit[]
-                                {   new BaseUnit(unitsystem, (SByte)TrigometryBaseUnitKind.Radian, "radian", "rad",    BaseUnitDimension.Angle),
-                                 // new BaseUnit(unitsystem, (SByte)TrigometryBaseUnitKind.Steradian, "steradian", "sr", BaseUnitDimension.SolidAngle),
+                                {   new BaseUnit(unitsystem, (SByte)TrigonometryBaseUnitKind.Radian, "radian", "rad",    BaseUnitDimension.Angle),
+                                 // new BaseUnit(unitsystem, (SByte)TrigonometryBaseUnitKind.Steradian, "steradian", "sr", BaseUnitDimension.SolidAngle),
                                 },
             (unitsystem) => new NamedDerivedUnit[]
                                 {   new NamedDerivedUnit(unitsystem, "steradian", "sr", new SByte[] { 2 }), // BaseUnitDimension.SolidAngle 
                                 },
             (unitsystem) => new ConvertibleUnit[]
-                                {   new ConvertibleUnit("degree", "°" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ , unitsystem.BaseUnits[(int)TrigometryBaseUnitKind.Radian], new ScaledValueConversion( 360.0 /(2.0 * Math.PI)))   /* [°] = 360 / 2 PI  [rad] */
+                                {   new ConvertibleUnit("degree", "°" /* degree sign:  C2 B0  (char)176 '\0x00B0' */ , unitsystem.BaseUnits[(int)TrigonometryBaseUnitKind.Radian], new ScaledValueConversion( 360.0 /(2.0 * Math.PI)))   /* [°] = 360 / 2 PI  [rad] */
                                 },
             isModifiableUnitSystem: false, isIsolatedUnitSystem : true
                          );

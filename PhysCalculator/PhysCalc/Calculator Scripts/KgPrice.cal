@@ -1,0 +1,11 @@
+﻿// Saved 2026-08-21 14:25:00 to KgPrice.cal
+// UTF8
+
+unit kr Dimension Currency
+
+set KgPrice = 7 kr/Kg
+set Weight = 20 Kg
+set TotalPrice = KgPrice * Weight
+
+print TotalPrice 
+print TotalPrice [kr]

@@ -957,6 +957,7 @@ namespace PhysicalCalculator
         public virtual String ReadCommand(CalculatorEnvironment localContext, ref String ResultLine)
         {
             #region local functions
+            /*
             void Write(String Line)
             {   // Echo Line to output
                 if (ResultLineWriter != null)
@@ -980,7 +981,7 @@ namespace PhysicalCalculator
                     Console.WriteLine(Line);
                 }
             }
-
+            */
             void WritePrompt(String prompt)
             {   // Echo Line to output
                 if (ResultLineWriter != null)

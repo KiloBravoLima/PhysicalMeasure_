@@ -14,7 +14,9 @@ namespace PhysicalMeasure
     public enum BaseUnitDimension
     {
         // for custom defined or isolated unit system units
-        Unknown,
+        Unknown = -1,
+
+        DimensionLess = 0,
 
         // Physical base unit dimensions
         Length,
@@ -25,7 +27,7 @@ namespace PhysicalMeasure
         AmountOfSubstance,
         LuminousIntensity,
 
-        // Trigometry unit dimensions
+        // Trigonometry unit dimensions
         Angle,          // Base unit
         SolidAngle,     // Named derived unit = Angle * Angle
 
@@ -36,11 +38,12 @@ namespace PhysicalMeasure
         Currency
     }
 
+    /**
     public interface IUnitDimensionExponentsAccess
     {
         (BaseUnitDimension, SByte)[] Exponents { get; }
     }
-
+    **/
 
     public enum UnitSystemKind
     {
@@ -52,12 +55,12 @@ namespace PhysicalMeasure
         CombinedUnitSystem
     }
 
-    public enum TrigometryBaseUnitKind
+    public enum TrigonometryBaseUnitKind
     {
         Radian, // 
         Steradian,
 
-        TrigometrySystem_NoOfBaseUnits = 2
+        TrigonometrySystem_NoOfBaseUnits = 2
     }
 
     public enum PhysicalBaseUnitKind
@@ -124,7 +127,7 @@ namespace PhysicalMeasure
     public interface IUnitPrefixExponent
     {
         SByte Exponent { get; }
-        Double Value { get; }
+        Double Factor { get; }  // Exponent = 0 means factor 1, Exponent = 1 means factor 10, Exponent = -3 means factor 0.001, etc.
 
         //  IUnitPrefixExponentMath
         IUnitPrefixExponent Multiply(IUnitPrefixExponent prefix);

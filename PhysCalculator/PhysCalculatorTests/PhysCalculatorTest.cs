@@ -999,8 +999,8 @@ set Var1 = 1010 GW * 0,4 * 356 d * 24 h/d
 
             SByte[] esponents = cu.Exponents;
 
-            Assert.AreEqual(EnergyUnitPriceExpected, (EnergyUnitPriceItem as NamedVariable).AsQuantity, "for EnergyUnitPrice");
-            Assert.AreEqual(EnergyConsumedExpected, (EnergyConsumedItem as NamedVariable).AsQuantity, "for EnergyConsumed");
+            Assert.AreEqual(EnergyUnitPriceExpected, (EnergyUnitPriceItem as NamedVariable).AsQuantity(), "for EnergyUnitPrice");
+            Assert.AreEqual(EnergyConsumedExpected, (EnergyConsumedItem as NamedVariable).AsQuantity(), "for EnergyConsumed");
             Assert.AreEqual(PriceEnergyConsumedExpected, (PriceEnergyConsumedItem as NamedVariable).AsQuantity, "for PriceEnergyConsumed");
             Assert.AreEqual(PriceDKREnergyConsumedExpected, (PriceDKREnergyConsumedItem as NamedVariable).AsQuantity, "for PriceDKREnergyConsumed");
             Assert.AreEqual(AccumulatorExpected, AccumulatorActual.AsQuantity(), "for accumulator");

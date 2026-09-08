@@ -159,6 +159,9 @@
     <None Include="Calculator Scripts\UTF8.cal">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Calculator Scripts\KgPrice.cal">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Calculator Scripts\Valuta.cal">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

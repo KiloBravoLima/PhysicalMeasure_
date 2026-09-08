@@ -155,11 +155,12 @@ namespace PhysicalMeasureTest
         [TestMethod()]
         public void NamedDerivedUnitReducedUnitStringTest()
         {
+            // /* IUnit */ var Watt = SI.W;
             IUnit Watt = SI.W;
 
             String expected = "W";
 
-            String actual = Watt.ReducedUnitString().ToString();
+            String actual = Watt.ReducedUnitString();
 
             Assert.AreEqual(expected, actual);
         }

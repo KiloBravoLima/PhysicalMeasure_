@@ -413,13 +413,15 @@ namespace PhysicalCalculator.Identifiers
                 }
         }
 
-        public Quantity AsQuantity
+        /**
+        public / * override * / Quantity AsQuantity
         {
             get
             {
                 return ValueAs<Quantity>();
             }
         }
+        **/
 
         public virtual String ToListString(String name)
         {

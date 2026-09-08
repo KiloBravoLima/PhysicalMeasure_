@@ -398,7 +398,7 @@ namespace PhysicalMeasure
     public readonly struct UnitPrefixExponent : IUnitPrefixExponent
     {
         public SByte Exponent { get; }
-        public Double Value => Math.Pow(Base, Exponent);
+        public Double Factor => Math.Pow(Base, Exponent);
         public UInt16 Base { get; }
 
         public UnitPrefixExponent(SByte somePrefixExponent)
@@ -470,7 +470,7 @@ namespace PhysicalMeasure
 
         public SByte Exponent => prefixExponent.Exponent;
 
-        public Double Value => prefixExponent.Value;
+        public Double Factor => prefixExponent.Factor;
 
         #endregion IUnitPrefix implementation
 
@@ -563,9 +563,9 @@ namespace PhysicalMeasure
     {
         public UnitPrefix[] UnitPrefixes { get; }
 
-        public UnitPrefixTable(UnitPrefix[] someUnitPrefix)
+        public UnitPrefixTable(UnitPrefix[] someUnitPrefixes)
         {
-            this.UnitPrefixes = someUnitPrefix;
+            this.UnitPrefixes = someUnitPrefixes;
         }
 
         public Boolean GetUnitPrefixFromExponent(IUnitPrefixExponent someExponent, out IUnitPrefix unitPrefix)
@@ -665,6 +665,7 @@ namespace PhysicalMeasure
 
         public Boolean GetExponentFromPrefixChar(Char somePrefixChar, out IUnitPrefixExponent exponent)
         {
+            /**
             switch (somePrefixChar)
             {
                 case '\x03BC':
@@ -680,6 +681,8 @@ namespace PhysicalMeasure
                     somePrefixChar = 'H'; // Hecto
                     break;
             }
+            **/
+            somePrefixChar = MapAlternativePrefixChar(somePrefixChar);
 
             foreach (UnitPrefix up in UnitPrefixes)
             {
@@ -1832,7 +1835,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public abstract Quantity ConvertToSystemUnit();
 
-
+        /*** */
         // Specific/absolute quantity unit conversion (e.g. specific temperature)
         public virtual Quantity ConvertTo(ref Double value, Unit convertToUnit)
         {
@@ -1865,6 +1868,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             value = 1;
             return pq;
         }
+        /* ***/ 
 
         // Conversion value is specified. Must assume Specific conversion e.g. specific temperature.
         public abstract Quantity ConvertToSystemUnit(ref Double value);
@@ -2038,14 +2042,14 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             {
                 IPrefixedUnit this_pu = (IPrefixedUnit)this;
                 Boolean equivalent = this_pu.Unit.Equivalent(other, out Double tempQuotient);
-                quotient = equivalent ? this_pu.Prefix.Value * tempQuotient : 0;
+                quotient = equivalent ? this_pu.Prefix.Factor * tempQuotient : 0;
                 return equivalent;
             }
             else if (other.Kind == UnitKind.PrefixedUnit)
             {
                 IPrefixedUnit other_pu = (IPrefixedUnit)other;
                 Boolean equivalent = this.Equivalent((Unit)other_pu.Unit, out Double tempQuotient);
-                quotient = equivalent ? tempQuotient / other_pu.Prefix.Value : 0;
+                quotient = equivalent ? tempQuotient / other_pu.Prefix.Factor : 0;
                 return equivalent;
             }
             else if (this.Kind == UnitKind.PrefixedUnitExponent)
@@ -3532,45 +3536,39 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public static implicit operator Quantity(PrefixedUnit prefixedUnit) => prefixedUnit.AsQuantity();
 
+
+        private Quantity MultPrefix(Quantity pq)
+        { 
+            if (pq != null && prefix != null && prefix.Exponent != 0)
+            {
+                pq = pq.Multiply(prefix.Factor);
+            }
+            return pq;
+        }
+
         public override Quantity ConvertToSystemUnit()
         {
             Quantity pq = unit.ConvertToSystemUnit();
-            if (pq != null && prefix != null && prefix.Exponent != 0)
-            {
-                pq = pq.Multiply(prefix.Value);
-            }
-            return pq;
+            return MultPrefix(pq);
         }
 
         public override Quantity ConvertToSystemUnit(ref Double value)
         {
             // Conversion value is specified. Must assume Specific conversion e.g. specific temperature.
             Quantity pq = unit.ConvertToSystemUnit(ref value);
-            if (pq != null && prefix != null && prefix.Exponent != 0)
-            {
-                pq = pq.Multiply(prefix.Value);
-            }
-            return pq;
+            return MultPrefix(pq);
         }
 
         public override Quantity ConvertToBaseUnit()
         {
             Quantity pq = unit.ConvertToBaseUnit();
-            if (pq != null && prefix != null && prefix.Exponent != 0)
-            {
-                pq = pq.Multiply(prefix.Value);
-            }
-            return pq;
+            return MultPrefix(pq);
         }
 
         public override Quantity ConvertToDerivedUnit()
         {
             Quantity pq = unit.ConvertToDerivedUnit();
-            if (pq != null && prefix != null && prefix.Exponent != 0)
-            {
-                pq = pq.Multiply(prefix.Value);
-            }
-            return pq;
+            return MultPrefix(pq);
         }
 
         public override Quantity ConvertToBaseUnit(Double value)
@@ -5000,9 +4998,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return result;
         }
 
-        public override CombinedUnit CombineMultiply(IUnitPrefixExponent prefixExponent) => this.CombineMultiply(prefixExponent.Value);
+        public override CombinedUnit CombineMultiply(IUnitPrefixExponent prefixExponent) => this.CombineMultiply(prefixExponent.Factor);
 
-        public override CombinedUnit CombineDivide(IUnitPrefixExponent prefixExponent) => this.CombineDivide(prefixExponent.Value);
+        public override CombinedUnit CombineDivide(IUnitPrefixExponent prefixExponent) => this.CombineDivide(prefixExponent.Factor);
 
         public bool IsWellKnownScaledTimeCombinedUnits(Unit u1, Unit u2)
         {
@@ -5210,13 +5208,17 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
 
         public override CombinedUnit CombineMultiply(INamedSymbolUnit namedSymbolUnit)
         {
-            CombinedUnit result = this.CombineMultiply((IPrefixedUnitExponent)new PrefixedUnitExponent(null, namedSymbolUnit, 1));
+            // CombinedUnit result = this.CombineMultUnitExponent(1, namedSymbolUnit);
+            IPrefixedUnitExponent prefixedUnitExponent = new PrefixedUnitExponent(namedSymbolUnit);
+            CombinedUnit result = this.CombineMultiply(prefixedUnitExponent, shortenScaledUnits: false, shortenWellKnownScaledTimeUnits: false);
             return result;
         }
 
         public override CombinedUnit CombineDivide(INamedSymbolUnit namedSymbolUnit)
         {
-            CombinedUnit result = this.CombineMultiply((IPrefixedUnitExponent)new PrefixedUnitExponent(null, namedSymbolUnit, -1));
+            // CombinedUnit result = this.CombineMultUnitExponent(-1, namedSymbolUnit);
+            IPrefixedUnitExponent prefixedUnitExponent = new PrefixedUnitExponent(namedSymbolUnit, -1);
+            CombinedUnit result = this.CombineMultiply(prefixedUnitExponent, shortenScaledUnits: false, shortenWellKnownScaledTimeUnits: false);
             return result;
         }
 
@@ -5229,11 +5231,13 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 return this.CombineMultiply(cu);
             }
 
-            if (physicalUnit.Kind == UnitKind.BaseUnit || physicalUnit.Kind == UnitKind.ConvertibleUnit)
+            if (   physicalUnit.Kind == UnitKind.BaseUnit 
+                || physicalUnit.Kind == UnitKind.ConvertibleUnit
+                || (physicalUnit.Kind == UnitKind.DerivedUnit && physicalUnit as INamedSymbolUnit != null)))
             {
                 INamedSymbolUnit nsu = physicalUnit as INamedSymbolUnit;
                 Debug.Assert(nsu != null);
-                return this.CombineMultiply(new PrefixedUnitExponent(null, nsu, 1));
+                return this.CombineMultiply(new PrefixedUnitExponent(null, nsu, 1), false, false);
             }
 
             if (physicalUnit.Kind == UnitKind.MixedUnit)
@@ -5283,12 +5287,21 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                 return this.CombineDivide(cu);
             }
 
-            if (physicalUnit.Kind == UnitKind.BaseUnit || physicalUnit.Kind == UnitKind.ConvertibleUnit
+            /**
+            if (physicalUnit.Kind == UnitKind.BaseUnit)
+            {
+                INamedSymbolUnit nsu = physicalUnit as INamedSymbolUnit;
+                Debug.Assert(nsu != null);
+                return this.CombineDivide(nsu);
+            }
+            **/ 
+            if (   physicalUnit.Kind == UnitKind.BaseUnit 
+                || physicalUnit.Kind == UnitKind.ConvertibleUnit
                 || (physicalUnit.Kind == UnitKind.DerivedUnit && physicalUnit as INamedSymbolUnit != null))
             {
                 INamedSymbolUnit nsu = physicalUnit as INamedSymbolUnit;
                 Debug.Assert(nsu != null);
-                return this.CombineDivide((IPrefixedUnitExponent)new PrefixedUnitExponent(null, nsu, 1));
+                return this.CombineDivide((IPrefixedUnitExponent)new PrefixedUnitExponent(null, nsu, 1), false, false);
             }
 
             if (physicalUnit.Kind == UnitKind.MixedUnit)
@@ -5344,6 +5357,47 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return result;
         }
 
+        public CombinedUnit CombineMultiply(IPrefixedUnit prefixedUnit)
+        {
+            CombinedUnit result = new CombinedUnit(this);
+            int baseUnitIndex = 0;
+            IUnitSystem sys = prefixedUnit.ExponentsSystem;
+            foreach (SByte exp in prefixedUnit.Exponents)
+            {
+                if (exp != 0)
+                {
+                    result = result.CombineMultiply((IPrefixedUnitExponent)new PrefixedUnitExponent(null, sys.BaseUnits[baseUnitIndex], exp));
+                }
+                baseUnitIndex++;
+            }
+            if (prefixedUnit.Prefix != null)
+            {
+                result = result.CombineMultiply(prefixedUnit.Prefix);
+            }
+
+            return result;
+        }
+
+        public CombinedUnit CombineDivide(IPrefixedUnit prefixedUnit)
+        {
+            CombinedUnit result = new CombinedUnit(this);
+            int baseUnitIndex = 0;
+            IUnitSystem sys = prefixedUnit.ExponentsSystem;
+            foreach (SByte exp in prefixedUnit.Exponents)
+            {
+                if (exp != 0)
+                {
+                    result = result.CombineDivide((IPrefixedUnitExponent)new PrefixedUnitExponent(null, sys.BaseUnits[baseUnitIndex], exp), false, false);
+                }
+                baseUnitIndex++;
+            }
+            if (prefixedUnit.Prefix != null)
+            {
+                result = result.CombineDivide(prefixedUnit.Prefix);
+            }
+
+            return result;
+        }
 
         public CombinedUnit CombineMultiply(IDerivedUnit derivedUnit)
         {
@@ -6117,7 +6171,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception /* ex */)
                 {
                     throw;
                 }
@@ -6147,11 +6201,18 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             {
                 foreach (INamedSymbolUnit u in units)
                 {
-                    // StringComparison must consider case))
+                    // StringComparison must consider case
                     if (u.Symbol.Equals(unitsymbol, StringComparison.Ordinal))
                     {
                         return u;
                     }
+                }
+
+                // Special case "kg"
+                if (unitsymbol.Equals("kg", StringComparison.Ordinal))
+                {   // Accept "kg" as a valid symbol for Kilogram, even if "Kg" (uppercase K) was chosen for the symbol of the Kilogram unit.
+                    INamedSymbolUnit u = units.FirstOrDefault(unit => unit.Symbol.Equals("Kg", StringComparison.Ordinal));
+                    return u;
                 }
             }
             return null;
@@ -6230,7 +6291,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                             // symbolUnit = SI.Gy         <-> symbolUnit2 = SI_prefix.G·SI.y (year) Prefer (non-prefixed) symbolUnit, discharge symbolUnit2
                             // symbolUnit = SI.cd         <-> symbolUnit2 = SI_prefix.c·SI.d (day)  Prefer (non-prefixed) symbolUnit, discharge symbolUnit2
 
-                            if (   (ReferenceEquals(symbolUnit, SI.Kg) && prefixchar == 'K' && ReferenceEquals(symbolUnit2, SI.g))
+                            if (   (ReferenceEquals(symbolUnit, SI.Kg) && (prefixchar == 'K' || prefixchar == 'k') && ReferenceEquals(symbolUnit2, SI.g))
                                 || (ReferenceEquals(symbolUnit, SI.Gy) && prefixchar == 'G' && ReferenceEquals(symbolUnit2, SI.y))
                                 || (ReferenceEquals(symbolUnit, SI.cd) && prefixchar == 'c' && ReferenceEquals(symbolUnit2, SI.d)))  
                             {   // Prefer (non-prefixed) symbolUnit, discharge symbolUnit2
@@ -6438,7 +6499,7 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
                     Quantity pq_unit = convertFromUnit.ConvertTo((Unit)icu.Unit);
                     if (pq_unit != null)
                     {
-                        IQuantity pq = pq_unit.Divide(icu.Prefix.Value);
+                        IQuantity pq = pq_unit.Divide(icu.Prefix.Factor);
                         if (pq != null)
                         {
                             return new Quantity(pq.Value, convertToUnit);
@@ -8121,9 +8182,9 @@ s = s + Amount.ToString(x, "#,##0.00 US|meter");
             return pq;
         }
 
-        public static Quantity operator *(Quantity pq, IUnitPrefix up) => new Quantity(pq.Value * up.Value, pq.Unit);
+        public static Quantity operator *(Quantity pq, IUnitPrefix up) => new Quantity(pq.Value * up.Factor, pq.Unit);
 
-        public static Quantity operator *(IUnitPrefix up, Quantity pq) => new Quantity(pq.Value * up.Value, pq.Unit);
+        public static Quantity operator *(IUnitPrefix up, Quantity pq) => new Quantity(pq.Value * up.Factor, pq.Unit);
 
         public static Quantity operator *(Quantity pq, Double d) => new Quantity(pq.Value * d, pq.Unit);
 
